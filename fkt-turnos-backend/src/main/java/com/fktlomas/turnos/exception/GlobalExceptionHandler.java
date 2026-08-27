@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
+import jakarta.validation.ConstraintViolationException;
+
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -22,6 +24,17 @@ public class GlobalExceptionHandler {
         for (FieldError fe : ex.getBindingResult().getFieldErrors()) {
             errores.put(fe.getField(), fe.getDefaultMessage());
         }
+        return ResponseEntity.badRequest().body(cuerpo(HttpStatus.BAD_REQUEST, "Datos inválidos", errores));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleConstraintViolation(ConstraintViolationException ex) {
+        Map<String, String> errores = new LinkedHashMap<>();
+        ex.getConstraintViolations().forEach(v -> {
+            String campo = v.getPropertyPath().toString();
+            campo = campo.contains(".") ? campo.substring(campo.lastIndexOf('.') + 1) : campo;
+            errores.put(campo, v.getMessage());
+        });
         return ResponseEntity.badRequest().body(cuerpo(HttpStatus.BAD_REQUEST, "Datos inválidos", errores));
     }
 

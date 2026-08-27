@@ -59,7 +59,7 @@ export default function RegisterPage() {
         </div>
         <div className="field">
           <label htmlFor="telefono">Teléfono</label>
-          <input id="telefono" name="telefono" required value={form.telefono} onChange={handleChange} />
+          <input id="telefono" name="telefono" required pattern="\+?[0-9\s\-()]{6,20}" title="Solo números, espacios, guiones o paréntesis (6 a 20 caracteres)" value={form.telefono} onChange={handleChange} />
         </div>
         <div className="field">
           <label htmlFor="genero">Género</label>

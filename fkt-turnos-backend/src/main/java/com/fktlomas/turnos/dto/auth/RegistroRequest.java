@@ -1,6 +1,7 @@
 package com.fktlomas.turnos.dto.auth;
 
 import com.fktlomas.turnos.domain.Genero;
+import com.fktlomas.turnos.validation.Patrones;
 import jakarta.validation.constraints.*;
 
 public record RegistroRequest(
@@ -21,7 +22,7 @@ public record RegistroRequest(
         String email,
 
         @NotBlank(message = "El teléfono es obligatorio")
-        @Size(max = 30)
+        @Pattern(regexp = Patrones.TELEFONO, message = "El teléfono no es válido")
         String telefono,
 
         @NotNull(message = "El género es obligatorio")
