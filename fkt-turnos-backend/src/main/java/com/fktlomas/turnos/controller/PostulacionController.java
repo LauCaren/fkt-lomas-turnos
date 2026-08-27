@@ -22,12 +22,16 @@ public class PostulacionController {
     private final PostulacionService postulacionService;
 
     @PostMapping(consumes = "multipart/form-data")
-    public ResponseEntity<PostulacionDto> postular(
+    public ResponseEntity<?> postular(
             @RequestParam @NotBlank @Size(max = 150) String nombreCompleto,
             @RequestParam @NotBlank @Email(message = "El email no es válido") String email,
             @RequestParam(required = false) @Pattern(regexp = Patrones.TELEFONO_OPCIONAL, message = "El teléfono no es válido") String telefono,
             @RequestParam(required = false) @Size(max = 2000) String mensaje,
+            @RequestParam(required = false) String sitioWeb,
             @RequestParam("cv") MultipartFile cv) {
+        if (sitioWeb != null && !sitioWeb.isBlank()) {
+            return ResponseEntity.ok().build();
+        }
         return ResponseEntity.ok(postulacionService.recibir(nombreCompleto, email, telefono, mensaje, cv));
     }
 }

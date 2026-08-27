@@ -30,6 +30,15 @@ public record RegistroRequest(
 
         @NotBlank(message = "La contraseña es obligatoria")
         @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
-        String password
+        String password,
+
+        @AssertTrue(message = "Debés aceptar la política de privacidad")
+        boolean aceptaPoliticaPrivacidad,
+
+        /** Campo honeypot: invisible para personas, si viene completo es un bot. */
+        String sitioWeb
 ) {
+    public boolean pareceSpam() {
+        return sitioWeb != null && !sitioWeb.isBlank();
+    }
 }

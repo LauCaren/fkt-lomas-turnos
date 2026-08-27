@@ -29,6 +29,9 @@ public class AuthService {
 
     @Transactional
     public AuthResponse registrarPaciente(RegistroRequest request) {
+        if (request.pareceSpam()) {
+            throw new IllegalArgumentException("No pudimos procesar el registro");
+        }
         if (usuarioRepository.existsByEmail(request.email())) {
             throw new ConflictoDeDatosException("Ya existe una cuenta registrada con ese email");
         }
@@ -45,6 +48,7 @@ public class AuthService {
         usuario.setGenero(request.genero());
         usuario.setPasswordHash(passwordEncoder.encode(request.password()));
         usuario.setRole(Role.PACIENTE);
+        usuario.setAceptaPoliticaPrivacidad(request.aceptaPoliticaPrivacidad());
         usuarioRepository.save(usuario);
 
         return new AuthResponse(jwtService.generarToken(usuario), usuario.getNombreCompleto(), usuario.getEmail(), usuario.getRole().name());

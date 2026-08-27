@@ -10,6 +10,11 @@ public record ContactoRequest(
         @NotBlank @Size(max = 150) String nombre,
         @NotBlank @Email @Size(max = 180) String email,
         @Pattern(regexp = Patrones.TELEFONO_OPCIONAL, message = "El teléfono no es válido") String telefono,
-        @NotBlank @Size(max = 2000) String mensaje
+        @NotBlank @Size(max = 2000) String mensaje,
+        /** Campo honeypot: invisible para personas, si viene completo es un bot. */
+        String sitioWeb
 ) {
+    public boolean pareceSpam() {
+        return sitioWeb != null && !sitioWeb.isBlank();
+    }
 }

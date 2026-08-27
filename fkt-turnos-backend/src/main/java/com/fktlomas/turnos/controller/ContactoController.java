@@ -19,6 +19,9 @@ public class ContactoController {
 
     @PostMapping
     public ResponseEntity<Void> enviar(@Valid @RequestBody ContactoRequest request) {
+        if (request.pareceSpam()) {
+            return ResponseEntity.ok().build();
+        }
         contactoService.recibirMensaje(request);
         return ResponseEntity.ok().build();
     }
