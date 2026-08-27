@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { registrarPaciente } from './authSlice';
+import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../../constants/obrasSociales';
 
 const GENEROS = [
   { value: '', label: 'Seleccioná una opción' },
@@ -51,7 +52,17 @@ export default function RegisterPage() {
         </div>
         <div className="field">
           <label htmlFor="obraSocial">Obra social</label>
-          <input id="obraSocial" name="obraSocial" required placeholder="Ej: OSDE, Swiss Medical, Particular" value={form.obraSocial} onChange={handleChange} />
+          <select id="obraSocial" name="obraSocial" required value={form.obraSocial} onChange={handleChange}>
+            <option value="">Seleccioná tu obra social</option>
+            <option value={OBRA_SOCIAL_PARTICULAR}>{OBRA_SOCIAL_PARTICULAR}</option>
+            {OBRAS_SOCIALES.map((os) => <option key={os} value={os}>{os}</option>)}
+            <option value={OBRA_SOCIAL_OTRA}>{OBRA_SOCIAL_OTRA}</option>
+          </select>
+          {form.obraSocial === OBRA_SOCIAL_PARTICULAR && (
+            <p style={{ fontSize: 13, color: 'var(--orange-dark)', marginTop: 2 }}>
+              Al no tener obra social, la sesión particular tiene un costo (a confirmar con el centro).
+            </p>
+          )}
         </div>
         <div className="field">
           <label htmlFor="email">Email</label>

@@ -91,6 +91,13 @@
   .gallery-item:hover img{transform:scale(1.08);}
   @media (max-width:800px){ .gallery-grid{grid-template-columns:repeat(2,1fr);} }
 
+  /* ---------- OBRAS SOCIALES (logos) ---------- */
+  .os-logos-grid{display:flex; flex-wrap:wrap; gap:14px;}
+  .os-logo{width:130px; height:72px; display:flex; align-items:center; justify-content:center; padding:10px; background:var(--white); border:1px solid var(--line); border-radius:var(--radius-s); transition:border-color .2s var(--ease);}
+  .os-logo:hover{border-color:var(--orange);}
+  .os-logo img{max-width:100%; max-height:100%; object-fit:contain;}
+  .os-note{margin-top:20px; font-size:14px; color:var(--muted);}
+
   footer{background:var(--black); color:rgba(255,255,255,0.75); padding:56px 0 28px;}
   .footer-top{display:flex; justify-content:space-between; gap:40px; flex-wrap:wrap; padding-bottom:38px; border-bottom:1px solid rgba(255,255,255,0.12);}
   .footer-logo{font-family:'Space Grotesk',sans-serif; color:#fff; font-size:22px; font-weight:700;}
@@ -170,6 +177,59 @@
           <a class="btn btn-outline" href="tel:+541159505888">Llamar al centro</a>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ---------- OBRAS SOCIALES (grilla de logos) ---------- -->
+  <section class="soft" style="padding-top:0;">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Obras sociales y prepagas</span>
+        <h2>Trabajamos con estas coberturas</h2>
+        <p>Si la tuya no aparece en la lista, escribinos igual — sumamos convenios seguido.</p>
+      </div>
+      <div class="os-logos-grid reveal">
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/swiss-medical-150x80.jpg" alt="Swiss Medical" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/ioma-150x80.jpg" alt="IOMA" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/osmecon-150x80.jpg" alt="Osmecon" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/aleman-150x80.jpg" alt="Hospital Alemán" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/poder-judicial-150x80.jpg" alt="OSPJN (Poder Judicial)" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/casa-150x80.jpg" alt="CASA" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/ospedyc-150x80.jpg" alt="OSPEDYC" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/ospepba-150x80.jpg" alt="OSPEPBA" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/ospia-150x80.jpg" alt="OSPIA" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/ospip-logo-big-150x80.jpg" alt="OSPIP" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/osptv-150x80.jpg" alt="OSPTV" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/osseg-150x80.jpg" alt="OSSEG" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/premedic-150x80.jpg" alt="Premedic" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/sancor-salud-150x80.jpg" alt="Sancor Salud" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/william-hope-150x80.jpg" alt="William Hope" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/aca-salud-150x80.jpg" alt="ACA Salud" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/amebpba-150x80.jpg" alt="AMEBPBA" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/amsterdam-150x80.jpg" alt="Amsterdam Salud" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/apsot-150x80.jpg" alt="APSOT" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/Asociaci%C3%B3n-Eclesi%C3%A1stica-San-Pedro-150x80.jpg" alt="Asociación Eclesiástica San Pedro" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/centro-medico-pueyrredon-150x80.jpg" alt="Centro Médico Pueyrredón" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/clinica-espora-150x80.jpg" alt="Clínica Espora" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/comei-150x80.jpg" alt="Fundación COMEI" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/dasmi-150x80.jpg" alt="DASMI" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/dasuten-150x80.jpg" alt="DASUTEN" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/docthos-150x80.jpg" alt="Docthos" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/escribanos-150x80.jpg" alt="Colegio de Escribanos" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/federada-salud-150x80.jpg" alt="Federada Salud" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/futbolistas-agremiados-150x80.jpg" alt="Futbolistas Agremiados" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/iosfa-150x80.jpg" alt="IOSFA" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/jerarquicos-salud-150x80.jpg" alt="Jerárquicos Salud" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/la-peque%C3%B1a-familia-150x80.jpg" alt="La Pequeña Familia" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/luz-y-fuerza-150x80.jpg" alt="OSFATLYF (Luz y Fuerza)" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/medicar-work-150x80.jpg" alt="Medicar Work" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/medife-150x80.jpg" alt="Medifé" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/motociclistas-150x80.jpg" alt="Motociclistas" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/opdea-150x80.jpg" alt="OPDEA" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/OSAPM-150x80.jpg" alt="OSAPM" loading="lazy" onerror="imgFallback(this)"></div>
+        <div class="os-logo"><img src="https://fktlomas.com/wp-content/uploads/2019/02/OSFATUN-150x80.jpg" alt="OSFATUN" loading="lazy" onerror="imgFallback(this)"></div>
+      </div>
+      <p class="os-note reveal">¿No tenés obra social? Las sesiones particulares tienen un costo por consulta — consultanos el valor vigente.</p>
     </div>
   </section>
 
