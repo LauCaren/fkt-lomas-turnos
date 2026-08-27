@@ -1,8 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
-
-const SITE_URL = import.meta.env.VITE_SITE_URL || 'http://localhost:5500';
+import { SITE_URL } from '../config';
 
 export default function Layout({ children }) {
   const usuario = useSelector((state) => state.auth.usuario);

@@ -161,7 +161,13 @@
           <textarea id="mensaje" name="mensaje" rows="5" required maxlength="2000" placeholder="Especialidad, días y horarios que te interesan, etc."></textarea>
         </div>
 
+        <div style="position:absolute; left:-9999px; opacity:0;" aria-hidden="true">
+          <label for="sitioWeb">No completar este campo</label>
+          <input id="sitioWeb" name="sitioWeb" type="text" tabindex="-1" autocomplete="off">
+        </div>
+
         <button type="submit" id="btnEnviarAlquiler" class="btn btn-primary">Enviar consulta</button>
+        <p style="font-size:12.5px; color:var(--muted); margin-top:14px;">Al enviar este formulario aceptás nuestra <a href="politica-de-privacidad.html" style="color:var(--orange-dark);">política de privacidad</a>.</p>
       </form>
     </div>
   </section>
@@ -195,6 +201,7 @@
           <h4>Otros</h4>
           <a href="alquiler-consultorios.html">Alquiler de consultorios</a>
           <a href="trabaja-con-nosotros.html">Trabajá con nosotros</a>
+          <a href="politica-de-privacidad.html">Política de privacidad</a>
         </div>
       </div>
     </div>
@@ -237,6 +244,7 @@
       email: document.getElementById('email').value.trim(),
       telefono: document.getElementById('telefono').value.trim(),
       mensaje: document.getElementById('mensaje').value.trim(),
+      sitioWeb: document.getElementById('sitioWeb').value,
     };
 
     try {

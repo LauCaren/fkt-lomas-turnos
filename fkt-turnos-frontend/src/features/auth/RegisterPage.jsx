@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { registrarPaciente } from './authSlice';
 import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../../constants/obrasSociales';
+import { SITE_URL } from '../../config';
 
 const GENEROS = [
   { value: '', label: 'Seleccioná una opción' },
@@ -14,6 +15,7 @@ const GENEROS = [
 
 const initialForm = {
   dni: '', obraSocial: '', nombreCompleto: '', email: '', telefono: '', genero: '', password: '',
+  aceptaPoliticaPrivacidad: false, sitioWeb: '',
 };
 
 export default function RegisterPage() {
@@ -23,7 +25,8 @@ export default function RegisterPage() {
   const [form, setForm] = useState(initialForm);
 
   function handleChange(e) {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, type, checked, value } = e.target;
+    setForm({ ...form, [name]: type === 'checkbox' ? checked : value });
   }
 
   function handleSubmit(e) {
@@ -81,6 +84,18 @@ export default function RegisterPage() {
         <div className="field">
           <label htmlFor="password">Contraseña</label>
           <input id="password" name="password" type="password" required minLength={6} value={form.password} onChange={handleChange} />
+        </div>
+
+        <div style={{ position: 'absolute', left: -9999, opacity: 0 }} aria-hidden="true">
+          <label htmlFor="sitioWeb">No completar este campo</label>
+          <input id="sitioWeb" name="sitioWeb" type="text" tabIndex={-1} autoComplete="off" value={form.sitioWeb} onChange={handleChange} />
+        </div>
+
+        <div className="field" style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
+          <input id="aceptaPoliticaPrivacidad" name="aceptaPoliticaPrivacidad" type="checkbox" required style={{ marginTop: 3 }} checked={form.aceptaPoliticaPrivacidad} onChange={handleChange} />
+          <label htmlFor="aceptaPoliticaPrivacidad" style={{ fontWeight: 400 }}>
+            Acepto la <a href={`${SITE_URL}/politica-de-privacidad.html`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--orange-dark)', fontWeight: 600 }}>política de privacidad</a>
+          </label>
         </div>
 
         <button type="submit" className="btn btn-primary btn-block" disabled={status === 'loading'}>

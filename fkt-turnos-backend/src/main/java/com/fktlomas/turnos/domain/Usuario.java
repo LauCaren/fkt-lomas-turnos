@@ -39,6 +39,9 @@ public class Usuario {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
+    @Column(name = "acepta_politica_privacidad", nullable = false)
+    private boolean aceptaPoliticaPrivacidad;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Role role;
