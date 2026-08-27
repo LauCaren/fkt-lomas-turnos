@@ -1,0 +1,102 @@
+package com.fktlomas.turnos.service;
+
+import com.fktlomas.turnos.domain.Postulacion;
+import com.fktlomas.turnos.dto.PostulacionDto;
+import com.fktlomas.turnos.exception.ArchivoInvalidoException;
+import com.fktlomas.turnos.exception.RecursoNoEncontradoException;
+import com.fktlomas.turnos.repository.PostulacionRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class PostulacionService {
+
+    private static final Set<String> TIPOS_PERMITIDOS = Set.of("application/pdf");
+    private static final long TAMANO_MAXIMO_BYTES = 5L * 1024 * 1024;
+
+    private final PostulacionRepository postulacionRepository;
+    private final EmailService emailService;
+
+    @Value("${app.uploads.dir}")
+    private String uploadsDir;
+
+    public PostulacionDto recibir(String nombreCompleto, String email, String telefono, String mensaje, MultipartFile cv) {
+        validarArchivo(cv);
+
+        Path directorio = Path.of(uploadsDir, "cv");
+        try {
+            Files.createDirectories(directorio);
+            String nombreArchivo = UUID.randomUUID() + ".pdf";
+            Path destino = directorio.resolve(nombreArchivo);
+            cv.transferTo(destino);
+
+            Postulacion postulacion = new Postulacion();
+            postulacion.setNombreCompleto(nombreCompleto);
+            postulacion.setEmail(email);
+            postulacion.setTelefono(telefono);
+            postulacion.setMensaje(mensaje);
+            postulacion.setCvPath(destino.toString());
+            postulacion.setCvNombreOriginal(StringUtils.cleanPath(cv.getOriginalFilename() != null ? cv.getOriginalFilename() : nombreArchivo));
+            postulacion.setCvContentType(cv.getContentType());
+            postulacion.setCvSize(cv.getSize());
+
+            postulacionRepository.save(postulacion);
+            emailService.notificarNuevaPostulacion(postulacion);
+            return PostulacionDto.de(postulacion);
+        } catch (IOException e) {
+            throw new UncheckedIOException("No se pudo guardar el CV", e);
+        }
+    }
+
+    private void validarArchivo(MultipartFile cv) {
+        if (cv == null || cv.isEmpty()) {
+            throw new ArchivoInvalidoException("Adjuntá tu CV en formato PDF");
+        }
+        if (!TIPOS_PERMITIDOS.contains(cv.getContentType())) {
+            throw new ArchivoInvalidoException("El CV debe ser un archivo PDF");
+        }
+        if (cv.getSize() > TAMANO_MAXIMO_BYTES) {
+            throw new ArchivoInvalidoException("El CV no puede superar los 5MB");
+        }
+    }
+
+    public List<PostulacionDto> listar() {
+        return postulacionRepository.findAll().stream()
+                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
+                .map(PostulacionDto::de).toList();
+    }
+
+    public PostulacionDto marcarRevisado(Long id) {
+        Postulacion postulacion = obtenerEntidad(id);
+        postulacion.setRevisado(true);
+        return PostulacionDto.de(postulacionRepository.save(postulacion));
+    }
+
+    public Postulacion obtenerEntidad(Long id) {
+        return postulacionRepository.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Postulación no encontrada"));
+    }
+
+    public Resource descargarCv(Long id) {
+        Postulacion postulacion = obtenerEntidad(id);
+        Path path = Path.of(postulacion.getCvPath());
+        if (!Files.exists(path)) {
+            throw new RecursoNoEncontradoException("El archivo del CV ya no está disponible");
+        }
+        return new FileSystemResource(path);
+    }
+}

@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: fkt-turnos-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: fkt_turnos
+      POSTGRES_USER: fkt
+      POSTGRES_PASSWORD: fkt
+    ports:
+      - "5432:5432"
+    volumes:
+      - fkt_turnos_pgdata:/var/lib/postgresql/data
+
+volumes:
+  fkt_turnos_pgdata:

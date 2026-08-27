@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trabajá con nosotros — FKT Lomas</title>
+<meta name="description" content="Sumate al equipo de FKT Lomas. Postulate enviando tu CV en PDF.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M15 70 A35 35 0 0 1 85 70' fill='none' stroke='%23121212' stroke-width='9' stroke-linecap='round'/%3E%3Ccircle cx='50' cy='70' r='6' fill='%23F1541D'/%3E%3Cline x1='50' y1='70' x2='75' y2='38' stroke='%23F1541D' stroke-width='9' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  @view-transition{ navigation:auto; }
+  ::view-transition-old(root){ animation:220ms ease both fkt-out; }
+  ::view-transition-new(root){ animation:280ms ease both fkt-in; }
+  @keyframes fkt-out{ to{ opacity:0; transform:translateY(-8px);} }
+  @keyframes fkt-in{ from{ opacity:0; transform:translateY(8px);} }
+
+  :root{
+    --bg:#FFFFFF; --bg-soft:#F6F6F2; --ink:#121212; --ink-soft:#43443F; --muted:#75756E; --line:#E7E7E0;
+    --orange:#F1541D; --orange-dark:#C23F12; --orange-tint:#FDEAE1; --black:#0B0B0A; --white:#FFFFFF;
+    --radius-s:6px; --radius-m:16px; --maxw:1180px; --ease:cubic-bezier(.22,.68,.32,1);
+  }
+  *,*::before,*::after{box-sizing:border-box;}
+  @media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important;} }
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:'Inter',sans-serif; font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:'Space Grotesk',sans-serif; font-weight:600; letter-spacing:-0.015em; margin:0; color:var(--ink);}
+  p{margin:0;} a{color:inherit; text-decoration:none;} ul{margin:0; padding:0; list-style:none;} img{max-width:100%; display:block;}
+  button{font:inherit; background:none; border:none; cursor:pointer; color:inherit;}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px;} .hl{color:var(--orange);}
+
+  .eyebrow{font-family:'JetBrains Mono',monospace; font-size:12.5px; letter-spacing:0.14em; text-transform:uppercase; color:var(--orange-dark); font-weight:500; display:inline-flex; align-items:center; gap:10px;}
+  .eyebrow::before{content:""; width:18px; height:2px; background:var(--orange); display:inline-block;}
+
+  .btn{display:inline-flex; align-items:center; gap:8px; padding:14px 26px; border-radius:var(--radius-s); font-weight:600; font-size:15px; border:1.5px solid transparent; transition:transform .25s var(--ease), background .25s var(--ease), border-color .25s var(--ease), color .25s var(--ease); white-space:nowrap;}
+  .btn:hover:not(:disabled){transform:translateY(-2px);}
+  .btn:disabled{opacity:.55; cursor:not-allowed;}
+  .btn-primary{background:var(--orange); color:#fff;} .btn-primary:hover:not(:disabled){background:var(--orange-dark);}
+  .btn-outline{border-color:var(--line); color:var(--ink);} .btn-outline:hover:not(:disabled){border-color:var(--ink); background:var(--bg-soft);}
+  .btn-outline-light{border-color:rgba(255,255,255,0.3); color:#fff;} .btn-outline-light:hover{border-color:#fff; background:rgba(255,255,255,0.08);}
+
+  header{position:sticky; top:0; z-index:100; background:rgba(255,255,255,0.86); backdrop-filter:blur(10px); border-bottom:1px solid var(--line);}
+  .nav{display:flex; align-items:center; justify-content:space-between; padding:16px 0;}
+  .logo{display:flex; align-items:center; gap:10px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:20px;}
+  .logo-mark{width:30px; height:22px; flex-shrink:0;}
+  .logo small{display:block; font-family:'JetBrains Mono',monospace; font-weight:400; font-size:9.5px; letter-spacing:0.1em; color:var(--muted); text-transform:uppercase;}
+  .nav-links{display:flex; align-items:center; gap:28px;}
+  .nav-links a{font-size:14.5px; font-weight:600; color:var(--ink-soft); position:relative; padding:4px 0;}
+  .nav-links a::after{content:""; position:absolute; left:0; bottom:0; width:0; height:2px; background:var(--orange); transition:width .25s var(--ease);}
+  .nav-links a:hover::after, .nav-links a.active::after{width:100%;} .nav-links a.active{color:var(--ink);}
+  .nav-cta{display:flex; align-items:center; gap:12px;} .nav-cta .btn{padding:10px 18px; font-size:14px;}
+  .burger{display:none; width:26px; height:20px; position:relative;}
+  .burger span{position:absolute; left:0; width:100%; height:2px; background:var(--ink); transition:transform .25s, opacity .25s;}
+  .burger span:nth-child(1){top:0;} .burger span:nth-child(2){top:9px;} .burger span:nth-child(3){top:18px;}
+  .mobile-panel{display:none; flex-direction:column; gap:2px; padding:6px 0 20px;}
+  .mobile-panel a{padding:12px 4px; font-size:15px; font-weight:600; border-top:1px solid var(--line);}
+  .mobile-panel .nav-cta{padding:14px 4px 4px; gap:10px; flex-direction:column; align-items:stretch;}
+  @media (max-width:900px){ .nav-links{display:none;} .nav-cta{display:none;} .burger{display:block;} header.open .mobile-panel{display:flex;} }
+
+  section{padding:96px 0;} section.soft{background:var(--bg-soft);}
+  .reveal{opacity:0; transform:translateY(18px); transition:opacity .7s var(--ease), transform .7s var(--ease);}
+  .reveal.in-view{opacity:1; transform:translateY(0);}
+
+  .page-hero{padding:56px 0 20px;}
+  .page-hero h1{font-size:clamp(30px,4vw,46px); margin-top:14px; max-width:680px;}
+  .page-hero p{margin-top:16px; max-width:560px; color:var(--muted); font-size:16.5px;}
+
+  .form-card{background:var(--white); border:1px solid var(--line); border-radius:var(--radius-m); padding:40px; max-width:560px;}
+  .field{display:flex; flex-direction:column; gap:6px; margin-bottom:18px;}
+  .field label{font-size:13.5px; font-weight:600; color:var(--ink-soft);}
+  .field input, .field textarea{padding:12px 14px; border:1.5px solid var(--line); border-radius:var(--radius-s); font:inherit; font-size:15px; color:var(--ink); background:var(--white);}
+  .field input[type="file"]{padding:10px 0; border:none;}
+  .field input:focus, .field textarea:focus{outline:none; border-color:var(--orange);}
+  .field .hint{font-size:12.5px; color:var(--muted);}
+  .alert{padding:12px 16px; border-radius:var(--radius-s); font-size:14px; margin-bottom:18px;}
+  .alert-error{background:var(--orange-tint); color:var(--orange-dark); border:1px solid var(--orange);}
+  .alert-success{background:#E8F5E9; color:#2E7D32; border:1px solid #2E7D32;}
+
+  footer{background:var(--black); color:rgba(255,255,255,0.75); padding:56px 0 28px;}
+  .footer-top{display:flex; justify-content:space-between; gap:40px; flex-wrap:wrap; padding-bottom:38px; border-bottom:1px solid rgba(255,255,255,0.12);}
+  .footer-logo{font-family:'Space Grotesk',sans-serif; color:#fff; font-size:22px; font-weight:700;}
+  .footer-logo small{display:block; font-family:'JetBrains Mono',monospace; font-weight:400; font-size:11px; color:rgba(255,255,255,0.45); margin-top:6px; letter-spacing:0.05em;}
+  .footer-cols{display:flex; gap:64px; flex-wrap:wrap;}
+  .footer-col h4{font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.45); margin-bottom:14px;}
+  .footer-col a, .footer-col span{display:block; font-size:14.5px; margin-bottom:10px; color:rgba(255,255,255,0.8);}
+  .footer-col a:hover{color:var(--orange);}
+  .footer-bottom{display:flex; justify-content:space-between; align-items:center; padding-top:22px; flex-wrap:wrap; gap:12px; font-size:13px; color:rgba(255,255,255,0.4);}
+  .footer-bottom a{color:rgba(255,255,255,0.55);} .footer-bottom a:hover{color:var(--orange);}
+  :focus-visible{outline:2px solid var(--orange-dark); outline-offset:3px;}
+</style>
+</head>
+<body>
+
+<header id="site-header">
+  <div class="wrap nav">
+    <a href="index.html" class="logo">
+      <svg class="logo-mark" viewBox="0 0 40 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M4 26 A16 16 0 0 1 36 26" stroke="#121212" stroke-width="3.4" stroke-linecap="round"/>
+        <circle cx="20" cy="26" r="2.4" fill="#F1541D"/>
+        <line x1="20" y1="26" x2="31" y2="10" stroke="#F1541D" stroke-width="3.4" stroke-linecap="round"/>
+      </svg>
+      <span>FKT Lomas<small>Kinesiología &amp; especialidades médicas</small></span>
+    </a>
+    <nav class="nav-links" aria-label="Navegación principal">
+      <a href="index.html">Inicio</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="especialidades.html">Especialidades</a>
+      <a href="equipo.html">Equipo</a>
+      <a href="opiniones.html">Opiniones</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-outline" href="tel:+541159505888">11 5950-5888</a>
+      <a class="btn btn-primary" href="http://localhost:5173" target="_blank" rel="noopener">Pedir turno</a>
+    </div>
+    <button class="burger" id="burgerBtn" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobilePanel">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="wrap mobile-panel" id="mobilePanel">
+    <a href="index.html">Inicio</a>
+    <a href="servicios.html">Servicios</a>
+    <a href="especialidades.html">Especialidades</a>
+    <a href="equipo.html">Equipo</a>
+    <a href="opiniones.html">Opiniones</a>
+    <a href="contacto.html">Contacto</a>
+    <div class="nav-cta">
+      <a class="btn btn-primary" href="http://localhost:5173" target="_blank" rel="noopener">Pedir turno</a>
+      <a class="btn btn-outline" href="tel:+541159505888">Llamar</a>
+      <a class="btn btn-outline" href="https://wa.me/5491149703857?text=Hola%20FKT%20Lomas%2C%20quiero%20consultar%20por%20un%20turno." target="_blank" rel="noopener">WhatsApp</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="page-hero">
+    <div class="wrap">
+      <span class="eyebrow reveal">Trabajá con nosotros</span>
+      <h1 class="reveal">Sumate al equipo de FKT Lomas</h1>
+      <p class="reveal">Si sos profesional de la salud y te interesa formar parte de nuestro centro, dejanos tus datos y tu CV en PDF. Fernando Carenzio revisa personalmente cada postulación.</p>
+    </div>
+  </section>
+
+  <section style="padding-top:24px;">
+    <div class="wrap">
+      <form id="formPostulacion" class="form-card reveal" enctype="multipart/form-data">
+        <div id="postulacionMensaje"></div>
+
+        <div class="field">
+          <label for="nombreCompleto">Nombre completo</label>
+          <input id="nombreCompleto" name="nombreCompleto" required maxlength="150">
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" required maxlength="180">
+        </div>
+        <div class="field">
+          <label for="telefono">Teléfono</label>
+          <input id="telefono" name="telefono" maxlength="30">
+        </div>
+        <div class="field">
+          <label for="mensaje">Contanos brevemente sobre vos (opcional)</label>
+          <textarea id="mensaje" name="mensaje" rows="4" maxlength="2000" placeholder="Especialidad, experiencia, disponibilidad horaria, etc."></textarea>
+        </div>
+        <div class="field">
+          <label for="cv">Tu CV (PDF, hasta 5MB)</label>
+          <input id="cv" name="cv" type="file" accept="application/pdf" required>
+          <span class="hint">Solo se aceptan archivos PDF de hasta 5MB.</span>
+        </div>
+
+        <button type="submit" id="btnEnviarPostulacion" class="btn btn-primary">Enviar postulación</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div><div class="footer-logo">FKT Lomas<small>Centro médico y de kinesiología</small></div></div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h4>Centro</h4>
+          <a href="servicios.html">Servicios</a>
+          <a href="especialidades.html">Especialidades</a>
+          <a href="equipo.html">Equipo</a>
+          <a href="opiniones.html">Opiniones</a>
+        </div>
+        <div class="footer-col">
+          <h4>Contacto</h4>
+          <span>Juan Larrea 496, Lomas de Zamora</span>
+          <a href="tel:+541159505888">11 5950-5888</a>
+          <a href="https://wa.me/5491149703857">WhatsApp: 11 4970-3857</a>
+        </div>
+        <div class="footer-col">
+          <h4>Seguinos</h4>
+          <a href="https://www.instagram.com/fktlomas" target="_blank" rel="noopener">Instagram</a>
+          <a href="https://www.facebook.com/fktlomas496/" target="_blank" rel="noopener">Facebook</a>
+          <a href="https://www.google.com/maps/place/?q=place_id:ChIJcZceT5rSvJURu57YHxCu_eE" target="_blank" rel="noopener">Google Maps</a>
+        </div>
+        <div class="footer-col">
+          <h4>Otros</h4>
+          <a href="alquiler-consultorios.html">Alquiler de consultorios</a>
+          <a href="trabaja-con-nosotros.html">Trabajá con nosotros</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 FKT Lomas — Kinesiología y especialidades médicas en Lomas de Zamora.</span>
+      <a href="https://fktlomas.com" target="_blank" rel="noopener">fktlomas.com</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const burger = document.getElementById('burgerBtn');
+  const header = document.getElementById('site-header');
+  burger.addEventListener('click', () => { const isOpen = header.classList.toggle('open'); burger.setAttribute('aria-expanded', isOpen); });
+  document.querySelectorAll('#mobilePanel a').forEach(a=>{ a.addEventListener('click', ()=> { header.classList.remove('open'); burger.setAttribute('aria-expanded', false); }); });
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const revealEls = document.querySelectorAll('.reveal');
+  if (reduceMotion) { revealEls.forEach(el => el.classList.add('in-view')); }
+  else {
+    const io = new IntersectionObserver((entries)=>{ entries.forEach(entry=>{ if(entry.isIntersecting){ entry.target.classList.add('in-view'); io.unobserve(entry.target); } }); }, {threshold:0.15});
+    revealEls.forEach(el => io.observe(el));
+  }
+
+  // Antes de publicar el sitio, reemplazar por la URL real del backend desplegado.
+  const API_URL = 'http://localhost:8080';
+  const TAMANO_MAXIMO = 5 * 1024 * 1024;
+
+  const form = document.getElementById('formPostulacion');
+  const mensajeBox = document.getElementById('postulacionMensaje');
+  const btn = document.getElementById('btnEnviarPostulacion');
+  const cvInput = document.getElementById('cv');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    mensajeBox.innerHTML = '';
+
+    const archivo = cvInput.files[0];
+    if (archivo && archivo.size > TAMANO_MAXIMO) {
+      mensajeBox.innerHTML = '<div class="alert alert-error">El CV no puede superar los 5MB.</div>';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Enviando…';
+
+    const formData = new FormData();
+    formData.append('nombreCompleto', document.getElementById('nombreCompleto').value.trim());
+    formData.append('email', document.getElementById('email').value.trim());
+    formData.append('telefono', document.getElementById('telefono').value.trim());
+    formData.append('mensaje', document.getElementById('mensaje').value.trim());
+    formData.append('cv', archivo);
+
+    try {
+      const res = await fetch(`${API_URL}/api/postulaciones`, { method: 'POST', body: formData });
+      if (!res.ok) throw new Error();
+      mensajeBox.innerHTML = '<div class="alert alert-success">¡Gracias por postularte! Recibimos tu CV y lo vamos a revisar.</div>';
+      form.reset();
+    } catch {
+      mensajeBox.innerHTML = '<div class="alert alert-error">No pudimos enviar tu postulación. Probá de nuevo en unos minutos.</div>';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Enviar postulación';
+    }
+  });
+</script>
+</body>
+</html>
