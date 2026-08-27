@@ -35,7 +35,11 @@ docker-compose.yml       Postgres local para desarrollo.
    npm run dev
    ```
    Queda en `http://localhost:5173`.
-4. Sitio estático: abrí los `.html` de `FKT Pagina/` directamente en el navegador, o serví la carpeta con cualquier servidor estático (por ejemplo `python3 -m http.server 5500` desde esa carpeta) si querés probar los formularios de contacto/CV, que llaman a la API del backend.
+4. Sitio estático (en `FKT Pagina/`):
+   ```bash
+   python3 -m http.server 5500
+   ```
+   Servirlo en el puerto 5500 no es opcional para el desarrollo completo: el logo de la app de turnos linkea de vuelta a `http://localhost:5500`, y los formularios de contacto/CV necesitan que esté servido por http (no abierto como archivo local) para poder llamar a la API.
 
 ## Estado actual (v1)
 
@@ -51,5 +55,5 @@ Implementado y probado de punta a punta:
 ## Pendiente / próximos pasos (fuera del alcance de esta versión)
 
 - Reglas de disponibilidad particulares por médico (turnos rotativos, feriados, múltiples consultorios) — a definir con las especificaciones que faltan.
-- Deploy a un hosting real (elegir proveedor, dominio, base de datos y SMTP en producción). Las URLs de la app de turnos (`http://localhost:5173`) están hardcodeadas en los `.html` del sitio estático — hay que reemplazarlas por la URL real una vez desplegada.
+- Deploy a un hosting real (elegir proveedor, dominio, base de datos y SMTP en producción). Hay URLs de desarrollo hardcodeadas que hay que reemplazar por las reales una vez desplegado: la URL de la app de turnos (`http://localhost:5173`) en los `.html` del sitio estático, y la URL del sitio estático (`VITE_SITE_URL`, hoy `http://localhost:5500`) en el frontend de turnos.
 - Antes de ir a producción: cambiar `JWT_SECRET` y la contraseña del admin bootstrap por valores propios y seguros.
