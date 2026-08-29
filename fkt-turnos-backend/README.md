@@ -5,14 +5,14 @@ API REST en Spring Boot 3 (Java 17) para el sistema de turnos, contacto y postul
 ## Requisitos
 
 - Java 17
-- Maven (o usar el wrapper `./mvnw` si se agrega)
 - Postgres (levantado con `docker compose up -d` desde la raíz del repo)
+- No hace falta instalar Maven: el repo trae el wrapper (`./mvnw` en Mac/Linux, `mvnw.cmd` en Windows).
 
 ## Variables de entorno
 
 | Variable | Default (dev) | Descripción |
 |---|---|---|
-| `DB_URL` | `jdbc:postgresql://localhost:5432/fkt_turnos` | Conexión a Postgres |
+| `DB_URL` | `jdbc:postgresql://localhost:5433/fkt_turnos` | Conexión a Postgres. Se usa el puerto 5433 (no el 5432 estándar) para no pisarse con un Postgres nativo que puedas tener instalado en la máquina |
 | `DB_USERNAME` / `DB_PASSWORD` | `fkt` / `fkt` | Credenciales de la base |
 | `JWT_SECRET` | valor de desarrollo | **Cambiar en producción.** Secreto para firmar los JWT |
 | `JWT_EXPIRATION_MINUTES` | `10080` (7 días) | Duración del token |
@@ -28,19 +28,28 @@ Con `MAIL_ENABLED=false` (default) los emails no se envían, solo se loguean —
 
 ## Correr en local
 
+Mac/Linux:
 ```bash
-JAVA_HOME=<ruta a un JDK 17> \
 ADMIN_BOOTSTRAP_EMAIL=fernando@fktlomas.com \
 ADMIN_BOOTSTRAP_PASSWORD=elegí-una-clave \
-mvn spring-boot:run
+./mvnw spring-boot:run
 ```
+
+Windows (PowerShell):
+```powershell
+$env:ADMIN_BOOTSTRAP_EMAIL="fernando@fktlomas.com"
+$env:ADMIN_BOOTSTRAP_PASSWORD="elegí-una-clave"
+.\mvnw.cmd spring-boot:run
+```
+
+Si tenés más de un JDK instalado y Maven elige uno que no es la versión 17, seteá `JAVA_HOME` apuntando al JDK 17 antes de correr el comando.
 
 La API queda en `http://localhost:8080`. Documentación interactiva (Swagger) en `http://localhost:8080/docs`.
 
 ## Tests
 
 ```bash
-mvn test
+./mvnw test
 ```
 
 Incluye un test que verifica que, ante dos intentos de reserva sobre el mismo turno, solo uno tiene éxito (la reserva usa un `UPDATE` atómico condicionado a `estado = DISPONIBLE`, sin necesidad de locks explícitos).

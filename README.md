@@ -41,6 +41,47 @@ docker-compose.yml       Postgres local para desarrollo.
    ```
    Servirlo en el puerto 5500 no es opcional para el desarrollo completo: el logo de la app de turnos linkea de vuelta a `http://localhost:5500`, y los formularios de contacto/CV necesitan que esté servido por http (no abierto como archivo local) para poder llamar a la API.
 
+## Levantarlo en Windows
+
+Los pasos son los mismos, solo cambia la sintaxis de terminal. Instalá antes:
+
+- **Git para Windows** ([git-scm.com](https://git-scm.com/download/win)) — incluye Git Bash y el Credential Manager que te va a pedir loguearte con GitHub al clonar (el repo es privado).
+- **Java 17** — [Eclipse Temurin 17 (MSI)](https://adoptium.net/temurin/releases/?version=17), tildando la opción de setear `JAVA_HOME` durante la instalación. **No hace falta instalar Maven aparte**, el repo ya trae el wrapper (`mvnw.cmd`).
+- **Node.js LTS** ([nodejs.org](https://nodejs.org)) — incluye `npm`.
+- **Docker Desktop** ([docker.com](https://www.docker.com/products/docker-desktop)) — el instalador te va a guiar para habilitar WSL2 si no lo tenés. Sin esto no hay base de datos.
+
+Clonar el repo (PowerShell o Git Bash):
+```powershell
+git clone https://github.com/LauCaren/fkt-lomas-turnos.git
+cd fkt-lomas-turnos
+```
+
+Después, en PowerShell, desde la carpeta del repo:
+
+```powershell
+docker compose up -d
+```
+```powershell
+cd fkt-turnos-backend
+$env:ADMIN_BOOTSTRAP_EMAIL="fernando@fktlomas.com"
+$env:ADMIN_BOOTSTRAP_PASSWORD="cambiar123"
+.\mvnw.cmd spring-boot:run
+```
+En otra terminal:
+```powershell
+cd fkt-turnos-frontend
+npm install
+npm run dev
+```
+Y en una tercera, para el sitio estático:
+```powershell
+cd "FKT Pagina"
+python -m http.server 5500
+```
+(si no tenés Python instalado, `npx serve -l 5500` hace lo mismo).
+
+**Importante:** cada máquina tiene su propia base de datos local (el contenedor de Docker no se sincroniza entre tu Mac y tu PC). Vas a arrancar con las especialidades y los 9 médicos reales ya cargados (vienen de una migración), pero **no** con los pacientes/turnos de prueba que haya en la otra máquina — son entornos de desarrollo independientes, no una base compartida.
+
 ## Estado actual (v1)
 
 Implementado y probado de punta a punta:
