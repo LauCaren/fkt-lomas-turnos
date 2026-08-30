@@ -32,7 +32,7 @@ export default function AdminDashboardPage() {
               fontWeight: 600,
               fontSize: 14.5,
               color: tab === t.id ? 'var(--ink)' : 'var(--muted)',
-              borderBottom: tab === t.id ? '2px solid var(--orange)' : '2px solid transparent',
+              borderBottom: tab === t.id ? '2px solid var(--teal)' : '2px solid transparent',
             }}
           >
             {t.label}

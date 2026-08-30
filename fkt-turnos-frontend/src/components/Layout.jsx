@@ -17,8 +17,14 @@ export default function Layout({ children }) {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <header style={{ background: '#fff', borderBottom: '1px solid var(--line)' }}>
         <div className="wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 0', flexWrap: 'wrap', gap: 12 }}>
-          <a href={SITE_URL} style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 20, whiteSpace: 'nowrap' }}>
-            FKT Lomas<span style={{ color: 'var(--orange)' }}> · Turnos</span>
+          <a href={SITE_URL} style={{ display: 'flex', alignItems: 'center', gap: 10, whiteSpace: 'nowrap' }}>
+            <img src="/img/fkt-logo-mark-transparent.png" alt="" aria-hidden="true" style={{ width: 34, height: 34, objectFit: 'contain', flexShrink: 0 }} />
+            <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
+              <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 20 }}>
+                FKT Lomas<span style={{ color: 'var(--teal)' }}> · Turnos</span>
+              </span>
+              <span style={{ fontFamily: "'Caveat', cursive", fontWeight: 600, fontSize: 14, color: 'var(--muted)' }}>Fisio Kinesio Terapia</span>
+            </span>
           </a>
           {usuario && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>

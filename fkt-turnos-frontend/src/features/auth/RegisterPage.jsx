@@ -62,7 +62,7 @@ export default function RegisterPage() {
             <option value={OBRA_SOCIAL_OTRA}>{OBRA_SOCIAL_OTRA}</option>
           </select>
           {form.obraSocial === OBRA_SOCIAL_PARTICULAR && (
-            <p style={{ fontSize: 13, color: 'var(--orange-dark)', marginTop: 2 }}>
+            <p style={{ fontSize: 13, color: 'var(--teal-dark)', marginTop: 2 }}>
               Al no tener obra social, la sesión particular tiene un costo (a confirmar con el centro).
             </p>
           )}
@@ -94,7 +94,7 @@ export default function RegisterPage() {
         <div className="field" style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
           <input id="aceptaPoliticaPrivacidad" name="aceptaPoliticaPrivacidad" type="checkbox" required style={{ marginTop: 3 }} checked={form.aceptaPoliticaPrivacidad} onChange={handleChange} />
           <label htmlFor="aceptaPoliticaPrivacidad" style={{ fontWeight: 400 }}>
-            Acepto la <a href={`${SITE_URL}/politica-de-privacidad.html`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--orange-dark)', fontWeight: 600 }}>política de privacidad</a>
+            Acepto la <a href={`${SITE_URL}/politica-de-privacidad.html`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal-dark)', fontWeight: 600 }}>política de privacidad</a>
           </label>
         </div>
 
@@ -104,7 +104,7 @@ export default function RegisterPage() {
       </form>
 
       <p style={{ marginTop: 18, textAlign: 'center', color: 'var(--muted)' }}>
-        ¿Ya tenés cuenta? <Link to="/login" style={{ color: 'var(--orange-dark)', fontWeight: 600 }}>Ingresá acá</Link>
+        ¿Ya tenés cuenta? <Link to="/login" style={{ color: 'var(--teal-dark)', fontWeight: 600 }}>Ingresá acá</Link>
       </p>
     </div>
   );

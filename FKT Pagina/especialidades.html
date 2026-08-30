@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Especialidades Médicas — FKT Lomas</title>
 <meta name="description" content="Traumatología, reumatología, flebología, dermopatología, nutrición, psicología, psiquiatría, psicopedagogía, genética ADN, estética y pilates en FKT Lomas.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M15 70 A35 35 0 0 1 85 70' fill='none' stroke='%23121212' stroke-width='9' stroke-linecap='round'/%3E%3Ccircle cx='50' cy='70' r='6' fill='%23F1541D'/%3E%3Cline x1='50' y1='70' x2='75' y2='38' stroke='%23F1541D' stroke-width='9' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M15 70 A35 35 0 0 1 85 70' fill='none' stroke='%231C3240' stroke-width='9' stroke-linecap='round'/%3E%3Ccircle cx='50' cy='70' r='6' fill='%23239A96'/%3E%3Cline x1='50' y1='70' x2='75' y2='38' stroke='%23239A96' stroke-width='9' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   @view-transition{ navigation:auto; }
   ::view-transition-old(root){ animation:220ms ease both fkt-out; }
@@ -17,35 +17,35 @@
   @keyframes fkt-in{ from{ opacity:0; transform:translateY(8px);} }
 
   :root{
-    --bg:#FFFFFF; --bg-soft:#F6F6F2; --ink:#121212; --ink-soft:#43443F; --muted:#75756E; --line:#E7E7E0;
-    --orange:#F1541D; --orange-dark:#C23F12; --orange-tint:#FDEAE1; --black:#0B0B0A; --white:#FFFFFF;
+    --bg:#FFFFFF; --bg-soft:#F3F9F9; --ink:#1C3240; --ink-soft:#3D5566; --muted:#6D8089; --line:#DFEAEA;
+    --teal:#239A96; --teal-dark:#186F6C; --teal-tint:#E1F3F2; --black:#13232C; --white:#FFFFFF;
     --radius-s:6px; --radius-m:16px; --maxw:1180px; --ease:cubic-bezier(.22,.68,.32,1);
   }
   *,*::before,*::after{box-sizing:border-box;}
   @media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important;} }
   body{margin:0; background:var(--bg); color:var(--ink); font-family:'Inter',sans-serif; font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased;}
-  h1,h2,h3{font-family:'Space Grotesk',sans-serif; font-weight:600; letter-spacing:-0.015em; margin:0; color:var(--ink);}
+  h1,h2,h3{font-family:'Playfair Display',serif; font-weight:600; letter-spacing:-0.015em; margin:0; color:var(--ink);}
   p{margin:0;} a{color:inherit; text-decoration:none;} ul{margin:0; padding:0; list-style:none;} img{max-width:100%; display:block;}
   button{font:inherit; background:none; border:none; cursor:pointer; color:inherit;}
-  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px;} .hl{color:var(--orange);}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px;} .hl{color:var(--teal);}
 
-  .eyebrow{font-family:'JetBrains Mono',monospace; font-size:12.5px; letter-spacing:0.14em; text-transform:uppercase; color:var(--orange-dark); font-weight:500; display:inline-flex; align-items:center; gap:10px;}
-  .eyebrow::before{content:""; width:18px; height:2px; background:var(--orange); display:inline-block;}
+  .eyebrow{font-family:'JetBrains Mono',monospace; font-size:12.5px; letter-spacing:0.14em; text-transform:uppercase; color:var(--teal-dark); font-weight:500; display:inline-flex; align-items:center; gap:10px;}
+  .eyebrow::before{content:""; width:18px; height:2px; background:var(--teal); display:inline-block;}
 
   .btn{display:inline-flex; align-items:center; gap:8px; padding:14px 26px; border-radius:var(--radius-s); font-weight:600; font-size:15px; border:1.5px solid transparent; transition:transform .25s var(--ease), background .25s var(--ease), border-color .25s var(--ease), color .25s var(--ease); white-space:nowrap;}
   .btn:hover{transform:translateY(-2px);}
-  .btn-primary{background:var(--orange); color:#fff;} .btn-primary:hover{background:var(--orange-dark);}
+  .btn-primary{background:var(--teal); color:#fff;} .btn-primary:hover{background:var(--teal-dark);}
   .btn-outline{border-color:var(--line); color:var(--ink);} .btn-outline:hover{border-color:var(--ink); background:var(--bg-soft);}
   .btn-outline-light{border-color:rgba(255,255,255,0.3); color:#fff;} .btn-outline-light:hover{border-color:#fff; background:rgba(255,255,255,0.08);}
 
   header{position:sticky; top:0; z-index:100; background:rgba(255,255,255,0.86); backdrop-filter:blur(10px); border-bottom:1px solid var(--line);}
   .nav{display:flex; align-items:center; justify-content:space-between; padding:16px 0;}
-  .logo{display:flex; align-items:center; gap:10px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:20px;}
-  .logo-mark{width:30px; height:22px; flex-shrink:0;}
-  .logo small{display:block; font-family:'JetBrains Mono',monospace; font-weight:400; font-size:9.5px; letter-spacing:0.1em; color:var(--muted); text-transform:uppercase;}
+  .logo{display:flex; align-items:center; gap:10px; font-family:'Playfair Display',serif; font-weight:700; font-size:20px;}
+  .logo-mark{width:34px; height:34px; flex-shrink:0; object-fit:contain;}
+  .logo small{display:block; font-family:'Caveat',cursive; font-weight:600; font-size:14px; letter-spacing:0.01em; color:var(--muted); text-transform:none;}
   .nav-links{display:flex; align-items:center; gap:28px;}
   .nav-links a{font-size:14.5px; font-weight:600; color:var(--ink-soft); position:relative; padding:4px 0;}
-  .nav-links a::after{content:""; position:absolute; left:0; bottom:0; width:0; height:2px; background:var(--orange); transition:width .25s var(--ease);}
+  .nav-links a::after{content:""; position:absolute; left:0; bottom:0; width:0; height:2px; background:var(--teal); transition:width .25s var(--ease);}
   .nav-links a:hover::after, .nav-links a.active::after{width:100%;} .nav-links a.active{color:var(--ink);}
   .nav-cta{display:flex; align-items:center; gap:12px;} .nav-cta .btn{padding:10px 18px; font-size:14px;}
   .burger{display:none; width:26px; height:20px; position:relative;}
@@ -69,11 +69,11 @@
 
   .spec-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:18px;}
   .spec-item{border:1px solid var(--line); border-radius:var(--radius-m); overflow:hidden; background:var(--white); transition:border-color .25s var(--ease), transform .25s var(--ease); position:relative;}
-  .spec-item:hover{border-color:var(--orange); transform:translateY(-4px);}
+  .spec-item:hover{border-color:var(--teal); transform:translateY(-4px);}
   .spec-img{position:relative; width:100%; aspect-ratio:4/3; background:var(--bg-soft); overflow:hidden;}
   .spec-img img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s var(--ease);}
   .spec-item:hover .spec-img img{transform:scale(1.07);}
-  .spec-icn{position:absolute; left:14px; bottom:-16px; width:36px; height:36px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 3px 10px rgba(0,0,0,0.14); color:var(--orange-dark);}
+  .spec-icn{position:absolute; left:14px; bottom:-16px; width:36px; height:36px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 3px 10px rgba(0,0,0,0.14); color:var(--teal-dark);}
   .spec-icn svg{width:18px; height:18px;}
   .spec-body{padding:28px 18px 18px;}
   .spec-body h3{font-size:15.5px; font-weight:600; font-family:'Inter',sans-serif;}
@@ -89,15 +89,15 @@
 
   footer{background:var(--black); color:rgba(255,255,255,0.75); padding:56px 0 28px;}
   .footer-top{display:flex; justify-content:space-between; gap:40px; flex-wrap:wrap; padding-bottom:38px; border-bottom:1px solid rgba(255,255,255,0.12);}
-  .footer-logo{font-family:'Space Grotesk',sans-serif; color:#fff; font-size:22px; font-weight:700;}
-  .footer-logo small{display:block; font-family:'JetBrains Mono',monospace; font-weight:400; font-size:11px; color:rgba(255,255,255,0.45); margin-top:6px; letter-spacing:0.05em;}
+  .footer-logo{display:flex; align-items:center; gap:12px; font-family:'Playfair Display',serif; color:#fff; font-size:22px; font-weight:700;} .footer-logo img{width:38px; height:38px; object-fit:contain; flex-shrink:0;}
+  .footer-logo small{display:block; font-family:'Caveat',cursive; font-weight:600; font-size:16px; color:rgba(255,255,255,0.6); margin-top:4px; letter-spacing:0.01em;}
   .footer-cols{display:flex; gap:64px; flex-wrap:wrap;}
   .footer-col h4{font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.45); margin-bottom:14px;}
   .footer-col a, .footer-col span{display:block; font-size:14.5px; margin-bottom:10px; color:rgba(255,255,255,0.8);}
-  .footer-col a:hover{color:var(--orange);}
+  .footer-col a:hover{color:var(--teal);}
   .footer-bottom{display:flex; justify-content:space-between; align-items:center; padding-top:22px; flex-wrap:wrap; gap:12px; font-size:13px; color:rgba(255,255,255,0.4);}
-  .footer-bottom a{color:rgba(255,255,255,0.55);} .footer-bottom a:hover{color:var(--orange);}
-  :focus-visible{outline:2px solid var(--orange-dark); outline-offset:3px;}
+  .footer-bottom a{color:rgba(255,255,255,0.55);} .footer-bottom a:hover{color:var(--teal);}
+  :focus-visible{outline:2px solid var(--teal-dark); outline-offset:3px;}
 </style>
 </head>
 <body>
@@ -105,12 +105,8 @@
 <header id="site-header">
   <div class="wrap nav">
     <a href="index.html" class="logo">
-      <svg class="logo-mark" viewBox="0 0 40 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M4 26 A16 16 0 0 1 36 26" stroke="#121212" stroke-width="3.4" stroke-linecap="round"/>
-        <circle cx="20" cy="26" r="2.4" fill="#F1541D"/>
-        <line x1="20" y1="26" x2="31" y2="10" stroke="#F1541D" stroke-width="3.4" stroke-linecap="round"/>
-      </svg>
-      <span>FKT Lomas<small>Kinesiología &amp; especialidades médicas</small></span>
+      <img class="logo-mark" src="assets/img/logo/fkt-logo-mark-transparent.png" alt="" aria-hidden="true">
+      <span>FKT Lomas<small>Fisio Kinesio Terapia</small></span>
     </a>
     <nav class="nav-links" aria-label="Navegación principal">
       <a href="index.html">Inicio</a>
@@ -231,7 +227,7 @@
 <footer>
   <div class="wrap">
     <div class="footer-top">
-      <div><div class="footer-logo">FKT Lomas<small>Centro médico y de kinesiología</small></div></div>
+      <div><div class="footer-logo"><img src="assets/img/logo/fkt-logo-mark-light.png" alt="" aria-hidden="true"><span>FKT Lomas<small>Fisio Kinesio Terapia</small></span></div></div>
       <div class="footer-cols">
         <div class="footer-col">
           <h4>Centro</h4>
@@ -271,7 +267,7 @@
   function imgFallback(img){
     img.onerror = null;
     img.style.objectFit = 'cover';
-    img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="%23F6F6F2"/><path d="M150 190 A50 50 0 0 1 250 190" fill="none" stroke="%23E7E7E0" stroke-width="4"/><circle cx="200" cy="190" r="4" fill="%23F1541D"/></svg>');
+    img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="%23F3F9F9"/><path d="M150 190 A50 50 0 0 1 250 190" fill="none" stroke="%23DFEAEA" stroke-width="4"/><circle cx="200" cy="190" r="4" fill="%23239A96"/></svg>');
   }
   const burger = document.getElementById('burgerBtn');
   const header = document.getElementById('site-header');

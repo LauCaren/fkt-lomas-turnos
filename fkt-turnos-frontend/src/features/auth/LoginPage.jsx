@@ -42,7 +42,7 @@ export default function LoginPage() {
       </form>
 
       <p style={{ marginTop: 18, textAlign: 'center', color: 'var(--muted)' }}>
-        ¿No tenés cuenta? <Link to="/registro" style={{ color: 'var(--orange-dark)', fontWeight: 600 }}>Creá una acá</Link>
+        ¿No tenés cuenta? <Link to="/registro" style={{ color: 'var(--teal-dark)', fontWeight: 600 }}>Creá una acá</Link>
       </p>
     </div>
   );

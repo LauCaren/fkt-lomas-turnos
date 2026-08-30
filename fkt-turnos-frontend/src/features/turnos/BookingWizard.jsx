@@ -109,8 +109,8 @@ export default function BookingWizard() {
                   onClick={() => setTurnoSeleccionado(t)}
                   className="btn"
                   style={{
-                    border: turnoSeleccionado?.id === t.id ? '1.5px solid var(--orange)' : '1.5px solid var(--line)',
-                    background: turnoSeleccionado?.id === t.id ? 'var(--orange-tint)' : 'var(--white)',
+                    border: turnoSeleccionado?.id === t.id ? '1.5px solid var(--teal)' : '1.5px solid var(--line)',
+                    background: turnoSeleccionado?.id === t.id ? 'var(--teal-tint)' : 'var(--white)',
                     color: 'var(--ink)',
                     padding: '9px 16px',
                     fontSize: 14,
