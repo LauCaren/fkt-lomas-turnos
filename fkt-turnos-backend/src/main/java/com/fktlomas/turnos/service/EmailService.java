@@ -51,6 +51,24 @@ public class EmailService {
     }
 
     @Async
+    public void enviarRecuperacionPassword(Usuario usuario, String linkRecuperacion) {
+        String asunto = "Recuperar contraseña — FKT Lomas";
+        String cuerpo = """
+                Hola %s,
+
+                Pediste restablecer tu contraseña. Entrá a este link para elegir una nueva
+                (válido por 1 hora):
+
+                %s
+
+                Si no fuiste vos, ignorá este email — tu contraseña actual sigue funcionando.
+
+                FKT Lomas
+                """.formatted(usuario.getNombreCompleto(), linkRecuperacion);
+        enviar(usuario.getEmail(), asunto, cuerpo);
+    }
+
+    @Async
     public void notificarNuevoMensajeContacto(MensajeContacto mensaje) {
         String asunto = "Nueva consulta por alquiler de consultorio";
         String cuerpo = """

@@ -69,6 +69,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(cuerpo(HttpStatus.UNAUTHORIZED, "Credenciales inválidas", null));
     }
 
+    @ExceptionHandler(MfaRequeridaException.class)
+    public ResponseEntity<Map<String, Object>> handleMfaRequerida(MfaRequeridaException ex) {
+        Map<String, Object> body = cuerpo(HttpStatus.UNAUTHORIZED, ex.getMessage(), null);
+        body.put("requiereMfa", true);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
         return ResponseEntity.badRequest().body(cuerpo(HttpStatus.BAD_REQUEST, ex.getMessage(), null));

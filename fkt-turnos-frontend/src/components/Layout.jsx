@@ -32,6 +32,7 @@ export default function Layout({ children }) {
                 <>
                   <Link to="/turnos" style={{ fontSize: 14, fontWeight: 600 }}>Sacar turno</Link>
                   <Link to="/turnos/mis-turnos" style={{ fontSize: 14, fontWeight: 600 }}>Mis turnos</Link>
+                  <Link to="/turnos/mi-cuenta" style={{ fontSize: 14, fontWeight: 600 }}>Mi cuenta</Link>
                 </>
               )}
               {usuario.role === 'ADMIN' && (

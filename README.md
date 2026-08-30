@@ -117,6 +117,9 @@ Implementado y probado de punta a punta:
 - Cancelación de turnos propios (libera el horario para otros pacientes).
 - Panel de administración (Fernando): alta de especialidades y médicos, carga de horarios semanales por médico, generación de turnos a partir de esos horarios, bandeja de mensajes de "alquiler de consultorios" y de postulaciones con descarga de CV.
 - Agenda para la secretaria: vista del día con los turnos de todos los médicos (o filtrado por uno), y reserva de un turno en nombre de un paciente que llama por teléfono o WhatsApp (sin necesidad de que ese paciente tenga cuenta).
+- Los pacientes pueden editar sus propios datos y cambiar su contraseña desde "Mi cuenta".
+- "Olvidé mi contraseña" (paciente y admin), por email con link temporal.
+- Verificación en dos pasos (TOTP, tipo Google Authenticator) opcional para la cuenta de administrador — no para pacientes, para no agregarles fricción a los que reservan por teléfono.
 - Página de contacto para alquiler de consultorios y página "Trabajá con nosotros" con carga de CV en PDF, ambas en el sitio estático.
 - Envío de emails (confirmación de turno, aviso de nuevo mensaje/postulación) — desactivado por defecto hasta que se configure un SMTP real (ver README del backend).
 

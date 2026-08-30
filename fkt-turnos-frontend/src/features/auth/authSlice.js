@@ -15,6 +15,8 @@ const initialState = {
   usuario: usuarioGuardado(),
   status: 'idle',
   error: null,
+  requiereMfa: false,
+  mensajeExito: null,
 };
 
 function guardarSesion(data) {
@@ -40,12 +42,39 @@ export const registrarPaciente = createAsyncThunk(
 
 export const login = createAsyncThunk(
   'auth/login',
-  async ({ email, password }, { rejectWithValue }) => {
+  async ({ email, password, codigoMfa }, { rejectWithValue }) => {
     try {
-      const { data } = await axiosClient.post('/api/auth/login', { email, password });
+      const { data } = await axiosClient.post('/api/auth/login', { email, password, codigoMfa });
       return data;
     } catch (error) {
-      return rejectWithValue(mensajeDeError(error, 'Email o contraseña incorrectos'));
+      return rejectWithValue({
+        mensaje: mensajeDeError(error, 'Email o contraseña incorrectos'),
+        requiereMfa: !!error.response?.data?.requiereMfa,
+      });
+    }
+  }
+);
+
+export const olvidePassword = createAsyncThunk(
+  'auth/olvidePassword',
+  async (email, { rejectWithValue }) => {
+    try {
+      await axiosClient.post('/api/auth/olvide-password', { email });
+      return true;
+    } catch (error) {
+      return rejectWithValue(mensajeDeError(error, 'No se pudo procesar el pedido'));
+    }
+  }
+);
+
+export const restablecerPassword = createAsyncThunk(
+  'auth/restablecerPassword',
+  async ({ token, passwordNueva }, { rejectWithValue }) => {
+    try {
+      await axiosClient.post('/api/auth/restablecer-password', { token, passwordNueva });
+      return true;
+    } catch (error) {
+      return rejectWithValue(mensajeDeError(error, 'No se pudo restablecer la contraseña'));
     }
   }
 );
@@ -59,6 +88,15 @@ const authSlice = createSlice({
       state.usuario = null;
       localStorage.removeItem('fkt_token');
       localStorage.removeItem('fkt_user');
+    },
+    actualizarUsuarioLocal(state, action) {
+      state.usuario = { ...state.usuario, ...action.payload };
+      localStorage.setItem('fkt_user', JSON.stringify(state.usuario));
+    },
+    limpiarMensajesAuth(state) {
+      state.error = null;
+      state.mensajeExito = null;
+      state.requiereMfa = false;
     },
   },
   extraReducers: (builder) => {
@@ -79,14 +117,28 @@ const authSlice = createSlice({
         state.status = 'idle';
         state.token = action.payload.token;
         state.usuario = { nombreCompleto: action.payload.nombreCompleto, email: action.payload.email, role: action.payload.role };
+        state.requiereMfa = false;
         guardarSesion(action.payload);
       })
       .addCase(login.rejected, (state, action) => {
         state.status = 'idle';
-        state.error = action.payload;
-      });
+        state.error = action.payload.mensaje;
+        state.requiereMfa = action.payload.requiereMfa;
+      })
+      .addCase(olvidePassword.pending, (state) => { state.status = 'loading'; state.error = null; state.mensajeExito = null; })
+      .addCase(olvidePassword.fulfilled, (state) => {
+        state.status = 'idle';
+        state.mensajeExito = 'Si el email existe en nuestro sistema, te enviamos un link para restablecer tu contraseña.';
+      })
+      .addCase(olvidePassword.rejected, (state, action) => { state.status = 'idle'; state.error = action.payload; })
+      .addCase(restablecerPassword.pending, (state) => { state.status = 'loading'; state.error = null; state.mensajeExito = null; })
+      .addCase(restablecerPassword.fulfilled, (state) => {
+        state.status = 'idle';
+        state.mensajeExito = 'Contraseña actualizada. Ya podés ingresar con tu nueva contraseña.';
+      })
+      .addCase(restablecerPassword.rejected, (state, action) => { state.status = 'idle'; state.error = action.payload; });
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, actualizarUsuarioLocal, limpiarMensajesAuth } = authSlice.actions;
 export default authSlice.reducer;

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "usuarios")
@@ -48,6 +49,18 @@ public class Usuario {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
+
+    @Column(name = "reset_token", length = 64)
+    private String resetToken;
+
+    @Column(name = "reset_token_expira")
+    private OffsetDateTime resetTokenExpira;
+
+    @Column(name = "mfa_secret", length = 64)
+    private String mfaSecret;
+
+    @Column(name = "mfa_habilitado", nullable = false)
+    private boolean mfaHabilitado;
 
     @PrePersist
     void prePersist() {

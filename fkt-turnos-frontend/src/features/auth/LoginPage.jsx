@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { login } from './authSlice';
+import { login, limpiarMensajesAuth } from './authSlice';
 
 export default function LoginPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { status, error } = useSelector((state) => state.auth);
-  const [form, setForm] = useState({ email: '', password: '' });
+  const { status, error, requiereMfa } = useSelector((state) => state.auth);
+  const [form, setForm] = useState({ email: '', password: '', codigoMfa: '' });
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -30,18 +30,29 @@ export default function LoginPage() {
         {error && <div className="alert alert-error">{error}</div>}
         <div className="field">
           <label htmlFor="email">Email</label>
-          <input id="email" name="email" type="email" required value={form.email} onChange={handleChange} />
+          <input id="email" name="email" type="email" required disabled={requiereMfa} value={form.email} onChange={handleChange} />
         </div>
         <div className="field">
           <label htmlFor="password">Contraseña</label>
-          <input id="password" name="password" type="password" required value={form.password} onChange={handleChange} />
+          <input id="password" name="password" type="password" required disabled={requiereMfa} value={form.password} onChange={handleChange} />
         </div>
+        {requiereMfa && (
+          <div className="field">
+            <label htmlFor="codigoMfa">Código de verificación</label>
+            <input id="codigoMfa" name="codigoMfa" inputMode="numeric" pattern="\d{6}" maxLength={6} autoFocus required
+              placeholder="123456" value={form.codigoMfa} onChange={handleChange} />
+            <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 4 }}>Abrí tu app de autenticación y escribí el código de 6 dígitos.</p>
+          </div>
+        )}
         <button type="submit" className="btn btn-primary btn-block" disabled={status === 'loading'}>
           {status === 'loading' ? 'Ingresando…' : 'Ingresar'}
         </button>
       </form>
 
       <p style={{ marginTop: 18, textAlign: 'center', color: 'var(--muted)' }}>
+        <Link to="/olvide-password" onClick={() => dispatch(limpiarMensajesAuth())} style={{ color: 'var(--teal-dark)', fontWeight: 600 }}>¿Olvidaste tu contraseña?</Link>
+      </p>
+      <p style={{ marginTop: 8, textAlign: 'center', color: 'var(--muted)' }}>
         ¿No tenés cuenta? <Link to="/registro" style={{ color: 'var(--teal-dark)', fontWeight: 600 }}>Creá una acá</Link>
       </p>
     </div>

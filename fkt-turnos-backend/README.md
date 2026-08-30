@@ -19,6 +19,7 @@ API REST en Spring Boot 3 (Java 17) para el sistema de turnos, contacto y postul
 | `ADMIN_BOOTSTRAP_EMAIL` / `ADMIN_BOOTSTRAP_PASSWORD` | ver `application.yml` | Credenciales del usuario admin (Fernando) que se crea automáticamente al arrancar si no existe. Cambiar la contraseña desde el panel una vez logueado. |
 | `ADMIN_NOTIFY_EMAIL` | `fernando@fktlomas.com` | A dónde llegan los avisos de contacto/postulaciones |
 | `CORS_ALLOWED_ORIGINS` | `http://localhost:5173` | Orígenes permitidos (separados por coma) |
+| `FRONTEND_URL` | `http://localhost:5173` | Base para armar el link de "olvidé mi contraseña" que se manda por email |
 | `MAIL_ENABLED` | `false` | Poner en `true` para enviar emails de verdad |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USERNAME` / `SMTP_PASSWORD` | vacío | Credenciales SMTP. Recomendado: [Brevo](https://www.brevo.com) (plan gratuito, 300 emails/día) u otro proveedor similar |
 | `MAIL_FROM` | `no-reply@fktlomas.com` | Remitente de los emails |

@@ -136,6 +136,33 @@ export const cambiarPasswordAdmin = createAsyncThunk('admin/cambiarPassword', as
   }
 });
 
+export const iniciarMfa = createAsyncThunk('admin/iniciarMfa', async (_, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.post('/api/admin/mfa/iniciar');
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudo iniciar la configuración'));
+  }
+});
+
+export const activarMfa = createAsyncThunk('admin/activarMfa', async (codigo, { rejectWithValue }) => {
+  try {
+    await axiosClient.post('/api/admin/mfa/activar', { codigo });
+    return true;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'El código no es correcto'));
+  }
+});
+
+export const desactivarMfa = createAsyncThunk('admin/desactivarMfa', async (codigo, { rejectWithValue }) => {
+  try {
+    await axiosClient.post('/api/admin/mfa/desactivar', { codigo });
+    return true;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'El código no es correcto'));
+  }
+});
+
 const adminSlice = createSlice({
   name: 'admin',
   initialState: {
@@ -143,6 +170,7 @@ const adminSlice = createSlice({
     reglasPorMedico: {},
     agenda: [],
     agendaCargando: false,
+    mfaSetup: null,
     mensajesContacto: [],
     postulaciones: [],
     error: null,
@@ -196,7 +224,13 @@ const adminSlice = createSlice({
         state.postulaciones = state.postulaciones.map((p) => p.id === action.payload.id ? action.payload : p);
       })
       .addCase(cambiarPasswordAdmin.fulfilled, (state) => { state.mensajeExito = 'Contraseña actualizada correctamente'; })
-      .addCase(cambiarPasswordAdmin.rejected, (state, action) => { state.error = action.payload; });
+      .addCase(cambiarPasswordAdmin.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(iniciarMfa.fulfilled, (state, action) => { state.mfaSetup = action.payload; })
+      .addCase(iniciarMfa.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(activarMfa.fulfilled, (state) => { state.mfaSetup = null; state.mensajeExito = 'Verificación en dos pasos activada'; })
+      .addCase(activarMfa.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(desactivarMfa.fulfilled, (state) => { state.mensajeExito = 'Verificación en dos pasos desactivada'; })
+      .addCase(desactivarMfa.rejected, (state, action) => { state.error = action.payload; });
   },
 });
 
