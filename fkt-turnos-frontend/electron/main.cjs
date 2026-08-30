@@ -20,11 +20,26 @@ function carpetaDist() {
 function iniciarServidorEstatico() {
   return new Promise((resolve) => {
     const servidor = express();
-    servidor.use(express.static(carpetaDist()));
+    servidor.use(express.static(carpetaDist(), {
+      // index.html referencia los archivos con hash (assets/index-XXXX.js) por
+      // nombre — si el propio index.html quedara cacheado, una actualización
+      // de la app podría seguir mostrando la versión vieja indefinidamente
+      // (nos pasó: reconstruimos la app pero la ventana ya abierta seguía con
+      // el bundle anterior). Los archivos con hash sí pueden cachearse fuerte,
+      // porque cambian de nombre solos cuando cambia su contenido.
+      setHeaders: (res, rutaArchivo) => {
+        if (path.basename(rutaArchivo) === 'index.html') {
+          res.setHeader('Cache-Control', 'no-store');
+        }
+      },
+    }));
     // Fallback de SPA: cualquier ruta que no sea un archivo estático (las de
     // react-router-dom) devuelve index.html, para que el router del lado
     // cliente la resuelva.
-    servidor.get('*', (_req, res) => res.sendFile(path.join(carpetaDist(), 'index.html')));
+    servidor.get('*', (_req, res) => {
+      res.setHeader('Cache-Control', 'no-store');
+      res.sendFile(path.join(carpetaDist(), 'index.html'));
+    });
     servidor.listen(PUERTO, '127.0.0.1', resolve);
   });
 }
@@ -41,6 +56,9 @@ async function crearVentana() {
     },
   });
 
+  // Por las dudas quede algo cacheado de una versión anterior de la app
+  // (instalada encima de la vieja, mismo puerto): arrancar siempre en limpio.
+  await ventana.webContents.session.clearCache();
   ventana.loadURL(`http://localhost:${PUERTO}`);
 }
 
