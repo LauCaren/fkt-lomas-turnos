@@ -81,8 +81,8 @@ public class TurnoService {
     }
 
     @Transactional(readOnly = true)
-    public List<TurnoAdminDto> agenda(LocalDate desde, LocalDate hasta, Long medicoId) {
-        return turnoRepository.findAgenda(desde, hasta, medicoId).stream().map(TurnoAdminDto::de).toList();
+    public List<TurnoAdminDto> agenda(LocalDate desde, LocalDate hasta, Long medicoId, Long especialidadId) {
+        return turnoRepository.findAgenda(desde, hasta, medicoId, especialidadId).stream().map(TurnoAdminDto::de).toList();
     }
 
     @Transactional

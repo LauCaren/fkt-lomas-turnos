@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -55,5 +56,15 @@ public class AdminMedicoController {
     public ResponseEntity<Map<String, Integer>> generarTurnos(@PathVariable Long id, @Valid @RequestBody GenerarTurnosRequest request) {
         int generados = disponibilidadService.generarTurnos(id, request.desde(), request.hasta());
         return ResponseEntity.ok(Map.of("turnosGenerados", generados));
+    }
+
+    @PostMapping(value = "/{id}/foto", consumes = "multipart/form-data")
+    public MedicoDto subirFoto(@PathVariable Long id, @RequestParam("foto") MultipartFile foto) {
+        return medicoService.subirFoto(id, foto);
+    }
+
+    @PostMapping(value = "/{id}/titulo", consumes = "multipart/form-data")
+    public MedicoDto subirTitulo(@PathVariable Long id, @RequestParam("imagen") MultipartFile imagen) {
+        return medicoService.subirTitulo(id, imagen);
     }
 }

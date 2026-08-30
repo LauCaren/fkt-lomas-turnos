@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAgenda, fetchFeriados, fetchMedicosAdmin, reservarParaPaciente } from './adminSlice';
+import { fetchEspecialidades } from '../turnos/turnosSlice';
 import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../../constants/obrasSociales';
 
 function hoyISO() {
@@ -260,10 +261,17 @@ function VistaSemana({ agenda, agendaCargando, feriados, medicoId, medicos, fech
 export default function AdminAgendaTab() {
   const dispatch = useDispatch();
   const { medicos, agenda, agendaCargando, feriados, error, mensajeExito } = useSelector((state) => state.admin);
+  const especialidades = useSelector((state) => state.turnos.especialidades);
   const [fecha, setFecha] = useState(hoyISO());
+  const [especialidadId, setEspecialidadId] = useState('');
   const [medicoId, setMedicoId] = useState('');
   const [reservandoId, setReservandoId] = useState(null);
   const [vista, setVista] = useState('lista');
+
+  const medicosFiltrados = useMemo(() => {
+    if (!especialidadId) return medicos;
+    return medicos.filter((m) => String(m.especialidadId) === especialidadId);
+  }, [medicos, especialidadId]);
 
   const rango = useMemo(() => {
     if (vista === 'semana') {
@@ -275,12 +283,23 @@ export default function AdminAgendaTab() {
 
   useEffect(() => {
     dispatch(fetchMedicosAdmin());
+    dispatch(fetchEspecialidades());
   }, [dispatch]);
 
   useEffect(() => {
-    dispatch(fetchAgenda({ desde: rango.desde, hasta: rango.hasta, medicoId }));
+    dispatch(fetchAgenda({ desde: rango.desde, hasta: rango.hasta, medicoId, especialidadId }));
     dispatch(fetchFeriados({ desde: rango.desde, hasta: rango.hasta }));
-  }, [rango.desde, rango.hasta, medicoId, dispatch]);
+  }, [rango.desde, rango.hasta, medicoId, especialidadId, dispatch]);
+
+  function handleEspecialidadChange(nuevaEspecialidadId) {
+    setEspecialidadId(nuevaEspecialidadId);
+    if (medicoId) {
+      const medicoActual = medicos.find((m) => String(m.id) === medicoId);
+      if (!medicoActual || (nuevaEspecialidadId && String(medicoActual.especialidadId) !== nuevaEspecialidadId)) {
+        setMedicoId('');
+      }
+    }
+  }
 
   const feriadoDelDia = feriados.find((f) => f.fecha === fecha);
 
@@ -300,10 +319,17 @@ export default function AdminAgendaTab() {
           <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
         </div>
         <div className="field" style={{ marginBottom: 0 }}>
+          <label>Especialidad</label>
+          <select value={especialidadId} onChange={(e) => handleEspecialidadChange(e.target.value)}>
+            <option value="">Todas las especialidades</option>
+            {especialidades.map((esp) => <option key={esp.id} value={esp.id}>{esp.nombre}</option>)}
+          </select>
+        </div>
+        <div className="field" style={{ marginBottom: 0 }}>
           <label>Médico</label>
           <select value={medicoId} onChange={(e) => setMedicoId(e.target.value)}>
             <option value="">Todos los médicos</option>
-            {medicos.map((m) => <option key={m.id} value={m.id}>{m.nombreCompleto}</option>)}
+            {medicosFiltrados.map((m) => <option key={m.id} value={m.id}>{m.nombreCompleto}</option>)}
           </select>
         </div>
       </div>

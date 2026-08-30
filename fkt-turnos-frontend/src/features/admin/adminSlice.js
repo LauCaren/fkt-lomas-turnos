@@ -37,6 +37,28 @@ export const actualizarMedico = createAsyncThunk('admin/actualizarMedico', async
   }
 });
 
+export const subirFotoMedico = createAsyncThunk('admin/subirFotoMedico', async ({ medicoId, file }, { rejectWithValue }) => {
+  try {
+    const formData = new FormData();
+    formData.append('foto', file);
+    const { data } = await axiosClient.post(`/api/admin/medicos/${medicoId}/foto`, formData);
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudo subir la foto'));
+  }
+});
+
+export const subirTituloMedico = createAsyncThunk('admin/subirTituloMedico', async ({ medicoId, file }, { rejectWithValue }) => {
+  try {
+    const formData = new FormData();
+    formData.append('imagen', file);
+    const { data } = await axiosClient.post(`/api/admin/medicos/${medicoId}/titulo`, formData);
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudo subir la imagen del título'));
+  }
+});
+
 export const fetchReglas = createAsyncThunk('admin/fetchReglas', async (medicoId, { rejectWithValue }) => {
   try {
     const { data } = await axiosClient.get(`/api/admin/medicos/${medicoId}/reglas-disponibilidad`);
@@ -73,10 +95,10 @@ export const generarTurnos = createAsyncThunk('admin/generarTurnos', async ({ me
   }
 });
 
-export const fetchAgenda = createAsyncThunk('admin/fetchAgenda', async ({ fecha, desde, hasta, medicoId }, { rejectWithValue }) => {
+export const fetchAgenda = createAsyncThunk('admin/fetchAgenda', async ({ fecha, desde, hasta, medicoId, especialidadId }, { rejectWithValue }) => {
   try {
     const { data } = await axiosClient.get('/api/admin/turnos', {
-      params: { desde: desde || fecha, hasta: hasta || fecha, medicoId: medicoId || undefined },
+      params: { desde: desde || fecha, hasta: hasta || fecha, medicoId: medicoId || undefined, especialidadId: especialidadId || undefined },
     });
     return data;
   } catch (error) {
@@ -268,6 +290,16 @@ const adminSlice = createSlice({
       .addCase(actualizarMedico.fulfilled, (state, action) => {
         state.medicos = state.medicos.map((m) => m.id === action.payload.id ? action.payload : m);
       })
+      .addCase(subirFotoMedico.fulfilled, (state, action) => {
+        state.medicos = state.medicos.map((m) => m.id === action.payload.id ? action.payload : m);
+        state.mensajeExito = 'Foto actualizada';
+      })
+      .addCase(subirFotoMedico.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(subirTituloMedico.fulfilled, (state, action) => {
+        state.medicos = state.medicos.map((m) => m.id === action.payload.id ? action.payload : m);
+        state.mensajeExito = 'Imagen del título actualizada';
+      })
+      .addCase(subirTituloMedico.rejected, (state, action) => { state.error = action.payload; })
       .addCase(crearEspecialidad.rejected, (state, action) => { state.error = action.payload; })
       .addCase(fetchReglas.fulfilled, (state, action) => {
         state.reglasPorMedico[action.payload.medicoId] = action.payload.reglas;

@@ -22,8 +22,9 @@ public class AdminTurnoController {
     public List<TurnoAdminDto> agenda(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
-            @RequestParam(required = false) Long medicoId) {
-        return turnoService.agenda(desde, hasta, medicoId);
+            @RequestParam(required = false) Long medicoId,
+            @RequestParam(required = false) Long especialidadId) {
+        return turnoService.agenda(desde, hasta, medicoId, especialidadId);
     }
 
     @PostMapping("/{id}/reservar-para-paciente")

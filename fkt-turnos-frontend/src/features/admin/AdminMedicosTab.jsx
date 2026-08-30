@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchMedicosAdmin, crearMedico, actualizarMedico, crearEspecialidad,
-  fetchReglas, crearRegla, eliminarRegla, generarTurnos,
+  fetchReglas, crearRegla, eliminarRegla, generarTurnos, subirFotoMedico, subirTituloMedico,
 } from './adminSlice';
 import { fetchEspecialidades } from '../turnos/turnosSlice';
 
@@ -25,6 +25,22 @@ function MedicoDetalle({ medico }) {
   const reglas = useSelector((state) => state.admin.reglasPorMedico[medico.id] || []);
   const [nuevaRegla, setNuevaRegla] = useState({ diaSemana: 'MONDAY', horaInicio: '08:00', horaFin: '12:00' });
   const [rango, setRango] = useState({ desde: hoyISO(), hasta: hoyISO() });
+  const [anosExperiencia, setAnosExperiencia] = useState(medico.anosExperiencia ?? '');
+
+  function handleGuardarAnosExperiencia(e) {
+    e.preventDefault();
+    dispatch(actualizarMedico({
+      id: medico.id,
+      payload: {
+        nombreCompleto: medico.nombreCompleto,
+        especialidadId: medico.especialidadId,
+        matricula: medico.matricula,
+        activo: medico.activo,
+        duracionTurnoMinutos: medico.duracionTurnoMinutos,
+        anosExperiencia: anosExperiencia === '' ? null : Number(anosExperiencia),
+      },
+    }));
+  }
 
   useEffect(() => {
     dispatch(fetchReglas(medico.id));
@@ -40,8 +56,57 @@ function MedicoDetalle({ medico }) {
     dispatch(generarTurnos({ medicoId: medico.id, ...rango }));
   }
 
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+  const [fotoVersion, setFotoVersion] = useState(0);
+  const [tituloVersion, setTituloVersion] = useState(0);
+
+  function handleSubirFoto(e) {
+    const file = e.target.files[0];
+    if (file) {
+      dispatch(subirFotoMedico({ medicoId: medico.id, file })).unwrap()
+        .then(() => setFotoVersion((v) => v + 1)).catch(() => {});
+    }
+    e.target.value = '';
+  }
+
+  function handleSubirTitulo(e) {
+    const file = e.target.files[0];
+    if (file) {
+      dispatch(subirTituloMedico({ medicoId: medico.id, file })).unwrap()
+        .then(() => setTituloVersion((v) => v + 1)).catch(() => {});
+    }
+    e.target.value = '';
+  }
+
   return (
     <div style={{ padding: '18px 0 4px', borderTop: '1px solid var(--line)', marginTop: 14 }}>
+      <h4 style={{ fontSize: 15, marginBottom: 10 }}>Ficha pública (página "Equipo")</h4>
+      <form onSubmit={handleGuardarAnosExperiencia} style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginBottom: 16 }}>
+        <div className="field" style={{ marginBottom: 0 }}>
+          <label>Años de experiencia</label>
+          <input type="number" min={0} max={70} value={anosExperiencia} onChange={(e) => setAnosExperiencia(e.target.value)} style={{ width: 100 }} />
+        </div>
+        <button type="submit" className="btn btn-outline">Guardar</button>
+      </form>
+      <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', marginBottom: 20 }}>
+        <div>
+          <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>Foto (tipo carnet)</label>
+          {medico.tieneFoto && (
+            <img src={`${apiUrl}/api/medicos/${medico.id}/foto?v=${fotoVersion}`} alt=""
+              style={{ width: 90, height: 110, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--line)', marginBottom: 8, display: 'block' }} />
+          )}
+          <input type="file" accept="image/jpeg,image/png" onChange={handleSubirFoto} style={{ fontSize: 12.5 }} />
+        </div>
+        <div>
+          <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>Título / matrícula (imagen)</label>
+          {medico.tieneTitulo && (
+            <img src={`${apiUrl}/api/medicos/${medico.id}/titulo?v=${tituloVersion}`} alt=""
+              style={{ width: 140, height: 100, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--line)', marginBottom: 8, display: 'block' }} />
+          )}
+          <input type="file" accept="image/jpeg,image/png" onChange={handleSubirTitulo} style={{ fontSize: 12.5 }} />
+        </div>
+      </div>
+
       <h4 style={{ fontSize: 15, marginBottom: 10 }}>Horarios semanales</h4>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 14 }}>
         {reglas.length === 0 && <p style={{ fontSize: 13, color: 'var(--muted)' }}>Sin horarios cargados todavía.</p>}
@@ -94,7 +159,7 @@ export default function AdminMedicosTab() {
   const especialidades = useSelector((state) => state.turnos.especialidades);
   const [expandidoId, setExpandidoId] = useState(null);
   const [nuevaEspecialidad, setNuevaEspecialidad] = useState('');
-  const [nuevoMedico, setNuevoMedico] = useState({ nombreCompleto: '', especialidadId: '', matricula: '', duracionTurnoMinutos: 30 });
+  const [nuevoMedico, setNuevoMedico] = useState({ nombreCompleto: '', especialidadId: '', matricula: '', duracionTurnoMinutos: 30, anosExperiencia: '' });
 
   useEffect(() => {
     dispatch(fetchMedicosAdmin());
@@ -112,8 +177,9 @@ export default function AdminMedicosTab() {
 
   function handleCrearMedico(e) {
     e.preventDefault();
-    dispatch(crearMedico(nuevoMedico)).unwrap().then(() => {
-      setNuevoMedico({ nombreCompleto: '', especialidadId: '', matricula: '', duracionTurnoMinutos: 30 });
+    const payload = { ...nuevoMedico, anosExperiencia: nuevoMedico.anosExperiencia === '' ? null : Number(nuevoMedico.anosExperiencia) };
+    dispatch(crearMedico(payload)).unwrap().then(() => {
+      setNuevoMedico({ nombreCompleto: '', especialidadId: '', matricula: '', duracionTurnoMinutos: 30, anosExperiencia: '' });
     }).catch(() => {});
   }
 
@@ -126,6 +192,7 @@ export default function AdminMedicosTab() {
         matricula: medico.matricula,
         activo: !medico.activo,
         duracionTurnoMinutos: medico.duracionTurnoMinutos,
+        anosExperiencia: medico.anosExperiencia,
       },
     }));
   }
@@ -164,6 +231,10 @@ export default function AdminMedicosTab() {
           <div className="field">
             <label>Duración del turno (minutos)</label>
             <input type="number" min={10} step={5} value={nuevoMedico.duracionTurnoMinutos} onChange={(e) => setNuevoMedico({ ...nuevoMedico, duracionTurnoMinutos: Number(e.target.value) })} />
+          </div>
+          <div className="field">
+            <label>Años de experiencia (opcional, para la ficha pública)</label>
+            <input type="number" min={0} max={70} value={nuevoMedico.anosExperiencia} onChange={(e) => setNuevoMedico({ ...nuevoMedico, anosExperiencia: e.target.value })} />
           </div>
           <button type="submit" className="btn btn-primary">Crear médico</button>
         </form>

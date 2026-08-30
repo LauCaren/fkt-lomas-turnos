@@ -83,6 +83,23 @@
   .team-card li::before{content:""; position:absolute; left:0; top:9px; width:6px; height:2px; background:var(--teal);}
   @media (max-width:700px){ .team-grid{grid-template-columns:1fr;} }
 
+  /* ---------- FICHA DE PROFESIONAL (modal) ---------- */
+  .team-card li.clickable{cursor:pointer; transition:color .2s var(--ease);}
+  .team-card li.clickable:hover{color:var(--teal-dark); text-decoration:underline; text-decoration-color:var(--teal);}
+  .ficha-overlay{position:fixed; inset:0; background:rgba(19,35,44,0.55); backdrop-filter:blur(2px); z-index:1000; display:none; align-items:center; justify-content:center; padding:20px;}
+  .ficha-overlay.open{display:flex;}
+  .ficha-card{background:#fff; border-radius:var(--radius-m); max-width:520px; width:100%; max-height:90vh; overflow-y:auto; padding:32px; position:relative; box-shadow:0 20px 60px rgba(19,35,44,0.3);}
+  .ficha-cerrar{position:absolute; top:16px; right:16px; width:32px; height:32px; border-radius:50%; background:var(--bg-soft); display:flex; align-items:center; justify-content:center; font-size:18px; color:var(--ink-soft); line-height:1;}
+  .ficha-cerrar:hover{background:var(--teal-tint); color:var(--teal-dark);}
+  .ficha-top{display:flex; gap:20px; align-items:flex-start; margin-bottom:4px;}
+  .ficha-foto{width:110px; height:130px; border-radius:10px; object-fit:cover; flex-shrink:0; background:var(--bg-soft); border:1px solid var(--line);}
+  .ficha-nombre{font-size:22px; margin-top:2px;}
+  .ficha-especialidad{font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:var(--teal-dark); margin-top:8px;}
+  .ficha-experiencia{font-size:14.5px; color:var(--ink-soft); margin-top:10px;}
+  .ficha-titulo-box{margin-top:24px; padding-top:20px; border-top:1px solid var(--line);}
+  .ficha-titulo-box h4{font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; font-weight:500;}
+  .ficha-titulo-img{width:100%; border-radius:8px; border:1px solid var(--line); display:block;}
+
   /* ---------- GALLERY (fotos reales del espacio) ---------- */
   .gallery-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px;}
   .gallery-item{aspect-ratio:4/3; border-radius:var(--radius-s); overflow:hidden; background:var(--bg-soft);}
@@ -281,6 +298,24 @@
   </div>
 </footer>
 
+<div class="ficha-overlay" id="fichaOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="ficha-card">
+    <button class="ficha-cerrar" id="fichaCerrar" aria-label="Cerrar">&times;</button>
+    <div class="ficha-top">
+      <img class="ficha-foto" id="fichaFoto" src="" alt="">
+      <div>
+        <h3 class="ficha-nombre" id="fichaNombre"></h3>
+        <div class="ficha-especialidad" id="fichaEspecialidad"></div>
+        <p class="ficha-experiencia" id="fichaExperiencia"></p>
+      </div>
+    </div>
+    <div class="ficha-titulo-box" id="fichaTituloBox" style="display:none;">
+      <h4>Título habilitante</h4>
+      <img class="ficha-titulo-img" id="fichaTituloImg" src="" alt="Título habilitante">
+    </div>
+  </div>
+</div>
+
 <script>
   function imgFallback(img){
     img.onerror = null;
@@ -299,6 +334,63 @@
     const io = new IntersectionObserver((entries)=>{ entries.forEach(entry=>{ if(entry.isIntersecting){ entry.target.classList.add('in-view'); io.unobserve(entry.target); } }); }, {threshold:0.15});
     revealEls.forEach(el => io.observe(el));
   }
+
+  // ---------- FICHA DE PROFESIONAL ----------
+  const API_URL = 'http://localhost:8080';
+  const FOTO_PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 130"><rect width="110" height="130" fill="%23F3F9F9"/>' +
+    '<circle cx="55" cy="48" r="22" fill="%23DFEAEA"/><path d="M18 118 A37 42 0 0 1 92 118" fill="%23DFEAEA"/></svg>'
+  );
+
+  const overlay = document.getElementById('fichaOverlay');
+  const elFoto = document.getElementById('fichaFoto');
+  const elNombre = document.getElementById('fichaNombre');
+  const elEspecialidad = document.getElementById('fichaEspecialidad');
+  const elExperiencia = document.getElementById('fichaExperiencia');
+  const elTituloBox = document.getElementById('fichaTituloBox');
+  const elTituloImg = document.getElementById('fichaTituloImg');
+
+  function abrirFicha(medico) {
+    elFoto.src = medico.tieneFoto ? `${API_URL}/api/medicos/${medico.id}/foto` : FOTO_PLACEHOLDER;
+    elNombre.textContent = medico.nombreCompleto;
+    elEspecialidad.textContent = medico.especialidadNombre;
+    elExperiencia.textContent = medico.anosExperiencia
+      ? `${medico.anosExperiencia} ${medico.anosExperiencia === 1 ? 'año' : 'años'} de experiencia`
+      : '';
+    if (medico.tieneTitulo) {
+      elTituloImg.src = `${API_URL}/api/medicos/${medico.id}/titulo`;
+      elTituloBox.style.display = '';
+    } else {
+      elTituloBox.style.display = 'none';
+    }
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+  }
+
+  function cerrarFicha() {
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+  }
+
+  document.getElementById('fichaCerrar').addEventListener('click', cerrarFicha);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) cerrarFicha(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && overlay.classList.contains('open')) cerrarFicha(); });
+
+  fetch(`${API_URL}/api/medicos`)
+    .then((res) => res.json())
+    .then((medicos) => {
+      const porNombre = new Map(medicos.map((m) => [m.nombreCompleto.trim(), m]));
+      document.querySelectorAll('.team-card li').forEach((li) => {
+        const medico = porNombre.get(li.textContent.trim());
+        if (!medico) return;
+        li.classList.add('clickable');
+        li.setAttribute('role', 'button');
+        li.setAttribute('tabindex', '0');
+        li.addEventListener('click', () => abrirFicha(medico));
+        li.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirFicha(medico); } });
+      });
+    })
+    .catch(() => { /* Sin conexión al backend: la página sigue funcionando, solo no quedan clickeables los nombres. */ });
 </script>
 </body>
 </html>

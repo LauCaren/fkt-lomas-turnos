@@ -9,7 +9,10 @@ public record MedicoDto(
         String especialidadNombre,
         String matricula,
         boolean activo,
-        int duracionTurnoMinutos
+        int duracionTurnoMinutos,
+        Integer anosExperiencia,
+        boolean tieneFoto,
+        boolean tieneTitulo
 ) {
     public static MedicoDto de(Medico m) {
         return new MedicoDto(
@@ -19,7 +22,10 @@ public record MedicoDto(
                 m.getEspecialidad().getNombre(),
                 m.getMatricula(),
                 m.isActivo(),
-                m.getDuracionTurnoMinutos()
+                m.getDuracionTurnoMinutos(),
+                m.getAnosExperiencia(),
+                m.getFotoPath() != null,
+                m.getTituloImagenPath() != null
         );
     }
 }

@@ -1,5 +1,6 @@
 package com.fktlomas.turnos.dto.admin;
 
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,6 +11,7 @@ public record ActualizarMedicoRequest(
         @NotNull Long especialidadId,
         @Size(max = 50) String matricula,
         boolean activo,
-        @Min(10) int duracionTurnoMinutos
+        @Min(10) int duracionTurnoMinutos,
+        @Min(0) @Max(70) Integer anosExperiencia
 ) {
 }

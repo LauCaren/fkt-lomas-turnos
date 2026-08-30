@@ -31,4 +31,19 @@ public class Medico {
 
     @Column(name = "duracion_turno_minutos", nullable = false)
     private int duracionTurnoMinutos = 30;
+
+    @Column(name = "anos_experiencia")
+    private Integer anosExperiencia;
+
+    @Column(name = "foto_path")
+    private String fotoPath;
+
+    @Column(name = "foto_content_type", length = 100)
+    private String fotoContentType;
+
+    @Column(name = "titulo_imagen_path")
+    private String tituloImagenPath;
+
+    @Column(name = "titulo_imagen_content_type", length = 100)
+    private String tituloImagenContentType;
 }
