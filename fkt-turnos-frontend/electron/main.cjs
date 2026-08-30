@@ -8,6 +8,17 @@ const express = require('express');
 // cargamos esa URL, igual que en un navegador normal.
 const PUERTO = 43117;
 
+// Si hay dos copias del .app instaladas (ej. una en /Applications y otra
+// que quedó suelta en la carpeta del proyecto) y las dos se abren, compiten
+// por el mismo puerto fijo — la segunda en arrancar carga silenciosamente
+// el servidor de la primera, que puede ser una build vieja, y no hay forma
+// de saber cuál se está viendo. Esto lo evita de raíz: si ya hay una
+// instancia corriendo, esta simplemente no arranca y le pasa el foco a la
+// que ya estaba.
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+}
+
 function carpetaDist() {
   // Empaquetada (electron-builder): dist/ queda dentro de resources/ (ver
   // "files" en package.json). En desarrollo (electron .): relativa a este
@@ -61,6 +72,14 @@ async function crearVentana() {
   await ventana.webContents.session.clearCache();
   ventana.loadURL(`http://localhost:${PUERTO}`);
 }
+
+app.on('second-instance', () => {
+  const ventana = BrowserWindow.getAllWindows()[0];
+  if (ventana) {
+    if (ventana.isMinimized()) ventana.restore();
+    ventana.focus();
+  }
+});
 
 app.whenReady().then(() => {
   crearVentana();
