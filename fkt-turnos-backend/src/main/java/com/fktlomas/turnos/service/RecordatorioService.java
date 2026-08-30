@@ -46,7 +46,6 @@ public class RecordatorioService {
     private final UsuarioRepository usuarioRepository;
     private final ConfiguracionRecordatoriosRepository configuracionRepository;
     private final EmailService emailService;
-    private final SmsService smsService;
     private final WhatsAppService whatsAppService;
 
     @Scheduled(fixedDelayString = "#{${app.recordatorios.intervalo-minutos} * 60000}")
@@ -158,7 +157,6 @@ public class RecordatorioService {
     private void enviarPorCanal(CanalNotificacion canal, Usuario paciente, String asunto, String texto) {
         switch (canal) {
             case EMAIL -> emailService.enviarRecordatorioSync(paciente.getEmail(), asunto, texto);
-            case SMS -> smsService.enviar(paciente.getTelefono(), texto);
             case WHATSAPP -> whatsAppService.enviar(paciente.getTelefono(), texto);
         }
     }

@@ -58,10 +58,10 @@ app:
     enabled: ${MAIL_ENABLED:false}
   uploads:
     dir: ${UPLOADS_DIR:./uploads}
+  # Solo WhatsApp usa Twilio — el canal SMS se sacó del sistema.
   twilio:
     account-sid: ${TWILIO_ACCOUNT_SID:}
     auth-token: ${TWILIO_AUTH_TOKEN:}
-    numero-origen: ${TWILIO_NUMERO_ORIGEN:}
     numero-origen-whatsapp: ${TWILIO_NUMERO_ORIGEN_WHATSAPP:}
   recordatorios:
     # Frecuencia del polling del scheduler (minutos) — a diferencia de la

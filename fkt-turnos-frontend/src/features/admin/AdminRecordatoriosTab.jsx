@@ -11,7 +11,6 @@ function nombreCanal(valor) {
 
 const CANALES = [
   { value: 'EMAIL', label: 'Email' },
-  { value: 'SMS', label: 'SMS' },
   { value: 'WHATSAPP', label: 'WhatsApp' },
 ];
 

@@ -81,7 +81,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(cuerpo(HttpStatus.BAD_REQUEST, ex.getMessage(), null));
     }
 
-    /** Ej.: un canal de notificación sin credenciales configuradas (ver SmsService/WhatsAppService), o un envío que falló. */
+    /** Ej.: un canal de notificación sin credenciales configuradas (ver WhatsAppService), o un envío que falló. */
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalState(IllegalStateException ex) {
         return ResponseEntity.badRequest().body(cuerpo(HttpStatus.BAD_REQUEST, ex.getMessage(), null));
