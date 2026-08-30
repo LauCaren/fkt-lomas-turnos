@@ -116,7 +116,8 @@ Implementado y probado de punta a punta:
 - Reserva de turnos por especialidad → médico → fecha → horario, con bloqueo real contra doble reserva (dos personas no pueden tomar el mismo horario).
 - Cancelación de turnos propios (libera el horario para otros pacientes).
 - Panel de administración (Fernando): alta de especialidades y médicos, carga de horarios semanales por médico, generación de turnos a partir de esos horarios, bandeja de mensajes de "alquiler de consultorios" y de postulaciones con descarga de CV.
-- Agenda para la secretaria: vista del día con los turnos de todos los médicos (o filtrado por uno), y reserva de un turno en nombre de un paciente que llama por teléfono o WhatsApp (sin necesidad de que ese paciente tenga cuenta).
+- Agenda para la secretaria: vista de lista por día, y vista semanal tipo calendario (eligiendo un médico) con los turnos coloreados por estado, además de reserva de un turno en nombre de un paciente que llama por teléfono o WhatsApp (sin necesidad de que ese paciente tenga cuenta).
+- Feriados nacionales de Argentina 2026 precargados (Ley 27.399, verificados contra el calendario oficial) — se excluyen automáticamente al generar turnos, y se marcan visualmente en la agenda. El admin puede sumar cierres propios del centro vía `POST /api/admin/feriados` (falta la UI para cargarlos desde el panel, hoy solo por API).
 - Los pacientes pueden editar sus propios datos y cambiar su contraseña desde "Mi cuenta".
 - "Olvidé mi contraseña" (paciente y admin), por email con link temporal.
 - Verificación en dos pasos (TOTP, tipo Google Authenticator) opcional para la cuenta de administrador — no para pacientes, para no agregarles fricción a los que reservan por teléfono.

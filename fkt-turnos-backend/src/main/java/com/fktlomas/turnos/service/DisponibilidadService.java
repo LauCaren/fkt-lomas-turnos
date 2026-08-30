@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +27,7 @@ public class DisponibilidadService {
     private final ReglaDisponibilidadRepository reglaRepository;
     private final TurnoRepository turnoRepository;
     private final MedicoService medicoService;
+    private final FeriadoService feriadoService;
 
     @Transactional(readOnly = true)
     public List<ReglaDisponibilidadDto> listarReglas(Long medicoId) {
@@ -64,9 +66,13 @@ public class DisponibilidadService {
         Medico medico = medicoService.obtenerEntidad(medicoId);
         List<ReglaDisponibilidad> reglas = reglaRepository.findByMedicoId(medicoId);
         int duracion = medico.getDuracionTurnoMinutos();
+        Set<LocalDate> feriados = feriadoService.fechasEnRango(desde, hasta);
 
         List<Turno> nuevos = new ArrayList<>();
         for (LocalDate fecha = desde; !fecha.isAfter(hasta); fecha = fecha.plusDays(1)) {
+            if (feriados.contains(fecha)) {
+                continue;
+            }
             for (ReglaDisponibilidad regla : reglas) {
                 if (regla.getDiaSemana() != fecha.getDayOfWeek()) {
                     continue;

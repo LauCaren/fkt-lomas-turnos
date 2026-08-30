@@ -73,9 +73,20 @@ export const generarTurnos = createAsyncThunk('admin/generarTurnos', async ({ me
   }
 });
 
-export const fetchAgenda = createAsyncThunk('admin/fetchAgenda', async ({ fecha, medicoId }, { rejectWithValue }) => {
+export const fetchAgenda = createAsyncThunk('admin/fetchAgenda', async ({ fecha, desde, hasta, medicoId }, { rejectWithValue }) => {
   try {
-    const { data } = await axiosClient.get('/api/admin/turnos', { params: { desde: fecha, hasta: fecha, medicoId: medicoId || undefined } });
+    const { data } = await axiosClient.get('/api/admin/turnos', {
+      params: { desde: desde || fecha, hasta: hasta || fecha, medicoId: medicoId || undefined },
+    });
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
+export const fetchFeriados = createAsyncThunk('admin/fetchFeriados', async ({ desde, hasta }, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/admin/feriados', { params: { desde, hasta } });
     return data;
   } catch (error) {
     return rejectWithValue(mensajeDeError(error));
@@ -170,6 +181,7 @@ const adminSlice = createSlice({
     reglasPorMedico: {},
     agenda: [],
     agendaCargando: false,
+    feriados: [],
     mfaSetup: null,
     mensajesContacto: [],
     postulaciones: [],
@@ -215,6 +227,8 @@ const adminSlice = createSlice({
         state.mensajeExito = 'Turno reservado correctamente';
       })
       .addCase(reservarParaPaciente.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(fetchFeriados.fulfilled, (state, action) => { state.feriados = action.payload; })
+      .addCase(fetchFeriados.rejected, (state, action) => { state.error = action.payload; })
       .addCase(fetchMensajesContacto.fulfilled, (state, action) => { state.mensajesContacto = action.payload; })
       .addCase(marcarMensajeLeido.fulfilled, (state, action) => {
         state.mensajesContacto = state.mensajesContacto.map((m) => m.id === action.payload.id ? action.payload : m);
