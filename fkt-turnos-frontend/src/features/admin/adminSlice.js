@@ -73,6 +73,24 @@ export const generarTurnos = createAsyncThunk('admin/generarTurnos', async ({ me
   }
 });
 
+export const fetchAgenda = createAsyncThunk('admin/fetchAgenda', async ({ fecha, medicoId }, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/admin/turnos', { params: { desde: fecha, hasta: fecha, medicoId: medicoId || undefined } });
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
+export const reservarParaPaciente = createAsyncThunk('admin/reservarParaPaciente', async ({ turnoId, payload }, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.post(`/api/admin/turnos/${turnoId}/reservar-para-paciente`, payload);
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudo reservar el turno'));
+  }
+});
+
 export const fetchMensajesContacto = createAsyncThunk('admin/fetchMensajes', async (_, { rejectWithValue }) => {
   try {
     const { data } = await axiosClient.get('/api/admin/mensajes-contacto');
@@ -123,6 +141,8 @@ const adminSlice = createSlice({
   initialState: {
     medicos: [],
     reglasPorMedico: {},
+    agenda: [],
+    agendaCargando: false,
     mensajesContacto: [],
     postulaciones: [],
     error: null,
@@ -159,6 +179,14 @@ const adminSlice = createSlice({
         state.mensajeExito = `Se generaron ${action.payload.turnosGenerados} turnos nuevos`;
       })
       .addCase(generarTurnos.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(fetchAgenda.pending, (state) => { state.agendaCargando = true; })
+      .addCase(fetchAgenda.fulfilled, (state, action) => { state.agenda = action.payload; state.agendaCargando = false; })
+      .addCase(fetchAgenda.rejected, (state, action) => { state.error = action.payload; state.agendaCargando = false; })
+      .addCase(reservarParaPaciente.fulfilled, (state, action) => {
+        state.agenda = state.agenda.map((t) => t.id === action.payload.id ? action.payload : t);
+        state.mensajeExito = 'Turno reservado correctamente';
+      })
+      .addCase(reservarParaPaciente.rejected, (state, action) => { state.error = action.payload; })
       .addCase(fetchMensajesContacto.fulfilled, (state, action) => { state.mensajesContacto = action.payload; })
       .addCase(marcarMensajeLeido.fulfilled, (state, action) => {
         state.mensajesContacto = state.mensajesContacto.map((m) => m.id === action.payload.id ? action.payload : m);

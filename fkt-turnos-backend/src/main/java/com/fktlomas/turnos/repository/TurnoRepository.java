@@ -19,6 +19,17 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
 
     boolean existsByMedicoIdAndFechaAndHoraInicio(Long medicoId, LocalDate fecha, java.time.LocalTime horaInicio);
 
+    @Query("""
+            select t from Turno t
+            join fetch t.medico m
+            join fetch m.especialidad
+            left join fetch t.paciente
+            where t.fecha between :desde and :hasta
+            and (:medicoId is null or m.id = :medicoId)
+            order by t.fecha asc, t.horaInicio asc
+            """)
+    List<Turno> findAgenda(@Param("desde") LocalDate desde, @Param("hasta") LocalDate hasta, @Param("medicoId") Long medicoId);
+
     /**
      * Update atómico: solo reserva si sigue DISPONIBLE. Si otra transacción ya lo tomó,
      * esta operación afecta 0 filas y el service la traduce en un 409 sin necesidad de locks explícitos.

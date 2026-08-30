@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import AdminAgendaTab from './AdminAgendaTab';
 import AdminMedicosTab from './AdminMedicosTab';
 import AdminMensajesTab from './AdminMensajesTab';
 import AdminPostulacionesTab from './AdminPostulacionesTab';
 import AdminCuentaTab from './AdminCuentaTab';
 
 const TABS = [
+  { id: 'agenda', label: 'Agenda' },
   { id: 'medicos', label: 'Médicos y horarios' },
   { id: 'mensajes', label: 'Alquiler de consultorios' },
   { id: 'postulaciones', label: 'Postulaciones' },
@@ -12,7 +14,7 @@ const TABS = [
 ];
 
 export default function AdminDashboardPage() {
-  const [tab, setTab] = useState('medicos');
+  const [tab, setTab] = useState('agenda');
 
   return (
     <div>
@@ -40,6 +42,7 @@ export default function AdminDashboardPage() {
         ))}
       </div>
 
+      {tab === 'agenda' && <AdminAgendaTab />}
       {tab === 'medicos' && <AdminMedicosTab />}
       {tab === 'mensajes' && <AdminMensajesTab />}
       {tab === 'postulaciones' && <AdminPostulacionesTab />}
