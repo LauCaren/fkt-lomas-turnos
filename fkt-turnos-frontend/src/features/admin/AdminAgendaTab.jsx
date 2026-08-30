@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAgenda, fetchMedicosAdmin, reservarParaPaciente } from './adminSlice';
+import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../../constants/obrasSociales';
 
 function hoyISO() {
   return new Date().toISOString().slice(0, 10);
@@ -40,7 +41,12 @@ function FormularioReserva({ turno, onCancelar }) {
         </div>
         <div className="field" style={{ marginBottom: 0, flex: '1 1 160px' }}>
           <label>Obra social</label>
-          <input required value={datos.obraSocial} onChange={(e) => setDatos({ ...datos, obraSocial: e.target.value })} placeholder="Particular si no tiene" />
+          <select required value={datos.obraSocial} onChange={(e) => setDatos({ ...datos, obraSocial: e.target.value })}>
+            <option value="">Seleccioná una obra social</option>
+            <option value={OBRA_SOCIAL_PARTICULAR}>{OBRA_SOCIAL_PARTICULAR}</option>
+            {OBRAS_SOCIALES.map((os) => <option key={os} value={os}>{os}</option>)}
+            <option value={OBRA_SOCIAL_OTRA}>{OBRA_SOCIAL_OTRA}</option>
+          </select>
         </div>
         <div className="field" style={{ marginBottom: 0, flex: '1 1 200px' }}>
           <label>Email (opcional)</label>
