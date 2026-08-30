@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">FKT Lomas Turnos</string>
+    <string name="title_activity_main">FKT Lomas Turnos</string>
+    <string name="package_name">com.fktlomas.turnos</string>
+    <string name="custom_url_scheme">com.fktlomas.turnos</string>
+</resources>

@@ -41,6 +41,32 @@ docker-compose.yml       Postgres local para desarrollo.
    ```
    Servirlo en el puerto 5500 no es opcional para el desarrollo completo: el logo de la app de turnos linkea de vuelta a `http://localhost:5500`, y los formularios de contacto/CV necesitan que esté servido por http (no abierto como archivo local) para poder llamar a la API.
 
+## App móvil (Capacitor)
+
+`fkt-turnos-frontend/` está envuelto con [Capacitor](https://capacitorjs.com) para generar las apps nativas de iOS y Android a partir del mismo código React (carpetas `ios/` y `android/` dentro de `fkt-turnos-frontend/`, ya versionadas). Antes de compilar, siempre hay que buildear el web y sincronizar:
+
+```bash
+cd fkt-turnos-frontend
+npm run build
+npx cap sync
+```
+
+**iOS** (necesita Xcode instalado, no hace falta CocoaPods — usa Swift Package Manager):
+```bash
+cd ios/App
+xcodebuild -project App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath build
+```
+O abrí `ios/App/App.xcodeproj` directo en Xcode y correlo desde ahí.
+
+**Android** (necesita el Android SDK — `brew install --cask android-commandlinetools` alcanza, no hace falta Android Studio completo para compilar por consola):
+```bash
+cd android
+JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home ./gradlew assembleDebug
+```
+Importante: el build de Android necesita **JDK 21** (no el JDK 17 que usa el backend) y el SDK Platform 36 (`sdkmanager "platforms;android-36" "build-tools;36.0.0"`). El APK queda en `android/app/build/outputs/apk/debug/app-debug.apk`.
+
+Íconos y splash screens salen de `fkt-turnos-frontend/resources/` (generados a partir del logo real) — para regenerarlos tras cambiar el logo: `npx capacitor-assets generate`.
+
 ## Levantarlo en Windows
 
 Los pasos son los mismos, solo cambia la sintaxis de terminal. Instalá antes:
