@@ -67,9 +67,18 @@ async function crearVentana() {
     },
   });
 
-  // Por las dudas quede algo cacheado de una versión anterior de la app
-  // (instalada encima de la vieja, mismo puerto): arrancar siempre en limpio.
+  // clearCache() solo limpia la caché HTTP normal — no alcanza. Antes de
+  // sacarle el plugin de PWA al build de escritorio, una prueba temprana
+  // registró un service worker acá dentro (session propia y persistente de
+  // Electron, en ~/Library/Application Support/fkt-turnos-frontend): una vez
+  // instalado, intercepta cualquier request a este origen y sirve SU PROPIA
+  // caché (Cache Storage), sin importar qué tan seguido se reconstruya la
+  // app — clearCache() no toca esa caché porque es otro almacenamiento.
+  // Desregistrar cualquier service worker + vaciar su caché deja esto en
+  // limpio de una vez; no debería volver a registrarse ninguno ya que el
+  // build de escritorio no incluye el plugin de PWA.
   await ventana.webContents.session.clearCache();
+  await ventana.webContents.session.clearStorageData({ storages: ['serviceworkers', 'cachestorage'] });
   ventana.loadURL(`http://localhost:${PUERTO}`);
 }
 
