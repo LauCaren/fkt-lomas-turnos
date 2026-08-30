@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { registrarPaciente } from './authSlice';
+import PasswordInput from '../../components/PasswordInput';
 import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../../constants/obrasSociales';
 import { SITE_URL } from '../../config';
 
@@ -83,7 +84,7 @@ export default function RegisterPage() {
         </div>
         <div className="field">
           <label htmlFor="password">Contraseña</label>
-          <input id="password" name="password" type="password" required minLength={6} value={form.password} onChange={handleChange} />
+          <PasswordInput id="password" name="password" required minLength={6} value={form.password} onChange={handleChange} />
         </div>
 
         <div style={{ position: 'absolute', left: -9999, opacity: 0 }} aria-hidden="true">

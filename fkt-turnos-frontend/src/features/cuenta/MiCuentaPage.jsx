@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMiPerfil, actualizarPerfil, cambiarPasswordCuenta, limpiarMensajesCuenta } from './cuentaSlice';
 import { actualizarUsuarioLocal } from '../auth/authSlice';
+import PasswordInput from '../../components/PasswordInput';
 import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../../constants/obrasSociales';
 
 const GENEROS = [
@@ -89,11 +90,11 @@ function CambiarPassword() {
     <form onSubmit={handleSubmit} className="card">
       <div className="field">
         <label>Contraseña actual</label>
-        <input type="password" required value={form.passwordActual} onChange={(e) => setForm({ ...form, passwordActual: e.target.value })} />
+        <PasswordInput required value={form.passwordActual} onChange={(e) => setForm({ ...form, passwordActual: e.target.value })} />
       </div>
       <div className="field">
         <label>Contraseña nueva</label>
-        <input type="password" required minLength={6} value={form.passwordNueva} onChange={(e) => setForm({ ...form, passwordNueva: e.target.value })} />
+        <PasswordInput required minLength={6} value={form.passwordNueva} onChange={(e) => setForm({ ...form, passwordNueva: e.target.value })} />
       </div>
       <button type="submit" className="btn btn-primary">Actualizar contraseña</button>
     </form>

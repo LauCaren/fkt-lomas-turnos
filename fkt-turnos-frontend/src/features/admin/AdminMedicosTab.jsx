@@ -5,6 +5,7 @@ import {
   fetchReglas, crearRegla, eliminarRegla, generarTurnos, subirFotoMedico, subirTituloMedico,
 } from './adminSlice';
 import { fetchEspecialidades } from '../turnos/turnosSlice';
+import Lightbox from '../../components/Lightbox';
 
 const DIAS = [
   { value: 'MONDAY', label: 'Lunes' },
@@ -12,8 +13,6 @@ const DIAS = [
   { value: 'WEDNESDAY', label: 'Miércoles' },
   { value: 'THURSDAY', label: 'Jueves' },
   { value: 'FRIDAY', label: 'Viernes' },
-  { value: 'SATURDAY', label: 'Sábado' },
-  { value: 'SUNDAY', label: 'Domingo' },
 ];
 
 function hoyISO() {
@@ -59,6 +58,7 @@ function MedicoDetalle({ medico }) {
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
   const [fotoVersion, setFotoVersion] = useState(0);
   const [tituloVersion, setTituloVersion] = useState(0);
+  const [lightboxSrc, setLightboxSrc] = useState(null);
 
   function handleSubirFoto(e) {
     const file = e.target.files[0];
@@ -93,7 +93,8 @@ function MedicoDetalle({ medico }) {
           <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>Foto (tipo carnet)</label>
           {medico.tieneFoto && (
             <img src={`${apiUrl}/api/medicos/${medico.id}/foto?v=${fotoVersion}`} alt=""
-              style={{ width: 90, height: 110, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--line)', marginBottom: 8, display: 'block' }} />
+              onClick={() => setLightboxSrc(`${apiUrl}/api/medicos/${medico.id}/foto?v=${fotoVersion}`)}
+              style={{ width: 90, height: 110, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--line)', marginBottom: 8, display: 'block', cursor: 'zoom-in' }} />
           )}
           <input type="file" accept="image/jpeg,image/png" onChange={handleSubirFoto} style={{ fontSize: 12.5 }} />
         </div>
@@ -101,11 +102,13 @@ function MedicoDetalle({ medico }) {
           <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>Título / matrícula (imagen)</label>
           {medico.tieneTitulo && (
             <img src={`${apiUrl}/api/medicos/${medico.id}/titulo?v=${tituloVersion}`} alt=""
-              style={{ width: 140, height: 100, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--line)', marginBottom: 8, display: 'block' }} />
+              onClick={() => setLightboxSrc(`${apiUrl}/api/medicos/${medico.id}/titulo?v=${tituloVersion}`)}
+              style={{ width: 140, height: 100, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--line)', marginBottom: 8, display: 'block', cursor: 'zoom-in' }} />
           )}
           <input type="file" accept="image/jpeg,image/png" onChange={handleSubirTitulo} style={{ fontSize: 12.5 }} />
         </div>
       </div>
+      <Lightbox src={lightboxSrc} alt={medico.nombreCompleto} onClose={() => setLightboxSrc(null)} />
 
       <h4 style={{ fontSize: 15, marginBottom: 10 }}>Horarios semanales</h4>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 14 }}>
@@ -128,11 +131,11 @@ function MedicoDetalle({ medico }) {
         </div>
         <div className="field" style={{ marginBottom: 0 }}>
           <label>Desde</label>
-          <input type="time" value={nuevaRegla.horaInicio} onChange={(e) => setNuevaRegla({ ...nuevaRegla, horaInicio: e.target.value })} />
+          <input type="time" min="08:00" max="20:00" value={nuevaRegla.horaInicio} onChange={(e) => setNuevaRegla({ ...nuevaRegla, horaInicio: e.target.value })} />
         </div>
         <div className="field" style={{ marginBottom: 0 }}>
           <label>Hasta</label>
-          <input type="time" value={nuevaRegla.horaFin} onChange={(e) => setNuevaRegla({ ...nuevaRegla, horaFin: e.target.value })} />
+          <input type="time" min="08:00" max="20:00" value={nuevaRegla.horaFin} onChange={(e) => setNuevaRegla({ ...nuevaRegla, horaFin: e.target.value })} />
         </div>
         <button type="submit" className="btn btn-outline">Agregar horario</button>
       </form>

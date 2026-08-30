@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { cambiarPasswordAdmin, iniciarMfa, activarMfa, desactivarMfa, limpiarMensajes } from './adminSlice';
 import { fetchMiPerfil } from '../cuenta/cuentaSlice';
+import PasswordInput from '../../components/PasswordInput';
 
 function SeccionMfa() {
   const dispatch = useDispatch();
@@ -98,11 +99,11 @@ export default function AdminCuentaTab() {
       <form onSubmit={handleSubmit} className="card">
         <div className="field">
           <label>Contraseña actual</label>
-          <input type="password" required value={form.passwordActual} onChange={(e) => setForm({ ...form, passwordActual: e.target.value })} />
+          <PasswordInput required value={form.passwordActual} onChange={(e) => setForm({ ...form, passwordActual: e.target.value })} />
         </div>
         <div className="field">
           <label>Contraseña nueva</label>
-          <input type="password" required minLength={6} value={form.passwordNueva} onChange={(e) => setForm({ ...form, passwordNueva: e.target.value })} />
+          <PasswordInput required minLength={6} value={form.passwordNueva} onChange={(e) => setForm({ ...form, passwordNueva: e.target.value })} />
         </div>
         <button type="submit" className="btn btn-primary">Actualizar contraseña</button>
       </form>

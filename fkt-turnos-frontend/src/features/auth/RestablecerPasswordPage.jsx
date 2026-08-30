@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { restablecerPassword } from './authSlice';
+import PasswordInput from '../../components/PasswordInput';
 
 export default function RestablecerPasswordPage() {
   const dispatch = useDispatch();
@@ -39,7 +40,7 @@ export default function RestablecerPasswordPage() {
         {mensajeExito && <div className="alert alert-success">{mensajeExito}</div>}
         <div className="field">
           <label htmlFor="passwordNueva">Contraseña nueva</label>
-          <input id="passwordNueva" type="password" required minLength={6} value={passwordNueva} onChange={(e) => setPasswordNueva(e.target.value)} />
+          <PasswordInput id="passwordNueva" required minLength={6} value={passwordNueva} onChange={(e) => setPasswordNueva(e.target.value)} />
         </div>
         <button type="submit" className="btn btn-primary btn-block" disabled={status === 'loading'}>
           {status === 'loading' ? 'Guardando…' : 'Guardar contraseña'}

@@ -12,9 +12,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
@@ -23,6 +25,10 @@ import java.util.Set;
 public class DisponibilidadService {
 
     private static final int MAX_DIAS_GENERACION = 90;
+    private static final LocalTime HORA_MINIMA = LocalTime.of(8, 0);
+    private static final LocalTime HORA_MAXIMA = LocalTime.of(20, 0);
+    private static final Set<DayOfWeek> DIAS_HABILES = EnumSet.of(
+            DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY);
 
     private final ReglaDisponibilidadRepository reglaRepository;
     private final TurnoRepository turnoRepository;
@@ -35,8 +41,14 @@ public class DisponibilidadService {
     }
 
     public ReglaDisponibilidadDto crearRegla(Long medicoId, ReglaDisponibilidadRequest request) {
+        if (!DIAS_HABILES.contains(request.diaSemana())) {
+            throw new IllegalArgumentException("Solo se pueden cargar horarios de lunes a viernes");
+        }
         if (!request.horaInicio().isBefore(request.horaFin())) {
             throw new IllegalArgumentException("La hora de inicio debe ser anterior a la hora de fin");
+        }
+        if (request.horaInicio().isBefore(HORA_MINIMA) || request.horaFin().isAfter(HORA_MAXIMA)) {
+            throw new IllegalArgumentException("El horario debe estar entre las 08:00 y las 20:00");
         }
         Medico medico = medicoService.obtenerEntidad(medicoId);
         ReglaDisponibilidad regla = new ReglaDisponibilidad();

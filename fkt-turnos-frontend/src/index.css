@@ -109,6 +109,58 @@ input, select, textarea { font: inherit; }
 }
 .field-error { color: var(--red); font-size: 12.5px; }
 
+.password-field { position: relative; }
+.password-field input { width: 100%; padding-right: 42px; }
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: var(--radius-s);
+}
+.password-toggle:hover { color: var(--ink); }
+.password-toggle:focus-visible { outline: 2px solid var(--teal); outline-offset: 1px; }
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(19, 35, 44, 0.85);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  cursor: zoom-out;
+}
+.lightbox img { max-width: 100%; max-height: 90vh; border-radius: var(--radius-s); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4); cursor: default; }
+.lightbox-cerrar {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 26px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.lightbox-cerrar:hover { background: rgba(255, 255, 255, 0.22); }
+
 .alert {
   padding: 12px 16px;
   border-radius: var(--radius-s);

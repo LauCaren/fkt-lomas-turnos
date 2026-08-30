@@ -85,6 +85,12 @@
   .footer-bottom{display:flex; justify-content:space-between; align-items:center; padding-top:22px; flex-wrap:wrap; gap:12px; font-size:13px; color:rgba(255,255,255,0.4);}
   .footer-bottom a{color:rgba(255,255,255,0.55);} .footer-bottom a:hover{color:var(--teal);}
   :focus-visible{outline:2px solid var(--teal-dark); outline-offset:3px;}
+
+  /* ---------- WHATSAPP FLOTANTE ---------- */
+  .wa-float{position:fixed; bottom:24px; right:24px; width:58px; height:58px; border-radius:50%; background:#25D366; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 20px rgba(0,0,0,0.28); z-index:900; transition:transform .25s var(--ease);}
+  .wa-float:hover{transform:scale(1.08);}
+  .wa-float svg{width:30px; height:30px; fill:#fff;}
+  @media (max-width:600px){ .wa-float{width:52px; height:52px; bottom:18px; right:18px;} .wa-float svg{width:27px; height:27px;} }
 </style>
 </head>
 <body>
@@ -100,6 +106,7 @@
       <a href="servicios.html">Servicios</a>
       <a href="especialidades.html">Especialidades</a>
       <a href="equipo.html">Equipo</a>
+      <a href="el-centro.html">El Centro</a>
       <a href="opiniones.html">Opiniones</a>
       <a href="contacto.html">Contacto</a>
     </nav>
@@ -116,12 +123,12 @@
     <a href="servicios.html">Servicios</a>
     <a href="especialidades.html">Especialidades</a>
     <a href="equipo.html">Equipo</a>
+    <a href="el-centro.html">El Centro</a>
     <a href="opiniones.html">Opiniones</a>
     <a href="contacto.html">Contacto</a>
     <div class="nav-cta">
       <a class="btn btn-primary" href="http://localhost:5173" target="_blank" rel="noopener">Pedir turno</a>
       <a class="btn btn-outline" href="tel:+541159505888">Llamar</a>
-      <a class="btn btn-outline" href="https://wa.me/5491149703857?text=Hola%20FKT%20Lomas%2C%20quiero%20consultar%20por%20un%20turno." target="_blank" rel="noopener">WhatsApp</a>
     </div>
   </div>
 </header>
@@ -179,13 +186,14 @@
           <a href="servicios.html">Servicios</a>
           <a href="especialidades.html">Especialidades</a>
           <a href="equipo.html">Equipo</a>
+          <a href="el-centro.html">El Centro</a>
           <a href="opiniones.html">Opiniones</a>
         </div>
         <div class="footer-col">
           <h4>Contacto</h4>
           <span>Juan Larrea 496, Lomas de Zamora</span>
           <a href="tel:+541159505888">11 5950-5888</a>
-          <a href="https://wa.me/5491149703857">WhatsApp: 11 4970-3857</a>
+          <a href="https://wa.me/5491123515402">WhatsApp: 11 2351-5402</a>
         </div>
         <div class="footer-col">
           <h4>Seguinos</h4>
@@ -260,5 +268,10 @@
     }
   });
 </script>
+
+<a class="wa-float" href="https://wa.me/5491123515402?text=Hola%20FKT%20Lomas%2C%20quiero%20consultar%20por%20un%20turno." target="_blank" rel="noopener" aria-label="Escribinos por WhatsApp">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12.001 2C6.478 2 2 6.478 2 12c0 1.999.594 3.86 1.615 5.42L2 22l4.674-1.588A9.953 9.953 0 0012 22c5.523 0 10-4.478 10-10S17.523 2 12.001 2zm0 18.163a8.135 8.135 0 01-4.146-1.135l-.297-.176-3.09.99.99-3.021-.194-.313A8.128 8.128 0 013.837 12c0-4.507 3.656-8.163 8.164-8.163 4.507 0 8.163 3.656 8.163 8.163 0 4.508-3.656 8.163-8.163 8.163z"/></svg>
+</a>
+
 </body>
 </html>

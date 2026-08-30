@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { login, limpiarMensajesAuth } from './authSlice';
+import PasswordInput from '../../components/PasswordInput';
 
 export default function LoginPage() {
   const dispatch = useDispatch();
@@ -34,7 +35,7 @@ export default function LoginPage() {
         </div>
         <div className="field">
           <label htmlFor="password">Contraseña</label>
-          <input id="password" name="password" type="password" required disabled={requiereMfa} value={form.password} onChange={handleChange} />
+          <PasswordInput id="password" name="password" required disabled={requiereMfa} value={form.password} onChange={handleChange} />
         </div>
         {requiereMfa && (
           <div className="field">
