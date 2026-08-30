@@ -81,6 +81,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(cuerpo(HttpStatus.BAD_REQUEST, ex.getMessage(), null));
     }
 
+    /** Ej.: un canal de notificación sin credenciales configuradas (ver SmsService/WhatsAppService), o un envío que falló. */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalState(IllegalStateException ex) {
+        return ResponseEntity.badRequest().body(cuerpo(HttpStatus.BAD_REQUEST, ex.getMessage(), null));
+    }
+
     private Map<String, Object> cuerpo(HttpStatus status, String mensaje, Object detalle) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", Instant.now().toString());

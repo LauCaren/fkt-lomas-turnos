@@ -24,8 +24,12 @@ API REST en Spring Boot 3 (Java 17) para el sistema de turnos, contacto y postul
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USERNAME` / `SMTP_PASSWORD` | vacío | Credenciales SMTP. Recomendado: [Brevo](https://www.brevo.com) (plan gratuito, 300 emails/día) u otro proveedor similar |
 | `MAIL_FROM` | `no-reply@fktlomas.com` | Remitente de los emails |
 | `UPLOADS_DIR` | `./uploads` | Carpeta donde se guardan los CVs recibidos |
+| `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` | vacío | Credenciales de [Twilio](https://www.twilio.com), para los canales SMS y WhatsApp de los recordatorios de turno |
+| `TWILIO_NUMERO_ORIGEN` | vacío | Número de Twilio para SMS (formato `+1415XXXXXXX`) |
+| `TWILIO_NUMERO_ORIGEN_WHATSAPP` | vacío | Número de Twilio para WhatsApp, **sin** el prefijo `whatsapp:` (el código lo agrega solo) |
+| `RECORDATORIOS_INTERVALO_MINUTOS` | `15` | Cada cuánto corre el job que revisa turnos próximos y manda recordatorios. La anticipación (cuántas horas antes) y el texto del mensaje se configuran desde el panel de admin, no acá |
 
-Con `MAIL_ENABLED=false` (default) los emails no se envían, solo se loguean — así se puede probar todo el flujo sin tener un SMTP configurado.
+Con `MAIL_ENABLED=false` (default) los emails no se envían, solo se loguean — así se puede probar todo el flujo sin tener un SMTP configurado. Mismo criterio para SMS/WhatsApp: sin credenciales de Twilio, esos canales simplemente no se registran (los recordatorios de pacientes con ese canal preferido quedan en FALLIDO con un mensaje de error claro, no rompen el resto).
 
 ## Correr en local
 

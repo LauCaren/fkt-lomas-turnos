@@ -3,11 +3,13 @@ import AdminAgendaTab from './AdminAgendaTab';
 import AdminMedicosTab from './AdminMedicosTab';
 import AdminMensajesTab from './AdminMensajesTab';
 import AdminPostulacionesTab from './AdminPostulacionesTab';
+import AdminRecordatoriosTab from './AdminRecordatoriosTab';
 import AdminCuentaTab from './AdminCuentaTab';
 
 const TABS = [
   { id: 'agenda', label: 'Agenda' },
   { id: 'medicos', label: 'Médicos y horarios' },
+  { id: 'recordatorios', label: 'Recordatorios' },
   { id: 'mensajes', label: 'Alquiler de consultorios' },
   { id: 'postulaciones', label: 'Postulaciones' },
   { id: 'cuenta', label: 'Mi cuenta' },
@@ -44,6 +46,7 @@ export default function AdminDashboardPage() {
 
       {tab === 'agenda' && <AdminAgendaTab />}
       {tab === 'medicos' && <AdminMedicosTab />}
+      {tab === 'recordatorios' && <AdminRecordatoriosTab />}
       {tab === 'mensajes' && <AdminMensajesTab />}
       {tab === 'postulaciones' && <AdminPostulacionesTab />}
       {tab === 'cuenta' && <AdminCuentaTab />}

@@ -34,6 +34,22 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
      * Update atómico: solo reserva si sigue DISPONIBLE. Si otra transacción ya lo tomó,
      * esta operación afecta 0 filas y el service la traduce en un 409 sin necesidad de locks explícitos.
      */
+    /**
+     * Candidatos a recordatorio: RESERVADO dentro de un rango de fechas (día completo,
+     * a favor de mano ancha) — RecordatorioService filtra en memoria por hora exacta
+     * contra la ventana real de anticipación, ya con el paciente y el médico cargados.
+     */
+    @Query("""
+            select t from Turno t
+            join fetch t.medico m
+            join fetch m.especialidad
+            join fetch t.paciente
+            where t.estado = com.fktlomas.turnos.domain.EstadoTurno.RESERVADO
+            and t.fecha between :desde and :hasta
+            order by t.fecha asc, t.horaInicio asc
+            """)
+    List<Turno> findReservadosEntreFechas(@Param("desde") LocalDate desde, @Param("hasta") LocalDate hasta);
+
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("update Turno t set t.estado = com.fktlomas.turnos.domain.EstadoTurno.RESERVADO, " +
             "t.paciente = :paciente, t.motivoConsulta = :motivo " +

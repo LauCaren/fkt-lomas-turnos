@@ -2,11 +2,17 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// El service worker de la PWA no tiene sentido dentro del wrapper de
+// escritorio (Electron): ya sirve los archivos localmente, no hay nada que
+// cachear para "offline". Se omite el plugin por completo en ese build
+// (ver package.json: "desktop:build" setea esta variable).
+const paraElectron = process.env.ELECTRON_BUILD === 'true'
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
-    VitePWA({
+    !paraElectron && VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['pwa/apple-touch-icon.png'],
       manifest: {

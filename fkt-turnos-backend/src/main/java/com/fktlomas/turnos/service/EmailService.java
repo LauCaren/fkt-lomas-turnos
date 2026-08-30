@@ -99,6 +99,28 @@ public class EmailService {
         enviar(adminNotifyEmail, asunto, cuerpo);
     }
 
+    /**
+     * A diferencia de los métodos de arriba (@Async, no le importa a nadie el
+     * resultado), este es sincrónico y tira excepción si falla: lo usa
+     * RecordatorioService, que necesita saber en el momento si el envío
+     * funcionó para marcar el Recordatorio como ENVIADO o FALLIDO.
+     */
+    public void enviarRecordatorioSync(String destinatario, String asunto, String cuerpo) {
+        if (!mailEnabled) {
+            throw new IllegalStateException("El canal Email está deshabilitado (app.mail.enabled=false)");
+        }
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(from);
+            message.setTo(destinatario);
+            message.setSubject(asunto);
+            message.setText(cuerpo);
+            mailSender.send(message);
+        } catch (Exception e) {
+            throw new IllegalStateException("Error enviando email a " + destinatario + ": " + e.getMessage(), e);
+        }
+    }
+
     private void enviar(String to, String asunto, String cuerpo) {
         if (!mailEnabled) {
             log.info("Envío de email deshabilitado (app.mail.enabled=false). Destinatario: {}, asunto: {}", to, asunto);

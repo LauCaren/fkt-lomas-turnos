@@ -51,6 +51,13 @@
       <scope>runtime</scope>
     </dependency>
 
+    <!-- Canales SMS y WhatsApp de los recordatorios de turno (misma versión ya probada en recordatorio-turnos) -->
+    <dependency>
+      <groupId>com.twilio.sdk</groupId>
+      <artifactId>twilio</artifactId>
+      <version>10.4.1</version>
+    </dependency>
+
     <dependency>
       <groupId>org.flywaydb</groupId>
       <artifactId>flyway-core</artifactId>

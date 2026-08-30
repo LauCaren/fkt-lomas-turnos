@@ -174,6 +174,69 @@ export const desactivarMfa = createAsyncThunk('admin/desactivarMfa', async (codi
   }
 });
 
+export const fetchRecordatorios = createAsyncThunk('admin/fetchRecordatorios', async (_, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/admin/recordatorios');
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
+export const reenviarRecordatorio = createAsyncThunk('admin/reenviarRecordatorio', async (id, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.post(`/api/admin/recordatorios/${id}/reenviar`);
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudo reenviar el recordatorio'));
+  }
+});
+
+export const fetchConfiguracionRecordatorios = createAsyncThunk('admin/fetchConfiguracionRecordatorios', async (_, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/admin/recordatorios/configuracion');
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
+export const actualizarConfiguracionRecordatorios = createAsyncThunk('admin/actualizarConfiguracionRecordatorios', async (payload, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.put('/api/admin/recordatorios/configuracion', payload);
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudo guardar la configuración'));
+  }
+});
+
+export const buscarPacientes = createAsyncThunk('admin/buscarPacientes', async (buscar, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/admin/recordatorios/pacientes', { params: { buscar } });
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
+export const actualizarCanalPreferido = createAsyncThunk('admin/actualizarCanalPreferido', async ({ pacienteId, canal }, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.put(`/api/admin/recordatorios/pacientes/${pacienteId}/canal-preferido`, { canal });
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudo actualizar el canal preferido'));
+  }
+});
+
+export const enviarMensajeManual = createAsyncThunk('admin/enviarMensajeManual', async (payload, { rejectWithValue }) => {
+  try {
+    await axiosClient.post('/api/admin/recordatorios/mensajes-manuales', payload);
+    return true;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudo enviar el mensaje'));
+  }
+});
+
 const adminSlice = createSlice({
   name: 'admin',
   initialState: {
@@ -185,6 +248,9 @@ const adminSlice = createSlice({
     mfaSetup: null,
     mensajesContacto: [],
     postulaciones: [],
+    recordatorios: [],
+    configuracionRecordatorios: null,
+    resultadosBusquedaPacientes: [],
     error: null,
     mensajeExito: null,
   },
@@ -244,7 +310,30 @@ const adminSlice = createSlice({
       .addCase(activarMfa.fulfilled, (state) => { state.mfaSetup = null; state.mensajeExito = 'Verificación en dos pasos activada'; })
       .addCase(activarMfa.rejected, (state, action) => { state.error = action.payload; })
       .addCase(desactivarMfa.fulfilled, (state) => { state.mensajeExito = 'Verificación en dos pasos desactivada'; })
-      .addCase(desactivarMfa.rejected, (state, action) => { state.error = action.payload; });
+      .addCase(desactivarMfa.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(fetchRecordatorios.fulfilled, (state, action) => { state.recordatorios = action.payload; })
+      .addCase(fetchRecordatorios.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(reenviarRecordatorio.fulfilled, (state, action) => {
+        state.recordatorios = state.recordatorios.map((r) => r.id === action.payload.id ? action.payload : r);
+        state.mensajeExito = action.payload.estado === 'ENVIADO' ? 'Recordatorio reenviado correctamente' : 'Se reintentó el envío, pero volvió a fallar';
+      })
+      .addCase(reenviarRecordatorio.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(fetchConfiguracionRecordatorios.fulfilled, (state, action) => { state.configuracionRecordatorios = action.payload; })
+      .addCase(fetchConfiguracionRecordatorios.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(actualizarConfiguracionRecordatorios.fulfilled, (state, action) => {
+        state.configuracionRecordatorios = action.payload;
+        state.mensajeExito = 'Configuración de recordatorios guardada';
+      })
+      .addCase(actualizarConfiguracionRecordatorios.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(buscarPacientes.fulfilled, (state, action) => { state.resultadosBusquedaPacientes = action.payload; })
+      .addCase(buscarPacientes.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(actualizarCanalPreferido.fulfilled, (state, action) => {
+        state.resultadosBusquedaPacientes = state.resultadosBusquedaPacientes.map((p) => p.id === action.payload.id ? action.payload : p);
+        state.mensajeExito = 'Canal preferido actualizado';
+      })
+      .addCase(actualizarCanalPreferido.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(enviarMensajeManual.fulfilled, (state) => { state.mensajeExito = 'Mensaje enviado correctamente'; })
+      .addCase(enviarMensajeManual.rejected, (state, action) => { state.error = action.payload; });
   },
 });
 

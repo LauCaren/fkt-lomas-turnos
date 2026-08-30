@@ -55,6 +55,16 @@ app:
     enabled: ${MAIL_ENABLED:false}
   uploads:
     dir: ${UPLOADS_DIR:./uploads}
+  twilio:
+    account-sid: ${TWILIO_ACCOUNT_SID:}
+    auth-token: ${TWILIO_AUTH_TOKEN:}
+    numero-origen: ${TWILIO_NUMERO_ORIGEN:}
+    numero-origen-whatsapp: ${TWILIO_NUMERO_ORIGEN_WHATSAPP:}
+  recordatorios:
+    # Frecuencia del polling del scheduler (minutos) — a diferencia de la
+    # plantilla del mensaje y las horas de anticipación, esto NO es editable
+    # desde el panel (ver RecordatorioService).
+    intervalo-minutos: ${RECORDATORIOS_INTERVALO_MINUTOS:15}
 
 springdoc:
   swagger-ui:

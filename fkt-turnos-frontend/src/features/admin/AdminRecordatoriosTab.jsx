@@ -1,0 +1,220 @@
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  fetchRecordatorios, reenviarRecordatorio, fetchConfiguracionRecordatorios,
+  actualizarConfiguracionRecordatorios, buscarPacientes, actualizarCanalPreferido, enviarMensajeManual,
+} from './adminSlice';
+
+function nombreCanal(valor) {
+  return CANALES.find((c) => c.value === valor)?.label || valor;
+}
+
+const CANALES = [
+  { value: 'EMAIL', label: 'Email' },
+  { value: 'SMS', label: 'SMS' },
+  { value: 'WHATSAPP', label: 'WhatsApp' },
+];
+
+const ESTADO_LABEL = { PENDIENTE: 'Pendiente', ENVIADO: 'Enviado', FALLIDO: 'Fallido' };
+
+function ConfiguracionRecordatorios() {
+  const dispatch = useDispatch();
+  const configuracion = useSelector((state) => state.admin.configuracionRecordatorios);
+  const [form, setForm] = useState({ plantillaMensaje: '', horasAnticipacion: 24 });
+
+  useEffect(() => {
+    dispatch(fetchConfiguracionRecordatorios());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (configuracion) setForm(configuracion);
+  }, [configuracion]);
+
+  function handleGuardar(e) {
+    e.preventDefault();
+    dispatch(actualizarConfiguracionRecordatorios(form));
+  }
+
+  return (
+    <div className="card" style={{ marginBottom: 20 }}>
+      <h3 style={{ fontSize: 17, marginBottom: 14 }}>Configuración</h3>
+      <form onSubmit={handleGuardar}>
+        <div className="field">
+          <label>Mensaje del recordatorio</label>
+          <textarea
+            rows={4}
+            value={form.plantillaMensaje}
+            onChange={(e) => setForm({ ...form, plantillaMensaje: e.target.value })}
+            style={{ width: '100%', padding: '10px 14px', border: '1.5px solid var(--line)', borderRadius: 6, fontFamily: 'inherit' }}
+          />
+          <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>
+            Placeholders disponibles: {'{paciente}'}, {'{profesional}'}, {'{especialidad}'}, {'{fecha}'}, {'{hora}'}
+          </span>
+        </div>
+        <div className="field">
+          <label>Con cuántas horas de anticipación avisar</label>
+          <input
+            type="number" min={1} max={168}
+            value={form.horasAnticipacion}
+            onChange={(e) => setForm({ ...form, horasAnticipacion: Number(e.target.value) })}
+            style={{ width: 120 }}
+          />
+        </div>
+        <button type="submit" className="btn btn-primary">Guardar configuración</button>
+      </form>
+    </div>
+  );
+}
+
+function MensajePuntual() {
+  const dispatch = useDispatch();
+  const resultados = useSelector((state) => state.admin.resultadosBusquedaPacientes);
+  const [busqueda, setBusqueda] = useState('');
+  const [pacienteSeleccionado, setPacienteSeleccionado] = useState(null);
+  const [canal, setCanal] = useState('EMAIL');
+  const [canalPreferido, setCanalPreferido] = useState('EMAIL');
+  const [mensaje, setMensaje] = useState('');
+
+  function handleBuscar(e) {
+    e.preventDefault();
+    if (busqueda.trim()) dispatch(buscarPacientes(busqueda.trim()));
+  }
+
+  function handleSeleccionar(paciente) {
+    setPacienteSeleccionado(paciente);
+    setCanal(paciente.canalNotificacionPreferido);
+    setCanalPreferido(paciente.canalNotificacionPreferido);
+  }
+
+  function handleGuardarCanalPreferido(e) {
+    e.preventDefault();
+    dispatch(actualizarCanalPreferido({ pacienteId: pacienteSeleccionado.id, canal: canalPreferido })).unwrap().then((actualizado) => {
+      setPacienteSeleccionado(actualizado);
+    }).catch(() => {});
+  }
+
+  function handleEnviar(e) {
+    e.preventDefault();
+    if (!pacienteSeleccionado || !mensaje.trim()) return;
+    dispatch(enviarMensajeManual({ pacienteId: pacienteSeleccionado.id, canal, mensaje: mensaje.trim() })).unwrap().then(() => {
+      setMensaje('');
+    }).catch(() => {});
+  }
+
+  return (
+    <div className="card" style={{ marginBottom: 20 }}>
+      <h3 style={{ fontSize: 17, marginBottom: 14 }}>Mensaje puntual a un paciente</h3>
+
+      <form onSubmit={handleBuscar} style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+        <input
+          placeholder="Buscar por nombre o DNI"
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          style={{ flex: 1, padding: '10px 14px', border: '1.5px solid var(--line)', borderRadius: 6 }}
+        />
+        <button type="submit" className="btn btn-outline">Buscar</button>
+      </form>
+
+      {resultados.length > 0 && !pacienteSeleccionado && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 14 }}>
+          {resultados.map((p) => (
+            <button
+              key={p.id}
+              className="btn btn-outline"
+              style={{ textAlign: 'left', padding: '8px 12px', fontSize: 13.5 }}
+              onClick={() => handleSeleccionar(p)}
+            >
+              {p.nombreCompleto} — DNI {p.dni}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {pacienteSeleccionado && (
+        <>
+          <div style={{ marginBottom: 12, fontSize: 14 }}>
+            Paciente: <strong>{pacienteSeleccionado.nombreCompleto}</strong>{' '}
+            <button type="button" className="btn btn-outline" style={{ padding: '2px 10px', fontSize: 12 }} onClick={() => setPacienteSeleccionado(null)}>
+              Cambiar
+            </button>
+          </div>
+
+          <form onSubmit={handleGuardarCanalPreferido} style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginBottom: 20 }}>
+            <div className="field" style={{ marginBottom: 0 }}>
+              <label>Canal preferido para los recordatorios automáticos</label>
+              <select value={canalPreferido} onChange={(e) => setCanalPreferido(e.target.value)}>
+                {CANALES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+              </select>
+            </div>
+            <button type="submit" className="btn btn-outline">Guardar</button>
+          </form>
+
+          <form onSubmit={handleEnviar}>
+            <div className="field">
+              <label>Canal del mensaje</label>
+              <select value={canal} onChange={(e) => setCanal(e.target.value)}>
+                {CANALES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+              </select>
+            </div>
+            <div className="field">
+              <label>Mensaje</label>
+              <textarea
+                rows={3}
+                maxLength={1600}
+                value={mensaje}
+                onChange={(e) => setMensaje(e.target.value)}
+                style={{ width: '100%', padding: '10px 14px', border: '1.5px solid var(--line)', borderRadius: 6, fontFamily: 'inherit' }}
+              />
+            </div>
+            <button type="submit" className="btn btn-primary">Enviar mensaje</button>
+          </form>
+        </>
+      )}
+    </div>
+  );
+}
+
+export default function AdminRecordatoriosTab() {
+  const dispatch = useDispatch();
+  const { recordatorios, error, mensajeExito } = useSelector((state) => state.admin);
+
+  useEffect(() => {
+    dispatch(fetchRecordatorios());
+  }, [dispatch]);
+
+  return (
+    <div>
+      {error && <div className="alert alert-error">{error}</div>}
+      {mensajeExito && <div className="alert alert-success">{mensajeExito}</div>}
+
+      <ConfiguracionRecordatorios />
+      <MensajePuntual />
+
+      <h3 style={{ fontSize: 17, marginBottom: 14 }}>Recordatorios</h3>
+      {recordatorios.length === 0 && <p style={{ fontSize: 14, color: 'var(--muted)' }}>No hay recordatorios para mostrar todavía.</p>}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {recordatorios.map((r) => (
+          <div key={r.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+            <div>
+              <div style={{ fontWeight: 600 }}>{r.pacienteNombre}</div>
+              <div style={{ fontSize: 13, color: 'var(--muted)' }}>
+                {r.fecha} {r.horaInicio?.slice(0, 5)} hs · {r.medicoNombre} ({r.especialidadNombre}) · {nombreCanal(r.canal)}
+              </div>
+              {r.errorMensaje && r.estado !== 'ENVIADO' && (
+                <div style={{ fontSize: 12.5, color: 'var(--danger, #c0392b)', marginTop: 4 }}>{r.errorMensaje}</div>
+              )}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 13, fontWeight: 600 }}>{ESTADO_LABEL[r.estado]}</span>
+              {r.estado !== 'ENVIADO' && (
+                <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => dispatch(reenviarRecordatorio(r.id))}>
+                  Reenviar
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

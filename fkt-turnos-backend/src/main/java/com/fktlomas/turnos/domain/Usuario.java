@@ -62,6 +62,10 @@ public class Usuario {
     @Column(name = "mfa_habilitado", nullable = false)
     private boolean mfaHabilitado;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "canal_notificacion_preferido", nullable = false, length = 20)
+    private CanalNotificacion canalNotificacionPreferido = CanalNotificacion.EMAIL;
+
     @PrePersist
     void prePersist() {
         if (createdAt == null) {
