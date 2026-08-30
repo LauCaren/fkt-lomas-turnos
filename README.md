@@ -116,6 +116,7 @@ Implementado y probado de punta a punta:
 - Reserva de turnos por especialidad → médico → fecha → horario, con bloqueo real contra doble reserva (dos personas no pueden tomar el mismo horario).
 - Cancelación de turnos propios (libera el horario para otros pacientes).
 - Panel de administración (Fernando): alta de especialidades y médicos, carga de horarios semanales por médico, generación de turnos a partir de esos horarios, bandeja de mensajes de "alquiler de consultorios" y de postulaciones con descarga de CV.
+- Agenda para la secretaria: vista del día con los turnos de todos los médicos (o filtrado por uno), y reserva de un turno en nombre de un paciente que llama por teléfono o WhatsApp (sin necesidad de que ese paciente tenga cuenta).
 - Página de contacto para alquiler de consultorios y página "Trabajá con nosotros" con carga de CV en PDF, ambas en el sitio estático.
 - Envío de emails (confirmación de turno, aviso de nuevo mensaje/postulación) — desactivado por defecto hasta que se configure un SMTP real (ver README del backend).
 
