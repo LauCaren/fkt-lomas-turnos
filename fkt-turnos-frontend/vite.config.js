@@ -10,6 +10,19 @@ const paraElectron = process.env.ELECTRON_BUILD === 'true'
 
 // https://vite.dev/config/
 export default defineConfig({
+  // "release/" es la salida de "electron-builder" (npm run desktop:build) — vigilarla
+  // choca con sus archivos temporales/bloqueados mientras arma el instalador y puede
+  // tirar abajo el dev server entero (EBUSY en Windows).
+  server: {
+    watch: {
+      ignored: ['**/release/**'],
+    },
+  },
+  test: {
+    environment: 'jsdom',
+    setupFiles: './src/test/setup.js',
+    globals: true,
+  },
   plugins: [
     react(),
     !paraElectron && VitePWA({

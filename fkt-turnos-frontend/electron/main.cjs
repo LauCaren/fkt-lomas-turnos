@@ -1,6 +1,7 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, dialog } = require('electron');
 const path = require('node:path');
 const express = require('express');
+const { autoUpdater } = require('electron-updater');
 
 // Puerto fijo local: no usamos file:// porque vite-plugin-pwa registra un
 // service worker que se comporta mal bajo ese protocolo (no hay un origen
@@ -61,6 +62,7 @@ async function crearVentana() {
   const ventana = new BrowserWindow({
     width: 1280,
     height: 800,
+    icon: path.join(__dirname, 'build', 'icon.png'),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
@@ -82,6 +84,40 @@ async function crearVentana() {
   ventana.loadURL(`http://localhost:${PUERTO}`);
 }
 
+// Solo tiene sentido contra un build empaquetado y publicado — en desarrollo
+// (electron .) no hay feed de actualizaciones ni instalador que reemplazar.
+function configurarAutoUpdater() {
+  if (!app.isPackaged) return;
+
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+
+  autoUpdater.on('update-downloaded', async (info) => {
+    const { response } = await dialog.showMessageBox({
+      type: 'info',
+      title: 'Actualización disponible',
+      message: `Hay una nueva versión de FKT Lomas Admin (${info.version}) lista para instalar.`,
+      detail: 'Se va a instalar la próxima vez que cierres el programa, o ahora mismo si preferís.',
+      buttons: ['Instalar ahora', 'Más tarde'],
+      defaultId: 0,
+      cancelId: 1,
+    });
+    if (response === 0) {
+      autoUpdater.quitAndInstall();
+    }
+  });
+
+  // Fallas de red o feed sin configurar todavía (ver electron-builder.yml / build.publish
+  // en package.json) no deben interrumpir a la secretaria — solo se loguean.
+  autoUpdater.on('error', (error) => {
+    console.error('Error buscando actualizaciones:', error);
+  });
+
+  autoUpdater.checkForUpdates().catch((error) => {
+    console.error('No se pudo verificar actualizaciones:', error);
+  });
+}
+
 app.on('second-instance', () => {
   const ventana = BrowserWindow.getAllWindows()[0];
   if (ventana) {
@@ -92,6 +128,7 @@ app.on('second-instance', () => {
 
 app.whenReady().then(() => {
   crearVentana();
+  configurarAutoUpdater();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) crearVentana();

@@ -45,4 +45,17 @@ npm run electron        # build + abre la app sin empaquetar, para probar
 npm run desktop:build   # build + genera el instalador (.dmg en Mac, con electron-builder) en release/
 ```
 
-`npm run desktop:build` corrido en una Mac genera el `.dmg`; para el instalador de Windows hay que correrlo en una PC con Windows (electron-builder, igual que jpackage, no puede cross-compilar el instalador nativo del otro SO). El backend con el que habla es el de `VITE_API_URL` (ver arriba) — si apunta a `localhost`, hay que agregar `http://localhost:43117` a `CORS_ALLOWED_ORIGINS` del backend para probarlo en desarrollo. Falta un ícono propio (`build.mac.icon`/`build.win.icon` en `package.json`) y firmar el instalador — sin firma, macOS/Windows van a mostrar la advertencia de "desarrollador no identificado" al abrirlo.
+`npm run desktop:build` corrido en una Mac genera el `.dmg`; para el instalador de Windows hay que correrlo en una PC con Windows (electron-builder, igual que jpackage, no puede cross-compilar el instalador nativo del otro SO). El backend con el que habla es el de `VITE_API_URL` (ver arriba) — si apunta a `localhost`, hay que agregar `http://localhost:43117` a `CORS_ALLOWED_ORIGINS` del backend para probarlo en desarrollo. Falta firmar el instalador — sin firma, macOS/Windows van a mostrar la advertencia de "desarrollador no identificado" al abrirlo (ver más abajo).
+
+### Actualizaciones automáticas
+
+La app usa `electron-updater`: al arrancar (solo en un build empaquetado, no con `npm run electron`), busca una versión nueva en la URL de `build.publish` (`package.json`) y, si encuentra una, la descarga sola y le pregunta a la secretaria si quiere instalarla ahora o al cerrar el programa. Así no hace falta reinstalar el `.exe`/`.dmg` a mano en cada máquina.
+
+**Hoy `build.publish.url` es un placeholder** (`https://updates.fktlomas.com/`) que no existe todavía — la app intenta buscar ahí, no encuentra nada, loguea el error y sigue funcionando normal (no rompe nada, solo no hay auto-update real todavía). Para activarlo de verdad hace falta:
+
+1. Un lugar público donde alojar los instaladores + el archivo `latest.yml` (Windows) / `latest-mac.yml` (Mac) que genera `electron-builder` en `release/` junto al instalador — puede ser el mismo bucket S3/R2 que ya se va a usar para uploads (ver README del backend), un repo **público** separado solo para releases, o cualquier hosting estático.
+2. Actualizar `build.publish.url` en `package.json` con esa dirección real.
+3. Subir ahí el contenido de `release/` cada vez que se genere una versión nueva con `npm run desktop:build` (subir el `.exe`/`.dmg`, su `.blockmap`, y el `.yml` correspondiente — `electron-builder` los genera listos para publicar tal cual).
+4. Subir también la versión (`npm version patch/minor`, o editar `version` en `package.json` a mano) antes de cada build — `electron-updater` compara versiones semánticas para saber si hay algo más nuevo.
+
+**Importante:** si en algún momento se prefiere usar GitHub Releases como feed (`provider: "github"`) en vez de un hosting propio, el repo del código **tiene que ser público** o el token para leerlo quedaría embebido en la app (cualquiera podría extraerlo y usarlo para leer el código fuente completo, no solo los releases) — no lo configuré así por eso. Si se quiere ese camino, lo más seguro es un repo nuevo y separado, público, solo con los instaladores compilados (nunca con el código).
