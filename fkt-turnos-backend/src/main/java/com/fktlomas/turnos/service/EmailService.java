@@ -69,6 +69,25 @@ public class EmailService {
     }
 
     @Async
+    public void notificarNuevaReservaOnline(Usuario paciente, String medicoNombre, String especialidadNombre,
+                                             LocalDate fecha, LocalTime horaInicio, LocalTime horaFin) {
+        String asunto = "Nueva reserva online — " + paciente.getNombreCompleto();
+        String cuerpo = """
+                Se reservó un turno desde la web:
+
+                Paciente: %s
+                DNI: %s
+                Teléfono: %s
+                Médico: %s
+                Especialidad: %s
+                Fecha: %s
+                Horario: %s a %s
+                """.formatted(paciente.getNombreCompleto(), paciente.getDni(), paciente.getTelefono(),
+                medicoNombre, especialidadNombre, fecha, horaInicio, horaFin);
+        enviar(adminNotifyEmail, asunto, cuerpo);
+    }
+
+    @Async
     public void notificarNuevoMensajeContacto(MensajeContacto mensaje) {
         String asunto = "Nueva consulta por alquiler de consultorio";
         String cuerpo = """

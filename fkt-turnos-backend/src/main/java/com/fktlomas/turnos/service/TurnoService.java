@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,6 +33,7 @@ public class TurnoService {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final NotificacionTurnoService notificacionTurnoService;
 
     @Transactional(readOnly = true)
     public List<TurnoDto> disponiblesDeMedico(Long medicoId, LocalDate fecha) {
@@ -50,7 +52,7 @@ public class TurnoService {
         }
 
         Turno actualizado = turnoRepository.findById(turnoId).orElseThrow();
-        emailService.enviarConfirmacionTurno(paciente, actualizado.getMedico().getNombreCompleto(),
+        notificacionTurnoService.confirmarReserva(paciente, actualizado.getMedico().getNombreCompleto(),
                 actualizado.getMedico().getEspecialidad().getNombre(), actualizado.getFecha(),
                 actualizado.getHoraInicio(), actualizado.getHoraFin());
         return TurnoDto.de(actualizado);
@@ -74,10 +76,18 @@ public class TurnoService {
             throw new IllegalArgumentException("No se puede cancelar un turno que ya pasó");
         }
 
+        String medicoNombre = turno.getMedico().getNombreCompleto();
+        String especialidadNombre = turno.getMedico().getEspecialidad().getNombre();
+        LocalDate fecha = turno.getFecha();
+        LocalTime horaInicio = turno.getHoraInicio();
+        LocalTime horaFin = turno.getHoraFin();
+
         turno.setEstado(EstadoTurno.DISPONIBLE);
         turno.setPaciente(null);
         turno.setMotivoConsulta(null);
         turnoRepository.save(turno);
+
+        notificacionTurnoService.confirmarCancelacion(paciente, medicoNombre, especialidadNombre, fecha, horaInicio, horaFin);
     }
 
     @Transactional(readOnly = true)
