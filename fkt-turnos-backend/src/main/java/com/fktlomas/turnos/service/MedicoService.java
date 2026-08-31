@@ -8,9 +8,8 @@ import com.fktlomas.turnos.dto.admin.CrearMedicoRequest;
 import com.fktlomas.turnos.exception.ArchivoInvalidoException;
 import com.fktlomas.turnos.exception.RecursoNoEncontradoException;
 import com.fktlomas.turnos.repository.MedicoRepository;
+import com.fktlomas.turnos.storage.FileStorageService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,8 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -34,9 +31,7 @@ public class MedicoService {
 
     private final MedicoRepository medicoRepository;
     private final EspecialidadService especialidadService;
-
-    @Value("${app.uploads.dir}")
-    private String uploadsDir;
+    private final FileStorageService fileStorageService;
 
     @Transactional(readOnly = true)
     public List<MedicoDto> listar(Long especialidadId) {
@@ -129,14 +124,8 @@ public class MedicoService {
     }
 
     private Resource recursoDeArchivo(String rutaGuardada, String mensajeSiFalta) {
-        if (rutaGuardada == null) {
-            throw new RecursoNoEncontradoException(mensajeSiFalta);
-        }
-        Path path = Path.of(rutaGuardada);
-        if (!Files.exists(path)) {
-            throw new RecursoNoEncontradoException(mensajeSiFalta);
-        }
-        return new FileSystemResource(path);
+        return fileStorageService.cargar(rutaGuardada)
+                .orElseThrow(() -> new RecursoNoEncontradoException(mensajeSiFalta));
     }
 
     private String guardarImagen(MultipartFile archivo, String subcarpeta) {
@@ -161,24 +150,13 @@ public class MedicoService {
             throw new ArchivoInvalidoException("El archivo no es una imagen válida");
         }
         try {
-            Path directorio = Path.of(uploadsDir, "medicos", subcarpeta);
-            Files.createDirectories(directorio);
-            Path destino = directorio.resolve(UUID.randomUUID() + extension);
-            archivo.transferTo(destino);
-            return destino.toString();
+            return fileStorageService.guardar("medicos/" + subcarpeta, UUID.randomUUID() + extension, archivo);
         } catch (IOException e) {
             throw new UncheckedIOException("No se pudo guardar la imagen", e);
         }
     }
 
     private void borrarSiExiste(String ruta) {
-        if (ruta == null) {
-            return;
-        }
-        try {
-            Files.deleteIfExists(Path.of(ruta));
-        } catch (IOException ignored) {
-            // No es crítico: queda un archivo huérfano en disco, no afecta el funcionamiento.
-        }
+        fileStorageService.borrar(ruta);
     }
 }

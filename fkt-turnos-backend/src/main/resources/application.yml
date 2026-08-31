@@ -63,6 +63,17 @@ app:
     enabled: ${MAIL_ENABLED:false}
   uploads:
     dir: ${UPLOADS_DIR:./uploads}
+  storage:
+    # "local" (default, disco en UPLOADS_DIR) o "s3" (bucket S3-compatible — AWS S3 o
+    # Cloudflare R2 — obligatorio en cualquier host con disco efímero). Ver S3FileStorageService.
+    type: ${STORAGE_TYPE:local}
+    s3:
+      bucket: ${STORAGE_S3_BUCKET:}
+      region: ${STORAGE_S3_REGION:auto}
+      # Vacío para AWS S3 real. Para R2: https://<account_id>.r2.cloudflarestorage.com
+      endpoint: ${STORAGE_S3_ENDPOINT:}
+      access-key: ${STORAGE_S3_ACCESS_KEY:}
+      secret-key: ${STORAGE_S3_SECRET_KEY:}
   # Solo WhatsApp usa Twilio — el canal SMS se sacó del sistema.
   twilio:
     account-sid: ${TWILIO_ACCOUNT_SID:}

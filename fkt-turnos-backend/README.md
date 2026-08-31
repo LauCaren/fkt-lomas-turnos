@@ -23,7 +23,12 @@ API REST en Spring Boot 3 (Java 17) para el sistema de turnos, contacto y postul
 | `MAIL_ENABLED` | `false` | Poner en `true` para enviar emails de verdad |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USERNAME` / `SMTP_PASSWORD` | vacío | Credenciales SMTP. Recomendado: [Brevo](https://www.brevo.com) (plan gratuito, 300 emails/día) u otro proveedor similar |
 | `MAIL_FROM` | `no-reply@fktlomas.com` | Remitente de los emails |
-| `UPLOADS_DIR` | `./uploads` | Carpeta donde se guardan los CVs recibidos |
+| `UPLOADS_DIR` | `./uploads` | Carpeta donde se guardan fotos de médicos y CVs cuando `STORAGE_TYPE=local` |
+| `STORAGE_TYPE` | `local` | `local` (disco, dev) o `s3` (bucket S3-compatible — AWS S3 o Cloudflare R2 — **obligatorio en cualquier host con disco efímero**, ver `S3FileStorageService`) |
+| `STORAGE_S3_BUCKET` | vacío | Nombre del bucket. Requerido si `STORAGE_TYPE=s3` |
+| `STORAGE_S3_REGION` | `auto` | Región AWS (ej. `sa-east-1`). Con R2 dejar `auto`, no aplica |
+| `STORAGE_S3_ENDPOINT` | vacío | Vacío para AWS S3 real. Para Cloudflare R2: `https://<account_id>.r2.cloudflarestorage.com` |
+| `STORAGE_S3_ACCESS_KEY` / `STORAGE_S3_SECRET_KEY` | vacío | Credenciales del bucket. El bucket debe quedar **privado** — los archivos siempre se sirven a través del backend (que aplica su propio control de acceso), nunca con una URL pública de S3/R2 |
 | `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` | vacío | Credenciales de [Twilio](https://www.twilio.com), para el canal WhatsApp de los recordatorios de turno |
 | `TWILIO_NUMERO_ORIGEN_WHATSAPP` | vacío | Número de Twilio para WhatsApp, **sin** el prefijo `whatsapp:` (el código lo agrega solo) |
 | `RECORDATORIOS_INTERVALO_MINUTOS` | `15` | Cada cuánto corre el job que revisa turnos próximos y manda recordatorios. La anticipación (cuántas horas antes) y el texto del mensaje se configuran desde el panel de admin, no acá |
