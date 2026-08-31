@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { fetchMisTurnos, cancelarTurno } from './turnosSlice';
 import AgregarCalendario from '../../components/AgregarCalendario';
 
@@ -18,6 +18,7 @@ const BADGE_LABEL = {
 
 export default function MisTurnosPage() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { misTurnos } = useSelector((state) => state.turnos);
 
   useEffect(() => {
@@ -32,6 +33,10 @@ export default function MisTurnosPage() {
     if (window.confirm('¿Cancelar este turno? El horario quedará disponible para otro paciente.')) {
       dispatch(cancelarTurno(id));
     }
+  }
+
+  function handleReprogramar(turno) {
+    navigate('/turnos', { state: { reprogramar: turno } });
   }
 
   return (
@@ -64,9 +69,14 @@ export default function MisTurnosPage() {
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
               <span className={`badge ${BADGE_CLASS[t.estado]}`}>{BADGE_LABEL[t.estado]}</span>
               {t.estado === 'RESERVADO' && esFuturo(t) && (
-                <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => handleCancelar(t.id)}>
-                  Cancelar
-                </button>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => handleReprogramar(t)}>
+                    Reprogramar
+                  </button>
+                  <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => handleCancelar(t.id)}>
+                    Cancelar
+                  </button>
+                </div>
               )}
             </div>
           </div>

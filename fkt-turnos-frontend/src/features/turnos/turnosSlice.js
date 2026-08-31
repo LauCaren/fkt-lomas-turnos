@@ -73,6 +73,42 @@ export const cancelarTurno = createAsyncThunk(
   }
 );
 
+export const fetchMiAnotacionListaEspera = createAsyncThunk(
+  'turnos/fetchMiAnotacionListaEspera',
+  async ({ medicoId, fecha }, { rejectWithValue }) => {
+    try {
+      const { data, status } = await axiosClient.get('/api/turnos/lista-espera', { params: { medicoId, fecha } });
+      return status === 204 ? null : data;
+    } catch (error) {
+      return rejectWithValue(mensajeDeError(error));
+    }
+  }
+);
+
+export const anotarseListaEspera = createAsyncThunk(
+  'turnos/anotarseListaEspera',
+  async ({ medicoId, fecha }, { rejectWithValue }) => {
+    try {
+      const { data } = await axiosClient.post('/api/turnos/lista-espera', { medicoId, fecha });
+      return data;
+    } catch (error) {
+      return rejectWithValue(mensajeDeError(error, 'No pudimos anotarte en la lista de espera'));
+    }
+  }
+);
+
+export const darseDeBajaListaEspera = createAsyncThunk(
+  'turnos/darseDeBajaListaEspera',
+  async (id, { rejectWithValue }) => {
+    try {
+      await axiosClient.delete(`/api/turnos/lista-espera/${id}`);
+      return id;
+    } catch (error) {
+      return rejectWithValue(mensajeDeError(error));
+    }
+  }
+);
+
 const turnosSlice = createSlice({
   name: 'turnos',
   initialState: {
@@ -83,6 +119,7 @@ const turnosSlice = createSlice({
     status: 'idle',
     error: null,
     reservaExitosa: null,
+    miAnotacionListaEspera: null,
   },
   reducers: {
     limpiarReserva(state) {
@@ -91,6 +128,7 @@ const turnosSlice = createSlice({
     },
     limpiarDisponibles(state) {
       state.disponibles = [];
+      state.miAnotacionListaEspera = null;
     },
   },
   extraReducers: (builder) => {
@@ -119,7 +157,10 @@ const turnosSlice = createSlice({
       .addCase(fetchMisTurnos.fulfilled, (state, action) => { state.misTurnos = action.payload; })
       .addCase(cancelarTurno.fulfilled, (state, action) => {
         state.misTurnos = state.misTurnos.map((t) => t.id === action.payload ? { ...t, estado: 'CANCELADO' } : t);
-      });
+      })
+      .addCase(fetchMiAnotacionListaEspera.fulfilled, (state, action) => { state.miAnotacionListaEspera = action.payload; })
+      .addCase(anotarseListaEspera.fulfilled, (state, action) => { state.miAnotacionListaEspera = action.payload; })
+      .addCase(darseDeBajaListaEspera.fulfilled, (state) => { state.miAnotacionListaEspera = null; });
   },
 });
 

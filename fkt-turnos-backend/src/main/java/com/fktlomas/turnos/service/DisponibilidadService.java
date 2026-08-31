@@ -34,6 +34,7 @@ public class DisponibilidadService {
     private final TurnoRepository turnoRepository;
     private final MedicoService medicoService;
     private final FeriadoService feriadoService;
+    private final ListaEsperaService listaEsperaService;
 
     @Transactional(readOnly = true)
     public List<ReglaDisponibilidadDto> listarReglas(Long medicoId) {
@@ -106,6 +107,10 @@ public class DisponibilidadService {
         }
 
         turnoRepository.saveAll(nuevos);
+
+        nuevos.stream().map(Turno::getFecha).distinct()
+                .forEach(fecha -> listaEsperaService.notificarLiberacion(medicoId, fecha));
+
         return nuevos.size();
     }
 }

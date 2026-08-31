@@ -34,6 +34,7 @@ public class TurnoService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final NotificacionTurnoService notificacionTurnoService;
+    private final ListaEsperaService listaEsperaService;
 
     @Transactional(readOnly = true)
     public List<TurnoDto> disponiblesDeMedico(Long medicoId, LocalDate fecha) {
@@ -78,6 +79,7 @@ public class TurnoService {
 
         String medicoNombre = turno.getMedico().getNombreCompleto();
         String especialidadNombre = turno.getMedico().getEspecialidad().getNombre();
+        Long medicoId = turno.getMedico().getId();
         LocalDate fecha = turno.getFecha();
         LocalTime horaInicio = turno.getHoraInicio();
         LocalTime horaFin = turno.getHoraFin();
@@ -88,6 +90,7 @@ public class TurnoService {
         turnoRepository.save(turno);
 
         notificacionTurnoService.confirmarCancelacion(paciente, medicoNombre, especialidadNombre, fecha, horaInicio, horaFin);
+        listaEsperaService.notificarLiberacion(medicoId, fecha);
     }
 
     @Transactional(readOnly = true)

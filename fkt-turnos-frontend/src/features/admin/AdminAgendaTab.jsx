@@ -304,10 +304,49 @@ export default function AdminAgendaTab() {
 
   const feriadoDelDia = feriados.find((f) => f.fecha === fecha);
 
+  const resumenDia = useMemo(() => {
+    if (vista !== 'lista') return null;
+    const reservados = agenda.filter((t) => t.estado === 'RESERVADO');
+    const disponibles = agenda.filter((t) => t.estado === 'DISPONIBLE').length;
+    const esHoy = fecha === hoyISO();
+    const ahora = new Date();
+    const proximos = reservados
+      .filter((t) => !esHoy || new Date(`${t.fecha}T${t.horaInicio}`) >= ahora)
+      .sort((a, b) => a.horaInicio.localeCompare(b.horaInicio))
+      .slice(0, 5);
+    return { esHoy, reservadosTotal: reservados.length, disponibles, proximos };
+  }, [agenda, vista, fecha]);
+
   return (
     <div>
       {error && <div className="alert alert-error">{error}</div>}
       {mensajeExito && <div className="alert alert-success">{mensajeExito}</div>}
+
+      {resumenDia && !agendaCargando && (
+        <div className="card" style={{ marginBottom: 20, display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+          <div>
+            <div style={{ fontSize: 13, color: 'var(--muted)' }}>{resumenDia.esHoy ? 'Hoy' : fecha}</div>
+            <div style={{ fontSize: 22, fontWeight: 700, marginTop: 2 }}>
+              {resumenDia.reservadosTotal} reservado{resumenDia.reservadosTotal === 1 ? '' : 's'}
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--muted)' }}>{resumenDia.disponibles} disponible{resumenDia.disponibles === 1 ? '' : 's'}</div>
+          </div>
+          {resumenDia.proximos.length > 0 && (
+            <div style={{ flex: 1, minWidth: 220 }}>
+              <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 6 }}>
+                {resumenDia.esHoy ? 'Próximos turnos' : 'Turnos del día'}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {resumenDia.proximos.map((t) => (
+                  <div key={t.id} style={{ fontSize: 13.5 }}>
+                    <strong>{t.horaInicio.slice(0, 5)}</strong> · {t.pacienteNombre} — {t.medicoNombre}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
         <button className={`btn ${vista === 'lista' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '7px 16px', fontSize: 13.5 }} onClick={() => setVista('lista')}>Lista</button>

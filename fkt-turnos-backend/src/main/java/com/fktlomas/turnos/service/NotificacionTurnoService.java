@@ -61,6 +61,22 @@ public class NotificacionTurnoService {
                 FKT Lomas
                 """.formatted(paciente.getNombreCompleto(), medicoNombre, especialidadNombre, fecha, horaInicio, horaFin);
         enviarSegunPreferencia(paciente, "Turno cancelado — FKT Lomas", texto);
+
+        emailService.notificarCancelacionOnline(paciente, medicoNombre, especialidadNombre, fecha, horaInicio, horaFin);
+    }
+
+    @Async
+    public void avisarTurnoLiberado(Usuario paciente, String medicoNombre, String especialidadNombre, LocalDate fecha) {
+        String texto = """
+                Hola %s,
+
+                Se liberó un turno de %s con %s para el %s.
+
+                Entrá a tu cuenta para reservarlo antes de que lo tome otro paciente — es por orden de llegada.
+
+                FKT Lomas
+                """.formatted(paciente.getNombreCompleto(), especialidadNombre, medicoNombre, fecha);
+        enviarSegunPreferencia(paciente, "Se liberó un turno — FKT Lomas", texto);
     }
 
     private void enviarSegunPreferencia(Usuario paciente, String asunto, String texto) {

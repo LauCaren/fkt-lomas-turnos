@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  fetchEspecialidades, fetchMedicos, fetchTurnosDisponibles, reservarTurno, limpiarReserva, limpiarDisponibles,
+  fetchEspecialidades, fetchMedicos, fetchTurnosDisponibles, reservarTurno, cancelarTurno, limpiarReserva, limpiarDisponibles,
+  fetchMiAnotacionListaEspera, anotarseListaEspera, darseDeBajaListaEspera,
 } from './turnosSlice';
 import AgregarCalendario from '../../components/AgregarCalendario';
 
@@ -14,25 +15,47 @@ function hoyISO() {
 export default function BookingWizard() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { especialidades, medicos, disponibles, status, error, reservaExitosa } = useSelector((state) => state.turnos);
+  const location = useLocation();
+  const { especialidades, medicos, disponibles, status, error, reservaExitosa, miAnotacionListaEspera } = useSelector((state) => state.turnos);
+  const [anotandoListaEspera, setAnotandoListaEspera] = useState(false);
 
-  const [especialidadId, setEspecialidadId] = useState('');
+  const turnoAReprogramar = location.state?.reprogramar || null;
+
+  const [especialidadId, setEspecialidadId] = useState(turnoAReprogramar?.especialidadId ? String(turnoAReprogramar.especialidadId) : '');
   const [medicoId, setMedicoId] = useState('');
   const [fecha, setFecha] = useState(hoyISO());
   const [turnoSeleccionado, setTurnoSeleccionado] = useState(null);
   const [motivoConsulta, setMotivoConsulta] = useState('');
+  const [reprogramando, setReprogramando] = useState(turnoAReprogramar);
+  const [reprogramadoOk, setReprogramadoOk] = useState(false);
+  const [avisoReprogramacion, setAvisoReprogramacion] = useState(null);
 
   useEffect(() => {
     dispatch(fetchEspecialidades());
   }, [dispatch]);
 
   useEffect(() => {
+    // Al salir de este wizard (a "Mis turnos", u otra especialidad desde el
+    // nav) limpiamos el resultado de la última reserva — si no, volver acá
+    // (por ejemplo al hacer clic en "Reprogramar") mostraba de nuevo la
+    // pantalla de éxito de la reserva anterior en vez del wizard.
+    return () => { dispatch(limpiarReserva()); };
+  }, [dispatch]);
+
+  useEffect(() => {
     if (especialidadId) {
-      setMedicoId('');
       dispatch(limpiarDisponibles());
       dispatch(fetchMedicos(especialidadId));
     }
+    // No reseteamos medicoId acá: si venimos de "Reprogramar" necesitamos que el
+    // médico preseleccionado sobreviva a este efecto disparado por el mismo cambio inicial de especialidad.
   }, [especialidadId, dispatch]);
+
+  useEffect(() => {
+    if (reprogramando && medicos.some((m) => m.id === reprogramando.medicoId) && !medicoId) {
+      setMedicoId(String(reprogramando.medicoId));
+    }
+  }, [medicos, reprogramando, medicoId]);
 
   useEffect(() => {
     if (medicoId && fecha) {
@@ -40,14 +63,56 @@ export default function BookingWizard() {
     }
   }, [medicoId, fecha, dispatch]);
 
-  function handleReservar() {
-    dispatch(reservarTurno({ turnoId: turnoSeleccionado.id, motivoConsulta }));
+  useEffect(() => {
+    if (medicoId && fecha && status !== 'loading' && disponibles.length === 0) {
+      dispatch(fetchMiAnotacionListaEspera({ medicoId, fecha }));
+    }
+  }, [medicoId, fecha, status, disponibles.length, dispatch]);
+
+  function handleAnotarseListaEspera() {
+    setAnotandoListaEspera(true);
+    dispatch(anotarseListaEspera({ medicoId, fecha })).unwrap().finally(() => setAnotandoListaEspera(false));
+  }
+
+  function handleEspecialidadChange(e) {
+    setEspecialidadId(e.target.value);
+    setMedicoId('');
+    setTurnoSeleccionado(null);
+    // reprogramando se mantiene: aunque cambie de especialidad o médico, el
+    // turno viejo se sigue liberando al confirmar uno nuevo (ver "Cancelar
+    // reprogramación" para el paciente que se arrepiente).
+  }
+
+  function handleMedicoChange(e) {
+    setMedicoId(e.target.value);
+    setTurnoSeleccionado(null);
+  }
+
+  async function handleReservar() {
+    try {
+      await dispatch(reservarTurno({ turnoId: turnoSeleccionado.id, motivoConsulta })).unwrap();
+      if (reprogramando) {
+        setReprogramadoOk(true);
+        try {
+          await dispatch(cancelarTurno(reprogramando.id)).unwrap();
+        } catch {
+          setAvisoReprogramacion(
+            'El nuevo turno se reservó, pero no pudimos liberar el turno anterior automáticamente. Cancelalo desde "Mis turnos" o contactate con el centro.'
+          );
+        }
+      }
+    } catch {
+      // El error ya queda en el estado de Redux (turnos.error) y se muestra abajo.
+    }
   }
 
   if (reservaExitosa) {
     return (
       <div className="card" style={{ maxWidth: 480, margin: '0 auto', textAlign: 'center' }}>
-        <div className="alert alert-success">¡Turno reservado con éxito!</div>
+        <div className="alert alert-success">
+          {reprogramadoOk ? '¡Turno reprogramado con éxito!' : '¡Turno reservado con éxito!'}
+        </div>
+        {avisoReprogramacion && <div className="alert alert-error" style={{ marginTop: 10 }}>{avisoReprogramacion}</div>}
         <h2 style={{ fontSize: 22 }}>{reservaExitosa.especialidadNombre} con {reservaExitosa.medicoNombre}</h2>
         <p style={{ marginTop: 10, color: 'var(--muted)' }}>
           {reservaExitosa.fecha} de {reservaExitosa.horaInicio.slice(0, 5)} a {reservaExitosa.horaFin.slice(0, 5)}
@@ -56,7 +121,13 @@ export default function BookingWizard() {
           <AgregarCalendario turno={reservaExitosa} />
         </div>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 24 }}>
-          <button className="btn btn-outline" onClick={() => { dispatch(limpiarReserva()); setTurnoSeleccionado(null); }}>
+          <button className="btn btn-outline" onClick={() => {
+            dispatch(limpiarReserva());
+            setTurnoSeleccionado(null);
+            setReprogramando(null);
+            setReprogramadoOk(false);
+            setAvisoReprogramacion(null);
+          }}>
             Sacar otro turno
           </button>
           <button className="btn btn-primary" onClick={() => navigate('/turnos/mis-turnos')}>Ver mis turnos</button>
@@ -67,15 +138,30 @@ export default function BookingWizard() {
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto' }}>
-      <span className="eyebrow">Sacar turno</span>
+      <span className="eyebrow">{reprogramando ? 'Reprogramar turno' : 'Sacar turno'}</span>
       <h1 style={{ marginTop: 12, fontSize: 30 }}>Elegí especialidad, médico y horario</h1>
+
+      {reprogramando && (
+        <div className="alert" style={{ marginTop: 16, background: 'var(--teal-tint)', color: 'var(--teal-dark)', border: '1px solid var(--teal)' }}>
+          Estás reprogramando tu turno de {reprogramando.especialidadNombre} con {reprogramando.medicoNombre} del{' '}
+          {reprogramando.fecha} a las {reprogramando.horaInicio.slice(0, 5)}. Elegí un nuevo horario abajo — el turno
+          anterior se libera automáticamente cuando confirmes el nuevo.{' '}
+          <button
+            type="button"
+            onClick={() => setReprogramando(null)}
+            style={{ background: 'none', border: 'none', padding: 0, color: 'inherit', textDecoration: 'underline', cursor: 'pointer', fontSize: 'inherit' }}
+          >
+            Cancelar reprogramación
+          </button>
+        </div>
+      )}
 
       <div className="card" style={{ marginTop: 28 }}>
         {error && <div className="alert alert-error">{error}</div>}
 
         <div className="field">
           <label htmlFor="especialidad">Especialidad</label>
-          <select id="especialidad" value={especialidadId} onChange={(e) => setEspecialidadId(e.target.value)}>
+          <select id="especialidad" value={especialidadId} onChange={handleEspecialidadChange}>
             <option value="">Seleccioná una especialidad</option>
             {especialidades.map((e) => <option key={e.id} value={e.id}>{e.nombre}</option>)}
           </select>
@@ -84,7 +170,7 @@ export default function BookingWizard() {
         {especialidadId && (
           <div className="field">
             <label htmlFor="medico">Médico</label>
-            <select id="medico" value={medicoId} onChange={(e) => { setMedicoId(e.target.value); setTurnoSeleccionado(null); }}>
+            <select id="medico" value={medicoId} onChange={handleMedicoChange}>
               <option value="">Seleccioná un médico</option>
               {medicos.map((m) => <option key={m.id} value={m.id}>{m.nombreCompleto}</option>)}
             </select>
@@ -104,7 +190,25 @@ export default function BookingWizard() {
             <label>Horarios disponibles</label>
             {status === 'loading' && <p style={{ color: 'var(--muted)' }}>Buscando horarios…</p>}
             {status !== 'loading' && disponibles.length === 0 && (
-              <p style={{ color: 'var(--muted)' }}>No hay horarios disponibles para esa fecha. Probá con otro día.</p>
+              <>
+                <p style={{ color: 'var(--muted)' }}>No hay horarios disponibles para esa fecha. Probá con otro día.</p>
+                {miAnotacionListaEspera ? (
+                  <p style={{ fontSize: 13.5, color: 'var(--teal-dark)' }}>
+                    Ya estás anotado en la lista de espera para este día — te avisamos por si se libera un turno.{' '}
+                    <button
+                      type="button"
+                      onClick={() => dispatch(darseDeBajaListaEspera(miAnotacionListaEspera.id))}
+                      style={{ background: 'none', border: 'none', padding: 0, color: 'inherit', textDecoration: 'underline', cursor: 'pointer', fontSize: 'inherit' }}
+                    >
+                      Darme de baja
+                    </button>
+                  </p>
+                ) : (
+                  <button type="button" className="btn btn-outline" style={{ marginTop: 8, padding: '8px 16px', fontSize: 13.5 }} onClick={handleAnotarseListaEspera} disabled={anotandoListaEspera}>
+                    {anotandoListaEspera ? 'Anotando…' : 'Avisame si se libera un turno'}
+                  </button>
+                )}
+              </>
             )}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {disponibles.map((t) => (
@@ -135,7 +239,7 @@ export default function BookingWizard() {
               <textarea id="motivo" rows={3} value={motivoConsulta} onChange={(e) => setMotivoConsulta(e.target.value)} />
             </div>
             <button className="btn btn-primary btn-block" onClick={handleReservar} disabled={status === 'loading'}>
-              {status === 'loading' ? 'Reservando…' : `Confirmar turno de ${turnoSeleccionado.horaInicio.slice(0, 5)}`}
+              {status === 'loading' ? 'Guardando…' : reprogramando ? `Confirmar nuevo horario de ${turnoSeleccionado.horaInicio.slice(0, 5)}` : `Confirmar turno de ${turnoSeleccionado.horaInicio.slice(0, 5)}`}
             </button>
           </>
         )}
