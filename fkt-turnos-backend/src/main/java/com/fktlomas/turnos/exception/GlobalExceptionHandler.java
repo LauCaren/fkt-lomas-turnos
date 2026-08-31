@@ -69,6 +69,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(cuerpo(HttpStatus.UNAUTHORIZED, "Credenciales inválidas", null));
     }
 
+    @ExceptionHandler(DemasiadosIntentosException.class)
+    public ResponseEntity<Map<String, Object>> handleDemasiadosIntentos(DemasiadosIntentosException ex) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(cuerpo(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage(), null));
+    }
+
     @ExceptionHandler(MfaRequeridaException.class)
     public ResponseEntity<Map<String, Object>> handleMfaRequerida(MfaRequeridaException ex) {
         Map<String, Object> body = cuerpo(HttpStatus.UNAUTHORIZED, ex.getMessage(), null);

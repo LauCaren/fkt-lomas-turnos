@@ -40,6 +40,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final TotpService totpService;
     private final EmailService emailService;
+    private final LoginRateLimiterService loginRateLimiterService;
 
     @Value("${app.frontend-url}")
     private String frontendUrl;
@@ -72,9 +73,16 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.email(), request.password())
-        );
+        loginRateLimiterService.verificarNoBloqueado(request.email());
+
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.email(), request.password())
+            );
+        } catch (BadCredentialsException e) {
+            loginRateLimiterService.registrarFallo(request.email());
+            throw e;
+        }
         Usuario usuario = usuarioRepository.findByEmail(request.email())
                 .orElseThrow(() -> new IllegalStateException("Usuario no encontrado tras autenticar"));
 
@@ -83,10 +91,12 @@ public class AuthService {
                 throw new MfaRequeridaException();
             }
             if (!totpService.verificar(usuario.getMfaSecret(), request.codigoMfa())) {
+                loginRateLimiterService.registrarFallo(request.email());
                 throw new BadCredentialsException("Código de verificación incorrecto");
             }
         }
 
+        loginRateLimiterService.registrarExito(request.email());
         return new AuthResponse(jwtService.generarToken(usuario), usuario.getNombreCompleto(), usuario.getEmail(), usuario.getRole().name());
     }
 
