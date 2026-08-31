@@ -5,6 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Contacto y Obras Sociales — FKT Lomas</title>
 <meta name="description" content="Dirección, teléfono, WhatsApp y obras sociales de FKT Lomas, centro médico y de kinesiología en Juan Larrea 496, Lomas de Zamora.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FKT Lomas">
+<meta property="og:locale" content="es_AR">
+<meta property="og:title" content="Contacto y Obras Sociales — FKT Lomas">
+<meta property="og:description" content="Dirección, teléfono, WhatsApp y obras sociales de FKT Lomas, centro médico y de kinesiología en Juan Larrea 496, Lomas de Zamora.">
+<meta property="og:url" content="https://fktlomas.com/contacto.html">
+<meta property="og:image" content="https://fktlomas.com/assets/img/og/preview.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Contacto y Obras Sociales — FKT Lomas">
+<meta name="twitter:description" content="Dirección, teléfono, WhatsApp y obras sociales de FKT Lomas, centro médico y de kinesiología en Juan Larrea 496, Lomas de Zamora.">
+<meta name="twitter:image" content="https://fktlomas.com/assets/img/og/preview.jpg">
+
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M15 70 A35 35 0 0 1 85 70' fill='none' stroke='%231C3240' stroke-width='9' stroke-linecap='round'/%3E%3Ccircle cx='50' cy='70' r='6' fill='%23239A96'/%3E%3Cline x1='50' y1='70' x2='75' y2='38' stroke='%23239A96' stroke-width='9' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -90,6 +104,20 @@
   .gallery-item img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .4s var(--ease);}
   .gallery-item:hover img{transform:scale(1.08);}
   @media (max-width:800px){ .gallery-grid{grid-template-columns:repeat(2,1fr);} }
+
+  /* ---------- PREGUNTAS FRECUENTES ---------- */
+  .faq-list{max-width:760px; display:flex; flex-direction:column; gap:0;}
+  .faq-item{border-top:1px solid var(--line);}
+  .faq-item:last-child{border-bottom:1px solid var(--line);}
+  .faq-item summary{list-style:none; cursor:pointer; padding:20px 4px; display:flex; align-items:center; justify-content:space-between; gap:20px; font-weight:600; font-size:16px; color:var(--ink);}
+  .faq-item summary::-webkit-details-marker{display:none;}
+  .faq-item summary .faq-icon{flex-shrink:0; width:24px; height:24px; border-radius:50%; border:1.5px solid var(--line); display:flex; align-items:center; justify-content:center; position:relative; transition:transform .25s var(--ease), border-color .25s var(--ease);}
+  .faq-item summary .faq-icon::before, .faq-item summary .faq-icon::after{content:""; position:absolute; background:var(--teal-dark); transition:opacity .2s var(--ease);}
+  .faq-item summary .faq-icon::before{width:10px; height:1.6px;}
+  .faq-item summary .faq-icon::after{width:1.6px; height:10px;}
+  .faq-item[open] summary .faq-icon{transform:rotate(180deg); border-color:var(--teal);}
+  .faq-item[open] summary .faq-icon::after{opacity:0;}
+  .faq-item p{margin:0 0 20px; padding-right:44px; font-size:14.5px; color:var(--muted); line-height:1.65;}
 
   /* ---------- OBRAS SOCIALES (logos) ---------- */
   .os-logos-grid{display:flex; flex-wrap:wrap; gap:14px;}
@@ -253,6 +281,46 @@
     </div>
   </section>
 
+  <!-- ---------- PREGUNTAS FRECUENTES ---------- -->
+  <section id="preguntas-frecuentes">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Preguntas frecuentes</span>
+        <h2>Lo que más nos preguntan</h2>
+      </div>
+      <div class="faq-list reveal">
+        <details class="faq-item">
+          <summary>¿Qué obras sociales atienden?<span class="faq-icon"></span></summary>
+          <p>Trabajamos con numerosas obras sociales y prepagas — mirá el listado completo más arriba en esta página. Si la tuya no aparece, escribinos por WhatsApp y te confirmamos la cobertura.</p>
+        </details>
+        <details class="faq-item">
+          <summary>¿Necesito orden médica para sacar un turno?<span class="faq-icon"></span></summary>
+          <p>Depende de tu obra social: algunas la piden y otras no. Te recomendamos consultarlo con nosotros por WhatsApp antes de tu turno para evitar demoras.</p>
+        </details>
+        <details class="faq-item">
+          <summary>¿Cómo cancelo un turno?<span class="faq-icon"></span></summary>
+          <p>Desde "Mis turnos" en la web, ingresando con tu cuenta, o escribiéndonos por WhatsApp con la mayor anticipación posible para liberar el horario a otro paciente.</p>
+        </details>
+        <details class="faq-item">
+          <summary>¿Puedo atenderme si no tengo obra social?<span class="faq-icon"></span></summary>
+          <p>Sí, atendemos pacientes particulares. El costo de la sesión se confirma directamente con el centro.</p>
+        </details>
+        <details class="faq-item">
+          <summary>¿Cuál es el horario de atención?<span class="faq-icon"></span></summary>
+          <p>Atendemos de lunes a viernes de 8 a 20 hs. No hay turnos disponibles los fines de semana.</p>
+        </details>
+        <details class="faq-item">
+          <summary>¿Puedo sacar un turno para un familiar?<span class="faq-icon"></span></summary>
+          <p>Sí, podés coordinarlo por WhatsApp o llamando al centro, pasándonos los datos de la persona que se va a atender.</p>
+        </details>
+        <details class="faq-item">
+          <summary>No encuentro turnos disponibles para lo que necesito, ¿qué hago?<span class="faq-icon"></span></summary>
+          <p>Escribinos por WhatsApp — a veces se liberan horarios o podemos coordinarlo directamente con el profesional.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
   <!-- ---------- CONTACTO ---------- -->
   <section class="soft">
     <div class="wrap">
@@ -338,6 +406,7 @@
           <h4>Otros</h4>
           <a href="alquiler-consultorios.html">Alquiler de consultorios</a>
           <a href="trabaja-con-nosotros.html">Trabajá con nosotros</a>
+          <a href="contacto.html#preguntas-frecuentes">Preguntas frecuentes</a>
           <a href="politica-de-privacidad.html">Política de privacidad</a>
         </div>
       </div>

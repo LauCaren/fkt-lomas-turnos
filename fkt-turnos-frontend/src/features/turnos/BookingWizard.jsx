@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   fetchEspecialidades, fetchMedicos, fetchTurnosDisponibles, reservarTurno, limpiarReserva, limpiarDisponibles,
 } from './turnosSlice';
+import AgregarCalendario from '../../components/AgregarCalendario';
 
 function hoyISO() {
   const d = new Date();
@@ -51,6 +52,9 @@ export default function BookingWizard() {
         <p style={{ marginTop: 10, color: 'var(--muted)' }}>
           {reservaExitosa.fecha} de {reservaExitosa.horaInicio.slice(0, 5)} a {reservaExitosa.horaFin.slice(0, 5)}
         </p>
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
+          <AgregarCalendario turno={reservaExitosa} />
+        </div>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 24 }}>
           <button className="btn btn-outline" onClick={() => { dispatch(limpiarReserva()); setTurnoSeleccionado(null); }}>
             Sacar otro turno

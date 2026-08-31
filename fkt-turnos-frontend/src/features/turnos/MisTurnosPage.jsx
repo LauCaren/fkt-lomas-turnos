@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { fetchMisTurnos, cancelarTurno } from './turnosSlice';
+import AgregarCalendario from '../../components/AgregarCalendario';
 
 const BADGE_CLASS = {
   DISPONIBLE: 'badge-disponible',
@@ -47,13 +48,18 @@ export default function MisTurnosPage() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 28 }}>
         {misTurnos.map((t) => (
-          <div key={t.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
+          <div key={t.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
             <div>
               <div style={{ fontWeight: 600 }}>{t.especialidadNombre} con {t.medicoNombre}</div>
               <div style={{ color: 'var(--muted)', fontSize: 14, marginTop: 4 }}>
                 {t.fecha} · {t.horaInicio.slice(0, 5)} a {t.horaFin.slice(0, 5)}
               </div>
               {t.motivoConsulta && <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 4 }}>Motivo: {t.motivoConsulta}</div>}
+              {t.estado === 'RESERVADO' && esFuturo(t) && (
+                <div style={{ marginTop: 10 }}>
+                  <AgregarCalendario turno={t} />
+                </div>
+              )}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
               <span className={`badge ${BADGE_CLASS[t.estado]}`}>{BADGE_LABEL[t.estado]}</span>
