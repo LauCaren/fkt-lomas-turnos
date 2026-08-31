@@ -14,6 +14,8 @@ import com.fktlomas.turnos.exception.TurnoNoDisponibleException;
 import com.fktlomas.turnos.repository.TurnoRepository;
 import com.fktlomas.turnos.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -102,10 +104,10 @@ public class TurnoService {
     private static final LocalDate HASTA_MAXIMO = LocalDate.of(2099, 12, 31);
 
     @Transactional(readOnly = true)
-    public List<TurnoAdminDto> buscarTurnos(LocalDate desde, LocalDate hasta, Long medicoId, Long especialidadId, EstadoTurno estado) {
+    public Page<TurnoAdminDto> buscarTurnos(LocalDate desde, LocalDate hasta, Long medicoId, Long especialidadId, EstadoTurno estado, Pageable pageable) {
         LocalDate desdeEfectivo = desde != null ? desde : DESDE_MINIMO;
         LocalDate hastaEfectivo = hasta != null ? hasta : HASTA_MAXIMO;
-        return turnoRepository.buscarTurnos(desdeEfectivo, hastaEfectivo, medicoId, especialidadId, estado).stream().map(TurnoAdminDto::de).toList();
+        return turnoRepository.buscarTurnos(desdeEfectivo, hastaEfectivo, medicoId, especialidadId, estado, pageable).map(TurnoAdminDto::de);
     }
 
     @Transactional

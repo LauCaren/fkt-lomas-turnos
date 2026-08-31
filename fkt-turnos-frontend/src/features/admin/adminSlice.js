@@ -109,9 +109,10 @@ export const fetchAgenda = createAsyncThunk('admin/fetchAgenda', async ({ fecha,
 export const fetchTurnosOcupados = createAsyncThunk('admin/fetchTurnosOcupados', async ({ desde, hasta, medicoId, especialidadId }, { rejectWithValue }) => {
   try {
     const { data } = await axiosClient.get('/api/admin/turnos/buscar', {
-      params: { desde: desde || undefined, hasta: hasta || undefined, medicoId: medicoId || undefined, especialidadId: especialidadId || undefined, estado: 'RESERVADO' },
+      params: { desde: desde || undefined, hasta: hasta || undefined, medicoId: medicoId || undefined, especialidadId: especialidadId || undefined, estado: 'RESERVADO', size: 200 },
     });
-    return data;
+    // El endpoint devuelve una Page de Spring Data (content, totalElements, etc.), no un array plano.
+    return data.content;
   } catch (error) {
     return rejectWithValue(mensajeDeError(error));
   }

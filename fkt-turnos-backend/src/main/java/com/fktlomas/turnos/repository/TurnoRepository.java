@@ -3,6 +3,8 @@ package com.fktlomas.turnos.repository;
 import com.fktlomas.turnos.domain.EstadoTurno;
 import com.fktlomas.turnos.domain.Turno;
 import com.fktlomas.turnos.domain.Usuario;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -43,9 +45,9 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
             and (:estado is null or t.estado = :estado)
             order by t.fecha asc, t.horaInicio asc
             """)
-    List<Turno> buscarTurnos(@Param("desde") LocalDate desde, @Param("hasta") LocalDate hasta,
+    Page<Turno> buscarTurnos(@Param("desde") LocalDate desde, @Param("hasta") LocalDate hasta,
                              @Param("medicoId") Long medicoId, @Param("especialidadId") Long especialidadId,
-                             @Param("estado") EstadoTurno estado);
+                             @Param("estado") EstadoTurno estado, Pageable pageable);
 
     /**
      * Update atómico: solo reserva si sigue DISPONIBLE. Si otra transacción ya lo tomó,

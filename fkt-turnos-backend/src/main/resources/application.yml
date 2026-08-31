@@ -88,3 +88,23 @@ app:
 springdoc:
   swagger-ui:
     path: /docs
+
+management:
+  # Solo health/info quedan expuestos — nada de env, beans, heapdump, etc. (que sí
+  # filtran detalles internos). show-details=never porque /actuator/health es público
+  # (lo pega cualquier orquestador/host para saber si reiniciar el contenedor), no queremos
+  # que devuelva el estado de la conexión a la base o el disco a quien no está autenticado.
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+  health:
+    # El indicador de mail por defecto intenta conectarse al SMTP configurado y marca
+    # DOWN toda la salud del servicio si falla — rompe el health check con MAIL_ENABLED=false
+    # (sin SMTP, a propósito) o incluso con un SMTP real que tenga un hipo momentáneo,
+    # que no debería tirar abajo el resto de la app. Ver MAIL_ENABLED en application.yml.
+    mail:
+      enabled: false
