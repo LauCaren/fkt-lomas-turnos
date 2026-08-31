@@ -1,0 +1,36 @@
+# Plantilla de configuración. El instalador (install.sh) copia este archivo
+# a config/application.properties en el directorio de instalación: ese es el
+# que hay que completar con los datos reales, NO este .example.
+#
+# La app usa DOS bases:
+#  - "origen.db.*" abajo: la base del sistema de turnos real. Esta app SOLO
+#    LEE de ahí (nunca inserta, actualiza ni borra nada) para copiar
+#    pacientes y turnos hacia su propia base.
+#  - Su propia base (embebida, H2): se crea sola en ./data/recordatorios,
+#    no requiere configuración. Ahí vive el canal preferido de cada
+#    paciente y el historial de recordatorios.
+
+# Conexión de SOLO LECTURA a la base del sistema de turnos real
+# (fkt-turnos-backend, PostgreSQL — ver docker-compose.yml de ese repo para
+# los datos de desarrollo; en producción, usar un usuario con permisos de
+# solo SELECT, no el usuario de la app).
+origen.db.url=jdbc:postgresql://localhost:5432/fkt_turnos
+origen.db.usuario=usuario_bdd_solo_lectura
+origen.db.password=password_bdd
+
+# Servidor SMTP para el canal EMAIL
+smtp.host=smtp.gmail.com
+smtp.usuario=notificaciones@clinica.com
+smtp.password=app_password
+
+# Credenciales de Twilio para SMS y WhatsApp
+# numeroWhatsApp debe tener el prefijo "whatsapp:" (lo exige Twilio)
+twilio.accountSid=TU_ACCOUNT_SID
+twilio.authToken=TU_AUTH_TOKEN
+twilio.numeroSms=+1415XXXXXXX
+twilio.numeroWhatsApp=whatsapp:+1415XXXXXXX
+
+# Parámetros del recordatorio (la sincronización con el sistema de turnos
+# corre en el mismo intervalo, justo antes de chequear qué recordatorios mandar)
+recordatorio.horasAnticipacion=24
+recordatorio.intervaloMinutos=15

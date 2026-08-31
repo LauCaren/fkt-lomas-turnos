@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ar.edu.uade</groupId>
+    <artifactId>recordatorio-turnos</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <javafx.version>21.0.4</javafx.version>
+        <!-- Se pisa por los perfiles de abajo según el sistema operativo -->
+        <javafx.platform>win</javafx.platform>
+    </properties>
+
+    <!--
+        Los módulos de JavaFX se publican con un jar distinto por sistema
+        operativo (contienen las librerías nativas). Este perfil detecta el
+        SO donde se corre Maven y baja el correcto automáticamente: así
+        "mvn clean package" en Windows arma el jar para la app de escritorio
+        de FKT Lomas, y en Mac/Linux sirve para desarrollo y para el jar
+        headless (Main) que no usa JavaFX.
+    -->
+    <profiles>
+        <profile>
+            <id>javafx-windows</id>
+            <activation><os><family>windows</family></os></activation>
+            <properties><javafx.platform>win</javafx.platform></properties>
+        </profile>
+        <!-- Mac Apple Silicon (M1/M2/M3/...) necesita el clasificador -aarch64;
+             si no, las librerías nativas de JavaFX no cargan y falla el motor gráfico. -->
+        <profile>
+            <id>javafx-mac-aarch64</id>
+            <activation><os><family>mac</family><arch>aarch64</arch></os></activation>
+            <properties><javafx.platform>mac-aarch64</javafx.platform></properties>
+        </profile>
+        <profile>
+            <id>javafx-mac-intel</id>
+            <activation><os><family>mac</family><arch>x86_64</arch></os></activation>
+            <properties><javafx.platform>mac</javafx.platform></properties>
+        </profile>
+        <profile>
+            <id>javafx-linux-aarch64</id>
+            <activation><os><family>linux</family><arch>aarch64</arch></os></activation>
+            <properties><javafx.platform>linux-aarch64</javafx.platform></properties>
+        </profile>
+        <profile>
+            <id>javafx-linux-x86</id>
+            <activation><os><family>linux</family><arch>x86_64</arch></os></activation>
+            <properties><javafx.platform>linux</javafx.platform></properties>
+        </profile>
+    </profiles>
+
+    <dependencies>
+        <!-- Driver JDBC de la base del sistema de turnos real (fkt-turnos-backend), solo lectura: PostgreSQL. -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.3</version>
+        </dependency>
+
+        <!-- Base propia embebida: acá vive el espejo de pacientes/turnos y el canal preferido. No requiere instalar nada aparte. -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>2.2.224</version>
+        </dependency>
+
+        <!-- Pool de conexiones -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>5.1.0</version>
+        </dependency>
+
+        <!-- Canal EMAIL -->
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>jakarta.mail</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+
+        <!-- Canales SMS y WHATSAPP -->
+        <dependency>
+            <groupId>com.twilio.sdk</groupId>
+            <artifactId>twilio</artifactId>
+            <version>10.4.1</version>
+        </dependency>
+
+        <!--
+            Interfaz gráfica de escritorio. javafx-graphics y javafx-controls declaran
+            en su propio POM una dependencia transitiva SIN el clasificador de
+            plataforma (el jar "stub" que solo imprime "faltan los componentes de
+            JavaFX runtime" si termina cargándose por error): se excluyen para que el
+            único javafx-base/javafx-graphics presente sea el nuestro, con el
+            clasificador correcto.
+        -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-base</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>${javafx.platform}</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>${javafx.platform}</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.openjfx</groupId>
+                    <artifactId>javafx-base</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>${javafx.platform}</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.openjfx</groupId>
+                    <artifactId>javafx-graphics</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Tests -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>5.11.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>5.11.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.25.3</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>recordatorio-turnos</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+            </plugin>
+            <!--
+                Produce el jar "standalone" (todas las dependencias fusionadas) que usa
+                install.sh para el modo headless (Main, sin JavaFX). Se genera en
+                target/standalone/ y NO en target/ a secas: jpackage arma la app de
+                escritorio leyendo todos los jars sueltos de target/ (ver plugin de abajo),
+                y si este jar fusionado quedara ahí también, JavaFX intentaría cargar sus
+                librerías nativas desde dos lugares a la vez y falla en tiempo de ejecución
+                con "faltan los componentes de JavaFX runtime" (JavaFX necesita ubicarse a
+                sí mismo como jar propio, no funciona fusionado con otras dependencias).
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.7.1</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>ar.edu.uade.recordatorios.Main</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <outputDirectory>${project.build.directory}/standalone</outputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--
+                Arma target/app-libs/ como insumo LIMPIO para jpackage (jpackage bundea
+                TODO lo que encuentra en el directorio de entrada, recursivamente e
+                incluso subcarpetas con otros jars: por eso no puede ser target/ a secas,
+                que además tiene target/classes, target/standalone/recordatorio-turnos.jar,
+                etc.): cada dependencia de runtime como jar suelto...
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.6.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies-para-jpackage</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/app-libs</outputDirectory>
+                            <includeScope>runtime</includeScope>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- ...más el jar liviano de la app (RecordatorioApp), copiado a la misma carpeta. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <execution>
+                        <id>copiar-jar-liviano-para-jpackage</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/app-libs</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}</directory>
+                                    <includes>
+                                        <include>recordatorio-turnos.jar</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Solo para desarrollo: "mvn javafx:run" levanta la GUI sin empaquetar -->
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>
+                <configuration>
+                    <mainClass>ar.edu.uade.recordatorios.gui.RecordatorioApp</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

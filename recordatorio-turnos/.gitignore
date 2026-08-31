@@ -1,0 +1,8 @@
+target/
+data/
+logs/
+config/application.properties
+.idea/
+.DS_Store
+*.class
+dist/

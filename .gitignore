@@ -1,3 +1,12 @@
 .DS_Store
 .idea/
 .claude/
+
+# recordatorio-turnos: app JavaFX superada por los recordatorios integrados en
+# fkt-turnos-backend, se guarda como referencia — nunca sus build artifacts ni
+# el config con credenciales reales (ver config/application.properties.example)
+recordatorio-turnos/target/
+recordatorio-turnos/dist/
+recordatorio-turnos/logs/
+recordatorio-turnos/data/
+recordatorio-turnos/config/application.properties
