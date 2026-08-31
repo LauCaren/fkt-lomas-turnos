@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
 import { SITE_URL } from '../config';
+import InstalarAppBanner from './InstalarAppBanner';
 
 export default function Layout({ children }) {
   const usuario = useSelector((state) => state.auth.usuario);
@@ -45,7 +46,10 @@ export default function Layout({ children }) {
         </div>
       </header>
       <main style={{ flex: 1, padding: '40px 0' }}>
-        <div className="wrap">{children}</div>
+        <div className="wrap">
+          {usuario?.role === 'PACIENTE' && <InstalarAppBanner />}
+          {children}
+        </div>
       </main>
     </div>
   );
