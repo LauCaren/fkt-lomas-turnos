@@ -40,7 +40,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 AppUserDetails userDetails = (AppUserDetails) userDetailsService.loadUserByUsername(email);
 
                 Instant emitidoEn = jwtService.extraerFechaEmision(token);
-                Instant passwordCambiadaEn = userDetails.getUsuario().getPasswordChangedAt();
+                // El claim "iat" del JWT se trunca a segundos (así lo exige el formato NumericDate),
+                // pero passwordChangedAt se guarda con precisión de milisegundos/microsegundos. Sin
+                // truncar acá, un token emitido en el mismo segundo que el alta o el cambio de
+                // contraseña quedaba mal marcado como "emitido antes" y se rechazaba siempre —
+                // rompía la reserva de turnos justo después de registrarse.
+                Instant passwordCambiadaEn = userDetails.getUsuario().getPasswordChangedAt() == null
+                        ? null : userDetails.getUsuario().getPasswordChangedAt().truncatedTo(java.time.temporal.ChronoUnit.SECONDS);
                 if (passwordCambiadaEn != null && emitidoEn.isBefore(passwordCambiadaEn)) {
                     // Token emitido antes del último cambio de contraseña: se ignora, como si
                     // no viniera autenticado. Evita que una sesión vieja siga sirviendo hasta

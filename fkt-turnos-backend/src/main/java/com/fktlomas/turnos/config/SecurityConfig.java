@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,6 +20,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.time.Instant;
 import java.util.List;
 
 @Configuration
@@ -55,6 +57,19 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
+                // Sin esto, Spring Security responde 403 tanto para "no autenticado" (falta el
+                // token, o es inválido/expiró/quedó viejo tras un cambio de contraseña) como para
+                // "autenticado pero sin el rol necesario". El frontend solo puede distinguir un
+                // 401 de un 403, así que sin este entry point no había forma de que, ante una
+                // sesión vencida, cerrara sesión y mandara a un paciente o admin de vuelta al
+                // login — se quedaba con la pantalla rota mostrando errores genéricos.
+                .exceptionHandling(eh -> eh.authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(401);
+                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                    response.getWriter().write("""
+                            {"timestamp":"%s","status":401,"mensaje":"No autenticado o la sesión venció"}
+                            """.formatted(Instant.now()));
+                }))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
