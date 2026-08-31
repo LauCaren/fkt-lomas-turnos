@@ -126,9 +126,23 @@ Implementado y probado de punta a punta:
 - Recordatorios automáticos de turno (email o WhatsApp según el canal preferido de cada paciente) desde un job programado del backend, con reintentos, historial y reenvío manual, plantilla del mensaje y anticipación editables, y envío de un mensaje puntual a un paciente — todo desde la pestaña "Recordatorios" del panel de admin (ver README del backend para las variables de entorno de Twilio). WhatsApp desactivado hasta configurar Twilio; el canal por defecto de cada paciente es email.
 - El panel de administración también se puede empaquetar como app de escritorio para Windows y Mac (Electron) — ver `fkt-turnos-frontend/electron/` y el script `npm run desktop:build`. Así la secretaria tiene un solo programa instalable para agenda, reserva telefónica y recordatorios, en vez de una pestaña del navegador.
 
+## Despliegue
+
+Todavía no está desplegado — se está preparando la infraestructura de a poco, sin crear ninguna cuenta ni elegir proveedor final todavía:
+
+- **Backend**: `fkt-turnos-backend/Dockerfile` (multi-stage, build verificado localmente con `docker build`) — sirve para desplegar en cualquier host que corra un Dockerfile (Railway, Render, Fly.io). Toda la config sensible ya sale de variables de entorno (ver `fkt-turnos-backend/README.md`), no hace falta tocar código para desplegar.
+- **Uploads** (fotos de médicos, CVs): ya no dependen de disco local — hay un backend de storage S3-compatible (`STORAGE_TYPE=s3`, AWS S3 o Cloudflare R2) además del local de siempre. Ver `fkt-turnos-backend/README.md`.
+- **Frontend** (`fkt-turnos-frontend/`): `vercel.json` y `public/_redirects` ya agregados — cubren el rewrite de SPA (todas las rutas caen en `index.html`) para Vercel, Netlify y Cloudflare Pages por igual.
+- **Secretos de producción** (`JWT_SECRET`, `MFA_ENCRYPTION_KEY`, contraseña de admin): ya generados y guardados en `.secrets-local/produccion.env` (fuera de git, ver `.gitignore`) — listos para copiar al panel del host que se elija.
+- **Todavía pendiente** (necesita elegir proveedor / crear cuentas — se deja para cuando esté todo listo del lado de negocio):
+  - Elegir y crear cuenta en el host del backend + su Postgres administrado.
+  - Elegir y crear cuenta en el host del frontend/sitio estático.
+  - Crear el bucket S3/R2 real y cargar sus credenciales.
+  - Resolver el acceso al DNS de `fktlomas.com` (lo armó un contratista externo).
+  - SMTP real (Brevo sugerido) y cuenta de Twilio + aprobación de plantilla de WhatsApp en Meta.
+  - Reemplazar las URLs de desarrollo hardcodeadas (`http://localhost:5173`, `http://localhost:5500`, `http://localhost:8080`) por las reales una vez que se conozcan los dominios definitivos — están en los `.html` del sitio estático, en `fkt-turnos-frontend/.env.production` (`VITE_SITE_URL`) y en la app de escritorio (hay que volver a correr `npm run desktop:build` después).
+  - Certificado de firma de código para el instalador de Mac/Windows (hoy sale sin firmar).
+
 ## Pendiente / próximos pasos (fuera del alcance de esta versión)
 
 - Reglas de disponibilidad particulares por médico (turnos rotativos, feriados, múltiples consultorios) — a definir con las especificaciones que faltan.
-- Deploy a un hosting real (elegir proveedor, dominio, base de datos y SMTP en producción). Hay URLs de desarrollo hardcodeadas que hay que reemplazar por las reales una vez desplegado: la URL de la app de turnos (`http://localhost:5173`) en los `.html` del sitio estático, y la URL del sitio estático (`VITE_SITE_URL`, hoy `http://localhost:5500`) en el frontend de turnos. La app de escritorio también apunta a `http://localhost:8080` por defecto (`fkt-turnos-frontend/.env.production`) — hay que actualizarla una vez que el backend esté desplegado, y volver a correr `npm run desktop:build`.
-- Antes de ir a producción: cambiar `JWT_SECRET` y la contraseña del admin bootstrap por valores propios y seguros, y conseguir un certificado de firma de código para el instalador de Mac/Windows (hoy sale sin firmar).
-- Registrar y aprobar la plantilla de WhatsApp Business en Twilio antes de habilitar ese canal en producción (Meta exige aprobación previa de plantillas para mensajes fuera de una conversación iniciada por el paciente).

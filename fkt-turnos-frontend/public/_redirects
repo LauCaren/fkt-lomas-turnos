@@ -1,0 +1,4 @@
+# SPA (react-router-dom): toda ruta que no matchea un archivo real cae en
+# index.html, así el router del lado del cliente puede tomar el control.
+# Funciona en Netlify y Cloudflare Pages tal cual; Vercel usa vercel.json (ver raíz del proyecto).
+/*    /index.html   200
