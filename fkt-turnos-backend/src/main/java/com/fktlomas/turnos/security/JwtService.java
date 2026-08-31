@@ -3,7 +3,9 @@ package com.fktlomas.turnos.security;
 import com.fktlomas.turnos.domain.Usuario;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -13,15 +15,31 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
+@Slf4j
 @Service
 public class JwtService {
+
+    /**
+     * Tiene que coincidir exactamente con el default de app.jwt.secret en application.yml.
+     * Es un valor público (está en el código fuente): si alguna vez queda activo en un
+     * despliegue real, cualquiera podría firmar tokens válidos, incluso de admin. Por eso
+     * nunca se usa para firmar — ver el chequeo en el constructor.
+     */
+    private static final String SECRETO_POR_DEFECTO = "changeme-dev-secret-change-in-prod-please-0123456789";
 
     private final SecretKey key;
     private final long expirationMinutes;
 
     public JwtService(@Value("${app.jwt.secret}") String secret,
                        @Value("${app.jwt.expiration-minutes}") long expirationMinutes) {
-        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        if (SECRETO_POR_DEFECTO.equals(secret)) {
+            log.warn("JWT_SECRET no está configurado — usando una clave aleatoria generada para esta ejecución. "
+                    + "Las sesiones no van a sobrevivir un reinicio del backend. Configurá la variable de entorno "
+                    + "JWT_SECRET con un valor propio y secreto antes de desplegar a producción.");
+            this.key = Keys.secretKeyFor(SignatureAlgorithm.HS384);
+        } else {
+            this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        }
         this.expirationMinutes = expirationMinutes;
     }
 
@@ -48,6 +66,10 @@ public class JwtService {
 
     public String extraerEmail(String token) {
         return parseClaims(token).getSubject();
+    }
+
+    public Instant extraerFechaEmision(String token) {
+        return parseClaims(token).getIssuedAt().toInstant();
     }
 
     public boolean esValido(String token) {

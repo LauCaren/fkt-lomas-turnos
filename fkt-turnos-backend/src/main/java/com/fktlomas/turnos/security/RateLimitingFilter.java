@@ -27,6 +27,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     private static final List<Regla> REGLAS = List.of(
             new Regla("POST", "/api/auth/login", 15, Duration.ofMinutes(5)),
             new Regla("POST", "/api/auth/registro", 8, Duration.ofMinutes(10)),
+            new Regla("POST", "/api/auth/olvide-password", 8, Duration.ofMinutes(10)),
             new Regla("POST", "/api/contacto", 5, Duration.ofMinutes(10)),
             new Regla("POST", "/api/postulaciones", 5, Duration.ofMinutes(10))
     );

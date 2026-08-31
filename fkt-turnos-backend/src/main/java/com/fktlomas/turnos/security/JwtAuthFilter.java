@@ -8,13 +8,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.Instant;
 
 @Component
 @RequiredArgsConstructor
@@ -37,7 +37,18 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (jwtService.esValido(token) && SecurityContextHolder.getContext().getAuthentication() == null) {
             try {
                 String email = jwtService.extraerEmail(token);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                AppUserDetails userDetails = (AppUserDetails) userDetailsService.loadUserByUsername(email);
+
+                Instant emitidoEn = jwtService.extraerFechaEmision(token);
+                Instant passwordCambiadaEn = userDetails.getUsuario().getPasswordChangedAt();
+                if (passwordCambiadaEn != null && emitidoEn.isBefore(passwordCambiadaEn)) {
+                    // Token emitido antes del último cambio de contraseña: se ignora, como si
+                    // no viniera autenticado. Evita que una sesión vieja siga sirviendo hasta
+                    // los 7 días de expiración si la contraseña se cambió por seguridad.
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

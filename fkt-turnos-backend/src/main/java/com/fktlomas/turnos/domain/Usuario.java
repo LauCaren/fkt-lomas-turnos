@@ -50,13 +50,18 @@ public class Usuario {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    /** Cuándo se fijó la contraseña actual — un JWT emitido antes de esto ya no es válido (ver JwtAuthFilter). */
+    @Column(name = "password_changed_at", nullable = false)
+    private Instant passwordChangedAt;
+
     @Column(name = "reset_token", length = 64)
     private String resetToken;
 
     @Column(name = "reset_token_expira")
     private OffsetDateTime resetTokenExpira;
 
-    @Column(name = "mfa_secret", length = 64)
+    @Convert(converter = com.fktlomas.turnos.security.MfaSecretConverter.class)
+    @Column(name = "mfa_secret", length = 255)
     private String mfaSecret;
 
     @Column(name = "mfa_habilitado", nullable = false)
@@ -70,6 +75,24 @@ public class Usuario {
     void prePersist() {
         if (createdAt == null) {
             createdAt = Instant.now();
+        }
+        if (passwordChangedAt == null) {
+            passwordChangedAt = Instant.now();
+        }
+        normalizarEmail();
+    }
+
+    /**
+     * El email es único a nivel de columna, pero esa restricción es sensible a
+     * mayúsculas/minúsculas — sin esto, "Foo@Bar.com" y "foo@bar.com" pasarían
+     * como cuentas distintas. Se normaliza acá, en el único punto por el que
+     * pasa cualquier alta o cambio de email, sin importar desde qué service se
+     * llame (registro, "mi cuenta", alta telefónica del admin, bootstrap).
+     */
+    @PreUpdate
+    void normalizarEmail() {
+        if (email != null) {
+            email = email.trim().toLowerCase();
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.fktlomas.turnos.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -90,6 +91,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalState(IllegalStateException ex) {
         return ResponseEntity.badRequest().body(cuerpo(HttpStatus.BAD_REQUEST, ex.getMessage(), null));
+    }
+
+    /**
+     * Choque contra una restricción única de la base (ej: dos pedidos concurrentes con el
+     * mismo DNI o email) que ya pasó las validaciones de arriba porque, hasta el instante
+     * del INSERT, todavía no existía el conflicto. Sin este handler cae en el 500 genérico
+     * de Spring Boot — no filtra detalles internos en ningún caso, pero un 409 es más claro
+     * para quien está usando la API.
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(cuerpo(HttpStatus.CONFLICT, "Ya existe un registro con esos datos", null));
     }
 
     private Map<String, Object> cuerpo(HttpStatus status, String mensaje, Object detalle) {

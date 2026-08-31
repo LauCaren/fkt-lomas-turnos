@@ -10,11 +10,13 @@ import com.fktlomas.turnos.dto.auth.OlvidePasswordRequest;
 import com.fktlomas.turnos.dto.auth.RegistroRequest;
 import com.fktlomas.turnos.dto.auth.RestablecerPasswordRequest;
 import com.fktlomas.turnos.exception.ConflictoDeDatosException;
+import com.fktlomas.turnos.exception.DemasiadosIntentosException;
 import com.fktlomas.turnos.exception.MfaRequeridaException;
 import com.fktlomas.turnos.exception.RecursoNoEncontradoException;
 import com.fktlomas.turnos.repository.UsuarioRepository;
 import com.fktlomas.turnos.security.AppUserDetails;
 import com.fktlomas.turnos.security.JwtService;
+import com.fktlomas.turnos.security.RateLimiterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,6 +27,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Base64;
 
@@ -33,6 +37,8 @@ import java.util.Base64;
 public class AuthService {
 
     private static final int MINUTOS_VALIDEZ_TOKEN_RESET = 60;
+    private static final int MAX_REGISTROS_POR_HORA = 5;
+    private static final int MAX_OLVIDE_PASSWORD_POR_HORA = 5;
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
@@ -41,12 +47,14 @@ public class AuthService {
     private final TotpService totpService;
     private final EmailService emailService;
     private final LoginRateLimiterService loginRateLimiterService;
+    private final RateLimiterService rateLimiterService;
 
     @Value("${app.frontend-url}")
     private String frontendUrl;
 
     @Transactional
     public AuthResponse registrarPaciente(RegistroRequest request) {
+        verificarLimite(request.email(), MAX_REGISTROS_POR_HORA);
         if (request.pareceSpam()) {
             throw new IllegalArgumentException("No pudimos procesar el registro");
         }
@@ -102,6 +110,7 @@ public class AuthService {
 
     @Transactional
     public void olvidePassword(OlvidePasswordRequest request) {
+        verificarLimite(request.email(), MAX_OLVIDE_PASSWORD_POR_HORA);
         usuarioRepository.findByEmail(request.email()).ifPresent(usuario -> {
             byte[] bytes = new byte[32];
             new SecureRandom().nextBytes(bytes);
@@ -127,6 +136,7 @@ public class AuthService {
         }
 
         usuario.setPasswordHash(passwordEncoder.encode(request.passwordNueva()));
+        usuario.setPasswordChangedAt(Instant.now());
         usuario.setResetToken(null);
         usuario.setResetTokenExpira(null);
         usuarioRepository.save(usuario);
@@ -138,6 +148,7 @@ public class AuthService {
             throw new BadCredentialsException("La contraseña actual no es correcta");
         }
         usuario.setPasswordHash(passwordEncoder.encode(request.passwordNueva()));
+        usuario.setPasswordChangedAt(Instant.now());
         usuarioRepository.save(usuario);
     }
 
@@ -177,5 +188,16 @@ public class AuthService {
             return appUserDetails.getUsuario();
         }
         throw new IllegalStateException("No hay un usuario autenticado válido");
+    }
+
+    /**
+     * Límite por email (además del límite por IP que ya aplica RateLimitingFilter a nivel
+     * de todo el pedido): evita que alguien reparta los intentos entre varias IPs para
+     * seguir apuntando a la misma cuenta/dirección.
+     */
+    private void verificarLimite(String email, int maxPorHora) {
+        if (!rateLimiterService.permitir("auth-email|" + (email == null ? "" : email.trim().toLowerCase()), maxPorHora, Duration.ofHours(1))) {
+            throw new DemasiadosIntentosException("Demasiados pedidos. Probá de nuevo más tarde.");
+        }
     }
 }

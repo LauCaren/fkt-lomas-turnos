@@ -49,6 +49,11 @@ app:
   jwt:
     secret: ${JWT_SECRET:changeme-dev-secret-change-in-prod-please-0123456789}
     expiration-minutes: ${JWT_EXPIRATION_MINUTES:10080}
+  mfa:
+    # Clave AES de 256 bits en Base64 para encriptar el secreto TOTP en la base
+    # (ver MfaSecretConverter). Generar una propia para producción, por ejemplo:
+    # openssl rand -base64 32
+    encryption-key: ${MFA_ENCRYPTION_KEY:changeme-dev-mfa-key-change-in-prod-please}
   admin:
     bootstrap-email: ${ADMIN_BOOTSTRAP_EMAIL:fernando@fktlomas.com}
     bootstrap-password: ${ADMIN_BOOTSTRAP_PASSWORD:cambiar-esta-clave}

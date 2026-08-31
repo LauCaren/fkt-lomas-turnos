@@ -3,6 +3,7 @@ package com.fktlomas.turnos.service;
 import com.fktlomas.turnos.domain.Role;
 import com.fktlomas.turnos.domain.Usuario;
 import com.fktlomas.turnos.repository.UsuarioRepository;
+import com.fktlomas.turnos.validation.Patrones;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,12 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class AdminBootstrapRunner implements CommandLineRunner {
+
+    /**
+     * Coincide con el default de app.admin.bootstrap-password en application.yml — un valor
+     * público (está en el código fuente), así que nunca se usa para crear la cuenta admin.
+     */
+    private static final String PASSWORD_POR_DEFECTO = "cambiar-esta-clave";
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
@@ -27,6 +34,17 @@ public class AdminBootstrapRunner implements CommandLineRunner {
     @Override
     public void run(String... args) {
         if (usuarioRepository.existsByEmail(bootstrapEmail)) {
+            return;
+        }
+        if (PASSWORD_POR_DEFECTO.equals(bootstrapPassword)) {
+            log.error("No se creó el usuario admin ({}): falta configurar ADMIN_BOOTSTRAP_PASSWORD con una "
+                    + "contraseña propia — el valor por defecto es público (está en el código fuente) y nunca se usa "
+                    + "para crear la cuenta. Configurá la variable de entorno y reiniciá la aplicación.", bootstrapEmail);
+            return;
+        }
+        if (!bootstrapPassword.matches(Patrones.PASSWORD_FUERTE)) {
+            log.error("No se creó el usuario admin ({}): ADMIN_BOOTSTRAP_PASSWORD no cumple los requisitos de "
+                    + "seguridad ({}).", bootstrapEmail, Patrones.PASSWORD_FUERTE_MENSAJE);
             return;
         }
         Usuario admin = new Usuario();

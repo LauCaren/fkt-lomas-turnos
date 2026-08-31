@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -71,6 +72,16 @@ public class PostulacionService {
         }
         if (cv.getSize() > TAMANO_MAXIMO_BYTES) {
             throw new ArchivoInvalidoException("El CV no puede superar los 5MB");
+        }
+        // El Content-Type de arriba lo declara el navegador — se puede falsificar. Se verifica
+        // además que el archivo empiece con la firma real de un PDF ("%PDF-").
+        try (var in = cv.getInputStream()) {
+            byte[] firma = in.readNBytes(5);
+            if (!new String(firma, StandardCharsets.US_ASCII).equals("%PDF-")) {
+                throw new ArchivoInvalidoException("El archivo no es un PDF válido");
+            }
+        } catch (IOException e) {
+            throw new ArchivoInvalidoException("El archivo no es un PDF válido");
         }
     }
 

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -148,6 +149,16 @@ public class MedicoService {
         }
         if (archivo.getSize() > TAMANO_MAXIMO_BYTES) {
             throw new ArchivoInvalidoException("La imagen no puede superar los 5MB");
+        }
+        // El Content-Type de arriba lo declara el navegador — se puede falsificar. Acá se
+        // verifica que el archivo sea realmente una imagen decodificable, no cualquier cosa
+        // subida con una extensión/mimetype falso.
+        try {
+            if (ImageIO.read(archivo.getInputStream()) == null) {
+                throw new ArchivoInvalidoException("El archivo no es una imagen válida");
+            }
+        } catch (IOException e) {
+            throw new ArchivoInvalidoException("El archivo no es una imagen válida");
         }
         try {
             Path directorio = Path.of(uploadsDir, "medicos", subcarpeta);

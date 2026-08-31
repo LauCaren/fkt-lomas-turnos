@@ -5,11 +5,13 @@ import com.fktlomas.turnos.dto.PostulacionDto;
 import com.fktlomas.turnos.service.PostulacionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RestController
@@ -33,9 +35,14 @@ public class AdminPostulacionController {
     public ResponseEntity<Resource> descargarCv(@PathVariable Long id) {
         Postulacion postulacion = postulacionService.obtenerEntidad(id);
         Resource recurso = postulacionService.descargarCv(id);
+        // El nombre original lo eligió quien subió el CV: nunca se concatena crudo en el
+        // header, se arma con el builder de Spring para que quede correctamente escapado.
+        ContentDisposition disposition = ContentDisposition.attachment()
+                .filename(postulacion.getCvNombreOriginal(), StandardCharsets.UTF_8)
+                .build();
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_PDF)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + postulacion.getCvNombreOriginal() + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
                 .body(recurso);
     }
 }
