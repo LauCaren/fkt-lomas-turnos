@@ -28,7 +28,7 @@ export default function LoginPage() {
       <p style={{ marginTop: 10, color: 'var(--muted)' }}>Ingresá con tu email y contraseña para sacar o revisar tus turnos.</p>
 
       <form onSubmit={handleSubmit} className="card" style={{ marginTop: 28 }}>
-        {error && <div className="alert alert-error">{error}</div>}
+        {error && <div className="alert alert-error" role="alert">{error}</div>}
         <div className="field">
           <label htmlFor="email">Email</label>
           <input id="email" name="email" type="email" required disabled={requiereMfa} value={form.email} onChange={handleChange} />
