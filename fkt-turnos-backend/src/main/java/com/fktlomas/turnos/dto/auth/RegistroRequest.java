@@ -29,7 +29,7 @@ public record RegistroRequest(
         Genero genero,
 
         @NotBlank(message = "La contraseña es obligatoria")
-        @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
+        @Pattern(regexp = Patrones.PASSWORD_FUERTE, message = Patrones.PASSWORD_FUERTE_MENSAJE)
         String password,
 
         @AssertTrue(message = "Debés aceptar la política de privacidad")

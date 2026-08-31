@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { registrarPaciente } from './authSlice';
 import PasswordInput from '../../components/PasswordInput';
 import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../../constants/obrasSociales';
+import { PATRON_PASSWORD, TITULO_PASSWORD, AYUDA_PASSWORD } from '../../constants/validacion';
 import { SITE_URL } from '../../config';
 
 const GENEROS = [
@@ -84,7 +85,8 @@ export default function RegisterPage() {
         </div>
         <div className="field">
           <label htmlFor="password">Contraseña</label>
-          <PasswordInput id="password" name="password" required minLength={6} value={form.password} onChange={handleChange} />
+          <PasswordInput id="password" name="password" required minLength={8} pattern={PATRON_PASSWORD} title={TITULO_PASSWORD} value={form.password} onChange={handleChange} />
+          <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{AYUDA_PASSWORD}</p>
         </div>
 
         <div style={{ position: 'absolute', left: -9999, opacity: 0 }} aria-hidden="true">

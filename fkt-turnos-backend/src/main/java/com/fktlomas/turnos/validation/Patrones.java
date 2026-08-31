@@ -8,6 +8,12 @@ public final class Patrones {
     /** Igual que TELEFONO pero también acepta vacío, para campos opcionales. */
     public static final String TELEFONO_OPCIONAL = "^$|" + TELEFONO;
 
+    /** Mínimo 8 caracteres, con al menos una mayúscula, una minúscula, un número y un símbolo. */
+    public static final String PASSWORD_FUERTE = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}$";
+
+    public static final String PASSWORD_FUERTE_MENSAJE =
+            "La contraseña debe tener al menos 8 caracteres, con mayúsculas, minúsculas, números y un símbolo";
+
     private Patrones() {
     }
 }

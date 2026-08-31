@@ -28,10 +28,38 @@ export const cambiarPasswordCuenta = createAsyncThunk('cuenta/cambiarPassword', 
   }
 });
 
+export const iniciarMfaCuenta = createAsyncThunk('cuenta/iniciarMfa', async (_, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.post('/api/mi-cuenta/mfa/iniciar');
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
+export const activarMfaCuenta = createAsyncThunk('cuenta/activarMfa', async (codigo, { rejectWithValue }) => {
+  try {
+    await axiosClient.post('/api/mi-cuenta/mfa/activar', { codigo });
+    return true;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
+export const desactivarMfaCuenta = createAsyncThunk('cuenta/desactivarMfa', async (codigo, { rejectWithValue }) => {
+  try {
+    await axiosClient.post('/api/mi-cuenta/mfa/desactivar', { codigo });
+    return true;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
 const cuentaSlice = createSlice({
   name: 'cuenta',
   initialState: {
     perfil: null,
+    mfaSetup: null,
     error: null,
     mensajeExito: null,
   },
@@ -51,7 +79,13 @@ const cuentaSlice = createSlice({
       })
       .addCase(actualizarPerfil.rejected, (state, action) => { state.error = action.payload; })
       .addCase(cambiarPasswordCuenta.fulfilled, (state) => { state.mensajeExito = 'Contraseña actualizada correctamente'; })
-      .addCase(cambiarPasswordCuenta.rejected, (state, action) => { state.error = action.payload; });
+      .addCase(cambiarPasswordCuenta.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(iniciarMfaCuenta.fulfilled, (state, action) => { state.mfaSetup = action.payload; })
+      .addCase(iniciarMfaCuenta.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(activarMfaCuenta.fulfilled, (state) => { state.mfaSetup = null; state.mensajeExito = 'Verificación en dos pasos activada'; })
+      .addCase(activarMfaCuenta.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(desactivarMfaCuenta.fulfilled, (state) => { state.mensajeExito = 'Verificación en dos pasos desactivada'; })
+      .addCase(desactivarMfaCuenta.rejected, (state, action) => { state.error = action.payload; });
   },
 });
 

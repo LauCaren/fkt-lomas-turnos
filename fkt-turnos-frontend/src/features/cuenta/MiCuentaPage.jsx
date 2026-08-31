@@ -1,9 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchMiPerfil, actualizarPerfil, cambiarPasswordCuenta, limpiarMensajesCuenta } from './cuentaSlice';
+import {
+  fetchMiPerfil, actualizarPerfil, cambiarPasswordCuenta, limpiarMensajesCuenta,
+  iniciarMfaCuenta, activarMfaCuenta, desactivarMfaCuenta,
+} from './cuentaSlice';
 import { actualizarUsuarioLocal } from '../auth/authSlice';
 import PasswordInput from '../../components/PasswordInput';
+import SeccionMfa from '../../components/SeccionMfa';
 import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../../constants/obrasSociales';
+import { PATRON_PASSWORD, TITULO_PASSWORD, AYUDA_PASSWORD } from '../../constants/validacion';
 
 const GENEROS = [
   { value: '', label: 'Seleccioná una opción' },
@@ -94,7 +99,8 @@ function CambiarPassword() {
       </div>
       <div className="field">
         <label>Contraseña nueva</label>
-        <PasswordInput required minLength={6} value={form.passwordNueva} onChange={(e) => setForm({ ...form, passwordNueva: e.target.value })} />
+        <PasswordInput required minLength={8} pattern={PATRON_PASSWORD} title={TITULO_PASSWORD} value={form.passwordNueva} onChange={(e) => setForm({ ...form, passwordNueva: e.target.value })} />
+        <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{AYUDA_PASSWORD}</p>
       </div>
       <button type="submit" className="btn btn-primary">Actualizar contraseña</button>
     </form>
@@ -103,7 +109,7 @@ function CambiarPassword() {
 
 export default function MiCuentaPage() {
   const dispatch = useDispatch();
-  const { perfil, error, mensajeExito } = useSelector((state) => state.cuenta);
+  const { perfil, mfaSetup, error, mensajeExito } = useSelector((state) => state.cuenta);
 
   useEffect(() => {
     dispatch(fetchMiPerfil());
@@ -127,6 +133,15 @@ export default function MiCuentaPage() {
           </div>
           <h2 style={{ fontSize: 20, marginTop: 32, marginBottom: 16 }}>Cambiar contraseña</h2>
           <CambiarPassword />
+
+          <h2 style={{ fontSize: 20, marginTop: 32, marginBottom: 16 }}>Verificación en dos pasos</h2>
+          <SeccionMfa
+            perfil={perfil}
+            mfaSetup={mfaSetup}
+            onIniciar={() => dispatch(iniciarMfaCuenta())}
+            onActivar={(codigo) => dispatch(activarMfaCuenta(codigo)).unwrap().then(() => dispatch(fetchMiPerfil()))}
+            onDesactivar={(codigo) => dispatch(desactivarMfaCuenta(codigo)).unwrap().then(() => dispatch(fetchMiPerfil()))}
+          />
         </>
       )}
     </div>

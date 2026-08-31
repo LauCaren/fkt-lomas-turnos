@@ -17,7 +17,7 @@ function IconOjo({ oculto }) {
   );
 }
 
-export default function PasswordInput({ id, name, value, onChange, required, minLength, disabled, autoFocus, placeholder }) {
+export default function PasswordInput({ id, name, value, onChange, required, minLength, disabled, autoFocus, placeholder, pattern, title }) {
   const [visible, setVisible] = useState(false);
 
   return (
@@ -31,6 +31,8 @@ export default function PasswordInput({ id, name, value, onChange, required, min
         disabled={disabled}
         autoFocus={autoFocus}
         placeholder={placeholder}
+        pattern={pattern}
+        title={title}
         value={value}
         onChange={onChange}
       />
