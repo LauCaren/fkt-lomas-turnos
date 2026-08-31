@@ -95,6 +95,7 @@
   .team-card ul{margin-top:16px; display:flex; flex-direction:column; gap:8px;}
   .team-card li{font-size:14.5px; color:var(--ink-soft); padding-left:16px; position:relative;}
   .team-card li::before{content:""; position:absolute; left:0; top:9px; width:6px; height:2px; background:var(--teal);}
+  .team-card p{margin-top:12px; font-size:13.5px; color:var(--muted); line-height:1.6;}
   @media (max-width:700px){ .team-grid{grid-template-columns:1fr;} }
 
   /* ---------- FICHA DE PROFESIONAL (modal) ---------- */
@@ -245,11 +246,95 @@
             <li>Lic. Fátima Zánchez</li>
           </ul>
         </div>
-        <div class="team-card" style="grid-column:1 / -1;">
+        <div class="team-card">
+          <span class="tag">Osteopatía</span>
+          <h3>Terapia manual y enfoque global del cuerpo</h3>
+          <ul>
+            <li>Lic. Pablo Sorin</li>
+          </ul>
+        </div>
+        <div class="team-card">
           <span class="tag">Dermopatología</span>
           <h3>Diagnóstico y cuidado de la piel</h3>
           <ul>
             <li>Dra. Graciela Sanchez</li>
+          </ul>
+        </div>
+        <div class="team-card">
+          <span class="tag">Traumatología</span>
+          <h3>Lesiones, columna y articulaciones</h3>
+          <ul>
+            <li>Dr. Cristian Indrieri — pierna, tobillo y pie</li>
+            <li>Dr. Marcelo Guerra — rodilla</li>
+            <li>Dr. Maximiliano Garavaglia — bio-ortopedia</li>
+            <li>Dra. Tamara Sisi — columna</li>
+            <li>Dr. Leonel Shteimberg — columna</li>
+          </ul>
+          <p>Bio-ortopedia: artrosis, tendinopatías, lumbociatalgias y cervicobraquialgias, con plasma rico en plaquetas, ozonoterapia y terapia neural.</p>
+        </div>
+        <div class="team-card">
+          <span class="tag">Reumatología</span>
+          <h3>Enfermedades reumáticas y osteoporosis</h3>
+          <ul>
+            <li>Dr. Gonzalo Rodriguez</li>
+          </ul>
+        </div>
+        <div class="team-card">
+          <span class="tag">Flebología</span>
+          <h3>Venas y cirugía plástica</h3>
+          <ul>
+            <li>Dr. Gaston Farjat</li>
+            <li>Dr. Daniel Oyarzun</li>
+          </ul>
+        </div>
+        <div class="team-card">
+          <span class="tag">Genética ADN</span>
+          <h3>Estudios genéticos y de filiación</h3>
+          <ul>
+            <li>Dr. Sergio Lozano — investigaciones biomoleculares</li>
+          </ul>
+        </div>
+        <div class="team-card">
+          <span class="tag">Nutrición</span>
+          <h3>Planes alimentarios personalizados</h3>
+          <ul>
+            <li>Dra. Elfi Molina</li>
+            <li>Lic. Gabriela Morganti</li>
+          </ul>
+        </div>
+        <div class="team-card">
+          <span class="tag">Psicología</span>
+          <h3>Acompañamiento y salud mental</h3>
+          <ul>
+            <li>Lic. Lorena Morganti</li>
+          </ul>
+        </div>
+        <div class="team-card">
+          <span class="tag">Psiquiatría</span>
+          <h3>Diagnóstico y tratamiento psiquiátrico</h3>
+          <ul>
+            <li>Dr. Aristides Damiano</li>
+          </ul>
+        </div>
+        <div class="team-card">
+          <span class="tag">Psicopedagogía</span>
+          <h3>Aprendizaje y desarrollo</h3>
+          <ul>
+            <li>Lic. Vanina Kilb</li>
+          </ul>
+        </div>
+        <div class="team-card">
+          <span class="tag">Estética</span>
+          <h3>Tratamientos faciales y corporales</h3>
+          <ul>
+            <li>Adriana Fernández</li>
+          </ul>
+        </div>
+        <div class="team-card">
+          <span class="tag">Pilates</span>
+          <h3>Fortalecimiento y control corporal</h3>
+          <ul>
+            <li>Emilia Aedo</li>
           </ul>
         </div>
       </div>
@@ -439,7 +524,8 @@
     .then((medicos) => {
       const porNombre = new Map(medicos.map((m) => [m.nombreCompleto.trim(), m]));
       document.querySelectorAll('.team-card li').forEach((li) => {
-        const medico = porNombre.get(li.textContent.trim());
+        const nombrePlano = li.textContent.split('—')[0].trim();
+        const medico = porNombre.get(nombrePlano);
         if (!medico) return;
         li.classList.add('clickable');
         li.setAttribute('role', 'button');

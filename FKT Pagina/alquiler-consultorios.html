@@ -79,6 +79,11 @@
   .page-hero h1{font-size:clamp(30px,4vw,46px); margin-top:14px; max-width:680px;}
   .page-hero p{margin-top:16px; max-width:560px; color:var(--muted); font-size:16.5px;}
 
+  .amenities-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px 32px; max-width:760px;}
+  .amenity-item{display:flex; align-items:flex-start; gap:12px; font-size:15px; color:var(--ink-soft);}
+  .amenity-item svg{flex-shrink:0; width:20px; height:20px; margin-top:1px; color:var(--teal-dark);}
+  @media (max-width:600px){ .amenities-grid{grid-template-columns:1fr;} }
+
   .form-card{background:var(--white); border:1px solid var(--line); border-radius:var(--radius-m); padding:40px; max-width:560px;}
   .field{display:flex; flex-direction:column; gap:6px; margin-bottom:18px;}
   .field label{font-size:13.5px; font-weight:600; color:var(--ink-soft);}
@@ -156,6 +161,21 @@
     </div>
   </section>
 
+  <section style="padding-top:0; padding-bottom:24px;">
+    <div class="wrap">
+      <div class="amenities-grid reveal">
+        <div class="amenity-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 13 L10 18 L19 7"/></svg> Recepcionista para tus pacientes</div>
+        <div class="amenity-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 13 L10 18 L19 7"/></svg> WiFi</div>
+        <div class="amenity-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 13 L10 18 L19 7"/></svg> Sala de espera con capacidad para 12 personas</div>
+        <div class="amenity-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 13 L10 18 L19 7"/></svg> Aire acondicionado y calefacción</div>
+        <div class="amenity-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 13 L10 18 L19 7"/></svg> Dispenser de agua fría/caliente y cocina</div>
+        <div class="amenity-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 13 L10 18 L19 7"/></svg> Estacionamiento libre</div>
+        <div class="amenity-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 13 L10 18 L19 7"/></svg> Barrio residencial y tranquilo en Lomas de Zamora</div>
+        <div class="amenity-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 13 L10 18 L19 7"/></svg> Atención de lunes a viernes de 8 a 20 hs</div>
+      </div>
+    </div>
+  </section>
+
   <section style="padding-top:24px;">
     <div class="wrap">
       <form id="formAlquiler" class="form-card reveal">
@@ -171,7 +191,7 @@
         </div>
         <div class="field">
           <label for="telefono">Teléfono</label>
-          <input id="telefono" name="telefono" maxlength="30" pattern="\+?[0-9\s\-()]{6,20}" title="Solo números, espacios, guiones o paréntesis (6 a 20 caracteres)">
+          <input id="telefono" name="telefono" maxlength="30" pattern="\+?[0-9\s\-\(\)]{6,20}" title="Solo números, espacios, guiones o paréntesis (6 a 20 caracteres)">
         </div>
         <div class="field">
           <label for="mensaje">Contanos qué necesitás</label>
