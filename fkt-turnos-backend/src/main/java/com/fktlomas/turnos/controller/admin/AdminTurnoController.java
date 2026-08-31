@@ -1,5 +1,6 @@
 package com.fktlomas.turnos.controller.admin;
 
+import com.fktlomas.turnos.domain.EstadoTurno;
 import com.fktlomas.turnos.dto.TurnoAdminDto;
 import com.fktlomas.turnos.dto.admin.ReservarParaPacienteRequest;
 import com.fktlomas.turnos.service.TurnoService;
@@ -25,6 +26,16 @@ public class AdminTurnoController {
             @RequestParam(required = false) Long medicoId,
             @RequestParam(required = false) Long especialidadId) {
         return turnoService.agenda(desde, hasta, medicoId, especialidadId);
+    }
+
+    @GetMapping("/buscar")
+    public List<TurnoAdminDto> buscar(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+            @RequestParam(required = false) Long medicoId,
+            @RequestParam(required = false) Long especialidadId,
+            @RequestParam(required = false) EstadoTurno estado) {
+        return turnoService.buscarTurnos(desde, hasta, medicoId, especialidadId, estado);
     }
 
     @PostMapping("/{id}/reservar-para-paciente")

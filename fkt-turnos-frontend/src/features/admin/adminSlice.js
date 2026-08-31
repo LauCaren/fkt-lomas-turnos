@@ -106,6 +106,17 @@ export const fetchAgenda = createAsyncThunk('admin/fetchAgenda', async ({ fecha,
   }
 });
 
+export const fetchTurnosOcupados = createAsyncThunk('admin/fetchTurnosOcupados', async ({ desde, hasta, medicoId, especialidadId }, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/admin/turnos/buscar', {
+      params: { desde: desde || undefined, hasta: hasta || undefined, medicoId: medicoId || undefined, especialidadId: especialidadId || undefined, estado: 'RESERVADO' },
+    });
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
 export const fetchFeriados = createAsyncThunk('admin/fetchFeriados', async ({ desde, hasta }, { rejectWithValue }) => {
   try {
     const { data } = await axiosClient.get('/api/admin/feriados', { params: { desde, hasta } });
@@ -266,6 +277,8 @@ const adminSlice = createSlice({
     reglasPorMedico: {},
     agenda: [],
     agendaCargando: false,
+    turnosOcupados: [],
+    turnosOcupadosCargando: false,
     feriados: [],
     mfaSetup: null,
     mensajesContacto: [],
@@ -320,6 +333,9 @@ const adminSlice = createSlice({
       .addCase(fetchAgenda.pending, (state) => { state.agendaCargando = true; })
       .addCase(fetchAgenda.fulfilled, (state, action) => { state.agenda = action.payload; state.agendaCargando = false; })
       .addCase(fetchAgenda.rejected, (state, action) => { state.error = action.payload; state.agendaCargando = false; })
+      .addCase(fetchTurnosOcupados.pending, (state) => { state.turnosOcupadosCargando = true; })
+      .addCase(fetchTurnosOcupados.fulfilled, (state, action) => { state.turnosOcupados = action.payload; state.turnosOcupadosCargando = false; })
+      .addCase(fetchTurnosOcupados.rejected, (state, action) => { state.error = action.payload; state.turnosOcupadosCargando = false; })
       .addCase(reservarParaPaciente.fulfilled, (state, action) => {
         state.agenda = state.agenda.map((t) => t.id === action.payload.id ? action.payload : t);
         state.mensajeExito = 'Turno reservado correctamente';

@@ -85,6 +85,16 @@ public class TurnoService {
         return turnoRepository.findAgenda(desde, hasta, medicoId, especialidadId).stream().map(TurnoAdminDto::de).toList();
     }
 
+    private static final LocalDate DESDE_MINIMO = LocalDate.of(2000, 1, 1);
+    private static final LocalDate HASTA_MAXIMO = LocalDate.of(2099, 12, 31);
+
+    @Transactional(readOnly = true)
+    public List<TurnoAdminDto> buscarTurnos(LocalDate desde, LocalDate hasta, Long medicoId, Long especialidadId, EstadoTurno estado) {
+        LocalDate desdeEfectivo = desde != null ? desde : DESDE_MINIMO;
+        LocalDate hastaEfectivo = hasta != null ? hasta : HASTA_MAXIMO;
+        return turnoRepository.buscarTurnos(desdeEfectivo, hastaEfectivo, medicoId, especialidadId, estado).stream().map(TurnoAdminDto::de).toList();
+    }
+
     @Transactional
     public TurnoAdminDto reservarParaPaciente(Long turnoId, ReservarParaPacienteRequest request) {
         Usuario paciente = usuarioRepository.findByDni(request.dni())
