@@ -11,13 +11,13 @@ import java.util.List;
 
 public interface RetiroRepository extends JpaRepository<Retiro, Long> {
 
+    /** desde/hasta SIEMPRE se pasan no-nulos — ver comentario en IngresoRepository.buscar. */
     @Query("""
             select r from Retiro r
             join fetch r.medico
             join fetch r.entregadoPor
             where (:medicoId is null or r.medico.id = :medicoId)
-            and (:desde is null or r.fechaHora >= :desde)
-            and (:hasta is null or r.fechaHora < :hasta)
+            and r.fechaHora >= :desde and r.fechaHora < :hasta
             order by r.fechaHora desc
             """)
     List<Retiro> buscar(@Param("medicoId") Long medicoId, @Param("desde") Instant desde, @Param("hasta") Instant hasta);

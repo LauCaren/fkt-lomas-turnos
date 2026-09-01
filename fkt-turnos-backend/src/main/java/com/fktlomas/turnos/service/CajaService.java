@@ -36,6 +36,12 @@ public class CajaService {
     private final TurnoRepository turnoRepository;
     private final ConfiguracionCajaRepository configuracionCajaRepository;
 
+    // Postgres no puede inferir el tipo de un parámetro cuyo único uso en la consulta es
+    // "? is null" (a diferencia de medicoId, que sí resuelve bien) — se evita pasando
+    // siempre un rango concreto en vez de nulls "abiertos".
+    private static final LocalDate DESDE_MINIMO = LocalDate.of(2000, 1, 1);
+    private static final LocalDate HASTA_MAXIMO = LocalDate.of(2099, 12, 31);
+
     @Transactional(readOnly = true)
     public ConfiguracionCajaDto obtenerConfiguracion() {
         return ConfiguracionCajaDto.de(configuracionCajaRepository.findById((short) 1)
@@ -53,7 +59,9 @@ public class CajaService {
 
     @Transactional(readOnly = true)
     public List<IngresoDto> listarIngresos(Long medicoId, LocalDate desde, LocalDate hasta) {
-        return ingresoRepository.buscar(medicoId, desde, hasta).stream().map(IngresoDto::de).toList();
+        LocalDate desdeEfectivo = desde != null ? desde : DESDE_MINIMO;
+        LocalDate hastaEfectivo = hasta != null ? hasta : HASTA_MAXIMO;
+        return ingresoRepository.buscar(medicoId, desdeEfectivo, hastaEfectivo).stream().map(IngresoDto::de).toList();
     }
 
     @Transactional(readOnly = true)
@@ -93,8 +101,10 @@ public class CajaService {
 
     @Transactional(readOnly = true)
     public List<RetiroDto> listarRetiros(Long medicoId, LocalDate desde, LocalDate hasta) {
-        Instant desdeInstant = desde != null ? desde.atStartOfDay(ZoneId.systemDefault()).toInstant() : null;
-        Instant hastaInstant = hasta != null ? hasta.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant() : null;
+        LocalDate desdeEfectivo = desde != null ? desde : DESDE_MINIMO;
+        LocalDate hastaEfectivo = hasta != null ? hasta : HASTA_MAXIMO;
+        Instant desdeInstant = desdeEfectivo.atStartOfDay(ZoneId.systemDefault()).toInstant();
+        Instant hastaInstant = hastaEfectivo.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant();
         return retiroRepository.buscar(medicoId, desdeInstant, hastaInstant).stream().map(RetiroDto::de).toList();
     }
 

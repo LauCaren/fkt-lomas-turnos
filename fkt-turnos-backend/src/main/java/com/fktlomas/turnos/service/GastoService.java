@@ -31,6 +31,10 @@ import java.util.UUID;
 public class GastoService {
 
     private static final long TAMANO_MAXIMO_BYTES = 5L * 1024 * 1024;
+    // Postgres no puede inferir el tipo de un parámetro cuyo único uso es "? is null" —
+    // se evita pasando siempre un rango concreto (ver GastoRepository.buscar).
+    private static final LocalDate DESDE_MINIMO = LocalDate.of(2000, 1, 1);
+    private static final LocalDate HASTA_MAXIMO = LocalDate.of(2099, 12, 31);
 
     private final GastoRepository gastoRepository;
     private final CategoriaGastoRepository categoriaGastoRepository;
@@ -53,7 +57,9 @@ public class GastoService {
 
     @Transactional(readOnly = true)
     public List<GastoDto> listar(Long categoriaId, LocalDate desde, LocalDate hasta) {
-        return gastoRepository.buscar(categoriaId, desde, hasta).stream().map(GastoDto::de).toList();
+        LocalDate desdeEfectivo = desde != null ? desde : DESDE_MINIMO;
+        LocalDate hastaEfectivo = hasta != null ? hasta : HASTA_MAXIMO;
+        return gastoRepository.buscar(categoriaId, desdeEfectivo, hastaEfectivo).stream().map(GastoDto::de).toList();
     }
 
     @Transactional

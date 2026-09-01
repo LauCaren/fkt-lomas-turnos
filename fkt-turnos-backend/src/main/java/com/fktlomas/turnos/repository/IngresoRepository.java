@@ -11,14 +11,19 @@ import java.util.List;
 
 public interface IngresoRepository extends JpaRepository<Ingreso, Long> {
 
+    /**
+     * desde/hasta SIEMPRE se pasan no-nulos (ver CajaService.listarIngresos) — Postgres no
+     * puede inferir el tipo de un parámetro cuyo único uso en la consulta es "? is null" (a
+     * diferencia de medicoId, que sí lo resuelve bien); pasar un rango con centinelas evita
+     * el problema de raíz en vez de tener que castear el parámetro a mano en el JPQL.
+     */
     @Query("""
             select i from Ingreso i
             join fetch i.medico m
             left join fetch i.turno
             join fetch i.registradoPor
             where (:medicoId is null or m.id = :medicoId)
-            and (:desde is null or i.fecha >= :desde)
-            and (:hasta is null or i.fecha <= :hasta)
+            and i.fecha between :desde and :hasta
             order by i.fecha desc, i.createdAt desc
             """)
     List<Ingreso> buscar(@Param("medicoId") Long medicoId, @Param("desde") LocalDate desde, @Param("hasta") LocalDate hasta);

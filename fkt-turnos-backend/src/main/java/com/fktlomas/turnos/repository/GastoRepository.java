@@ -11,13 +11,13 @@ import java.util.List;
 
 public interface GastoRepository extends JpaRepository<Gasto, Long> {
 
+    /** desde/hasta SIEMPRE se pasan no-nulos — ver comentario en IngresoRepository.buscar. */
     @Query("""
             select g from Gasto g
             join fetch g.categoria
             join fetch g.registradoPor
             where (:categoriaId is null or g.categoria.id = :categoriaId)
-            and (:desde is null or g.fecha >= :desde)
-            and (:hasta is null or g.fecha <= :hasta)
+            and g.fecha between :desde and :hasta
             order by g.fecha desc, g.createdAt desc
             """)
     List<Gasto> buscar(@Param("categoriaId") Long categoriaId, @Param("desde") LocalDate desde, @Param("hasta") LocalDate hasta);
