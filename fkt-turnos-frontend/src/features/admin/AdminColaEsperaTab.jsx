@@ -19,7 +19,7 @@ export default function AdminColaEsperaTab() {
 
   useEffect(() => {
     dispatch(fetchColaEsperaAdmin({ fecha, medicoId }));
-    const intervalo = setInterval(() => dispatch(fetchColaEsperaAdmin({ fecha, medicoId })), 30000);
+    const intervalo = setInterval(() => dispatch(fetchColaEsperaAdmin({ fecha, medicoId })), 10000);
     return () => clearInterval(intervalo);
   }, [dispatch, fecha, medicoId]);
 

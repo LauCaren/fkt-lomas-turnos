@@ -68,6 +68,15 @@ export const crearOActualizarCredencialesMedico = createAsyncThunk('admin/crearO
   }
 });
 
+export const fetchResumenAdmin = createAsyncThunk('admin/fetchResumen', async (_, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/admin/resumen');
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
 export const fetchReglas = createAsyncThunk('admin/fetchReglas', async (medicoId, { rejectWithValue }) => {
   try {
     const { data } = await axiosClient.get(`/api/admin/medicos/${medicoId}/reglas-disponibilidad`);
@@ -310,6 +319,7 @@ export const enviarMensajeManual = createAsyncThunk('admin/enviarMensajeManual',
 const adminSlice = createSlice({
   name: 'admin',
   initialState: {
+    resumen: null,
     medicos: [],
     reglasPorMedico: {},
     agenda: [],
@@ -336,6 +346,8 @@ const adminSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(fetchResumenAdmin.fulfilled, (state, action) => { state.resumen = action.payload; })
+      .addCase(fetchResumenAdmin.rejected, (state, action) => { state.error = action.payload; })
       .addCase(fetchMedicosAdmin.fulfilled, (state, action) => { state.medicos = action.payload; })
       .addCase(crearMedico.fulfilled, (state, action) => { state.medicos.push(action.payload); })
       .addCase(crearMedico.rejected, (state, action) => { state.error = action.payload; })

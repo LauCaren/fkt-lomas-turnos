@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import AdminResumenTab from './AdminResumenTab';
 import AdminAgendaTab from './AdminAgendaTab';
 import AdminTurnosAgendadosTab from './AdminTurnosAgendadosTab';
 import AdminMedicosTab from './AdminMedicosTab';
@@ -9,14 +10,17 @@ import AdminRecordatoriosTab from './AdminRecordatoriosTab';
 import AdminCuentaTab from './AdminCuentaTab';
 import AdminCajaTab from '../caja/AdminCajaTab';
 import AdminKinesiologiaTab from '../kinesiologia/AdminKinesiologiaTab';
+import AdminReportesTab from './AdminReportesTab';
 
 const TABS = [
+  { id: 'resumen', label: 'Resumen' },
   { id: 'agenda', label: 'Agenda' },
   { id: 'turnos-agendados', label: 'Ver Turnos Agendados' },
   { id: 'cola-espera', label: 'Cola de espera' },
   { id: 'medicos', label: 'Médicos y horarios' },
   { id: 'kinesiologia', label: 'Kinesiología' },
   { id: 'caja', label: 'Caja' },
+  { id: 'reportes', label: 'Reportes' },
   { id: 'recordatorios', label: 'Recordatorios' },
   { id: 'mensajes', label: 'Alquiler de consultorios' },
   { id: 'postulaciones', label: 'Postulaciones' },
@@ -24,7 +28,7 @@ const TABS = [
 ];
 
 export default function AdminDashboardPage() {
-  const [tab, setTab] = useState('agenda');
+  const [tab, setTab] = useState('resumen');
 
   return (
     <div>
@@ -52,12 +56,20 @@ export default function AdminDashboardPage() {
         ))}
       </div>
 
+      {tab === 'resumen' && (
+        <AdminResumenTab
+          irACola={() => setTab('cola-espera')}
+          irAKinesiologia={() => setTab('kinesiologia')}
+          irACaja={() => setTab('caja')}
+        />
+      )}
       {tab === 'agenda' && <AdminAgendaTab />}
       {tab === 'turnos-agendados' && <AdminTurnosAgendadosTab />}
       {tab === 'cola-espera' && <AdminColaEsperaTab />}
       {tab === 'medicos' && <AdminMedicosTab />}
       {tab === 'kinesiologia' && <AdminKinesiologiaTab />}
       {tab === 'caja' && <AdminCajaTab />}
+      {tab === 'reportes' && <AdminReportesTab />}
       {tab === 'recordatorios' && <AdminRecordatoriosTab />}
       {tab === 'mensajes' && <AdminMensajesTab />}
       {tab === 'postulaciones' && <AdminPostulacionesTab />}

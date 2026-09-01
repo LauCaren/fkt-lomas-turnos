@@ -125,7 +125,11 @@ function ColaEsperaTab() {
   const dispatch = useDispatch();
   const { colaEspera, colaEsperaCargando } = useSelector((state) => state.medico);
 
-  useEffect(() => { dispatch(fetchColaEsperaMedico()); }, [dispatch]);
+  useEffect(() => {
+    dispatch(fetchColaEsperaMedico());
+    const intervalo = setInterval(() => dispatch(fetchColaEsperaMedico()), 10000);
+    return () => clearInterval(intervalo);
+  }, [dispatch]);
 
   return (
     <div>
