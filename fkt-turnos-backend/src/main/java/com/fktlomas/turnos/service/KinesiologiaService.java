@@ -1,6 +1,7 @@
 package com.fktlomas.turnos.service;
 
 import com.fktlomas.turnos.domain.*;
+import com.fktlomas.turnos.dto.kinesiologia.HorarioDisponibleDto;
 import com.fktlomas.turnos.dto.kinesiologia.PlanKinesiologiaDto;
 import com.fktlomas.turnos.dto.kinesiologia.SesionKinesiologiaDto;
 import com.fktlomas.turnos.exception.ArchivoInvalidoException;
@@ -35,6 +36,16 @@ public class KinesiologiaService {
     /** Tope de semanas a explorar buscando huecos libres antes de darse por vencido con lo que se pudo generar. */
     private static final int LIMITE_SEMANAS_BUSQUEDA = 78;
 
+    private static final Map<DayOfWeek, String> DIA_EN_ESPANOL = Map.of(
+            DayOfWeek.MONDAY, "lunes",
+            DayOfWeek.TUESDAY, "martes",
+            DayOfWeek.WEDNESDAY, "miércoles",
+            DayOfWeek.THURSDAY, "jueves",
+            DayOfWeek.FRIDAY, "viernes",
+            DayOfWeek.SATURDAY, "sábado",
+            DayOfWeek.SUNDAY, "domingo"
+    );
+
     private final PlanKinesiologiaRepository planRepository;
     private final TurnoRepository turnoRepository;
     private final UsuarioRepository usuarioRepository;
@@ -62,6 +73,46 @@ public class KinesiologiaService {
     @Transactional(readOnly = true)
     public List<PlanKinesiologiaDto> buscarAdmin(EstadoPlanKinesiologia estado) {
         return planRepository.buscar(estado).stream().map(this::conSesiones).toList();
+    }
+
+    /**
+     * Horarios semanales reales que se pueden elegir para un plan: si se pasa medicoId, solo
+     * los de ese kinesiólogo; si se omite (el paciente eligió "me da igual quién"), los de
+     * todos los kinesiólogos activos juntos, para que arme el plan a partir de una lista real
+     * en vez de un día/hora que el médico capaz no atiende.
+     */
+    @Transactional(readOnly = true)
+    public List<HorarioDisponibleDto> horariosDisponibles(Long medicoId) {
+        List<Medico> kinesiologos;
+        if (medicoId != null) {
+            Medico medico = medicoRepository.findById(medicoId)
+                    .orElseThrow(() -> new RecursoNoEncontradoException("Médico no encontrado"));
+            if (!medico.getEspecialidad().isEsKinesiologia()) {
+                throw new IllegalArgumentException("El médico elegido no es de kinesiología");
+            }
+            kinesiologos = List.of(medico);
+        } else {
+            kinesiologos = medicoRepository.findByActivoTrue().stream()
+                    .filter(m -> m.getEspecialidad().isEsKinesiologia())
+                    .toList();
+        }
+
+        List<HorarioDisponibleDto> resultado = new ArrayList<>();
+        for (Medico medico : kinesiologos) {
+            int duracion = medico.getDuracionTurnoMinutos();
+            for (ReglaDisponibilidad regla : reglaRepository.findByMedicoId(medico.getId())) {
+                LocalTime inicio = regla.getHoraInicio();
+                while (inicio.plusMinutes(duracion).compareTo(regla.getHoraFin()) <= 0) {
+                    resultado.add(new HorarioDisponibleDto(medico.getId(), medico.getNombreCompleto(), regla.getDiaSemana(), inicio));
+                    inicio = inicio.plusMinutes(duracion);
+                }
+            }
+        }
+        resultado.sort(Comparator
+                .comparingInt((HorarioDisponibleDto h) -> h.diaSemana().getValue())
+                .thenComparing(HorarioDisponibleDto::horaInicio)
+                .thenComparing(HorarioDisponibleDto::medicoNombre));
+        return resultado;
     }
 
     private PlanKinesiologiaDto conSesiones(PlanKinesiologia plan) {
@@ -151,7 +202,7 @@ public class KinesiologiaService {
         boolean encaja = reglas.stream().anyMatch(r ->
                 r.getDiaSemana() == dia && !horaInicio.isBefore(r.getHoraInicio()) && !horaFin.isAfter(r.getHoraFin()));
         if (!encaja) {
-            throw new IllegalArgumentException("El médico no atiende los " + dia + " a las " + horaInicio + " según su horario cargado");
+            throw new IllegalArgumentException("El médico no atiende los " + DIA_EN_ESPANOL.get(dia) + " a las " + horaInicio + " según su horario cargado");
         }
     }
 

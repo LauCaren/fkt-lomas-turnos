@@ -1,5 +1,6 @@
 package com.fktlomas.turnos.controller;
 
+import com.fktlomas.turnos.dto.kinesiologia.HorarioDisponibleDto;
 import com.fktlomas.turnos.dto.kinesiologia.PlanKinesiologiaDto;
 import com.fktlomas.turnos.security.AppUserDetails;
 import com.fktlomas.turnos.service.KinesiologiaService;
@@ -15,18 +16,24 @@ import java.util.List;
 
 /** Plan de sesiones de kinesiología del propio paciente autenticado. */
 @RestController
-@RequestMapping("/api/kinesiologia/planes")
+@RequestMapping("/api/kinesiologia")
 @RequiredArgsConstructor
 public class KinesiologiaController {
 
     private final KinesiologiaService kinesiologiaService;
 
-    @GetMapping
+    /** medicoId ausente = "me da igual quién me atienda": junta los horarios de todos los kinesiólogos. */
+    @GetMapping("/horarios-disponibles")
+    public List<HorarioDisponibleDto> horariosDisponibles(@RequestParam(required = false) Long medicoId) {
+        return kinesiologiaService.horariosDisponibles(medicoId);
+    }
+
+    @GetMapping("/planes")
     public List<PlanKinesiologiaDto> misPlanes(@AuthenticationPrincipal AppUserDetails principal) {
         return kinesiologiaService.misPlanes(principal.getUsuario().getId());
     }
 
-    @PostMapping(consumes = "multipart/form-data")
+    @PostMapping(value = "/planes", consumes = "multipart/form-data")
     public PlanKinesiologiaDto crear(
             @AuthenticationPrincipal AppUserDetails principal,
             @RequestParam Long medicoId,
@@ -38,17 +45,17 @@ public class KinesiologiaController {
         return kinesiologiaService.crearParaPaciente(principal.getUsuario(), medicoId, cantidadSesiones, fechaInicio, diasSemana, KinesiologiaService.parsearHoras(horasInicio), ordenMedica);
     }
 
-    @PutMapping("/{id}/cancelar")
+    @PutMapping("/planes/{id}/cancelar")
     public PlanKinesiologiaDto cancelar(@AuthenticationPrincipal AppUserDetails principal, @PathVariable Long id) {
         return kinesiologiaService.cancelar(id, principal.getUsuario().getId());
     }
 
-    @PutMapping("/{id}/pausar")
+    @PutMapping("/planes/{id}/pausar")
     public PlanKinesiologiaDto pausar(@AuthenticationPrincipal AppUserDetails principal, @PathVariable Long id) {
         return kinesiologiaService.pausar(id, principal.getUsuario().getId());
     }
 
-    @PutMapping("/{id}/reanudar")
+    @PutMapping("/planes/{id}/reanudar")
     public PlanKinesiologiaDto reanudar(@AuthenticationPrincipal AppUserDetails principal, @PathVariable Long id,
                                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio) {
         return kinesiologiaService.reanudar(id, principal.getUsuario().getId(), fechaInicio != null ? fechaInicio : LocalDate.now());

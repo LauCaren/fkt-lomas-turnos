@@ -10,6 +10,15 @@ export const fetchMisPlanesKinesiologia = createAsyncThunk('kinesiologia/fetchMi
   }
 });
 
+export const fetchHorariosDisponiblesKinesiologia = createAsyncThunk('kinesiologia/fetchHorariosDisponibles', async (medicoId, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/kinesiologia/horarios-disponibles', { params: medicoId ? { medicoId } : {} });
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
 export const crearPlanKinesiologia = createAsyncThunk('kinesiologia/crearPlan', async (formData, { rejectWithValue }) => {
   try {
     const { data } = await axiosClient.post('/api/kinesiologia/planes', formData);
@@ -96,6 +105,8 @@ const kinesiologiaSlice = createSlice({
   initialState: {
     misPlanes: [],
     planesAdmin: [],
+    horariosDisponibles: [],
+    cargandoHorarios: false,
     error: null,
     mensajeExito: null,
   },
@@ -104,11 +115,23 @@ const kinesiologiaSlice = createSlice({
       state.error = null;
       state.mensajeExito = null;
     },
+    limpiarHorariosDisponibles(state) {
+      state.horariosDisponibles = [];
+    },
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchMisPlanesKinesiologia.fulfilled, (state, action) => { state.misPlanes = action.payload; })
       .addCase(fetchMisPlanesKinesiologia.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(fetchHorariosDisponiblesKinesiologia.pending, (state) => { state.cargandoHorarios = true; })
+      .addCase(fetchHorariosDisponiblesKinesiologia.fulfilled, (state, action) => {
+        state.horariosDisponibles = action.payload;
+        state.cargandoHorarios = false;
+      })
+      .addCase(fetchHorariosDisponiblesKinesiologia.rejected, (state, action) => {
+        state.error = action.payload;
+        state.cargandoHorarios = false;
+      })
       .addCase(crearPlanKinesiologia.fulfilled, (state, action) => {
         state.misPlanes = [action.payload, ...state.misPlanes];
         state.mensajeExito = 'Plan enviado — un admin va a revisar la orden médica antes de habilitar los turnos';
@@ -150,5 +173,5 @@ const kinesiologiaSlice = createSlice({
   },
 });
 
-export const { limpiarMensajesKinesiologia } = kinesiologiaSlice.actions;
+export const { limpiarMensajesKinesiologia, limpiarHorariosDisponibles } = kinesiologiaSlice.actions;
 export default kinesiologiaSlice.reducer;

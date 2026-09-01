@@ -23,6 +23,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Cubre la parte más delicada de kinesiología: la generación de sesiones al validar un plan
@@ -106,6 +107,45 @@ class KinesiologiaServiceTest {
         assertThat(validado.sesionesGeneradas()).isEqualTo(2);
         List<LocalDate> fechasDelPlan = validado.sesiones().stream().map(SesionKinesiologiaDto::fecha).sorted().toList();
         assertThat(fechasDelPlan).containsExactly(primerLunes, primerLunes.plusWeeks(2));
+    }
+
+    @Test
+    void horariosDisponiblesDeUnMedicoSoloListaLosSuyos() {
+        Medico kinesiologo = crearKinesiologoConReglaLunes();
+
+        List<com.fktlomas.turnos.dto.kinesiologia.HorarioDisponibleDto> horarios = kinesiologiaService.horariosDisponibles(kinesiologo.getId());
+
+        assertThat(horarios).isNotEmpty();
+        assertThat(horarios).allMatch(h -> h.medicoId().equals(kinesiologo.getId()) && h.diaSemana() == DayOfWeek.MONDAY);
+        // 08:00 a 12:00 en turnos de 30' → 8 horarios reales, no un solo texto libre
+        assertThat(horarios).hasSize(8);
+    }
+
+    @Test
+    void unHorarioFueraDeLaReglaTiraErrorConElDiaEnEspanol() {
+        Medico kinesiologo = crearKinesiologoConReglaLunes();
+        Usuario paciente = crearPaciente("paciente-horario-invalido@test.com", "30444444");
+        MockMultipartFile ordenMedica = new MockMultipartFile(
+                "ordenMedica", "orden.jpg", "image/jpeg",
+                new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, 0x00, 0x01, 0x02, 0x03, 0x04});
+
+        assertThatThrownBy(() -> kinesiologiaService.crearParaPaciente(
+                paciente, kinesiologo.getId(), 1, proximoLunes(),
+                List.of(DayOfWeek.TUESDAY), List.of(HORA), ordenMedica))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("martes")
+                .hasMessageNotContaining("TUESDAY");
+    }
+
+    @Test
+    void horariosDisponiblesSinMedicoJuntaTodosLosKinesiologosActivos() {
+        Medico kinesiologo1 = crearKinesiologoConReglaLunes();
+        Medico kinesiologo2 = crearKinesiologoConReglaLunes();
+
+        List<com.fktlomas.turnos.dto.kinesiologia.HorarioDisponibleDto> horarios = kinesiologiaService.horariosDisponibles(null);
+
+        assertThat(horarios.stream().map(com.fktlomas.turnos.dto.kinesiologia.HorarioDisponibleDto::medicoId).distinct().toList())
+                .contains(kinesiologo1.getId(), kinesiologo2.getId());
     }
 
     @Test
