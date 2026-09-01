@@ -99,6 +99,16 @@ public class CajaService {
         return RetiroDto.de(retiroRepository.save(retiro));
     }
 
+    /** Saldo propio de un médico (para su panel) — nunca la caja física ni la de otros médicos. */
+    @Transactional(readOnly = true)
+    public SaldoMedicoDto saldoDeMedico(Long medicoId) {
+        Medico medico = medicoRepository.findById(medicoId)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Médico no encontrado"));
+        BigDecimal ingresos = ingresoRepository.totalIngresos(medicoId);
+        BigDecimal retiros = retiroRepository.totalRetiros(medicoId);
+        return new SaldoMedicoDto(medico.getId(), medico.getNombreCompleto(), ingresos, retiros, ingresos.subtract(retiros));
+    }
+
     @Transactional(readOnly = true)
     public CajaResumenDto resumen() {
         BigDecimal ingresosTotal = ingresoRepository.totalIngresos(null);

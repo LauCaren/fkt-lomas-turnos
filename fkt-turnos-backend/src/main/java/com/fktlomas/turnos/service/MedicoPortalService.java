@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Vista propia del médico logueado: su agenda de hoy, su cola de espera, y la historia
@@ -40,13 +42,20 @@ public class MedicoPortalService {
     public List<TurnoAdminDto> agendaHoy(Long usuarioId) {
         Long medicoId = medicoDe(usuarioId).getId();
         LocalDate hoy = LocalDate.now();
-        return turnoRepository.findAgenda(hoy, hoy, medicoId, null).stream().map(TurnoAdminDto::de).toList();
+        return conEvolucion(turnoRepository.findAgenda(hoy, hoy, medicoId, null));
     }
 
     @Transactional(readOnly = true)
     public List<TurnoAdminDto> colaEspera(Long usuarioId) {
         Long medicoId = medicoDe(usuarioId).getId();
-        return turnoRepository.colaEspera(LocalDate.now(), medicoId).stream().map(TurnoAdminDto::de).toList();
+        return conEvolucion(turnoRepository.colaEspera(LocalDate.now(), medicoId));
+    }
+
+    private List<TurnoAdminDto> conEvolucion(List<Turno> turnos) {
+        Set<Long> turnoIds = turnos.stream().map(Turno::getId).collect(Collectors.toSet());
+        Set<Long> conEvolucion = turnoIds.isEmpty() ? Set.of() : evolucionClinicaRepository.findByTurnoIdIn(turnoIds)
+                .stream().map(e -> e.getTurno().getId()).collect(Collectors.toSet());
+        return turnos.stream().map(t -> TurnoAdminDto.de(t, conEvolucion.contains(t.getId()))).toList();
     }
 
     @Transactional

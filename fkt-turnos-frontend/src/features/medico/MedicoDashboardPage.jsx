@@ -2,8 +2,12 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchAgendaHoy, fetchColaEsperaMedico, marcarAtendido, crearEvolucion,
-  fetchEvolucionesDePaciente, limpiarMensajesMedico,
+  fetchEvolucionesDePaciente, fetchSaldoMedico, limpiarMensajesMedico,
 } from './medicoSlice';
+
+function formatMoneda(valor) {
+  return Number(valor || 0).toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
+}
 
 function FormularioEvolucion({ turno, onListo }) {
   const dispatch = useDispatch();
@@ -55,6 +59,7 @@ function FilaTurno({ turno, mostrarBotonAtender, mostrarEvolucion }) {
             <div style={{ marginTop: 6, fontSize: 14 }}>
               <strong>{turno.pacienteNombre}</strong> · DNI {turno.pacienteDni}
               {turno.motivoConsulta && <div style={{ color: 'var(--muted)', marginTop: 2 }}>Motivo: {turno.motivoConsulta}</div>}
+              {turno.tieneEvolucion && <div style={{ color: 'var(--teal-dark)', marginTop: 2, fontSize: 13 }}>Evolución cargada</div>}
             </div>
           )}
         </div>
@@ -110,7 +115,7 @@ function AgendaHoyTab() {
       {agendaCargando && <p style={{ color: 'var(--muted)' }}>Cargando agenda…</p>}
       {!agendaCargando && reservados.length === 0 && <p style={{ color: 'var(--muted)' }}>No tenés turnos reservados para hoy.</p>}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {reservados.map((t) => <FilaTurno key={t.id} turno={t} mostrarBotonAtender={false} mostrarEvolucion={t.estadoAsistencia === 'ATENDIDO'} />)}
+        {reservados.map((t) => <FilaTurno key={t.id} turno={t} mostrarBotonAtender={false} mostrarEvolucion={t.estadoAsistencia === 'ATENDIDO' && !t.tieneEvolucion} />)}
       </div>
     </div>
   );
@@ -141,13 +146,25 @@ const TABS = [
 export default function MedicoDashboardPage() {
   const dispatch = useDispatch();
   const usuario = useSelector((state) => state.auth.usuario);
-  const { error, mensajeExito } = useSelector((state) => state.medico);
+  const { error, mensajeExito, saldo } = useSelector((state) => state.medico);
   const [tab, setTab] = useState('agenda');
+
+  useEffect(() => { dispatch(fetchSaldoMedico()); }, [dispatch]);
 
   return (
     <div>
-      <span className="eyebrow">Panel del médico</span>
-      <h1 style={{ marginTop: 12, fontSize: 30 }}>Hola, {usuario?.nombreCompleto}</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <span className="eyebrow">Panel del médico</span>
+          <h1 style={{ marginTop: 12, fontSize: 30 }}>Hola, {usuario?.nombreCompleto}</h1>
+        </div>
+        {saldo && (
+          <div className="card" style={{ padding: '10px 18px', textAlign: 'right' }}>
+            <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>Tu saldo acumulado</div>
+            <div style={{ fontSize: 20, fontWeight: 700 }}>{formatMoneda(saldo.saldo)}</div>
+          </div>
+        )}
+      </div>
 
       {error && <div className="alert alert-error" style={{ marginTop: 20 }}>{error}</div>}
       {mensajeExito && <div className="alert alert-success" style={{ marginTop: 20 }}>{mensajeExito}</div>}

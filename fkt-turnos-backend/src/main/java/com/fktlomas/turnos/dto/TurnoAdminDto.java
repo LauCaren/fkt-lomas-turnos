@@ -21,9 +21,18 @@ public record TurnoAdminDto(
         String pacienteDni,
         String pacienteTelefono,
         String pacienteObraSocial,
-        String estadoAsistencia
+        String estadoAsistencia,
+        boolean tieneEvolucion
 ) {
     public static TurnoAdminDto de(Turno t) {
+        return de(t, false);
+    }
+
+    /**
+     * @param tieneEvolucion solo indica si el médico cargó una evolución para este turno —
+     *                        nunca el contenido, que es privado del profesional (ver EvolucionClinica).
+     */
+    public static TurnoAdminDto de(Turno t, boolean tieneEvolucion) {
         Usuario p = t.getPaciente();
         return new TurnoAdminDto(
                 t.getId(),
@@ -40,7 +49,8 @@ public record TurnoAdminDto(
                 p != null ? p.getDni() : null,
                 p != null ? p.getTelefono() : null,
                 p != null ? p.getObraSocial() : null,
-                t.getEstadoAsistencia().name()
+                t.getEstadoAsistencia().name(),
+                tieneEvolucion
         );
     }
 }

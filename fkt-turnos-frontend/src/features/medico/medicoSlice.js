@@ -46,6 +46,15 @@ export const fetchEvolucionesDePaciente = createAsyncThunk('medico/fetchEvolucio
   }
 });
 
+export const fetchSaldoMedico = createAsyncThunk('medico/fetchSaldo', async (_, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/medico/caja/saldo');
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
 const medicoSlice = createSlice({
   name: 'medico',
   initialState: {
@@ -54,6 +63,7 @@ const medicoSlice = createSlice({
     colaEspera: [],
     colaEsperaCargando: false,
     evolucionesPorPaciente: {},
+    saldo: null,
     error: null,
     mensajeExito: null,
   },
@@ -81,7 +91,9 @@ const medicoSlice = createSlice({
       .addCase(fetchEvolucionesDePaciente.fulfilled, (state, action) => {
         state.evolucionesPorPaciente[action.payload.pacienteId] = action.payload.evoluciones;
       })
-      .addCase(fetchEvolucionesDePaciente.rejected, (state, action) => { state.error = action.payload; });
+      .addCase(fetchEvolucionesDePaciente.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(fetchSaldoMedico.fulfilled, (state, action) => { state.saldo = action.payload; })
+      .addCase(fetchSaldoMedico.rejected, (state, action) => { state.error = action.payload; });
   },
 });
 

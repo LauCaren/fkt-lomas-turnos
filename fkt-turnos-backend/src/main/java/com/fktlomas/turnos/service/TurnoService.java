@@ -14,6 +14,7 @@ import com.fktlomas.turnos.dto.auditoria.TurnoSnapshot;
 import com.fktlomas.turnos.exception.ConflictoDeDatosException;
 import com.fktlomas.turnos.exception.RecursoNoEncontradoException;
 import com.fktlomas.turnos.exception.TurnoNoDisponibleException;
+import com.fktlomas.turnos.repository.EvolucionClinicaRepository;
 import com.fktlomas.turnos.repository.TurnoRepository;
 import com.fktlomas.turnos.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +45,19 @@ public class TurnoService {
     private final NotificacionTurnoService notificacionTurnoService;
     private final ListaEsperaService listaEsperaService;
     private final AuditoriaService auditoriaService;
+    private final EvolucionClinicaRepository evolucionClinicaRepository;
+
+    /**
+     * Marca en cada turno si el médico ya cargó una evolución — nunca el contenido, que es
+     * privado del profesional (ver EvolucionClinica) — para que el admin sepa que existe sin
+     * poder leerla.
+     */
+    private List<TurnoAdminDto> conEvolucion(List<Turno> turnos) {
+        Set<Long> turnoIds = turnos.stream().map(Turno::getId).collect(Collectors.toSet());
+        Set<Long> conEvolucion = turnoIds.isEmpty() ? Set.of() : evolucionClinicaRepository.findByTurnoIdIn(turnoIds)
+                .stream().map(e -> e.getTurno().getId()).collect(Collectors.toSet());
+        return turnos.stream().map(t -> TurnoAdminDto.de(t, conEvolucion.contains(t.getId()))).toList();
+    }
 
     private static TurnoSnapshot snapshotDe(Turno t) {
         return new TurnoSnapshot(
@@ -115,7 +131,7 @@ public class TurnoService {
 
     @Transactional(readOnly = true)
     public List<TurnoAdminDto> agenda(LocalDate desde, LocalDate hasta, Long medicoId, Long especialidadId) {
-        return turnoRepository.findAgenda(desde, hasta, medicoId, especialidadId).stream().map(TurnoAdminDto::de).toList();
+        return conEvolucion(turnoRepository.findAgenda(desde, hasta, medicoId, especialidadId));
     }
 
     @Transactional(readOnly = true)
@@ -139,7 +155,8 @@ public class TurnoService {
     public Page<TurnoAdminDto> buscarTurnos(LocalDate desde, LocalDate hasta, Long medicoId, Long especialidadId, EstadoTurno estado, Pageable pageable) {
         LocalDate desdeEfectivo = desde != null ? desde : DESDE_MINIMO;
         LocalDate hastaEfectivo = hasta != null ? hasta : HASTA_MAXIMO;
-        return turnoRepository.buscarTurnos(desdeEfectivo, hastaEfectivo, medicoId, especialidadId, estado, pageable).map(TurnoAdminDto::de);
+        Page<Turno> pagina = turnoRepository.buscarTurnos(desdeEfectivo, hastaEfectivo, medicoId, especialidadId, estado, pageable);
+        return new org.springframework.data.domain.PageImpl<>(conEvolucion(pagina.getContent()), pageable, pagina.getTotalElements());
     }
 
     @Transactional

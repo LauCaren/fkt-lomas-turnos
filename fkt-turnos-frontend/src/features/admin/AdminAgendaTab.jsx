@@ -199,6 +199,11 @@ function VistaLista({ agenda, agendaCargando, medicoId, reservandoId, setReserva
                     <div><strong>{t.pacienteNombre}</strong> · DNI {t.pacienteDni}</div>
                     <div style={{ color: 'var(--muted)' }}>{t.pacienteTelefono} · {t.pacienteObraSocial}</div>
                     {t.motivoConsulta && <div style={{ color: 'var(--muted)', marginTop: 2 }}>Motivo: {t.motivoConsulta}</div>}
+                    {t.tieneEvolucion && (
+                      <div style={{ fontSize: 12.5, color: 'var(--teal-dark)', marginTop: 4 }} title="El médico cargó una evolución para esta consulta — el contenido es privado del profesional">
+                        Evolución cargada
+                      </div>
+                    )}
                     <CheckInBotones turno={t} />
                   </div>
                 )}
