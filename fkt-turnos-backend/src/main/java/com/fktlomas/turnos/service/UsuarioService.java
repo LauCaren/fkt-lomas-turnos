@@ -27,6 +27,7 @@ public class UsuarioService {
         usuario.setTelefono(request.telefono());
         usuario.setGenero(request.genero());
         usuario.setObraSocial(request.obraSocial());
+        usuario.setCanalNotificacionPreferido(request.canalNotificacionPreferido());
         usuarioRepository.save(usuario);
 
         return PerfilDto.de(usuario);

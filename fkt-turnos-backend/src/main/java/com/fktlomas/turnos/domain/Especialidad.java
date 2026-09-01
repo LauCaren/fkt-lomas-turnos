@@ -18,4 +18,8 @@ public class Especialidad {
 
     @Column(nullable = false, unique = true, length = 100)
     private String nombre;
+
+    /** Kinesiología tiene un flujo de reserva propio (orden médica + plan de sesiones recurrentes). */
+    @Column(name = "es_kinesiologia", nullable = false)
+    private boolean esKinesiologia = false;
 }

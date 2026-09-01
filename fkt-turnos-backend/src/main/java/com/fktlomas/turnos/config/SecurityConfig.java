@@ -78,6 +78,8 @@ public class SecurityConfig {
                         .requestMatchers("/docs/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/medico/**").hasRole("MEDICO")
+                        .requestMatchers("/api/contador/**").hasRole("CONTADOR")
                         .anyRequest().authenticated()
                 )
                 // Sin esto, Spring Security responde 403 tanto para "no autenticado" (falta el

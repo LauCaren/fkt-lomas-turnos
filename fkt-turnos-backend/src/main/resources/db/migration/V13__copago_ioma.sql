@@ -1,0 +1,1 @@
+ALTER TABLE medicos ADD COLUMN cobra_copago_ioma BOOLEAN NOT NULL DEFAULT FALSE;

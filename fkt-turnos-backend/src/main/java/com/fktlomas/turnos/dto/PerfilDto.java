@@ -11,7 +11,8 @@ public record PerfilDto(
         String genero,
         String obraSocial,
         String role,
-        boolean mfaHabilitado
+        boolean mfaHabilitado,
+        String canalNotificacionPreferido
 ) {
     public static PerfilDto de(Usuario u) {
         return new PerfilDto(
@@ -23,7 +24,8 @@ public record PerfilDto(
                 u.getGenero() != null ? u.getGenero().name() : null,
                 u.getObraSocial(),
                 u.getRole().name(),
-                u.isMfaHabilitado()
+                u.isMfaHabilitado(),
+                u.getCanalNotificacionPreferido().name()
         );
     }
 }

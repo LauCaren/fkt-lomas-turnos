@@ -1,6 +1,5 @@
 package com.fktlomas.turnos.controller.admin;
 
-import com.fktlomas.turnos.dto.MedicoDto;
 import com.fktlomas.turnos.dto.admin.*;
 import com.fktlomas.turnos.service.DisponibilidadService;
 import com.fktlomas.turnos.service.MedicoService;
@@ -22,18 +21,23 @@ public class AdminMedicoController {
     private final DisponibilidadService disponibilidadService;
 
     @GetMapping
-    public List<MedicoDto> listar() {
+    public List<MedicoAdminDto> listar() {
         return medicoService.listarTodosAdmin();
     }
 
     @PostMapping
-    public ResponseEntity<MedicoDto> crear(@Valid @RequestBody CrearMedicoRequest request) {
+    public ResponseEntity<MedicoAdminDto> crear(@Valid @RequestBody CrearMedicoRequest request) {
         return ResponseEntity.ok(medicoService.crear(request));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MedicoDto> actualizar(@PathVariable Long id, @Valid @RequestBody ActualizarMedicoRequest request) {
+    public ResponseEntity<MedicoAdminDto> actualizar(@PathVariable Long id, @Valid @RequestBody ActualizarMedicoRequest request) {
         return ResponseEntity.ok(medicoService.actualizar(id, request));
+    }
+
+    @PutMapping("/{id}/credenciales")
+    public ResponseEntity<MedicoAdminDto> crearOActualizarCredenciales(@PathVariable Long id, @Valid @RequestBody CredencialesMedicoRequest request) {
+        return ResponseEntity.ok(medicoService.crearOActualizarCredenciales(id, request));
     }
 
     @GetMapping("/{id}/reglas-disponibilidad")
@@ -59,12 +63,12 @@ public class AdminMedicoController {
     }
 
     @PostMapping(value = "/{id}/foto", consumes = "multipart/form-data")
-    public MedicoDto subirFoto(@PathVariable Long id, @RequestParam("foto") MultipartFile foto) {
+    public MedicoAdminDto subirFoto(@PathVariable Long id, @RequestParam("foto") MultipartFile foto) {
         return medicoService.subirFoto(id, foto);
     }
 
     @PostMapping(value = "/{id}/titulo", consumes = "multipart/form-data")
-    public MedicoDto subirTitulo(@PathVariable Long id, @RequestParam("imagen") MultipartFile imagen) {
+    public MedicoAdminDto subirTitulo(@PathVariable Long id, @RequestParam("imagen") MultipartFile imagen) {
         return medicoService.subirTitulo(id, imagen);
     }
 }

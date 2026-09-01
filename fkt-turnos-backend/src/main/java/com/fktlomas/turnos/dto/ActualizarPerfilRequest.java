@@ -1,5 +1,6 @@
 package com.fktlomas.turnos.dto;
 
+import com.fktlomas.turnos.domain.CanalNotificacion;
 import com.fktlomas.turnos.domain.Genero;
 import com.fktlomas.turnos.validation.Patrones;
 import jakarta.validation.constraints.*;
@@ -22,6 +23,9 @@ public record ActualizarPerfilRequest(
 
         @NotBlank(message = "La obra social es obligatoria (usá 'Particular' si no tenés)")
         @Size(max = 100)
-        String obraSocial
+        String obraSocial,
+
+        @NotNull(message = "El canal de notificación preferido es obligatorio")
+        CanalNotificacion canalNotificacionPreferido
 ) {
 }

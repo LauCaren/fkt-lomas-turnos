@@ -44,6 +44,20 @@ public class Turno {
     @Column(name = "motivo_consulta", length = 500)
     private String motivoConsulta;
 
+    /**
+     * Check-in de sala de espera: PENDIENTE hasta que la secretaria marca que el paciente
+     * llegó; el médico marca ATENDIDO desde su propia pantalla al terminar la consulta.
+     * Independiente de {@link #estado} (disponible/reservado/cancelado).
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estado_asistencia", nullable = false, length = 20)
+    private EstadoAsistencia estadoAsistencia = EstadoAsistencia.PENDIENTE;
+
+    /** Si este turno es una sesión generada por un plan de kinesiología, a cuál pertenece. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "plan_kinesiologia_id")
+    private PlanKinesiologia planKinesiologia;
+
     @Version
     private Long version;
 

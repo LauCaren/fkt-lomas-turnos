@@ -12,7 +12,8 @@ public record MedicoDto(
         int duracionTurnoMinutos,
         Integer anosExperiencia,
         boolean tieneFoto,
-        boolean tieneTitulo
+        boolean tieneTitulo,
+        boolean cobraCopagoIoma
 ) {
     public static MedicoDto de(Medico m) {
         return new MedicoDto(
@@ -25,7 +26,8 @@ public record MedicoDto(
                 m.getDuracionTurnoMinutos(),
                 m.getAnosExperiencia(),
                 m.getFotoPath() != null,
-                m.getTituloImagenPath() != null
+                m.getTituloImagenPath() != null,
+                m.isCobraCopagoIoma()
         );
     }
 }

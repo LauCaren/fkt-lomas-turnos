@@ -2,15 +2,22 @@ package com.fktlomas.turnos.service;
 
 import com.fktlomas.turnos.domain.Especialidad;
 import com.fktlomas.turnos.domain.Medico;
+import com.fktlomas.turnos.domain.Role;
+import com.fktlomas.turnos.domain.Usuario;
 import com.fktlomas.turnos.dto.MedicoDto;
 import com.fktlomas.turnos.dto.admin.ActualizarMedicoRequest;
 import com.fktlomas.turnos.dto.admin.CrearMedicoRequest;
+import com.fktlomas.turnos.dto.admin.CredencialesMedicoRequest;
+import com.fktlomas.turnos.dto.admin.MedicoAdminDto;
 import com.fktlomas.turnos.exception.ArchivoInvalidoException;
+import com.fktlomas.turnos.exception.ConflictoDeDatosException;
 import com.fktlomas.turnos.exception.RecursoNoEncontradoException;
 import com.fktlomas.turnos.repository.MedicoRepository;
+import com.fktlomas.turnos.repository.UsuarioRepository;
 import com.fktlomas.turnos.storage.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,8 +37,10 @@ public class MedicoService {
     private static final long TAMANO_MAXIMO_BYTES = 5L * 1024 * 1024;
 
     private final MedicoRepository medicoRepository;
+    private final UsuarioRepository usuarioRepository;
     private final EspecialidadService especialidadService;
     private final FileStorageService fileStorageService;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
     public List<MedicoDto> listar(Long especialidadId) {
@@ -42,8 +51,8 @@ public class MedicoService {
     }
 
     @Transactional(readOnly = true)
-    public List<MedicoDto> listarTodosAdmin() {
-        return medicoRepository.findAll().stream().map(MedicoDto::de).toList();
+    public List<MedicoAdminDto> listarTodosAdmin() {
+        return medicoRepository.findAll().stream().map(MedicoAdminDto::de).toList();
     }
 
     public Medico obtenerEntidad(Long id) {
@@ -51,7 +60,7 @@ public class MedicoService {
                 .orElseThrow(() -> new RecursoNoEncontradoException("Médico no encontrado"));
     }
 
-    public MedicoDto crear(CrearMedicoRequest request) {
+    public MedicoAdminDto crear(CrearMedicoRequest request) {
         Especialidad especialidad = especialidadService.obtenerEntidad(request.especialidadId());
         Medico medico = new Medico();
         medico.setNombreCompleto(request.nombreCompleto());
@@ -59,7 +68,7 @@ public class MedicoService {
         medico.setMatricula(request.matricula());
         medico.setDuracionTurnoMinutos(request.duracionTurnoMinutos());
         medico.setAnosExperiencia(request.anosExperiencia());
-        return MedicoDto.de(medicoRepository.save(medico));
+        return MedicoAdminDto.de(medicoRepository.save(medico));
     }
 
     /**
@@ -71,7 +80,7 @@ public class MedicoService {
      * LazyInitializationException. Con @Transactional todo el método comparte una sola sesión.
      */
     @Transactional
-    public MedicoDto actualizar(Long id, ActualizarMedicoRequest request) {
+    public MedicoAdminDto actualizar(Long id, ActualizarMedicoRequest request) {
         Medico medico = obtenerEntidad(id);
         Especialidad especialidad = especialidadService.obtenerEntidad(request.especialidadId());
         medico.setNombreCompleto(request.nombreCompleto());
@@ -80,11 +89,42 @@ public class MedicoService {
         medico.setActivo(request.activo());
         medico.setDuracionTurnoMinutos(request.duracionTurnoMinutos());
         medico.setAnosExperiencia(request.anosExperiencia());
-        return MedicoDto.de(medicoRepository.save(medico));
+        medico.setCobraCopagoIoma(request.cobraCopagoIoma());
+        medico.setTarifaConsulta(request.tarifaConsulta());
+        return MedicoAdminDto.de(medicoRepository.save(medico));
+    }
+
+    /**
+     * Crea (o reemplaza) las credenciales de login del médico. Siempre las da de alta el
+     * admin desde el panel — el médico no se autoregistra.
+     */
+    @Transactional
+    public MedicoAdminDto crearOActualizarCredenciales(Long id, CredencialesMedicoRequest request) {
+        Medico medico = obtenerEntidad(id);
+        Usuario usuario = medico.getUsuario();
+        String emailNormalizado = request.email().trim().toLowerCase();
+
+        if (usuario == null) {
+            if (usuarioRepository.existsByEmail(emailNormalizado)) {
+                throw new ConflictoDeDatosException("Ya existe una cuenta con ese email");
+            }
+            usuario = new Usuario();
+            usuario.setRole(Role.MEDICO);
+            usuario.setAceptaPoliticaPrivacidad(true);
+        } else if (!usuario.getEmail().equalsIgnoreCase(emailNormalizado) && usuarioRepository.existsByEmail(emailNormalizado)) {
+            throw new ConflictoDeDatosException("Ya existe una cuenta con ese email");
+        }
+
+        usuario.setNombreCompleto(medico.getNombreCompleto());
+        usuario.setEmail(emailNormalizado);
+        usuario.setPasswordHash(passwordEncoder.encode(request.password()));
+        usuarioRepository.save(usuario);
+        medico.setUsuario(usuario);
+        return MedicoAdminDto.de(medicoRepository.save(medico));
     }
 
     @Transactional
-    public MedicoDto subirFoto(Long id, MultipartFile foto) {
+    public MedicoAdminDto subirFoto(Long id, MultipartFile foto) {
         Medico medico = obtenerEntidad(id);
         String rutaAnterior = medico.getFotoPath();
         String destino = guardarImagen(foto, "foto");
@@ -92,11 +132,11 @@ public class MedicoService {
         medico.setFotoContentType(foto.getContentType());
         Medico guardado = medicoRepository.save(medico);
         borrarSiExiste(rutaAnterior);
-        return MedicoDto.de(guardado);
+        return MedicoAdminDto.de(guardado);
     }
 
     @Transactional
-    public MedicoDto subirTitulo(Long id, MultipartFile imagen) {
+    public MedicoAdminDto subirTitulo(Long id, MultipartFile imagen) {
         Medico medico = obtenerEntidad(id);
         String rutaAnterior = medico.getTituloImagenPath();
         String destino = guardarImagen(imagen, "titulo");
@@ -104,7 +144,7 @@ public class MedicoService {
         medico.setTituloImagenContentType(imagen.getContentType());
         Medico guardado = medicoRepository.save(medico);
         borrarSiExiste(rutaAnterior);
-        return MedicoDto.de(guardado);
+        return MedicoAdminDto.de(guardado);
     }
 
     public Resource obtenerFoto(Long id) {

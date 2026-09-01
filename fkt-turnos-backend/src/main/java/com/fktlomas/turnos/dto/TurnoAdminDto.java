@@ -20,7 +20,8 @@ public record TurnoAdminDto(
         String pacienteNombre,
         String pacienteDni,
         String pacienteTelefono,
-        String pacienteObraSocial
+        String pacienteObraSocial,
+        String estadoAsistencia
 ) {
     public static TurnoAdminDto de(Turno t) {
         Usuario p = t.getPaciente();
@@ -38,7 +39,8 @@ public record TurnoAdminDto(
                 p != null ? p.getNombreCompleto() : null,
                 p != null ? p.getDni() : null,
                 p != null ? p.getTelefono() : null,
-                p != null ? p.getObraSocial() : null
+                p != null ? p.getObraSocial() : null,
+                t.getEstadoAsistencia().name()
         );
     }
 }

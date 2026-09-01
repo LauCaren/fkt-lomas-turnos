@@ -2,7 +2,11 @@ package com.fktlomas.turnos.controller.admin;
 
 import com.fktlomas.turnos.domain.EstadoTurno;
 import com.fktlomas.turnos.dto.TurnoAdminDto;
+import com.fktlomas.turnos.dto.admin.ActualizarAsistenciaRequest;
 import com.fktlomas.turnos.dto.admin.ReservarParaPacienteRequest;
+import com.fktlomas.turnos.dto.auditoria.RegistroAuditoriaDto;
+import com.fktlomas.turnos.security.AppUserDetails;
+import com.fktlomas.turnos.service.AuditoriaService;
 import com.fktlomas.turnos.service.TurnoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -22,6 +27,7 @@ import java.util.List;
 public class AdminTurnoController {
 
     private final TurnoService turnoService;
+    private final AuditoriaService auditoriaService;
 
     @GetMapping
     public List<TurnoAdminDto> agenda(
@@ -49,7 +55,30 @@ public class AdminTurnoController {
     }
 
     @PostMapping("/{id}/reservar-para-paciente")
-    public TurnoAdminDto reservarParaPaciente(@PathVariable Long id, @Valid @RequestBody ReservarParaPacienteRequest request) {
-        return turnoService.reservarParaPaciente(id, request);
+    public TurnoAdminDto reservarParaPaciente(@AuthenticationPrincipal AppUserDetails principal, @PathVariable Long id,
+                                               @Valid @RequestBody ReservarParaPacienteRequest request) {
+        return turnoService.reservarParaPaciente(id, request, principal.getUsuario());
+    }
+
+    @GetMapping("/cola-espera")
+    public List<TurnoAdminDto> colaEspera(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha,
+            @RequestParam(required = false) Long medicoId) {
+        return turnoService.colaEspera(fecha, medicoId);
+    }
+
+    @PutMapping("/{id}/asistencia")
+    public TurnoAdminDto actualizarAsistencia(@PathVariable Long id, @Valid @RequestBody ActualizarAsistenciaRequest request) {
+        return turnoService.actualizarAsistencia(id, request);
+    }
+
+    @GetMapping("/{id}/historial")
+    public List<RegistroAuditoriaDto> historial(@PathVariable Long id) {
+        return auditoriaService.buscar("TURNO", id);
+    }
+
+    @PutMapping("/{id}/deshacer")
+    public TurnoAdminDto deshacer(@AuthenticationPrincipal AppUserDetails principal, @PathVariable Long id) {
+        return turnoService.deshacerUltimaOperacion(id, principal.getUsuario());
     }
 }

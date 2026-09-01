@@ -1,5 +1,6 @@
 package com.fktlomas.turnos.repository;
 
+import com.fktlomas.turnos.domain.EstadoAsistencia;
 import com.fktlomas.turnos.domain.EstadoTurno;
 import com.fktlomas.turnos.domain.Turno;
 import com.fktlomas.turnos.domain.Usuario;
@@ -74,4 +75,40 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
             "t.paciente = :paciente, t.motivoConsulta = :motivo " +
             "where t.id = :turnoId and t.estado = com.fktlomas.turnos.domain.EstadoTurno.DISPONIBLE")
     int reservarSiDisponible(@Param("turnoId") Long turnoId, @Param("paciente") Usuario paciente, @Param("motivo") String motivo);
+
+    /** Cola de espera del día: pacientes que llegaron (check-in) y todavía no fueron atendidos, en el orden de su turno. */
+    @Query("""
+            select t from Turno t
+            join fetch t.medico m
+            join fetch m.especialidad
+            join fetch t.paciente
+            where t.fecha = :fecha
+            and t.estado = com.fktlomas.turnos.domain.EstadoTurno.RESERVADO
+            and t.estadoAsistencia = com.fktlomas.turnos.domain.EstadoAsistencia.LLEGO
+            and (:medicoId is null or m.id = :medicoId)
+            order by t.horaInicio asc
+            """)
+    List<Turno> colaEspera(@Param("fecha") LocalDate fecha, @Param("medicoId") Long medicoId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("update Turno t set t.estadoAsistencia = :estado where t.id = :turnoId")
+    int actualizarAsistencia(@Param("turnoId") Long turnoId, @Param("estado") EstadoAsistencia estado);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("update Turno t set t.estadoAsistencia = com.fktlomas.turnos.domain.EstadoAsistencia.ATENDIDO " +
+            "where t.id = :turnoId and t.medico.id = :medicoId and t.estadoAsistencia = com.fktlomas.turnos.domain.EstadoAsistencia.LLEGO")
+    int marcarAtendidoSiLlego(@Param("turnoId") Long turnoId, @Param("medicoId") Long medicoId);
+
+    @Query("""
+            select t from Turno t
+            join fetch t.medico m
+            join fetch m.especialidad
+            left join fetch t.paciente
+            where t.planKinesiologia.id = :planId
+            order by t.fecha asc, t.horaInicio asc
+            """)
+    List<Turno> findByPlanKinesiologiaId(@Param("planId") Long planId);
+
+    /** Libera (vuelve DISPONIBLE) las sesiones futuras aún reservadas de un plan que se cancela o pausa. */
+    List<Turno> findByPlanKinesiologiaIdAndEstadoAndFechaGreaterThanEqual(Long planId, EstadoTurno estado, LocalDate fecha);
 }

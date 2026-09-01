@@ -46,4 +46,16 @@ public class Medico {
 
     @Column(name = "titulo_imagen_content_type", length = 100)
     private String tituloImagenContentType;
+
+    @Column(name = "cobra_copago_ioma", nullable = false)
+    private boolean cobraCopagoIoma = false;
+
+    /** Cuenta de login del médico (rol MEDICO) — null hasta que el admin le crea credenciales. */
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", unique = true)
+    private Usuario usuario;
+
+    /** Tarifa fija de consulta, autocompletada al cobrar en caja — editable por admin. */
+    @Column(name = "tarifa_consulta", precision = 12, scale = 2)
+    private java.math.BigDecimal tarifaConsulta;
 }
