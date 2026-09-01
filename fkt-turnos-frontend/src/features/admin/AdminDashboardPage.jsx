@@ -11,12 +11,14 @@ import AdminCuentaTab from './AdminCuentaTab';
 import AdminCajaTab from '../caja/AdminCajaTab';
 import AdminKinesiologiaTab from '../kinesiologia/AdminKinesiologiaTab';
 import AdminReportesTab from './AdminReportesTab';
+import AdminBusquedaPacienteTab from './AdminBusquedaPacienteTab';
 
 const TABS = [
   { id: 'resumen', label: 'Resumen' },
   { id: 'agenda', label: 'Agenda' },
   { id: 'turnos-agendados', label: 'Ver Turnos Agendados' },
   { id: 'cola-espera', label: 'Cola de espera' },
+  { id: 'buscar-paciente', label: 'Buscar paciente' },
   { id: 'medicos', label: 'Médicos y horarios' },
   { id: 'kinesiologia', label: 'Kinesiología' },
   { id: 'caja', label: 'Caja' },
@@ -66,6 +68,7 @@ export default function AdminDashboardPage() {
       {tab === 'agenda' && <AdminAgendaTab />}
       {tab === 'turnos-agendados' && <AdminTurnosAgendadosTab />}
       {tab === 'cola-espera' && <AdminColaEsperaTab />}
+      {tab === 'buscar-paciente' && <AdminBusquedaPacienteTab />}
       {tab === 'medicos' && <AdminMedicosTab />}
       {tab === 'kinesiologia' && <AdminKinesiologiaTab />}
       {tab === 'caja' && <AdminCajaTab />}

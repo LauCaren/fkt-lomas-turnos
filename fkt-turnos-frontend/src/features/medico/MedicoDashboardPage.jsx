@@ -4,6 +4,7 @@ import {
   fetchAgendaHoy, fetchColaEsperaMedico, marcarAtendido, crearEvolucion,
   fetchEvolucionesDePaciente, fetchSaldoMedico, limpiarMensajesMedico,
 } from './medicoSlice';
+import CuentaSeguridadTab from '../../components/CuentaSeguridadTab';
 
 function formatMoneda(valor) {
   return Number(valor || 0).toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
@@ -145,6 +146,7 @@ function ColaEsperaTab() {
 const TABS = [
   { id: 'agenda', label: 'Mi agenda de hoy' },
   { id: 'cola-espera', label: 'Cola de espera' },
+  { id: 'cuenta', label: 'Mi cuenta' },
 ];
 
 export default function MedicoDashboardPage() {
@@ -196,6 +198,7 @@ export default function MedicoDashboardPage() {
 
       {tab === 'agenda' && <AgendaHoyTab />}
       {tab === 'cola-espera' && <ColaEsperaTab />}
+      {tab === 'cuenta' && <CuentaSeguridadTab />}
     </div>
   );
 }

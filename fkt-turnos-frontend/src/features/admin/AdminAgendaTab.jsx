@@ -194,11 +194,19 @@ function VistaLista({ agenda, agendaCargando, medicoId, reservandoId, setReserva
                   {t.horaInicio.slice(0, 5)} a {t.horaFin.slice(0, 5)} · {t.medicoNombre}
                 </div>
                 <div style={{ fontSize: 13, color: 'var(--muted)' }}>{t.especialidadNombre}</div>
+                {t.estado === 'DISPONIBLE' && t.confirmacionPrevia === 'RECHAZADO' && (
+                  <div style={{ fontSize: 12.5, color: 'var(--red)', marginTop: 4 }}>
+                    El paciente anterior avisó que no venía — horario libre otra vez
+                  </div>
+                )}
                 {t.estado === 'RESERVADO' && (
                   <div style={{ marginTop: 8, fontSize: 14 }}>
                     <div><strong>{t.pacienteNombre}</strong> · DNI {t.pacienteDni}</div>
                     <div style={{ color: 'var(--muted)' }}>{t.pacienteTelefono} · {t.pacienteObraSocial}</div>
                     {t.motivoConsulta && <div style={{ color: 'var(--muted)', marginTop: 2 }}>Motivo: {t.motivoConsulta}</div>}
+                    {t.confirmacionPrevia === 'CONFIRMADO' && (
+                      <div style={{ fontSize: 12.5, color: 'var(--teal-dark)', marginTop: 4 }}>Confirmó que viene</div>
+                    )}
                     {t.tieneEvolucion && (
                       <div style={{ fontSize: 12.5, color: 'var(--teal-dark)', marginTop: 4 }} title="El médico cargó una evolución para esta consulta — el contenido es privado del profesional">
                         Evolución cargada

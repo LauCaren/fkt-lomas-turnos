@@ -13,6 +13,7 @@ import MiCuentaPage from './features/cuenta/MiCuentaPage';
 import MedicoDashboardPage from './features/medico/MedicoDashboardPage';
 import ContadorDashboardPage from './features/contador/ContadorDashboardPage';
 import KinesiologiaPage from './features/kinesiologia/KinesiologiaPage';
+import ConfirmarTurnoPage from './features/turnos/ConfirmarTurnoPage';
 
 const RUTA_POR_ROL = { ADMIN: '/admin', MEDICO: '/medico', CONTADOR: '/contador' };
 
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="/registro" element={<RegisterPage />} />
         <Route path="/olvide-password" element={<OlvidePasswordPage />} />
         <Route path="/restablecer-password" element={<RestablecerPasswordPage />} />
+        <Route path="/confirmar-turno" element={<ConfirmarTurnoPage />} />
         <Route path="/turnos" element={<RutaPaciente><BookingWizard /></RutaPaciente>} />
         <Route path="/turnos/kinesiologia" element={<RutaPaciente><KinesiologiaPage /></RutaPaciente>} />
         <Route path="/turnos/mis-turnos" element={<RutaPaciente><MisTurnosPage /></RutaPaciente>} />
