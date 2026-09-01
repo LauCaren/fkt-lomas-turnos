@@ -22,6 +22,8 @@
     <jjwt.version>0.12.6</jjwt.version>
     <springdoc.version>2.6.0</springdoc.version>
     <aws-sdk.version>2.28.29</aws-sdk.version>
+    <poi.version>5.3.0</poi.version>
+    <pdfbox.version>3.0.3</pdfbox.version>
   </properties>
 
   <dependencyManagement>
@@ -32,6 +34,15 @@
         <version>${aws-sdk.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <!-- twilio declara commons-io 2.7 directamente, que por "nearest wins" le ganaba a la
+           2.16.1 que pide poi-ooxml transitivamente — y 2.7 no tiene el método que POI necesita
+           (UnsynchronizedByteArrayOutputStream.builder()), rompía recién al generar un Excel en
+           runtime. Se fuerza acá la versión que POI espera. -->
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>2.16.1</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -80,6 +91,19 @@
     <dependency>
       <groupId>software.amazon.awssdk</groupId>
       <artifactId>s3</artifactId>
+    </dependency>
+
+    <!-- Exportación de reportes (agenda, caja) a Excel/PDF que piden las secretarias, y el
+         envío mensual automático de caja — ambas licencias Apache 2.0. -->
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml</artifactId>
+      <version>${poi.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox</artifactId>
+      <version>${pdfbox.version}</version>
     </dependency>
 
     <dependency>

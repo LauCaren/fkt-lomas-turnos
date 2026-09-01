@@ -4,13 +4,16 @@ import com.fktlomas.turnos.domain.MensajeContacto;
 import com.fktlomas.turnos.domain.Postulacion;
 import com.fktlomas.turnos.domain.Usuario;
 
+import jakarta.mail.internet.MimeMessage;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -157,6 +160,26 @@ public class EmailService {
             mailSender.send(message);
         } catch (Exception e) {
             throw new IllegalStateException("Error enviando email a " + destinatario + ": " + e.getMessage(), e);
+        }
+    }
+
+    /** Sincrónico y tira excepción si falla — lo usa ReporteCajaProgramadoService, que necesita
+     * saber si el envío mensual funcionó para poder loguearlo como tal. */
+    public void enviarConAdjuntoSync(String to, String asunto, String cuerpo, String nombreArchivo, String contentType, byte[] adjunto) {
+        if (!mailEnabled) {
+            throw new IllegalStateException("El canal Email está deshabilitado (app.mail.enabled=false)");
+        }
+        try {
+            MimeMessage mensaje = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mensaje, true);
+            helper.setFrom(from);
+            helper.setTo(to);
+            helper.setSubject(asunto);
+            helper.setText(cuerpo);
+            helper.addAttachment(nombreArchivo, new ByteArrayResource(adjunto), contentType);
+            mailSender.send(mensaje);
+        } catch (Exception e) {
+            throw new IllegalStateException("Error enviando email con adjunto a " + to + ": " + e.getMessage(), e);
         }
     }
 

@@ -31,6 +31,16 @@ public class AdminCajaController {
         return cajaService.resumen();
     }
 
+    @GetMapping("/configuracion")
+    public ConfiguracionCajaDto obtenerConfiguracion() {
+        return cajaService.obtenerConfiguracion();
+    }
+
+    @PutMapping("/configuracion")
+    public ConfiguracionCajaDto actualizarConfiguracion(@Valid @RequestBody ActualizarConfiguracionCajaRequest request) {
+        return cajaService.actualizarConfiguracion(request);
+    }
+
     @GetMapping("/ingresos")
     public List<IngresoDto> listarIngresos(@RequestParam(required = false) Long medicoId,
                                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
@@ -49,8 +59,10 @@ public class AdminCajaController {
     }
 
     @GetMapping("/retiros")
-    public List<RetiroDto> listarRetiros(@RequestParam(required = false) Long medicoId) {
-        return cajaService.listarRetiros(medicoId);
+    public List<RetiroDto> listarRetiros(@RequestParam(required = false) Long medicoId,
+                                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+                                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
+        return cajaService.listarRetiros(medicoId, desde, hasta);
     }
 
     @PostMapping("/retiros")

@@ -43,6 +43,7 @@ public class KinesiologiaService {
     private final FeriadoService feriadoService;
     private final FileStorageService fileStorageService;
     private final PasswordEncoder passwordEncoder;
+    private final NotificacionTurnoService notificacionTurnoService;
 
     public static List<LocalTime> parsearHoras(List<String> horas) {
         try {
@@ -274,7 +275,9 @@ public class KinesiologiaService {
         plan.setEstado(EstadoPlanKinesiologia.VALIDADO);
         plan.setValidadoPor(admin);
         plan.setValidadoAt(Instant.now());
-        return conSesiones(planRepository.save(plan));
+        PlanKinesiologia guardado = planRepository.save(plan);
+        notificacionTurnoService.avisarPlanKinesiologiaValidado(guardado.getPaciente(), guardado.getSesionesGeneradas(), guardado.getCantidadSesiones());
+        return conSesiones(guardado);
     }
 
     @Transactional
@@ -287,7 +290,9 @@ public class KinesiologiaService {
         plan.setMotivoRechazo(motivo);
         plan.setValidadoPor(admin);
         plan.setValidadoAt(Instant.now());
-        return conSesiones(planRepository.save(plan));
+        PlanKinesiologia guardado = planRepository.save(plan);
+        notificacionTurnoService.avisarPlanKinesiologiaRechazado(guardado.getPaciente(), motivo);
+        return conSesiones(guardado);
     }
 
     /** El paciente (o la secretaria en su nombre) cancela la serie: libera las sesiones futuras aún no atendidas. */

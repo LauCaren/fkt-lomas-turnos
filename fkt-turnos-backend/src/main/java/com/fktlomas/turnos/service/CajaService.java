@@ -1,5 +1,6 @@
 package com.fktlomas.turnos.service;
 
+import com.fktlomas.turnos.domain.ConfiguracionCaja;
 import com.fktlomas.turnos.domain.Ingreso;
 import com.fktlomas.turnos.domain.Medico;
 import com.fktlomas.turnos.domain.Retiro;
@@ -8,6 +9,7 @@ import com.fktlomas.turnos.domain.Usuario;
 import com.fktlomas.turnos.dto.caja.*;
 import com.fktlomas.turnos.exception.ConflictoDeDatosException;
 import com.fktlomas.turnos.exception.RecursoNoEncontradoException;
+import com.fktlomas.turnos.repository.ConfiguracionCajaRepository;
 import com.fktlomas.turnos.repository.GastoRepository;
 import com.fktlomas.turnos.repository.IngresoRepository;
 import com.fktlomas.turnos.repository.MedicoRepository;
@@ -18,7 +20,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -30,6 +34,22 @@ public class CajaService {
     private final GastoRepository gastoRepository;
     private final MedicoRepository medicoRepository;
     private final TurnoRepository turnoRepository;
+    private final ConfiguracionCajaRepository configuracionCajaRepository;
+
+    @Transactional(readOnly = true)
+    public ConfiguracionCajaDto obtenerConfiguracion() {
+        return ConfiguracionCajaDto.de(configuracionCajaRepository.findById((short) 1)
+                .orElseThrow(() -> new IllegalStateException("Falta la fila de configuración de caja (id=1)")));
+    }
+
+    @Transactional
+    public ConfiguracionCajaDto actualizarConfiguracion(ActualizarConfiguracionCajaRequest request) {
+        ConfiguracionCaja configuracion = configuracionCajaRepository.findById((short) 1)
+                .orElseThrow(() -> new IllegalStateException("Falta la fila de configuración de caja (id=1)"));
+        String email = request.emailReporteMensual();
+        configuracion.setEmailReporteMensual(email != null && !email.isBlank() ? email.trim() : null);
+        return ConfiguracionCajaDto.de(configuracionCajaRepository.save(configuracion));
+    }
 
     @Transactional(readOnly = true)
     public List<IngresoDto> listarIngresos(Long medicoId, LocalDate desde, LocalDate hasta) {
@@ -67,8 +87,10 @@ public class CajaService {
     }
 
     @Transactional(readOnly = true)
-    public List<RetiroDto> listarRetiros(Long medicoId) {
-        return retiroRepository.buscar(medicoId).stream().map(RetiroDto::de).toList();
+    public List<RetiroDto> listarRetiros(Long medicoId, LocalDate desde, LocalDate hasta) {
+        Instant desdeInstant = desde != null ? desde.atStartOfDay(ZoneId.systemDefault()).toInstant() : null;
+        Instant hastaInstant = hasta != null ? hasta.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant() : null;
+        return retiroRepository.buscar(medicoId, desdeInstant, hastaInstant).stream().map(RetiroDto::de).toList();
     }
 
     @Transactional

@@ -66,6 +66,34 @@ public class NotificacionTurnoService {
     }
 
     @Async
+    public void avisarPlanKinesiologiaValidado(Usuario paciente, int sesionesGeneradas, int cantidadSesiones) {
+        String texto = """
+                Hola %s,
+
+                Tu plan de kinesiología fue aprobado y ya se generaron %d de %d sesiones.
+
+                Podés ver los días y horarios desde tu cuenta, en "Kinesiología".
+
+                FKT Lomas
+                """.formatted(paciente.getNombreCompleto(), sesionesGeneradas, cantidadSesiones);
+        enviarSegunPreferencia(paciente, "Tu plan de kinesiología fue aprobado — FKT Lomas", texto);
+    }
+
+    @Async
+    public void avisarPlanKinesiologiaRechazado(Usuario paciente, String motivo) {
+        String texto = """
+                Hola %s,
+
+                Tu plan de kinesiología no pudo aprobarse. Motivo: %s
+
+                Podés volver a cargarlo desde tu cuenta, en "Kinesiología", o contactarnos si tenés dudas.
+
+                FKT Lomas
+                """.formatted(paciente.getNombreCompleto(), motivo);
+        enviarSegunPreferencia(paciente, "Tu plan de kinesiología necesita otra revisión — FKT Lomas", texto);
+    }
+
+    @Async
     public void avisarTurnoLiberado(Usuario paciente, String medicoNombre, String especialidadNombre, LocalDate fecha) {
         String texto = """
                 Hola %s,

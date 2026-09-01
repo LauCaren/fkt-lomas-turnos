@@ -39,8 +39,10 @@ public class ContadorCajaController {
     }
 
     @GetMapping("/retiros")
-    public List<RetiroDto> listarRetiros(@RequestParam(required = false) Long medicoId) {
-        return cajaService.listarRetiros(medicoId);
+    public List<RetiroDto> listarRetiros(@RequestParam(required = false) Long medicoId,
+                                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+                                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
+        return cajaService.listarRetiros(medicoId, desde, hasta);
     }
 
     @GetMapping("/gastos")

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 
 public interface RetiroRepository extends JpaRepository<Retiro, Long> {
@@ -15,9 +16,11 @@ public interface RetiroRepository extends JpaRepository<Retiro, Long> {
             join fetch r.medico
             join fetch r.entregadoPor
             where (:medicoId is null or r.medico.id = :medicoId)
+            and (:desde is null or r.fechaHora >= :desde)
+            and (:hasta is null or r.fechaHora < :hasta)
             order by r.fechaHora desc
             """)
-    List<Retiro> buscar(@Param("medicoId") Long medicoId);
+    List<Retiro> buscar(@Param("medicoId") Long medicoId, @Param("desde") Instant desde, @Param("hasta") Instant hasta);
 
     @Query("select coalesce(sum(r.monto), 0) from Retiro r where r.anulado = false and (:medicoId is null or r.medico.id = :medicoId)")
     BigDecimal totalRetiros(@Param("medicoId") Long medicoId);
