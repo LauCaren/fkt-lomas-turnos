@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchAgenda, fetchFeriados, fetchMedicosAdmin, reservarParaPaciente } from './adminSlice';
+import { fetchAgenda, fetchFeriados, fetchMedicosAdmin, reservarParaPaciente, actualizarAsistencia, deshacerTurno } from './adminSlice';
 import { fetchEspecialidades } from '../turnos/turnosSlice';
 import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../../constants/obrasSociales';
 
@@ -123,6 +123,61 @@ function DetalleTurno({ turno, onCerrar }) {
   );
 }
 
+function CheckInBotones({ turno }) {
+  const dispatch = useDispatch();
+  const asistencia = turno.estadoAsistencia || 'PENDIENTE';
+
+  function marcar(estado) {
+    dispatch(actualizarAsistencia({ turnoId: turno.id, estado: asistencia === estado ? 'PENDIENTE' : estado }));
+  }
+
+  return (
+    <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+      <button
+        type="button"
+        className="btn"
+        onClick={() => marcar('LLEGO')}
+        style={{
+          padding: '5px 12px', fontSize: 12.5,
+          border: asistencia === 'LLEGO' ? '1.5px solid var(--teal)' : '1.5px solid var(--line)',
+          background: asistencia === 'LLEGO' ? 'var(--teal-tint)' : 'var(--white)',
+          color: 'var(--ink)',
+        }}
+      >
+        {asistencia === 'LLEGO' ? '✓ Llegó' : 'Llegó'}
+      </button>
+      <button
+        type="button"
+        className="btn"
+        onClick={() => marcar('AUSENTE')}
+        style={{
+          padding: '5px 12px', fontSize: 12.5,
+          border: asistencia === 'AUSENTE' ? '1.5px solid var(--red)' : '1.5px solid var(--line)',
+          background: asistencia === 'AUSENTE' ? 'var(--red-tint)' : 'var(--white)',
+          color: 'var(--ink)',
+        }}
+      >
+        {asistencia === 'AUSENTE' ? '✓ Ausente' : 'Ausente'}
+      </button>
+      {asistencia === 'ATENDIDO' && <span style={{ padding: '5px 10px', fontSize: 12.5, color: 'var(--teal-dark)', fontWeight: 600 }}>Atendido</span>}
+    </div>
+  );
+}
+
+function BotonDeshacer({ turno }) {
+  const dispatch = useDispatch();
+  return (
+    <button
+      className="btn btn-outline"
+      style={{ padding: '6px 14px', fontSize: 13 }}
+      title="Deshace la última reserva/cancelación registrada en este turno"
+      onClick={() => window.confirm('¿Deshacer la última acción sobre este turno?') && dispatch(deshacerTurno(turno.id))}
+    >
+      Deshacer
+    </button>
+  );
+}
+
 function VistaLista({ agenda, agendaCargando, medicoId, reservandoId, setReservandoId }) {
   return (
     <>
@@ -144,6 +199,7 @@ function VistaLista({ agenda, agendaCargando, medicoId, reservandoId, setReserva
                     <div><strong>{t.pacienteNombre}</strong> · DNI {t.pacienteDni}</div>
                     <div style={{ color: 'var(--muted)' }}>{t.pacienteTelefono} · {t.pacienteObraSocial}</div>
                     {t.motivoConsulta && <div style={{ color: 'var(--muted)', marginTop: 2 }}>Motivo: {t.motivoConsulta}</div>}
+                    <CheckInBotones turno={t} />
                   </div>
                 )}
               </div>
@@ -156,6 +212,7 @@ function VistaLista({ agenda, agendaCargando, medicoId, reservandoId, setReserva
                     Reservar por teléfono
                   </button>
                 )}
+                <BotonDeshacer turno={t} />
               </div>
             </div>
             {reservandoId === t.id && <FormularioReserva turno={t} onCancelar={() => setReservandoId(null)} />}

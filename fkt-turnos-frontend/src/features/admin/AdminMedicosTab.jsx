@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchMedicosAdmin, crearMedico, actualizarMedico, crearEspecialidad,
   fetchReglas, crearRegla, eliminarRegla, generarTurnos, subirFotoMedico, subirTituloMedico,
+  crearOActualizarCredencialesMedico,
 } from './adminSlice';
 import { fetchEspecialidades } from '../turnos/turnosSlice';
 import Lightbox from '../../components/Lightbox';
@@ -20,25 +21,80 @@ function hoyISO() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
+function CredencialesMedico({ medico }) {
+  const dispatch = useDispatch();
+  const [form, setForm] = useState({ email: medico.usuarioEmail || '', password: '' });
+  const [enviando, setEnviando] = useState(false);
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    setEnviando(true);
+    dispatch(crearOActualizarCredencialesMedico({ medicoId: medico.id, payload: form })).unwrap()
+      .then(() => setForm({ ...form, password: '' }))
+      .finally(() => setEnviando(false));
+  }
+
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <h4 style={{ fontSize: 15, marginBottom: 6 }}>Acceso al panel (rol Médico)</h4>
+      <p style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 10 }}>
+        {medico.usuarioEmail
+          ? `Ya tiene acceso con ${medico.usuarioEmail}. Completá los campos para cambiar el email o resetear la contraseña.`
+          : 'Este médico todavía no tiene usuario para loguearse en el panel. Cargá un email y una contraseña inicial.'}
+      </p>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+        <div className="field" style={{ marginBottom: 0, flex: '1 1 220px' }}>
+          <label>Email</label>
+          <input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+        </div>
+        <div className="field" style={{ marginBottom: 0, flex: '1 1 220px' }}>
+          <label>{medico.usuarioEmail ? 'Nueva contraseña' : 'Contraseña inicial'}</label>
+          <input type="password" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+        </div>
+        <button type="submit" className="btn btn-outline" disabled={enviando}>{enviando ? 'Guardando…' : 'Guardar credenciales'}</button>
+      </form>
+    </div>
+  );
+}
+
 function MedicoDetalle({ medico }) {
   const dispatch = useDispatch();
   const reglas = useSelector((state) => state.admin.reglasPorMedico[medico.id] || []);
   const [nuevaRegla, setNuevaRegla] = useState({ diaSemana: 'MONDAY', horaInicio: '08:00', horaFin: '12:00' });
   const [rango, setRango] = useState({ desde: hoyISO(), hasta: hoyISO() });
   const [anosExperiencia, setAnosExperiencia] = useState(medico.anosExperiencia ?? '');
+  const [tarifaConsulta, setTarifaConsulta] = useState(medico.tarifaConsulta ?? '');
+
+  function payloadBase() {
+    return {
+      nombreCompleto: medico.nombreCompleto,
+      especialidadId: medico.especialidadId,
+      matricula: medico.matricula,
+      activo: medico.activo,
+      duracionTurnoMinutos: medico.duracionTurnoMinutos,
+      anosExperiencia: medico.anosExperiencia,
+      cobraCopagoIoma: medico.cobraCopagoIoma,
+      tarifaConsulta: medico.tarifaConsulta,
+    };
+  }
 
   function handleGuardarAnosExperiencia(e) {
     e.preventDefault();
     dispatch(actualizarMedico({
       id: medico.id,
-      payload: {
-        nombreCompleto: medico.nombreCompleto,
-        especialidadId: medico.especialidadId,
-        matricula: medico.matricula,
-        activo: medico.activo,
-        duracionTurnoMinutos: medico.duracionTurnoMinutos,
-        anosExperiencia: anosExperiencia === '' ? null : Number(anosExperiencia),
-      },
+      payload: { ...payloadBase(), anosExperiencia: anosExperiencia === '' ? null : Number(anosExperiencia) },
+    }));
+  }
+
+  function handleToggleCopagoIoma(e) {
+    dispatch(actualizarMedico({ id: medico.id, payload: { ...payloadBase(), cobraCopagoIoma: e.target.checked } }));
+  }
+
+  function handleGuardarTarifa(e) {
+    e.preventDefault();
+    dispatch(actualizarMedico({
+      id: medico.id,
+      payload: { ...payloadBase(), tarifaConsulta: tarifaConsulta === '' ? null : Number(tarifaConsulta) },
     }));
   }
 
@@ -81,6 +137,8 @@ function MedicoDetalle({ medico }) {
 
   return (
     <div style={{ padding: '18px 0 4px', borderTop: '1px solid var(--line)', marginTop: 14 }}>
+      <CredencialesMedico medico={medico} />
+
       <h4 style={{ fontSize: 15, marginBottom: 10 }}>Ficha pública (página "Equipo")</h4>
       <form onSubmit={handleGuardarAnosExperiencia} style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginBottom: 16 }}>
         <div className="field" style={{ marginBottom: 0 }}>
@@ -110,6 +168,21 @@ function MedicoDetalle({ medico }) {
         </div>
       </div>
       <Lightbox src={lightboxSrc} alt={medico.nombreCompleto} onClose={() => setLightboxSrc(null)} />
+
+      <h4 style={{ fontSize: 15, marginBottom: 10 }}>Obra social IOMA</h4>
+      <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, marginBottom: 20 }}>
+        <input type="checkbox" checked={!!medico.cobraCopagoIoma} onChange={handleToggleCopagoIoma} />
+        Este médico cobra copago a pacientes con IOMA
+      </label>
+
+      <h4 style={{ fontSize: 15, marginBottom: 10 }}>Tarifa de consulta</h4>
+      <form onSubmit={handleGuardarTarifa} style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginBottom: 20 }}>
+        <div className="field" style={{ marginBottom: 0 }}>
+          <label>Monto (se autocompleta al cobrar en caja)</label>
+          <input type="number" min={0} step="0.01" value={tarifaConsulta} onChange={(e) => setTarifaConsulta(e.target.value)} style={{ width: 140 }} />
+        </div>
+        <button type="submit" className="btn btn-outline">Guardar</button>
+      </form>
 
       <h4 style={{ fontSize: 15, marginBottom: 10 }}>Horarios semanales</h4>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 14 }}>
@@ -197,6 +270,8 @@ export default function AdminMedicosTab() {
         activo: !medico.activo,
         duracionTurnoMinutos: medico.duracionTurnoMinutos,
         anosExperiencia: medico.anosExperiencia,
+        cobraCopagoIoma: medico.cobraCopagoIoma,
+        tarifaConsulta: medico.tarifaConsulta,
       },
     }));
   }

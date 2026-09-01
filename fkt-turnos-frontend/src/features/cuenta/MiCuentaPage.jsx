@@ -18,6 +18,11 @@ const GENEROS = [
   { value: 'PREFIERO_NO_DECIR', label: 'Prefiero no decir' },
 ];
 
+const CANALES_NOTIFICACION = [
+  { value: 'EMAIL', label: 'Email' },
+  { value: 'WHATSAPP', label: 'WhatsApp' },
+];
+
 function DatosPersonales({ perfil }) {
   const dispatch = useDispatch();
   const [form, setForm] = useState({
@@ -26,6 +31,7 @@ function DatosPersonales({ perfil }) {
     telefono: perfil.telefono || '',
     genero: perfil.genero || '',
     obraSocial: perfil.obraSocial || '',
+    canalNotificacionPreferido: perfil.canalNotificacionPreferido || 'EMAIL',
   });
 
   function handleChange(e) {
@@ -72,6 +78,12 @@ function DatosPersonales({ perfil }) {
         <label htmlFor="genero">Género</label>
         <select id="genero" name="genero" required value={form.genero} onChange={handleChange}>
           {GENEROS.map((g) => <option key={g.value} value={g.value}>{g.label}</option>)}
+        </select>
+      </div>
+      <div className="field">
+        <label htmlFor="canalNotificacionPreferido">Cómo preferís recibir los recordatorios de turno</label>
+        <select id="canalNotificacionPreferido" name="canalNotificacionPreferido" required value={form.canalNotificacionPreferido} onChange={handleChange}>
+          {CANALES_NOTIFICACION.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
         </select>
       </div>
       <button type="submit" className="btn btn-primary">Guardar cambios</button>

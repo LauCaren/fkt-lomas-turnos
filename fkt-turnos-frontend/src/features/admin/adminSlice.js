@@ -59,6 +59,15 @@ export const subirTituloMedico = createAsyncThunk('admin/subirTituloMedico', asy
   }
 });
 
+export const crearOActualizarCredencialesMedico = createAsyncThunk('admin/crearOActualizarCredencialesMedico', async ({ medicoId, payload }, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.put(`/api/admin/medicos/${medicoId}/credenciales`, payload);
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudieron guardar las credenciales'));
+  }
+});
+
 export const fetchReglas = createAsyncThunk('admin/fetchReglas', async (medicoId, { rejectWithValue }) => {
   try {
     const { data } = await axiosClient.get(`/api/admin/medicos/${medicoId}/reglas-disponibilidad`);
@@ -115,6 +124,33 @@ export const fetchTurnosOcupados = createAsyncThunk('admin/fetchTurnosOcupados',
     return data.content;
   } catch (error) {
     return rejectWithValue(mensajeDeError(error));
+  }
+});
+
+export const fetchColaEsperaAdmin = createAsyncThunk('admin/fetchColaEspera', async ({ fecha, medicoId }, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/admin/turnos/cola-espera', { params: { fecha, medicoId: medicoId || undefined } });
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
+export const actualizarAsistencia = createAsyncThunk('admin/actualizarAsistencia', async ({ turnoId, estado }, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.put(`/api/admin/turnos/${turnoId}/asistencia`, { estado });
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudo actualizar la asistencia'));
+  }
+});
+
+export const deshacerTurno = createAsyncThunk('admin/deshacerTurno', async (turnoId, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.put(`/api/admin/turnos/${turnoId}/deshacer`);
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudo deshacer'));
   }
 });
 
@@ -280,6 +316,8 @@ const adminSlice = createSlice({
     agendaCargando: false,
     turnosOcupados: [],
     turnosOcupadosCargando: false,
+    colaEspera: [],
+    colaEsperaCargando: false,
     feriados: [],
     mfaSetup: null,
     mensajesContacto: [],
@@ -304,6 +342,11 @@ const adminSlice = createSlice({
       .addCase(actualizarMedico.fulfilled, (state, action) => {
         state.medicos = state.medicos.map((m) => m.id === action.payload.id ? action.payload : m);
       })
+      .addCase(crearOActualizarCredencialesMedico.fulfilled, (state, action) => {
+        state.medicos = state.medicos.map((m) => m.id === action.payload.id ? action.payload : m);
+        state.mensajeExito = 'Credenciales del médico guardadas';
+      })
+      .addCase(crearOActualizarCredencialesMedico.rejected, (state, action) => { state.error = action.payload; })
       .addCase(subirFotoMedico.fulfilled, (state, action) => {
         state.medicos = state.medicos.map((m) => m.id === action.payload.id ? action.payload : m);
         state.mensajeExito = 'Foto actualizada';
@@ -337,6 +380,21 @@ const adminSlice = createSlice({
       .addCase(fetchTurnosOcupados.pending, (state) => { state.turnosOcupadosCargando = true; })
       .addCase(fetchTurnosOcupados.fulfilled, (state, action) => { state.turnosOcupados = action.payload; state.turnosOcupadosCargando = false; })
       .addCase(fetchTurnosOcupados.rejected, (state, action) => { state.error = action.payload; state.turnosOcupadosCargando = false; })
+      .addCase(fetchColaEsperaAdmin.pending, (state) => { state.colaEsperaCargando = true; })
+      .addCase(fetchColaEsperaAdmin.fulfilled, (state, action) => { state.colaEspera = action.payload; state.colaEsperaCargando = false; })
+      .addCase(fetchColaEsperaAdmin.rejected, (state, action) => { state.error = action.payload; state.colaEsperaCargando = false; })
+      .addCase(actualizarAsistencia.fulfilled, (state, action) => {
+        state.agenda = state.agenda.map((t) => t.id === action.payload.id ? action.payload : t);
+        state.colaEspera = action.payload.estadoAsistencia === 'LLEGO'
+          ? state.colaEspera
+          : state.colaEspera.filter((t) => t.id !== action.payload.id);
+      })
+      .addCase(actualizarAsistencia.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(deshacerTurno.fulfilled, (state, action) => {
+        state.agenda = state.agenda.map((t) => t.id === action.payload.id ? action.payload : t);
+        state.mensajeExito = 'Deshecho correctamente';
+      })
+      .addCase(deshacerTurno.rejected, (state, action) => { state.error = action.payload; })
       .addCase(reservarParaPaciente.fulfilled, (state, action) => {
         state.agenda = state.agenda.map((t) => t.id === action.payload.id ? action.payload : t);
         state.mensajeExito = 'Turno reservado correctamente';

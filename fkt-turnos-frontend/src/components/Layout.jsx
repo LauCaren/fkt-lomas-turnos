@@ -32,12 +32,19 @@ export default function Layout({ children }) {
               {usuario.role === 'PACIENTE' && (
                 <>
                   <Link to="/turnos" style={{ fontSize: 14, fontWeight: 600 }}>Sacar turno</Link>
+                  <Link to="/turnos/kinesiologia" style={{ fontSize: 14, fontWeight: 600 }}>Kinesiología</Link>
                   <Link to="/turnos/mis-turnos" style={{ fontSize: 14, fontWeight: 600 }}>Mis turnos</Link>
                   <Link to="/turnos/mi-cuenta" style={{ fontSize: 14, fontWeight: 600 }}>Mi cuenta</Link>
                 </>
               )}
               {usuario.role === 'ADMIN' && (
                 <Link to="/admin" style={{ fontSize: 14, fontWeight: 600 }}>Panel admin</Link>
+              )}
+              {usuario.role === 'MEDICO' && (
+                <Link to="/medico" style={{ fontSize: 14, fontWeight: 600 }}>Panel médico</Link>
+              )}
+              {usuario.role === 'CONTADOR' && (
+                <Link to="/contador" style={{ fontSize: 14, fontWeight: 600 }}>Panel contador</Link>
               )}
               <span style={{ fontSize: 14, color: 'var(--muted)' }}>{usuario.nombreCompleto}</span>
               <button className="btn btn-outline" onClick={handleLogout}>Salir</button>

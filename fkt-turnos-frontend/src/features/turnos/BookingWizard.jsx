@@ -5,7 +5,10 @@ import {
   fetchEspecialidades, fetchMedicos, fetchTurnosDisponibles, reservarTurno, cancelarTurno, limpiarReserva, limpiarDisponibles,
   fetchMiAnotacionListaEspera, anotarseListaEspera, darseDeBajaListaEspera,
 } from './turnosSlice';
+import { fetchMiPerfil } from '../cuenta/cuentaSlice';
 import AgregarCalendario from '../../components/AgregarCalendario';
+
+const WHATSAPP_CONSULTORIO = { numero: '5491123515402', texto: 'Hola, quiero confirmar mi turno con copago IOMA.' };
 
 function hoyISO() {
   const d = new Date();
@@ -17,6 +20,7 @@ export default function BookingWizard() {
   const navigate = useNavigate();
   const location = useLocation();
   const { especialidades, medicos, disponibles, status, error, reservaExitosa, miAnotacionListaEspera } = useSelector((state) => state.turnos);
+  const perfil = useSelector((state) => state.cuenta.perfil);
   const [anotandoListaEspera, setAnotandoListaEspera] = useState(false);
 
   const turnoAReprogramar = location.state?.reprogramar || null;
@@ -33,6 +37,10 @@ export default function BookingWizard() {
   useEffect(() => {
     dispatch(fetchEspecialidades());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (!perfil) dispatch(fetchMiPerfil());
+  }, [dispatch, perfil]);
 
   useEffect(() => {
     // Al salir de este wizard (a "Mis turnos", u otra especialidad desde el
@@ -75,7 +83,13 @@ export default function BookingWizard() {
   }
 
   function handleEspecialidadChange(e) {
-    setEspecialidadId(e.target.value);
+    const nuevaEspecialidadId = e.target.value;
+    const especialidad = especialidades.find((esp) => String(esp.id) === nuevaEspecialidadId);
+    if (especialidad?.esKinesiologia) {
+      navigate('/turnos/kinesiologia');
+      return;
+    }
+    setEspecialidadId(nuevaEspecialidadId);
     setMedicoId('');
     setTurnoSeleccionado(null);
     // reprogramando se mantiene: aunque cambie de especialidad o médico, el
@@ -107,12 +121,29 @@ export default function BookingWizard() {
   }
 
   if (reservaExitosa) {
+    const medicoReservado = medicos.find((m) => m.id === reservaExitosa.medicoId);
+    const mostrarAvisoCopagoIoma = perfil?.obraSocial === 'IOMA' && medicoReservado?.cobraCopagoIoma;
     return (
       <div className="card" style={{ maxWidth: 480, margin: '0 auto', textAlign: 'center' }}>
         <div className="alert alert-success">
           {reprogramadoOk ? '¡Turno reprogramado con éxito!' : '¡Turno reservado con éxito!'}
         </div>
         {avisoReprogramacion && <div className="alert alert-error" style={{ marginTop: 10 }}>{avisoReprogramacion}</div>}
+        {mostrarAvisoCopagoIoma && (
+          <div className="alert" style={{ marginTop: 10, background: 'var(--teal-tint)', color: 'var(--teal-dark)', border: '1px solid var(--teal)', textAlign: 'left' }}>
+            Este médico cobra un copago a pacientes con IOMA. Por favor escribinos por WhatsApp para terminar de confirmar el turno.
+            <div style={{ marginTop: 10 }}>
+              <a
+                className="btn btn-primary"
+                href={`https://wa.me/${WHATSAPP_CONSULTORIO.numero}?text=${encodeURIComponent(WHATSAPP_CONSULTORIO.texto)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Escribinos por WhatsApp
+              </a>
+            </div>
+          </div>
+        )}
         <h2 style={{ fontSize: 22 }}>{reservaExitosa.especialidadNombre} con {reservaExitosa.medicoNombre}</h2>
         <p style={{ marginTop: 10, color: 'var(--muted)' }}>
           {reservaExitosa.fecha} de {reservaExitosa.horaInicio.slice(0, 5)} a {reservaExitosa.horaFin.slice(0, 5)}

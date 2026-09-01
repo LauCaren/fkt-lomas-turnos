@@ -2,15 +2,21 @@ import { useState } from 'react';
 import AdminAgendaTab from './AdminAgendaTab';
 import AdminTurnosAgendadosTab from './AdminTurnosAgendadosTab';
 import AdminMedicosTab from './AdminMedicosTab';
+import AdminColaEsperaTab from './AdminColaEsperaTab';
 import AdminMensajesTab from './AdminMensajesTab';
 import AdminPostulacionesTab from './AdminPostulacionesTab';
 import AdminRecordatoriosTab from './AdminRecordatoriosTab';
 import AdminCuentaTab from './AdminCuentaTab';
+import AdminCajaTab from '../caja/AdminCajaTab';
+import AdminKinesiologiaTab from '../kinesiologia/AdminKinesiologiaTab';
 
 const TABS = [
   { id: 'agenda', label: 'Agenda' },
   { id: 'turnos-agendados', label: 'Ver Turnos Agendados' },
+  { id: 'cola-espera', label: 'Cola de espera' },
   { id: 'medicos', label: 'Médicos y horarios' },
+  { id: 'kinesiologia', label: 'Kinesiología' },
+  { id: 'caja', label: 'Caja' },
   { id: 'recordatorios', label: 'Recordatorios' },
   { id: 'mensajes', label: 'Alquiler de consultorios' },
   { id: 'postulaciones', label: 'Postulaciones' },
@@ -48,7 +54,10 @@ export default function AdminDashboardPage() {
 
       {tab === 'agenda' && <AdminAgendaTab />}
       {tab === 'turnos-agendados' && <AdminTurnosAgendadosTab />}
+      {tab === 'cola-espera' && <AdminColaEsperaTab />}
       {tab === 'medicos' && <AdminMedicosTab />}
+      {tab === 'kinesiologia' && <AdminKinesiologiaTab />}
+      {tab === 'caja' && <AdminCajaTab />}
       {tab === 'recordatorios' && <AdminRecordatoriosTab />}
       {tab === 'mensajes' && <AdminMensajesTab />}
       {tab === 'postulaciones' && <AdminPostulacionesTab />}
