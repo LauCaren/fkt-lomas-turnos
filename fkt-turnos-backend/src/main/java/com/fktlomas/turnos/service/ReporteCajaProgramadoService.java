@@ -70,6 +70,7 @@ public class ReporteCajaProgramadoService {
             log.info("Reporte mensual de caja enviado a {} ({} a {})", destinatario, desde, hasta);
         } catch (Exception e) {
             log.error("No se pudo enviar el reporte mensual de caja a {}: {}", destinatario, e.getMessage());
+            emailService.notificarFalloReporteMensualCaja(destinatario, e.getMessage());
         }
     }
 }

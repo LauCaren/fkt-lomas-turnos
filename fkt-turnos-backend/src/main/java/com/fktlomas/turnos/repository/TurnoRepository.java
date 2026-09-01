@@ -70,9 +70,16 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
             """)
     List<Turno> findReservadosEntreFechas(@Param("desde") LocalDate desde, @Param("hasta") LocalDate hasta);
 
+    /**
+     * Al reservar se limpian confirmacionPrevia/tokenConfirmacion: son del paciente que tenía
+     * este turno antes de liberarse (si lo rechazó, ese aviso queda visible en la agenda
+     * mientras el turno sigue libre — ver TurnoService.cancelarInterno), no tienen sentido
+     * para quien lo está reservando ahora.
+     */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("update Turno t set t.estado = com.fktlomas.turnos.domain.EstadoTurno.RESERVADO, " +
-            "t.paciente = :paciente, t.motivoConsulta = :motivo " +
+            "t.paciente = :paciente, t.motivoConsulta = :motivo, " +
+            "t.confirmacionPrevia = com.fktlomas.turnos.domain.ConfirmacionPrevia.SIN_RESPUESTA, t.tokenConfirmacion = null " +
             "where t.id = :turnoId and t.estado = com.fktlomas.turnos.domain.EstadoTurno.DISPONIBLE")
     int reservarSiDisponible(@Param("turnoId") Long turnoId, @Param("paciente") Usuario paciente, @Param("motivo") String motivo);
 
@@ -111,4 +118,13 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
 
     /** Libera (vuelve DISPONIBLE) las sesiones futuras aún reservadas de un plan que se cancela o pausa. */
     List<Turno> findByPlanKinesiologiaIdAndEstadoAndFechaGreaterThanEqual(Long planId, EstadoTurno estado, LocalDate fecha);
+
+    @Query("""
+            select t from Turno t
+            join fetch t.medico m
+            join fetch m.especialidad
+            join fetch t.paciente
+            where t.tokenConfirmacion = :token
+            """)
+    java.util.Optional<Turno> findByTokenConfirmacion(@Param("token") String token);
 }

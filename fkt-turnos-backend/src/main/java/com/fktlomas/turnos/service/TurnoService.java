@@ -1,5 +1,6 @@
 package com.fktlomas.turnos.service;
 
+import com.fktlomas.turnos.domain.ConfirmacionPrevia;
 import com.fktlomas.turnos.domain.EstadoAsistencia;
 import com.fktlomas.turnos.domain.EstadoTurno;
 import com.fktlomas.turnos.domain.Role;
@@ -110,11 +111,39 @@ public class TurnoService {
         if (turno.getFecha().isBefore(LocalDate.now())) {
             throw new IllegalArgumentException("No se puede cancelar un turno que ya pasó");
         }
+        cancelarInterno(turno, paciente, "CANCELAR");
+    }
 
+    /**
+     * Confirmación de asistencia del día anterior (punto pedido explícitamente): el link del
+     * recordatorio no requiere login, así que el token hace las veces de credencial — es un
+     * UUID no adivinable, generado por RecordatorioService. Si el paciente avisa que no puede
+     * venir, se libera el turno igual que una cancelación común.
+     */
+    @Transactional
+    public void confirmarPorToken(String token, boolean confirma) {
+        Turno turno = turnoRepository.findByTokenConfirmacion(token)
+                .orElseThrow(() -> new RecursoNoEncontradoException("El link no es válido o ya venció"));
+
+        if (turno.getEstado() != EstadoTurno.RESERVADO) {
+            // El turno ya se canceló o reprogramó por otra vía — no hay nada que confirmar.
+            return;
+        }
+
+        turno.setConfirmacionPrevia(confirma ? ConfirmacionPrevia.CONFIRMADO : ConfirmacionPrevia.RECHAZADO);
+        if (confirma) {
+            turnoRepository.save(turno);
+        } else {
+            cancelarInterno(turno, turno.getPaciente(), "CANCELAR_POR_CONFIRMACION_PREVIA");
+        }
+    }
+
+    private void cancelarInterno(Turno turno, Usuario paciente, String operacionAuditoria) {
         TurnoSnapshot antes = snapshotDe(turno);
         String medicoNombre = turno.getMedico().getNombreCompleto();
         String especialidadNombre = turno.getMedico().getEspecialidad().getNombre();
         Long medicoId = turno.getMedico().getId();
+        Long turnoId = turno.getId();
         LocalDate fecha = turno.getFecha();
         LocalTime horaInicio = turno.getHoraInicio();
         LocalTime horaFin = turno.getHoraFin();
@@ -122,8 +151,11 @@ public class TurnoService {
         turno.setEstado(EstadoTurno.DISPONIBLE);
         turno.setPaciente(null);
         turno.setMotivoConsulta(null);
+        // La confirmación/rechazo previo queda visible en la agenda mientras el turno siga
+        // libre (útil para la secretaria) — se limpia recién cuando alguien lo reserva de
+        // nuevo, ver reservarSiDisponible.
         Turno guardado = turnoRepository.save(turno);
-        auditoriaService.registrar(paciente, AUDITORIA_TIPO_TURNO, turnoId, "CANCELAR", antes, snapshotDe(guardado));
+        auditoriaService.registrar(paciente, AUDITORIA_TIPO_TURNO, turnoId, operacionAuditoria, antes, snapshotDe(guardado));
 
         notificacionTurnoService.confirmarCancelacion(paciente, medicoNombre, especialidadNombre, fecha, horaInicio, horaFin);
         listaEsperaService.notificarLiberacion(medicoId, fecha);

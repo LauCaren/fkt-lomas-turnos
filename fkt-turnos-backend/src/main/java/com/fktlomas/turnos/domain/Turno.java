@@ -58,6 +58,18 @@ public class Turno {
     @JoinColumn(name = "plan_kinesiologia_id")
     private PlanKinesiologia planKinesiologia;
 
+    /**
+     * Confirmación de asistencia del día anterior: el recordatorio incluye dos links (sí/no)
+     * que no requieren login, identificados por este token — se genera la primera vez que se
+     * manda un recordatorio para este turno (ver RecordatorioService).
+     */
+    @Column(name = "token_confirmacion", unique = true, length = 64)
+    private String tokenConfirmacion;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "confirmacion_previa", nullable = false, length = 20)
+    private ConfirmacionPrevia confirmacionPrevia = ConfirmacionPrevia.SIN_RESPUESTA;
+
     @Version
     private Long version;
 

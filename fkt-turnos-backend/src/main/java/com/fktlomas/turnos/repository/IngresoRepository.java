@@ -25,4 +25,15 @@ public interface IngresoRepository extends JpaRepository<Ingreso, Long> {
 
     @Query("select coalesce(sum(i.monto), 0) from Ingreso i where i.anulado = false and (:medicoId is null or i.medico.id = :medicoId)")
     BigDecimal totalIngresos(@Param("medicoId") Long medicoId);
+
+    /** Ingresos que se pueden atar a un paciente puntual — solo los que están ligados a uno de sus turnos. */
+    @Query("""
+            select i from Ingreso i
+            join fetch i.medico
+            left join fetch i.turno
+            join fetch i.registradoPor
+            where i.turno.paciente.id = :pacienteId
+            order by i.fecha desc, i.createdAt desc
+            """)
+    List<Ingreso> findByTurnoPacienteId(@Param("pacienteId") Long pacienteId);
 }

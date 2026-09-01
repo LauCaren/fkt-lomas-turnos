@@ -22,7 +22,8 @@ public record TurnoAdminDto(
         String pacienteTelefono,
         String pacienteObraSocial,
         String estadoAsistencia,
-        boolean tieneEvolucion
+        boolean tieneEvolucion,
+        String confirmacionPrevia
 ) {
     public static TurnoAdminDto de(Turno t) {
         return de(t, false);
@@ -50,7 +51,8 @@ public record TurnoAdminDto(
                 p != null ? p.getTelefono() : null,
                 p != null ? p.getObraSocial() : null,
                 t.getEstadoAsistencia().name(),
-                tieneEvolucion
+                tieneEvolucion,
+                t.getConfirmacionPrevia().name()
         );
     }
 }

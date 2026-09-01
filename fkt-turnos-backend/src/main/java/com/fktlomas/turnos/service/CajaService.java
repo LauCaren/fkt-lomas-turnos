@@ -56,6 +56,11 @@ public class CajaService {
         return ingresoRepository.buscar(medicoId, desde, hasta).stream().map(IngresoDto::de).toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<IngresoDto> ingresosDePaciente(Long pacienteId) {
+        return ingresoRepository.findByTurnoPacienteId(pacienteId).stream().map(IngresoDto::de).toList();
+    }
+
     @Transactional
     public IngresoDto registrarIngreso(CrearIngresoRequest request, Usuario registradoPor) {
         Medico medico = medicoRepository.findById(request.medicoId())

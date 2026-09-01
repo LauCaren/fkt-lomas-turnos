@@ -12,6 +12,7 @@ import com.fktlomas.turnos.repository.TurnoRepository;
 import com.fktlomas.turnos.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Job de recordatorios de turno. A propósito NO envuelve todo procesarPendientes()
@@ -47,6 +49,9 @@ public class RecordatorioService {
     private final ConfiguracionRecordatoriosRepository configuracionRepository;
     private final EmailService emailService;
     private final WhatsAppService whatsAppService;
+
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
 
     @Scheduled(fixedDelayString = "#{${app.recordatorios.intervalo-minutos} * 60000}")
     public void procesarPendientes() {
@@ -137,6 +142,10 @@ public class RecordatorioService {
     private void intentarEnvio(Recordatorio recordatorio, String plantilla) {
         Turno turno = recordatorio.getTurno();
         try {
+            if (turno.getTokenConfirmacion() == null) {
+                turno.setTokenConfirmacion(UUID.randomUUID().toString());
+                turno = turnoRepository.save(turno);
+            }
             String texto = renderizarPlantilla(plantilla, turno);
             enviarPorCanal(recordatorio.getCanal(), turno.getPaciente(), "Recordatorio de turno — FKT Lomas", texto);
 
@@ -162,12 +171,18 @@ public class RecordatorioService {
     }
 
     private String renderizarPlantilla(String plantilla, Turno turno) {
-        return plantilla
+        String mensaje = plantilla
                 .replace("{paciente}", turno.getPaciente().getNombreCompleto())
                 .replace("{profesional}", turno.getMedico().getNombreCompleto())
                 .replace("{especialidad}", turno.getMedico().getEspecialidad().getNombre())
                 .replace("{fecha}", turno.getFecha().format(FORMATO_FECHA))
                 .replace("{hora}", turno.getHoraInicio().format(FORMATO_HORA));
+
+        // Se agrega siempre, no depende de que la plantilla (editable por el admin) tenga un
+        // placeholder para esto — así el link de confirmación nunca queda afuera por error.
+        String linkConfirmar = frontendUrl + "/confirmar-turno?token=" + turno.getTokenConfirmacion() + "&respuesta=si";
+        String linkRechazar = frontendUrl + "/confirmar-turno?token=" + turno.getTokenConfirmacion() + "&respuesta=no";
+        return mensaje + "\n\n¿Vas a poder venir?\nSí, confirmo: " + linkConfirmar + "\nNo voy a poder ir: " + linkRechazar;
     }
 
     private ConfiguracionRecordatorios obtenerConfiguracionEntidad() {

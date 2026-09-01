@@ -142,6 +142,26 @@ public class EmailService {
     }
 
     /**
+     * Si el envío mensual automático de caja falla (ver ReporteCajaProgramadoService), esto
+     * es lo único que se entera alguien — sin esto quedaba solo en un log que nadie revisa.
+     * Va al mail interno de la clínica, no al destinatario configurado del reporte (que puede
+     * ser justamente la dirección que está fallando).
+     */
+    public void notificarFalloReporteMensualCaja(String destinatarioConfigurado, String motivo) {
+        String asunto = "No se pudo enviar el reporte mensual de caja — FKT Lomas";
+        String cuerpo = """
+                El envío automático del reporte mensual de caja falló.
+
+                Destinatario configurado: %s
+                Motivo: %s
+
+                Podés generar el reporte a mano desde el panel de administración,
+                pestaña "Reportes", y revisar la dirección configurada en "Caja".
+                """.formatted(destinatarioConfigurado, motivo);
+        enviar(adminNotifyEmail, asunto, cuerpo);
+    }
+
+    /**
      * A diferencia de los métodos de arriba (@Async, no le importa a nadie el
      * resultado), este es sincrónico y tira excepción si falla: lo usa
      * RecordatorioService, que necesita saber en el momento si el envío
