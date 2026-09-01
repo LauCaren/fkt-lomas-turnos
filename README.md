@@ -10,10 +10,15 @@ FKT Pagina/              Sitio estático de marketing (ya existía). Se agregaro
                           - columna "Otros" en el footer con los dos links nuevos
 
 fkt-turnos-backend/      API REST en Spring Boot (Java 17): auth JWT, turnos,
-                          panel admin, contacto y postulaciones.
+                          kinesiología, caja/gastos, historia clínica, auditoría,
+                          panel admin, contacto y postulaciones. Cuatro roles:
+                          PACIENTE, ADMIN, MEDICO, CONTADOR (ver "Roles" abajo).
 
 fkt-turnos-frontend/     App React + Redux Toolkit: registro/login de pacientes,
-                          reserva de turnos y panel de administración de Fernando.
+                          reserva de turnos, panel de administración, y los
+                          portales de médico y contador. Empaquetable también
+                          como app de escritorio (Electron) y apps móviles
+                          (Capacitor).
 
 docker-compose.yml       Postgres local para desarrollo.
 ```
@@ -108,23 +113,64 @@ python -m http.server 5500
 
 **Importante:** cada máquina tiene su propia base de datos local (el contenedor de Docker no se sincroniza entre tu Mac y tu PC). Vas a arrancar con las especialidades y los 9 médicos reales ya cargados (vienen de una migración), pero **no** con los pacientes/turnos de prueba que haya en la otra máquina — son entornos de desarrollo independientes, no una base compartida.
 
-## Estado actual (v1)
+## Roles
+
+El sistema tiene cuatro roles, cada uno con su propio login y su propia superficie de la API (`SecurityConfig` bloquea `/api/admin/**`, `/api/medico/**` y `/api/contador/**` por rol a nivel de servidor, no solo ocultando botones en el frontend):
+
+- **PACIENTE**: reserva turnos, pide plan de kinesiología, ve/cancela sus propios turnos, gestiona su cuenta.
+- **ADMIN** (la secretaria/Fernando): panel completo — turnos, médicos, caja, reportes, todo lo de abajo.
+- **MEDICO**: portal propio (`/medico`) — agenda del día, cola de espera, historia clínica de sus pacientes, su saldo en caja. No ve nada de otros médicos ni del negocio en general.
+- **CONTADOR**: portal de solo lectura (`/contador`) — únicamente movimientos de caja (ingresos, retiros, gastos). Sin acceso a turnos, pacientes ni historias clínicas, ni para leer ni para escribir.
+
+## Estado actual
 
 Implementado y probado de punta a punta:
 
+**Turnos y pacientes**
 - Registro de pacientes (DNI, obra social, nombre, email, teléfono, género) y login con JWT.
 - Reserva de turnos por especialidad → médico → fecha → horario, con bloqueo real contra doble reserva (dos personas no pueden tomar el mismo horario).
-- Cancelación de turnos propios (libera el horario para otros pacientes).
-- Panel de administración (Fernando): alta de especialidades y médicos, carga de horarios semanales por médico, generación de turnos a partir de esos horarios, bandeja de mensajes de "alquiler de consultorios" y de postulaciones con descarga de CV.
+- Copago de IOMA: el paciente ve el aviso de copago antes de confirmar si su obra social y la especialidad lo requieren.
+- Cancelación de turnos propios (libera el horario para otros pacientes), lista de espera, y confirmación previa del turno (recordatorio con confirmar/cancelar) el día anterior.
+- Los pacientes pueden editar sus propios datos y cambiar su contraseña desde "Mi cuenta". "Olvidé mi contraseña" por email con link temporal.
+- Feriados nacionales de Argentina 2026 precargados (Ley 27.399, verificados contra el calendario oficial) — se excluyen automáticamente al generar turnos, y se marcan visualmente en la agenda. El admin puede sumar cierres propios del centro vía `POST /api/admin/feriados`.
+
+**Kinesiología**
+- Plan de sesiones con orden médica obligatoria (subida de foto/PDF, validada por firma binaria del archivo, no por extensión ni por el Content-Type que manda el navegador) y validación manual del admin antes de generar los turnos.
+- El paciente elige sus horarios fijos semanales de una lista de horarios reales del kinesiólogo (derivados de su `ReglaDisponibilidad`), no escribiendo día/hora a mano — o puede elegir "me da igual quién me atienda" para ver los horarios de todos los kinesiólogos juntos.
+- Pausar/reanudar un plan libera y vuelve a generar las sesiones futuras sin perder el conteo de sesiones ya hechas.
+
+**Caja, gastos y el rol CONTADOR**
+- Caja física con ingresos (cobros a pacientes, por médico) y retiros, más gastos categorizados del consultorio — todo con saldo acumulado por médico.
+- Cierre/resumen mensual con reenvío automático por email el último día del mes.
+- Exportación a PDF y Excel (Apache PDFBox / POI, ambas Apache-2.0) de los movimientos, para que la secretaria le mande al dueño un resumen de un día o período puntual.
+- El rol CONTADOR ve estos movimientos en su propio portal, de solo lectura.
+
+**Historia clínica y el rol MEDICO**
+- Cada médico tiene su propia cuenta (vinculada a su `Medico` desde el panel admin) y ve solo su agenda del día, su cola de espera de pacientes que llegaron, y puede marcar "atendido" y cargar una evolución clínica de la consulta.
+- Historia clínica por paciente, visible solo para los médicos que lo atendieron — un médico no puede ver evoluciones cargadas por otro médico.
+- Saldo de caja acumulado, visible en su propio portal.
+
+**Auditoría**
+- Undo/redo de operaciones sobre turnos (reservar, cancelar, reasignar) con historial completo — pensado para revertir un error de carga de la secretaria sin tener que arreglarlo a mano en la base.
+
+**Administración**
+- Alta de especialidades y médicos, carga de horarios semanales por médico, generación de turnos a partir de esos horarios, bandeja de mensajes de "alquiler de consultorios" y de postulaciones con descarga de CV.
 - Agenda para la secretaria: vista de lista por día, y vista semanal tipo calendario (eligiendo un médico) con los turnos coloreados por estado, además de reserva de un turno en nombre de un paciente que llama por teléfono o WhatsApp (sin necesidad de que ese paciente tenga cuenta).
-- Feriados nacionales de Argentina 2026 precargados (Ley 27.399, verificados contra el calendario oficial) — se excluyen automáticamente al generar turnos, y se marcan visualmente en la agenda. El admin puede sumar cierres propios del centro vía `POST /api/admin/feriados` (falta la UI para cargarlos desde el panel, hoy solo por API).
-- Los pacientes pueden editar sus propios datos y cambiar su contraseña desde "Mi cuenta".
-- "Olvidé mi contraseña" (paciente y admin), por email con link temporal.
-- Verificación en dos pasos (TOTP, tipo Google Authenticator) opcional para la cuenta de administrador — no para pacientes, para no agregarles fricción a los que reservan por teléfono.
+- Búsqueda global de pacientes.
+
+**Seguridad de cuentas**
+- Verificación en dos pasos (TOTP, tipo Google Authenticator), disponible para ADMIN, MEDICO y CONTADOR — no para pacientes, para no agregarles fricción a los que reservan por teléfono.
+
+**Comunicaciones**
 - Página de contacto para alquiler de consultorios y página "Trabajá con nosotros" con carga de CV en PDF, ambas en el sitio estático.
-- Envío de emails (confirmación de turno, aviso de nuevo mensaje/postulación) — desactivado por defecto hasta que se configure un SMTP real (ver README del backend).
+- Envío de emails (confirmación de turno, aviso de nuevo mensaje/postulación, resumen mensual de caja, alerta de fallo de job) — desactivado por defecto hasta que se configure un SMTP real (ver README del backend).
 - Recordatorios automáticos de turno (email o WhatsApp según el canal preferido de cada paciente) desde un job programado del backend, con reintentos, historial y reenvío manual, plantilla del mensaje y anticipación editables, y envío de un mensaje puntual a un paciente — todo desde la pestaña "Recordatorios" del panel de admin (ver README del backend para las variables de entorno de Twilio). WhatsApp desactivado hasta configurar Twilio; el canal por defecto de cada paciente es email.
-- El panel de administración también se puede empaquetar como app de escritorio para Windows y Mac (Electron) — ver `fkt-turnos-frontend/electron/` y el script `npm run desktop:build`. Así la secretaria tiene un solo programa instalable para agenda, reserva telefónica y recordatorios, en vez de una pestaña del navegador.
+
+**App de escritorio**
+- El panel de administración (y los portales de médico y contador) también se pueden empaquetar como app de escritorio para Windows y Mac (Electron) — ver `fkt-turnos-frontend/electron/` y el script `npm run desktop:build`. La app de escritorio es exclusivamente para los paneles internos: no tiene ningún link de salida al sitio informativo público.
+
+**API**
+- La API está documentada con OpenAPI/Swagger (`springdoc-openapi`) — con el backend corriendo, la UI interactiva está en `http://localhost:8080/swagger-ui.html` y el JSON crudo en `/v3/api-docs`.
 
 ## Despliegue
 

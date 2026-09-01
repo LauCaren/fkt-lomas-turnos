@@ -1,0 +1,76 @@
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axiosClient, { mensajeDeError } from '../../api/axiosClient';
+
+export const fetchResumenCajaContador = createAsyncThunk('contador/fetchResumen', async (_, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/contador/caja/resumen');
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
+export const fetchIngresosContador = createAsyncThunk('contador/fetchIngresos', async (_, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/contador/caja/ingresos');
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
+export const fetchRetirosContador = createAsyncThunk('contador/fetchRetiros', async (_, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/contador/caja/retiros');
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
+export const fetchGastosContador = createAsyncThunk('contador/fetchGastos', async (_, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/contador/caja/gastos');
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
+const contadorSlice = createSlice({
+  name: 'contador',
+  initialState: {
+    resumen: null,
+    resumenCargando: false,
+    ingresos: [],
+    ingresosCargando: false,
+    retiros: [],
+    retirosCargando: false,
+    gastos: [],
+    gastosCargando: false,
+    error: null,
+  },
+  reducers: {
+    limpiarMensajesContador(state) {
+      state.error = null;
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchResumenCajaContador.pending, (state) => { state.resumenCargando = true; })
+      .addCase(fetchResumenCajaContador.fulfilled, (state, action) => { state.resumen = action.payload; state.resumenCargando = false; })
+      .addCase(fetchResumenCajaContador.rejected, (state, action) => { state.error = action.payload; state.resumenCargando = false; })
+      .addCase(fetchIngresosContador.pending, (state) => { state.ingresosCargando = true; })
+      .addCase(fetchIngresosContador.fulfilled, (state, action) => { state.ingresos = action.payload; state.ingresosCargando = false; })
+      .addCase(fetchIngresosContador.rejected, (state, action) => { state.error = action.payload; state.ingresosCargando = false; })
+      .addCase(fetchRetirosContador.pending, (state) => { state.retirosCargando = true; })
+      .addCase(fetchRetirosContador.fulfilled, (state, action) => { state.retiros = action.payload; state.retirosCargando = false; })
+      .addCase(fetchRetirosContador.rejected, (state, action) => { state.error = action.payload; state.retirosCargando = false; })
+      .addCase(fetchGastosContador.pending, (state) => { state.gastosCargando = true; })
+      .addCase(fetchGastosContador.fulfilled, (state, action) => { state.gastos = action.payload; state.gastosCargando = false; })
+      .addCase(fetchGastosContador.rejected, (state, action) => { state.error = action.payload; state.gastosCargando = false; });
+  },
+});
+
+export const { limpiarMensajesContador } = contadorSlice.actions;
+export default contadorSlice.reducer;

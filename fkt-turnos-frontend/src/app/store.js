@@ -6,6 +6,7 @@ import cuentaReducer from '../features/cuenta/cuentaSlice';
 import medicoReducer from '../features/medico/medicoSlice';
 import cajaReducer from '../features/caja/cajaSlice';
 import kinesiologiaReducer from '../features/kinesiologia/kinesiologiaSlice';
+import contadorReducer from '../features/contador/contadorSlice';
 
 const appReducer = combineReducers({
   auth: authReducer,
@@ -15,6 +16,7 @@ const appReducer = combineReducers({
   medico: medicoReducer,
   caja: cajaReducer,
   kinesiologia: kinesiologiaReducer,
+  contador: contadorReducer,
 });
 
 // Al cerrar sesión se resetea TODO el store (no solo auth), para que en una
