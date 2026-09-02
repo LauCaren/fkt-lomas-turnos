@@ -4,6 +4,7 @@ import { cambiarPasswordAdmin, iniciarMfa, activarMfa, desactivarMfa, limpiarMen
 import { fetchMiPerfil } from '../cuenta/cuentaSlice';
 import PasswordInput from '../../components/PasswordInput';
 import SeccionMfa from '../../components/SeccionMfa';
+import SeccionRevocarSesiones from '../../components/SeccionRevocarSesiones';
 import { PATRON_PASSWORD, TITULO_PASSWORD, AYUDA_PASSWORD } from '../../constants/validacion';
 
 export default function AdminCuentaTab() {
@@ -52,6 +53,9 @@ export default function AdminCuentaTab() {
         onActivar={(codigo) => dispatch(activarMfa(codigo)).unwrap().then(() => dispatch(fetchMiPerfil()))}
         onDesactivar={(codigo) => dispatch(desactivarMfa(codigo)).unwrap().then(() => dispatch(fetchMiPerfil()))}
       />
+
+      <h3 style={{ fontSize: 17, marginTop: 28, marginBottom: 14 }}>Sesiones activas</h3>
+      <SeccionRevocarSesiones />
     </div>
   );
 }

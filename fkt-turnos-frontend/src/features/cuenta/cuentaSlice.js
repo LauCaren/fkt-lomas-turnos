@@ -55,11 +55,44 @@ export const desactivarMfaCuenta = createAsyncThunk('cuenta/desactivarMfa', asyn
   }
 });
 
+// Disponible para cualquier rol logueado (paciente, admin, secretaria, médico, contador) —
+// el endpoint no distingue por rol, ver UsuarioController. Cierra también la sesión actual
+// (fuerza a loguearse de nuevo), no solo las "otras" — el componente que la usa debe
+// desloguear localmente después de que esto resuelva.
+export const revocarMisSesiones = createAsyncThunk('cuenta/revocarMisSesiones', async (_, { rejectWithValue }) => {
+  try {
+    await axiosClient.put('/api/mi-cuenta/revocar-sesiones');
+    return true;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudieron cerrar las sesiones'));
+  }
+});
+
+export const fetchMisEvoluciones = createAsyncThunk('cuenta/fetchMisEvoluciones', async (_, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/mi-cuenta/evoluciones');
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
+export const solicitarBajaCuenta = createAsyncThunk('cuenta/solicitarBaja', async (motivo, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.post('/api/mi-cuenta/solicitar-baja', { motivo: motivo || undefined });
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudo registrar el pedido de baja'));
+  }
+});
+
 const cuentaSlice = createSlice({
   name: 'cuenta',
   initialState: {
     perfil: null,
     mfaSetup: null,
+    misEvoluciones: [],
+    solicitudBaja: null,
     error: null,
     mensajeExito: null,
   },
@@ -85,7 +118,15 @@ const cuentaSlice = createSlice({
       .addCase(activarMfaCuenta.fulfilled, (state) => { state.mfaSetup = null; state.mensajeExito = 'Verificación en dos pasos activada'; })
       .addCase(activarMfaCuenta.rejected, (state, action) => { state.error = action.payload; })
       .addCase(desactivarMfaCuenta.fulfilled, (state) => { state.mensajeExito = 'Verificación en dos pasos desactivada'; })
-      .addCase(desactivarMfaCuenta.rejected, (state, action) => { state.error = action.payload; });
+      .addCase(desactivarMfaCuenta.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(revocarMisSesiones.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(fetchMisEvoluciones.fulfilled, (state, action) => { state.misEvoluciones = action.payload; })
+      .addCase(fetchMisEvoluciones.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(solicitarBajaCuenta.fulfilled, (state, action) => {
+        state.solicitudBaja = action.payload;
+        state.mensajeExito = 'Registramos tu pedido de baja — el centro lo va a revisar y confirmar por email.';
+      })
+      .addCase(solicitarBajaCuenta.rejected, (state, action) => { state.error = action.payload; });
   },
 });
 

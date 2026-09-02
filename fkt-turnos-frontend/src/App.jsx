@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Layout from './components/Layout';
-import { RutaPaciente, RutaAdmin, RutaMedico, RutaContador } from './components/RutaProtegida';
+import { RutaPaciente, RutaAdmin, RutaSecretaria, RutaMedico, RutaContador } from './components/RutaProtegida';
 import LoginPage from './features/auth/LoginPage';
 import RegisterPage from './features/auth/RegisterPage';
 import OlvidePasswordPage from './features/auth/OlvidePasswordPage';
@@ -9,6 +9,7 @@ import RestablecerPasswordPage from './features/auth/RestablecerPasswordPage';
 import BookingWizard from './features/turnos/BookingWizard';
 import MisTurnosPage from './features/turnos/MisTurnosPage';
 import AdminDashboardPage from './features/admin/AdminDashboardPage';
+import SecretariaDashboardPage from './features/secretaria/SecretariaDashboardPage';
 import MiCuentaPage from './features/cuenta/MiCuentaPage';
 import MedicoDashboardPage from './features/medico/MedicoDashboardPage';
 import ContadorDashboardPage from './features/contador/ContadorDashboardPage';
@@ -37,6 +38,7 @@ export default function App() {
         <Route path="/turnos/mis-turnos" element={<RutaPaciente><MisTurnosPage /></RutaPaciente>} />
         <Route path="/turnos/mi-cuenta" element={<RutaPaciente><MiCuentaPage /></RutaPaciente>} />
         <Route path="/admin" element={<RutaAdmin><AdminDashboardPage /></RutaAdmin>} />
+        <Route path="/secretaria" element={<RutaSecretaria><SecretariaDashboardPage /></RutaSecretaria>} />
         <Route path="/medico" element={<RutaMedico><MedicoDashboardPage /></RutaMedico>} />
         <Route path="/contador" element={<RutaContador><ContadorDashboardPage /></RutaContador>} />
         <Route path="*" element={<Navigate to="/" replace />} />

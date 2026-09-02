@@ -10,4 +10,4 @@ export const isElectron = typeof navigator !== 'undefined' && /Electron/i.test(n
 // A dónde va cada rol después de loguearse — una sola fuente de verdad para
 // App.jsx (InicioRedirect) y LoginPage, que antes tenían cada uno su propia
 // copia del mapeo y podían desincronizarse si se agregaba un rol nuevo.
-export const RUTA_POR_ROL = { ADMIN: '/admin', MEDICO: '/medico', CONTADOR: '/contador' };
+export const RUTA_POR_ROL = { ADMIN: '/admin', SECRETARIA: '/secretaria', MEDICO: '/medico', CONTADOR: '/contador' };

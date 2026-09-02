@@ -15,6 +15,9 @@ import AdminCajaTab from '../caja/AdminCajaTab';
 import AdminKinesiologiaTab from '../kinesiologia/AdminKinesiologiaTab';
 import AdminReportesTab from './AdminReportesTab';
 import AdminBusquedaPacienteTab from './AdminBusquedaPacienteTab';
+import AdminSecretariasTab from './AdminSecretariasTab';
+import AdminAuditoriaTab from './AdminAuditoriaTab';
+import AdminSolicitudesBajaTab from './AdminSolicitudesBajaTab';
 
 const TABS = [
   { id: 'resumen', label: 'Resumen' },
@@ -29,6 +32,9 @@ const TABS = [
   { id: 'recordatorios', label: 'Recordatorios' },
   { id: 'mensajes', label: 'Alquiler de consultorios' },
   { id: 'postulaciones', label: 'Postulaciones' },
+  { id: 'secretarias', label: 'Cuentas de secretaria' },
+  { id: 'solicitudes-baja', label: 'Pedidos de baja' },
+  { id: 'auditoria', label: 'Auditoría' },
   { id: 'cuenta', label: 'Mi cuenta' },
 ];
 
@@ -62,6 +68,9 @@ export default function AdminDashboardPage() {
         {tab === 'recordatorios' && <AdminRecordatoriosTab />}
         {tab === 'mensajes' && <AdminMensajesTab />}
         {tab === 'postulaciones' && <AdminPostulacionesTab />}
+        {tab === 'secretarias' && <AdminSecretariasTab />}
+        {tab === 'solicitudes-baja' && <AdminSolicitudesBajaTab />}
+        {tab === 'auditoria' && <AdminAuditoriaTab />}
         {tab === 'cuenta' && <AdminCuentaTab />}
       </TabPanel>
     </div>

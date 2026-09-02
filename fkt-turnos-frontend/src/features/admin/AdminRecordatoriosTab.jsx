@@ -273,6 +273,10 @@ function MensajeMasivo() {
 export default function AdminRecordatoriosTab() {
   const dispatch = useDispatch();
   const { recordatorios, error, mensajeExito } = useSelector((state) => state.admin);
+  // La plantilla/anticipación es política del centro (ver AdminRecordatorioController,
+  // /configuracion quedó ADMIN-only) — se oculta para secretaria en vez de mostrar un
+  // formulario que le va a devolver 403 al guardar.
+  const esAdmin = useSelector((state) => state.auth.usuario?.role) === 'ADMIN';
 
   useEffect(() => {
     dispatch(fetchRecordatorios());
@@ -283,7 +287,7 @@ export default function AdminRecordatoriosTab() {
       {error && <div className="alert alert-error">{error}</div>}
       {mensajeExito && <div className="alert alert-success">{mensajeExito}</div>}
 
-      <ConfiguracionRecordatorios />
+      {esAdmin && <ConfiguracionRecordatorios />}
       <MensajePuntual />
       <MensajeMasivo />
 

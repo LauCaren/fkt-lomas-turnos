@@ -343,6 +343,89 @@ export const fetchTendenciaAdmin = createAsyncThunk('admin/fetchTendencia', asyn
   }
 });
 
+export const fetchSecretarias = createAsyncThunk('admin/fetchSecretarias', async (_, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/admin/secretarias');
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
+export const crearSecretaria = createAsyncThunk('admin/crearSecretaria', async (payload, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.post('/api/admin/secretarias', payload);
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudo crear la cuenta'));
+  }
+});
+
+export const activarCuentaStaff = createAsyncThunk('admin/activarCuentaStaff', async (id, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.put(`/api/admin/usuarios/${id}/activar`);
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudo activar la cuenta'));
+  }
+});
+
+export const desactivarCuentaStaff = createAsyncThunk('admin/desactivarCuentaStaff', async (id, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.put(`/api/admin/usuarios/${id}/desactivar`);
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudo desactivar la cuenta'));
+  }
+});
+
+export const revocarSesionesCuentaStaff = createAsyncThunk('admin/revocarSesionesCuentaStaff', async (id, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.put(`/api/admin/usuarios/${id}/revocar-sesiones`);
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudieron revocar las sesiones'));
+  }
+});
+
+export const fetchSolicitudesBaja = createAsyncThunk('admin/fetchSolicitudesBaja', async (estado, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/admin/solicitudes-baja', { params: { estado: estado || undefined } });
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
+export const aprobarSolicitudBaja = createAsyncThunk('admin/aprobarSolicitudBaja', async (id, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.put(`/api/admin/solicitudes-baja/${id}/aprobar`);
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudo aprobar el pedido'));
+  }
+});
+
+export const rechazarSolicitudBaja = createAsyncThunk('admin/rechazarSolicitudBaja', async ({ id, motivo }, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.put(`/api/admin/solicitudes-baja/${id}/rechazar`, { motivo });
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudo rechazar el pedido'));
+  }
+});
+
+export const fetchAuditoria = createAsyncThunk('admin/fetchAuditoria', async ({ tipoEntidad, desde, hasta, page } = {}, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/admin/auditoria', {
+      params: { tipoEntidad: tipoEntidad || undefined, desde: desde || undefined, hasta: hasta || undefined, page: page || 0 },
+    });
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
 const adminSlice = createSlice({
   name: 'admin',
   initialState: {
@@ -365,6 +448,9 @@ const adminSlice = createSlice({
     pacientesEnRango: [],
     pacientesEnRangoCargando: false,
     tendencia: [],
+    secretarias: [],
+    solicitudesBaja: [],
+    auditoria: { content: [], totalPages: 0, number: 0 },
     error: null,
     mensajeExito: null,
   },
@@ -492,7 +578,42 @@ const adminSlice = createSlice({
       })
       .addCase(enviarMensajeMasivo.rejected, (state, action) => { state.error = action.payload; })
       .addCase(fetchTendenciaAdmin.fulfilled, (state, action) => { state.tendencia = action.payload; })
-      .addCase(fetchTendenciaAdmin.rejected, (state, action) => { state.error = action.payload; });
+      .addCase(fetchTendenciaAdmin.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(fetchSecretarias.fulfilled, (state, action) => { state.secretarias = action.payload; })
+      .addCase(fetchSecretarias.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(crearSecretaria.fulfilled, (state, action) => {
+        state.secretarias.push(action.payload);
+        state.mensajeExito = 'Cuenta de secretaria creada';
+      })
+      .addCase(crearSecretaria.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(activarCuentaStaff.fulfilled, (state, action) => {
+        state.secretarias = state.secretarias.map((s) => s.id === action.payload.id ? action.payload : s);
+        state.mensajeExito = 'Cuenta activada';
+      })
+      .addCase(activarCuentaStaff.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(desactivarCuentaStaff.fulfilled, (state, action) => {
+        state.secretarias = state.secretarias.map((s) => s.id === action.payload.id ? action.payload : s);
+        state.mensajeExito = 'Cuenta desactivada — sus sesiones activas quedaron cerradas';
+      })
+      .addCase(desactivarCuentaStaff.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(revocarSesionesCuentaStaff.fulfilled, (state) => {
+        state.mensajeExito = 'Se cerraron todas las sesiones activas de esa cuenta';
+      })
+      .addCase(revocarSesionesCuentaStaff.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(fetchAuditoria.fulfilled, (state, action) => { state.auditoria = action.payload; })
+      .addCase(fetchAuditoria.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(fetchSolicitudesBaja.fulfilled, (state, action) => { state.solicitudesBaja = action.payload; })
+      .addCase(fetchSolicitudesBaja.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(aprobarSolicitudBaja.fulfilled, (state, action) => {
+        state.solicitudesBaja = state.solicitudesBaja.map((s) => s.id === action.payload.id ? action.payload : s);
+        state.mensajeExito = 'Pedido aprobado — la cuenta quedó anonimizada';
+      })
+      .addCase(aprobarSolicitudBaja.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(rechazarSolicitudBaja.fulfilled, (state, action) => {
+        state.solicitudesBaja = state.solicitudesBaja.map((s) => s.id === action.payload.id ? action.payload : s);
+        state.mensajeExito = 'Pedido rechazado';
+      })
+      .addCase(rechazarSolicitudBaja.rejected, (state, action) => { state.error = action.payload; });
   },
 });
 

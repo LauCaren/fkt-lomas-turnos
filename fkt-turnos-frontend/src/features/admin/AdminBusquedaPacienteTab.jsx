@@ -14,9 +14,18 @@ function Ficha({ ficha }) {
   return (
     <div style={{ marginTop: 24 }}>
       <div className="card" style={{ marginBottom: 20 }}>
-        <div style={{ fontWeight: 600, fontSize: 17 }}>{ficha.paciente.nombreCompleto}</div>
-        <div style={{ fontSize: 13.5, color: 'var(--muted)', marginTop: 4 }}>
-          DNI {ficha.paciente.dni} · {ficha.paciente.telefono} · avisos por {ficha.paciente.canalNotificacionPreferido}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
+          <div>
+            <div style={{ fontWeight: 600, fontSize: 17 }}>{ficha.paciente.nombreCompleto}</div>
+            <div style={{ fontSize: 13.5, color: 'var(--muted)', marginTop: 4 }}>
+              DNI {ficha.paciente.dni} · {ficha.paciente.telefono} · avisos por {ficha.paciente.canalNotificacionPreferido}
+            </div>
+          </div>
+          {ficha.ausenciasCount > 0 && (
+            <span className="badge badge-cancelado" title="Turnos reservados a los que no se presentó">
+              {ficha.ausenciasCount} inasistencia{ficha.ausenciasCount === 1 ? '' : 's'}
+            </span>
+          )}
         </div>
       </div>
 

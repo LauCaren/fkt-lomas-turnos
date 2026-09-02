@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchMiPerfil, actualizarPerfil, cambiarPasswordCuenta, limpiarMensajesCuenta,
-  iniciarMfaCuenta, activarMfaCuenta, desactivarMfaCuenta,
+  iniciarMfaCuenta, activarMfaCuenta, desactivarMfaCuenta, fetchMisEvoluciones,
 } from './cuentaSlice';
 import { actualizarUsuarioLocal } from '../auth/authSlice';
 import PasswordInput from '../../components/PasswordInput';
 import SeccionMfa from '../../components/SeccionMfa';
+import SeccionRevocarSesiones from '../../components/SeccionRevocarSesiones';
+import SeccionPrivacidad from '../../components/SeccionPrivacidad';
 import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../../constants/obrasSociales';
 import { PATRON_PASSWORD, TITULO_PASSWORD, AYUDA_PASSWORD } from '../../constants/validacion';
 
@@ -119,6 +121,31 @@ function CambiarPassword() {
   );
 }
 
+function MiHistoriaClinica() {
+  const dispatch = useDispatch();
+  const evoluciones = useSelector((state) => state.cuenta.misEvoluciones);
+
+  useEffect(() => {
+    dispatch(fetchMisEvoluciones());
+  }, [dispatch]);
+
+  if (evoluciones.length === 0) {
+    return <p style={{ color: 'var(--muted)' }}>Todavía no hay notas cargadas en tu historia clínica.</p>;
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {evoluciones.map((e) => (
+        <div key={e.id} className="card">
+          <div style={{ fontWeight: 600 }}>{e.medicoNombre} · {e.especialidadNombre}</div>
+          <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 8 }}>Turno del {e.fechaTurno}</div>
+          <p style={{ fontSize: 14, whiteSpace: 'pre-wrap' }}>{e.texto}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function MiCuentaPage() {
   const dispatch = useDispatch();
   const { perfil, mfaSetup, error, mensajeExito } = useSelector((state) => state.cuenta);
@@ -154,6 +181,15 @@ export default function MiCuentaPage() {
             onActivar={(codigo) => dispatch(activarMfaCuenta(codigo)).unwrap().then(() => dispatch(fetchMiPerfil()))}
             onDesactivar={(codigo) => dispatch(desactivarMfaCuenta(codigo)).unwrap().then(() => dispatch(fetchMiPerfil()))}
           />
+
+          <h2 style={{ fontSize: 20, marginTop: 32, marginBottom: 16 }}>Sesiones activas</h2>
+          <SeccionRevocarSesiones />
+
+          <h2 style={{ fontSize: 20, marginTop: 32, marginBottom: 16 }}>Mi historia clínica</h2>
+          <MiHistoriaClinica />
+
+          <h2 style={{ fontSize: 20, marginTop: 32, marginBottom: 16 }}>Mis datos personales</h2>
+          <SeccionPrivacidad />
         </>
       )}
     </div>

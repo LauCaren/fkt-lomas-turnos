@@ -6,6 +6,7 @@ import {
 } from '../features/cuenta/cuentaSlice';
 import PasswordInput from './PasswordInput';
 import SeccionMfa from './SeccionMfa';
+import SeccionRevocarSesiones from './SeccionRevocarSesiones';
 import { PATRON_PASSWORD, TITULO_PASSWORD, AYUDA_PASSWORD } from '../constants/validacion';
 
 function CambiarPassword() {
@@ -68,6 +69,9 @@ export default function CuentaSeguridadTab() {
             onActivar={(codigo) => dispatch(activarMfaCuenta(codigo)).unwrap().then(() => dispatch(fetchMiPerfil()))}
             onDesactivar={(codigo) => dispatch(desactivarMfaCuenta(codigo)).unwrap().then(() => dispatch(fetchMiPerfil()))}
           />
+
+          <h2 style={{ fontSize: 18, marginTop: 32, marginBottom: 16 }}>Sesiones activas</h2>
+          <SeccionRevocarSesiones />
         </>
       )}
     </div>

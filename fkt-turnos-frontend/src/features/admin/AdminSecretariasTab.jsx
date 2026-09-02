@@ -1,0 +1,111 @@
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  fetchSecretarias, crearSecretaria, activarCuentaStaff, desactivarCuentaStaff, revocarSesionesCuentaStaff,
+} from './adminSlice';
+import PasswordInput from '../../components/PasswordInput';
+import { PATRON_PASSWORD, TITULO_PASSWORD, AYUDA_PASSWORD } from '../../constants/validacion';
+
+const VACIO = { nombreCompleto: '', email: '', password: '' };
+
+function NuevaSecretaria() {
+  const dispatch = useDispatch();
+  const [form, setForm] = useState(VACIO);
+  const [abierto, setAbierto] = useState(false);
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    dispatch(crearSecretaria(form)).unwrap().then(() => {
+      setForm(VACIO);
+      setAbierto(false);
+    }).catch(() => {});
+  }
+
+  if (!abierto) {
+    return <button className="btn btn-primary" onClick={() => setAbierto(true)}>Nueva cuenta de secretaria</button>;
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="card" style={{ marginBottom: 20, maxWidth: 420 }}>
+      <div className="field">
+        <label>Nombre completo</label>
+        <input required value={form.nombreCompleto} onChange={(e) => setForm({ ...form, nombreCompleto: e.target.value })} />
+      </div>
+      <div className="field">
+        <label>Email</label>
+        <input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+      </div>
+      <div className="field">
+        <label>Contraseña</label>
+        <PasswordInput required minLength={8} pattern={PATRON_PASSWORD} title={TITULO_PASSWORD}
+          value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+        <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{AYUDA_PASSWORD}</p>
+      </div>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button type="submit" className="btn btn-primary">Crear cuenta</button>
+        <button type="button" className="btn btn-outline" onClick={() => { setAbierto(false); setForm(VACIO); }}>Cancelar</button>
+      </div>
+    </form>
+  );
+}
+
+function FilaSecretaria({ cuenta }) {
+  const dispatch = useDispatch();
+
+  return (
+    <div className="card" style={{ marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+      <div>
+        <div style={{ fontWeight: 600 }}>{cuenta.nombreCompleto}</div>
+        <div style={{ fontSize: 13, color: 'var(--muted)' }}>{cuenta.email}</div>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: cuenta.activo ? 'var(--teal-dark, #12766b)' : 'var(--danger, #c0392b)' }}>
+          {cuenta.activo ? 'Activa' : 'Desactivada'}
+        </span>
+        {cuenta.activo ? (
+          <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }}
+            onClick={() => window.confirm(`¿Desactivar la cuenta de ${cuenta.nombreCompleto}? Se cierran sus sesiones activas.`) && dispatch(desactivarCuentaStaff(cuenta.id))}>
+            Desactivar
+          </button>
+        ) : (
+          <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => dispatch(activarCuentaStaff(cuenta.id))}>
+            Reactivar
+          </button>
+        )}
+        <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }}
+          onClick={() => window.confirm(`¿Cerrar todas las sesiones activas de ${cuenta.nombreCompleto}?`) && dispatch(revocarSesionesCuentaStaff(cuenta.id))}>
+          Cerrar sesiones
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default function AdminSecretariasTab() {
+  const dispatch = useDispatch();
+  const { secretarias, error, mensajeExito } = useSelector((state) => state.admin);
+
+  useEffect(() => {
+    dispatch(fetchSecretarias());
+  }, [dispatch]);
+
+  return (
+    <div>
+      {error && <div className="alert alert-error" style={{ marginBottom: 14 }}>{error}</div>}
+      {mensajeExito && <div className="alert alert-success" style={{ marginBottom: 14 }}>{mensajeExito}</div>}
+
+      <p style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 16, maxWidth: 640 }}>
+        Cada secretaria entra con su propia cuenta — ve agenda, reserva telefónica, mensajes,
+        postulaciones y recordatorios, pero no puede tocar médicos, caja ni reportes financieros.
+        Desactivar una cuenta cierra de inmediato cualquier sesión abierta con ella.
+      </p>
+
+      <div style={{ marginBottom: 20 }}>
+        <NuevaSecretaria />
+      </div>
+
+      {secretarias.length === 0 && <p style={{ color: 'var(--muted)' }}>Todavía no hay cuentas de secretaria creadas.</p>}
+      {secretarias.map((s) => <FilaSecretaria key={s.id} cuenta={s} />)}
+    </div>
+  );
+}
