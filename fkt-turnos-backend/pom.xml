@@ -83,7 +83,7 @@
     <dependency>
       <groupId>com.twilio.sdk</groupId>
       <artifactId>twilio</artifactId>
-      <version>10.4.1</version>
+      <version>13.0.0</version>
     </dependency>
 
     <!-- Storage de archivos en producción (fotos de médicos, CVs) — bucket S3-compatible,
