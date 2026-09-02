@@ -9,11 +9,16 @@ import com.fktlomas.turnos.exception.ConflictoDeDatosException;
 import com.fktlomas.turnos.exception.RecursoNoEncontradoException;
 import com.fktlomas.turnos.repository.RegistroAuditoriaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.UncheckedIOException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 /**
@@ -49,6 +54,15 @@ public class AuditoriaService {
                 .stream().map(RegistroAuditoriaDto::de).toList();
     }
 
+    /** Panel de auditoría general del admin — "hasta" es inclusive del día completo. */
+    @Transactional(readOnly = true)
+    public Page<RegistroAuditoriaDto> buscarGeneral(String tipoEntidad, Long usuarioId, LocalDate desde, LocalDate hasta, Pageable pageable) {
+        Instant desdeInstant = desde != null ? desde.atStartOfDay(ZoneId.systemDefault()).toInstant() : null;
+        Instant hastaInstant = hasta != null ? hasta.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant() : null;
+        return registroRepository.buscarGeneral(tipoEntidad, usuarioId, desdeInstant, hastaInstant, pageable)
+                .map(RegistroAuditoriaDto::de);
+    }
+
     /**
      * Trae el snapshot "antes" de la última operación no deshecha sobre esta entidad, y la
      * marca como deshecha. El caller es responsable de aplicar ese snapshot al estado actual.
@@ -56,7 +70,7 @@ public class AuditoriaService {
     @Transactional
     public <T> T snapshotParaDeshacer(String tipoEntidad, Long entidadId, Class<T> tipo) {
         RegistroAuditoria ultimo = registroRepository
-                .findTopByTipoEntidadAndEntidadIdAndDeshechoFalseOrderByCreatedAtDesc(tipoEntidad, entidadId)
+                .findTopByTipoEntidadAndEntidadIdAndDeshechoFalseOrderByCreatedAtDescIdDesc(tipoEntidad, entidadId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("No hay operaciones para deshacer"));
         if (ultimo.getSnapshotAntes() == null) {
             throw new ConflictoDeDatosException("La última operación sobre este registro no se puede deshacer");
