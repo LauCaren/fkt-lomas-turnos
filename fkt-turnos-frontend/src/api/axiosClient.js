@@ -18,6 +18,12 @@ axiosClient.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('fkt_token');
       localStorage.removeItem('fkt_user');
+      // No podemos dispatchear logout() del store directo acá (import circular:
+      // authSlice ya importa este archivo para sus propios thunks) — un evento del
+      // DOM lo desacopla. Sin esto, el store seguía con token/usuario en memoria
+      // después de un 401, así que la pantalla protegida se quedaba renderizada
+      // como si la sesión siguiera viva mientras cada acción fallaba en silencio.
+      window.dispatchEvent(new Event('fkt:sesion-vencida'));
     }
     return Promise.reject(error);
   }

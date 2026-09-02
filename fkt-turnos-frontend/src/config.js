@@ -6,3 +6,8 @@ export const SITE_URL = import.meta.env.VITE_SITE_URL || 'http://localhost:5500'
 // esto alcanza para distinguir la app de escritorio (solo paneles internos)
 // del navegador normal, sin necesidad de un preload/contextBridge.
 export const isElectron = typeof navigator !== 'undefined' && /Electron/i.test(navigator.userAgent);
+
+// A dónde va cada rol después de loguearse — una sola fuente de verdad para
+// App.jsx (InicioRedirect) y LoginPage, que antes tenían cada uno su propia
+// copia del mapeo y podían desincronizarse si se agregaba un rol nuevo.
+export const RUTA_POR_ROL = { ADMIN: '/admin', MEDICO: '/medico', CONTADOR: '/contador' };

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { login, limpiarMensajesAuth } from './authSlice';
 import PasswordInput from '../../components/PasswordInput';
+import { RUTA_POR_ROL } from '../../config';
 
 export default function LoginPage() {
   const dispatch = useDispatch();
@@ -17,7 +18,7 @@ export default function LoginPage() {
   function handleSubmit(e) {
     e.preventDefault();
     dispatch(login(form)).unwrap().then((data) => {
-      navigate(data.role === 'ADMIN' ? '/admin' : '/turnos');
+      navigate(RUTA_POR_ROL[data.role] || '/turnos');
     }).catch(() => {});
   }
 

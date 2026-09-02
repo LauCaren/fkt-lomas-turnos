@@ -14,8 +14,7 @@ import MedicoDashboardPage from './features/medico/MedicoDashboardPage';
 import ContadorDashboardPage from './features/contador/ContadorDashboardPage';
 import KinesiologiaPage from './features/kinesiologia/KinesiologiaPage';
 import ConfirmarTurnoPage from './features/turnos/ConfirmarTurnoPage';
-
-const RUTA_POR_ROL = { ADMIN: '/admin', MEDICO: '/medico', CONTADOR: '/contador' };
+import { RUTA_POR_ROL } from './config';
 
 function InicioRedirect() {
   const usuario = useSelector((state) => state.auth.usuario);

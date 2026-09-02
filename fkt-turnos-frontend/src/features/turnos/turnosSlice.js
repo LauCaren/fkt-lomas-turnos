@@ -115,6 +115,7 @@ const turnosSlice = createSlice({
     especialidades: [],
     medicos: [],
     disponibles: [],
+    disponiblesRequestId: null,
     misTurnos: [],
     status: 'idle',
     error: null,
@@ -135,12 +136,20 @@ const turnosSlice = createSlice({
     builder
       .addCase(fetchEspecialidades.fulfilled, (state, action) => { state.especialidades = action.payload; })
       .addCase(fetchMedicos.fulfilled, (state, action) => { state.medicos = action.payload; })
-      .addCase(fetchTurnosDisponibles.pending, (state) => { state.status = 'loading'; })
+      .addCase(fetchTurnosDisponibles.pending, (state, action) => {
+        state.status = 'loading';
+        state.disponiblesRequestId = action.meta.requestId;
+      })
       .addCase(fetchTurnosDisponibles.fulfilled, (state, action) => {
+        // Cambiar de fecha/médico rápido dispara varios pedidos seguidos; si uno viejo
+        // resuelve después de uno más nuevo (red lenta, orden de respuesta no garantizado),
+        // esto evita que pise la disponibilidad correcta con datos de una fecha vieja.
+        if (action.meta.requestId !== state.disponiblesRequestId) return;
         state.status = 'idle';
         state.disponibles = action.payload;
       })
       .addCase(fetchTurnosDisponibles.rejected, (state, action) => {
+        if (action.meta.requestId !== state.disponiblesRequestId) return;
         state.status = 'idle';
         state.error = action.payload;
       })

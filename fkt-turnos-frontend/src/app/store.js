@@ -32,3 +32,8 @@ function rootReducer(state, action) {
 export const store = configureStore({
   reducer: rootReducer,
 });
+
+// Ver axiosClient.js: un 401 ya limpia localStorage, pero sin esto el store seguía
+// con token/usuario en memoria — la pantalla protegida quedaba renderizada como si la
+// sesión siguiera viva mientras cada acción fallaba en silencio, hasta un refresh manual.
+window.addEventListener('fkt:sesion-vencida', () => store.dispatch(logout()));

@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { limpiarMensajes } from './adminSlice';
 import AdminResumenTab from './AdminResumenTab';
 import AdminAgendaTab from './AdminAgendaTab';
 import AdminTurnosAgendadosTab from './AdminTurnosAgendadosTab';
@@ -30,6 +32,7 @@ const TABS = [
 ];
 
 export default function AdminDashboardPage() {
+  const dispatch = useDispatch();
   const [tab, setTab] = useState('resumen');
 
   return (
@@ -41,7 +44,7 @@ export default function AdminDashboardPage() {
         {TABS.map((t) => (
           <button
             key={t.id}
-            onClick={() => setTab(t.id)}
+            onClick={() => { setTab(t.id); dispatch(limpiarMensajes()); }}
             style={{
               padding: '10px 4px',
               marginRight: 20,
