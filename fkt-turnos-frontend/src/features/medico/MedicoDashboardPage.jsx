@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import TabNav, { TabPanel } from '../../components/ui/TabNav';
 import { fetchSaldoMedico, limpiarMensajesMedico } from './medicoSlice';
 import MedicoAgendaTab from './MedicoAgendaTab';
 import MedicoColaEsperaTab from './MedicoColaEsperaTab';
@@ -38,30 +39,13 @@ export default function MedicoDashboardPage() {
       {error && <div className="alert alert-error" style={{ marginTop: 20 }}>{error}</div>}
       {mensajeExito && <div className="alert alert-success" style={{ marginTop: 20 }}>{mensajeExito}</div>}
 
-      <div style={{ display: 'flex', gap: 8, marginTop: 24, marginBottom: 28, flexWrap: 'wrap', borderBottom: '1px solid var(--line)' }}>
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => { setTab(t.id); dispatch(limpiarMensajesMedico()); }}
-            style={{
-              padding: '10px 4px',
-              marginRight: 20,
-              border: 'none',
-              background: 'none',
-              fontWeight: 600,
-              fontSize: 14.5,
-              color: tab === t.id ? 'var(--ink)' : 'var(--muted)',
-              borderBottom: tab === t.id ? '2px solid var(--teal)' : '2px solid transparent',
-            }}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <TabNav tabs={TABS} active={tab} onChange={(id) => { setTab(id); dispatch(limpiarMensajesMedico()); }} />
 
-      {tab === 'agenda' && <MedicoAgendaTab />}
-      {tab === 'cola-espera' && <MedicoColaEsperaTab />}
-      {tab === 'cuenta' && <CuentaSeguridadTab />}
+      <TabPanel tabKey={tab}>
+        {tab === 'agenda' && <MedicoAgendaTab />}
+        {tab === 'cola-espera' && <MedicoColaEsperaTab />}
+        {tab === 'cuenta' && <CuentaSeguridadTab />}
+      </TabPanel>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import TabNav, { TabPanel } from '../../components/ui/TabNav';
 import { fetchMiPerfil } from '../cuenta/cuentaSlice';
 import ContadorResumenTab from './ContadorResumenTab';
 import ContadorIngresosTab from './ContadorIngresosTab';
@@ -46,32 +47,15 @@ export default function ContadorDashboardPage() {
         </>
       ) : (
         <>
-          <div style={{ display: 'flex', gap: 8, marginTop: 24, marginBottom: 28, flexWrap: 'wrap', borderBottom: '1px solid var(--line)' }}>
-            {TABS.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
-                style={{
-                  padding: '10px 4px',
-                  marginRight: 20,
-                  border: 'none',
-                  background: 'none',
-                  fontWeight: 600,
-                  fontSize: 14.5,
-                  color: tab === t.id ? 'var(--ink)' : 'var(--muted)',
-                  borderBottom: tab === t.id ? '2px solid var(--teal)' : '2px solid transparent',
-                }}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
+          <TabNav tabs={TABS} active={tab} onChange={setTab} />
 
-          {tab === 'resumen' && <ContadorResumenTab />}
-          {tab === 'ingresos' && <ContadorIngresosTab />}
-          {tab === 'retiros' && <ContadorRetirosTab />}
-          {tab === 'gastos' && <ContadorGastosTab />}
-          {tab === 'cuenta' && <CuentaSeguridadTab />}
+          <TabPanel tabKey={tab}>
+            {tab === 'resumen' && <ContadorResumenTab />}
+            {tab === 'ingresos' && <ContadorIngresosTab />}
+            {tab === 'retiros' && <ContadorRetirosTab />}
+            {tab === 'gastos' && <ContadorGastosTab />}
+            {tab === 'cuenta' && <CuentaSeguridadTab />}
+          </TabPanel>
         </>
       )}
     </div>

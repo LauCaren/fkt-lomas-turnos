@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
 import { SITE_URL, isElectron } from '../config';
@@ -22,6 +22,7 @@ export default function Layout({ children }) {
   const usuario = useSelector((state) => state.auth.usuario);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   function handleLogout() {
     dispatch(logout());
@@ -30,7 +31,7 @@ export default function Layout({ children }) {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <header style={{ background: '#fff', borderBottom: '1px solid var(--line)' }}>
+      <header className="app-header">
         <div className="wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 0', flexWrap: 'wrap', gap: 12 }}>
           {isElectron ? (
             // La app de escritorio es solo para los paneles internos (admin/médico/contador) —
@@ -45,23 +46,19 @@ export default function Layout({ children }) {
           )}
           {usuario && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-              {usuario.role === 'PACIENTE' && (
-                <>
-                  <Link to="/turnos" style={{ fontSize: 14, fontWeight: 600 }}>Sacar turno</Link>
-                  <Link to="/turnos/kinesiologia" style={{ fontSize: 14, fontWeight: 600 }}>Kinesiología</Link>
-                  <Link to="/turnos/mis-turnos" style={{ fontSize: 14, fontWeight: 600 }}>Mis turnos</Link>
-                  <Link to="/turnos/mi-cuenta" style={{ fontSize: 14, fontWeight: 600 }}>Mi cuenta</Link>
-                </>
-              )}
-              {usuario.role === 'ADMIN' && (
-                <Link to="/admin" style={{ fontSize: 14, fontWeight: 600 }}>Panel admin</Link>
-              )}
-              {usuario.role === 'MEDICO' && (
-                <Link to="/medico" style={{ fontSize: 14, fontWeight: 600 }}>Panel médico</Link>
-              )}
-              {usuario.role === 'CONTADOR' && (
-                <Link to="/contador" style={{ fontSize: 14, fontWeight: 600 }}>Panel contador</Link>
-              )}
+              <div className="app-nav-links">
+                {usuario.role === 'PACIENTE' && (
+                  <>
+                    <Link to="/turnos">Sacar turno</Link>
+                    <Link to="/turnos/kinesiologia">Kinesiología</Link>
+                    <Link to="/turnos/mis-turnos">Mis turnos</Link>
+                    <Link to="/turnos/mi-cuenta">Mi cuenta</Link>
+                  </>
+                )}
+                {usuario.role === 'ADMIN' && <Link to="/admin">Panel admin</Link>}
+                {usuario.role === 'MEDICO' && <Link to="/medico">Panel médico</Link>}
+                {usuario.role === 'CONTADOR' && <Link to="/contador">Panel contador</Link>}
+              </div>
               <span style={{ fontSize: 14, color: 'var(--muted)' }}>{usuario.nombreCompleto}</span>
               <button className="btn btn-outline" onClick={handleLogout}>Salir</button>
             </div>
@@ -71,7 +68,9 @@ export default function Layout({ children }) {
       <main style={{ flex: 1, padding: '40px 0' }}>
         <div className="wrap">
           {usuario?.role === 'PACIENTE' && <InstalarAppBanner />}
-          {children}
+          <div key={location.pathname} className="page-fade">
+            {children}
+          </div>
         </div>
       </main>
     </div>

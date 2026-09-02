@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import TabNav, { TabPanel } from '../../components/ui/TabNav';
 import { limpiarMensajes } from './adminSlice';
 import AdminResumenTab from './AdminResumenTab';
 import AdminAgendaTab from './AdminAgendaTab';
@@ -40,46 +41,29 @@ export default function AdminDashboardPage() {
       <span className="eyebrow">Panel de administración</span>
       <h1 style={{ marginTop: 12, fontSize: 30 }}>Hola, Fernando</h1>
 
-      <div style={{ display: 'flex', gap: 8, marginTop: 24, marginBottom: 28, flexWrap: 'wrap', borderBottom: '1px solid var(--line)' }}>
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => { setTab(t.id); dispatch(limpiarMensajes()); }}
-            style={{
-              padding: '10px 4px',
-              marginRight: 20,
-              border: 'none',
-              background: 'none',
-              fontWeight: 600,
-              fontSize: 14.5,
-              color: tab === t.id ? 'var(--ink)' : 'var(--muted)',
-              borderBottom: tab === t.id ? '2px solid var(--teal)' : '2px solid transparent',
-            }}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <TabNav tabs={TABS} active={tab} onChange={(id) => { setTab(id); dispatch(limpiarMensajes()); }} />
 
-      {tab === 'resumen' && (
-        <AdminResumenTab
-          irACola={() => setTab('cola-espera')}
-          irAKinesiologia={() => setTab('kinesiologia')}
-          irACaja={() => setTab('caja')}
-        />
-      )}
-      {tab === 'agenda' && <AdminAgendaTab />}
-      {tab === 'turnos-agendados' && <AdminTurnosAgendadosTab />}
-      {tab === 'cola-espera' && <AdminColaEsperaTab />}
-      {tab === 'buscar-paciente' && <AdminBusquedaPacienteTab />}
-      {tab === 'medicos' && <AdminMedicosTab />}
-      {tab === 'kinesiologia' && <AdminKinesiologiaTab />}
-      {tab === 'caja' && <AdminCajaTab />}
-      {tab === 'reportes' && <AdminReportesTab />}
-      {tab === 'recordatorios' && <AdminRecordatoriosTab />}
-      {tab === 'mensajes' && <AdminMensajesTab />}
-      {tab === 'postulaciones' && <AdminPostulacionesTab />}
-      {tab === 'cuenta' && <AdminCuentaTab />}
+      <TabPanel tabKey={tab}>
+        {tab === 'resumen' && (
+          <AdminResumenTab
+            irACola={() => setTab('cola-espera')}
+            irAKinesiologia={() => setTab('kinesiologia')}
+            irACaja={() => setTab('caja')}
+          />
+        )}
+        {tab === 'agenda' && <AdminAgendaTab />}
+        {tab === 'turnos-agendados' && <AdminTurnosAgendadosTab />}
+        {tab === 'cola-espera' && <AdminColaEsperaTab />}
+        {tab === 'buscar-paciente' && <AdminBusquedaPacienteTab />}
+        {tab === 'medicos' && <AdminMedicosTab />}
+        {tab === 'kinesiologia' && <AdminKinesiologiaTab />}
+        {tab === 'caja' && <AdminCajaTab />}
+        {tab === 'reportes' && <AdminReportesTab />}
+        {tab === 'recordatorios' && <AdminRecordatoriosTab />}
+        {tab === 'mensajes' && <AdminMensajesTab />}
+        {tab === 'postulaciones' && <AdminPostulacionesTab />}
+        {tab === 'cuenta' && <AdminCuentaTab />}
+      </TabPanel>
     </div>
   );
 }

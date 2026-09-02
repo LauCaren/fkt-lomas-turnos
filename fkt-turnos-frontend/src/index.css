@@ -19,9 +19,20 @@
   --radius-m: 16px;
   --maxw: 960px;
   --ease: cubic-bezier(.22, .68, .32, 1);
+  --shadow-sm: 0 2px 10px rgba(19, 35, 44, .06);
+  --shadow-md: 0 16px 40px rgba(19, 35, 44, .14);
 }
 
 * , *::before, *::after { box-sizing: border-box; }
+
+@media (prefers-reduced-motion: reduce) {
+  * , *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 
 body {
   margin: 0;
@@ -91,6 +102,13 @@ input, select, textarea { font: inherit; }
   border: 1px solid var(--line);
   border-radius: var(--radius-m);
   padding: 28px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow .25s var(--ease), transform .25s var(--ease), border-color .25s var(--ease);
+}
+.card-hover:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+  border-color: var(--teal);
 }
 
 .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
@@ -176,3 +194,61 @@ input, select, textarea { font: inherit; }
 .badge-cancelado { background: var(--line); color: var(--muted); }
 
 :focus-visible { outline: 2px solid var(--teal-dark); outline-offset: 2px; }
+
+/* ---------- ENTRADA ESCALONADA (stat rows, listas) ---------- */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.stagger > * { opacity: 0; animation: fadeUp .45s var(--ease) forwards; }
+.stagger > *:nth-child(1) { animation-delay: .02s; }
+.stagger > *:nth-child(2) { animation-delay: .06s; }
+.stagger > *:nth-child(3) { animation-delay: .10s; }
+.stagger > *:nth-child(4) { animation-delay: .14s; }
+.stagger > *:nth-child(5) { animation-delay: .18s; }
+.stagger > *:nth-child(6) { animation-delay: .22s; }
+.stagger > *:nth-child(7) { animation-delay: .26s; }
+.stagger > *:nth-child(8) { animation-delay: .30s; }
+
+/* ---------- TRANSICIÓN DE PÁGINA (al cambiar de ruta) ---------- */
+.page-fade { animation: fadeUp .35s var(--ease); }
+
+/* ---------- STAT CARD ---------- */
+.stat-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  padding: 16px 20px;
+  min-width: 180px;
+  flex: 1 1 180px;
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+  transition: box-shadow .25s var(--ease), transform .25s var(--ease), border-color .25s var(--ease);
+}
+.stat-card-btn { cursor: pointer; }
+.stat-card-btn:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); border-color: var(--teal); }
+.stat-card-label { font-size: 13px; color: var(--muted); }
+.stat-card-value { font-size: 26px; font-weight: 700; margin-top: 4px; }
+.stat-card-value.destacado { color: var(--teal-dark); }
+
+/* ---------- TAB NAV ---------- */
+.tabnav { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 24px; margin-bottom: 28px; border-bottom: 1px solid var(--line); }
+.tabnav-btn {
+  padding: 10px 16px;
+  margin-bottom: -1px;
+  border: none;
+  background: none;
+  font-weight: 600;
+  font-size: 14.5px;
+  color: var(--muted);
+  border-radius: var(--radius-s) var(--radius-s) 0 0;
+  border-bottom: 2px solid transparent;
+  transition: color .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease);
+}
+.tabnav-btn:hover { color: var(--ink-soft); background: var(--bg-soft); }
+.tabnav-btn.active { color: var(--ink); background: var(--teal-tint); border-bottom-color: var(--teal); }
+
+/* ---------- HEADER DE LA APP (Layout) ---------- */
+.app-header { background: #fff; border-bottom: 1px solid var(--line); box-shadow: var(--shadow-sm); }
+.app-nav-links { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.app-nav-links a { font-size: 14px; font-weight: 600; position: relative; padding: 4px 0; color: var(--ink-soft); transition: color .2s var(--ease); }
+.app-nav-links a::after { content: ""; position: absolute; left: 0; bottom: 0; width: 0; height: 2px; background: var(--teal); transition: width .25s var(--ease); }
+.app-nav-links a:hover { color: var(--ink); }
+.app-nav-links a:hover::after { width: 100%; }
