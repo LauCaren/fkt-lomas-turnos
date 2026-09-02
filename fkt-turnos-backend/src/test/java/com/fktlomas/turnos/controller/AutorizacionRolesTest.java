@@ -1,0 +1,178 @@
+package com.fktlomas.turnos.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fktlomas.turnos.domain.*;
+import com.fktlomas.turnos.repository.EspecialidadRepository;
+import com.fktlomas.turnos.repository.EvolucionClinicaRepository;
+import com.fktlomas.turnos.repository.MedicoRepository;
+import com.fktlomas.turnos.repository.TurnoRepository;
+import com.fktlomas.turnos.repository.UsuarioRepository;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+/**
+ * El código de cada endpoint filtra correctamente por rol y por medicoId (verificado a mano
+ * al revisar MedicoPortalService/ContadorCajaController), pero no había ningún test que
+ * probara la garantía end-to-end: que un MEDICO nunca puede pegarle a /api/admin/** o
+ * /api/contador/**, que un CONTADOR nunca puede pegarle a /api/medico/**, y que un médico
+ * jamás ve la historia clínica que cargó otro médico para el mismo paciente. Esta última es
+ * la peor clase de bug posible en un sistema con historias clínicas de por medio — sin este
+ * test, esa garantía dependía únicamente de que nadie la rompiera sin querer en un refactor.
+ *
+ * Login real vía /api/auth/login (no @WithMockUser) para probar la cadena completa del
+ * JwtAuthFilter tal como la ve un cliente real, igual que AuthControllerTest.
+ */
+@SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
+@TestPropertySource(properties = {
+        "spring.datasource.url=jdbc:h2:mem:autorizacion-roles-test;DB_CLOSE_DELAY=-1",
+        "spring.datasource.driver-class-name=org.h2.Driver",
+        "spring.datasource.username=sa",
+        "spring.datasource.password=",
+        "spring.jpa.hibernate.ddl-auto=create-drop",
+        "spring.flyway.enabled=false"
+})
+class AutorizacionRolesTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+    @Autowired
+    private MedicoRepository medicoRepository;
+    @Autowired
+    private EspecialidadRepository especialidadRepository;
+    @Autowired
+    private TurnoRepository turnoRepository;
+    @Autowired
+    private EvolucionClinicaRepository evolucionClinicaRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    private static final String CLAVE = "Segura123!";
+
+    @Test
+    void unMedicoNoPuedeAccederAEndpointsDeAdminNiDeContador() throws Exception {
+        String token = loginComo(crearUsuario("medico.a@test.com", Role.MEDICO));
+
+        mockMvc.perform(autenticado(get("/api/admin/resumen"), token)).andExpect(status().isForbidden());
+        mockMvc.perform(autenticado(get("/api/contador/caja/resumen"), token)).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void unContadorNoPuedeAccederAEndpointsDeAdminNiDeMedico() throws Exception {
+        String token = loginComo(crearUsuario("contador.a@test.com", Role.CONTADOR));
+
+        mockMvc.perform(autenticado(get("/api/admin/resumen"), token)).andExpect(status().isForbidden());
+        mockMvc.perform(autenticado(get("/api/medico/agenda-hoy"), token)).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void unPacienteNoPuedeAccederANingunPanelInterno() throws Exception {
+        String token = loginComo(crearUsuario("paciente.a@test.com", Role.PACIENTE));
+
+        mockMvc.perform(autenticado(get("/api/admin/resumen"), token)).andExpect(status().isForbidden());
+        mockMvc.perform(autenticado(get("/api/medico/agenda-hoy"), token)).andExpect(status().isForbidden());
+        mockMvc.perform(autenticado(get("/api/contador/caja/resumen"), token)).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void sinTokenLosEndpointsInternosDevuelven401() throws Exception {
+        mockMvc.perform(get("/api/admin/resumen")).andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/api/medico/agenda-hoy")).andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/api/contador/caja/resumen")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void unMedicoNuncaVeLaEvolucionClinicaQueCargoOtroMedicoParaElMismoPaciente() throws Exception {
+        Medico medicoA = crearMedico();
+        Medico medicoB = crearMedico();
+        Usuario paciente = crearUsuario("paciente.compartido@test.com", Role.PACIENTE);
+
+        Turno turnoDeA = new Turno();
+        turnoDeA.setMedico(medicoA);
+        turnoDeA.setPaciente(paciente);
+        turnoDeA.setFecha(LocalDate.now());
+        turnoDeA.setHoraInicio(LocalTime.of(10, 0));
+        turnoDeA.setHoraFin(LocalTime.of(10, 30));
+        turnoDeA.setEstado(EstadoTurno.RESERVADO);
+        turnoDeA = turnoRepository.save(turnoDeA);
+
+        EvolucionClinica evolucionDeA = new EvolucionClinica();
+        evolucionDeA.setPaciente(paciente);
+        evolucionDeA.setMedico(medicoA);
+        evolucionDeA.setTurno(turnoDeA);
+        evolucionDeA.setTexto("Evolución confidencial cargada por el médico A");
+        evolucionClinicaRepository.save(evolucionDeA);
+
+        String tokenB = loginComo(medicoB.getUsuario());
+
+        mockMvc.perform(autenticado(get("/api/medico/pacientes/" + paciente.getId() + "/evoluciones"), tokenB))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    private Usuario crearUsuario(String email, Role role) {
+        Usuario usuario = new Usuario();
+        usuario.setEmail(email);
+        usuario.setDni(String.valueOf((int) (Math.random() * 90_000_000) + 10_000_000));
+        usuario.setNombreCompleto("Usuario Test " + role);
+        usuario.setTelefono("1122334455");
+        usuario.setGenero(Genero.PREFIERO_NO_DECIR);
+        usuario.setObraSocial("Particular");
+        usuario.setPasswordHash(passwordEncoder.encode(CLAVE));
+        usuario.setRole(role);
+        return usuarioRepository.save(usuario);
+    }
+
+    private Medico crearMedico() {
+        Especialidad especialidad = new Especialidad();
+        especialidad.setNombre("Especialidad " + System.nanoTime());
+        especialidad = especialidadRepository.save(especialidad);
+
+        Usuario cuenta = crearUsuario("medico" + System.nanoTime() + "@test.com", Role.MEDICO);
+
+        Medico medico = new Medico();
+        medico.setNombreCompleto("Dr. Test " + System.nanoTime());
+        medico.setEspecialidad(especialidad);
+        medico.setDuracionTurnoMinutos(30);
+        medico.setUsuario(cuenta);
+        return medicoRepository.save(medico);
+    }
+
+    private String loginComo(Usuario usuario) throws Exception {
+        String respuesta = mockMvc.perform(post("/api/auth/login")
+                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"%s","password":"%s"}
+                                """.formatted(usuario.getEmail(), CLAVE)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        String token = objectMapper.readTree(respuesta).get("token").asText();
+        assertThat(token).isNotBlank();
+        return token;
+    }
+
+    private org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder autenticado(
+            org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder builder, String token) {
+        return builder.header("Authorization", "Bearer " + token);
+    }
+}
