@@ -31,14 +31,20 @@ public interface RegistroAuditoriaRepository extends JpaRepository<RegistroAudit
             """)
     List<RegistroAuditoria> buscar(@Param("tipoEntidad") String tipoEntidad, @Param("entidadId") Long entidadId, Pageable pageable);
 
-    /** Listado general para el panel de auditoría del admin — todos los filtros son opcionales. */
+    /**
+     * Listado general para el panel de auditoría del admin. desde/hasta SIEMPRE se pasan
+     * no-nulos (ver AuditoriaService.buscarGeneral, mismo criterio que IngresoRepository.buscar)
+     * — Postgres no puede inferir el tipo de un parámetro cuyo único uso en la consulta es
+     * "? is null" (a diferencia de tipoEntidad/usuarioId, que sí lo resuelven bien); pasar un
+     * rango con centinelas evita el problema de raíz en vez de castear el parámetro a mano.
+     */
     @Query("""
             select r from RegistroAuditoria r
             left join fetch r.usuario
             where (:tipoEntidad is null or r.tipoEntidad = :tipoEntidad)
             and (:usuarioId is null or r.usuario.id = :usuarioId)
-            and (:desde is null or r.createdAt >= :desde)
-            and (:hasta is null or r.createdAt < :hasta)
+            and r.createdAt >= :desde
+            and r.createdAt < :hasta
             order by r.createdAt desc, r.id desc
             """)
     Page<RegistroAuditoria> buscarGeneral(@Param("tipoEntidad") String tipoEntidad, @Param("usuarioId") Long usuarioId,

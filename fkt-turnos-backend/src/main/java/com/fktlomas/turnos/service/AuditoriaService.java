@@ -32,6 +32,10 @@ import java.util.List;
 public class AuditoriaService {
 
     private static final int LIMITE_LISTADO = 200;
+    // Mismo criterio que CajaService: un rango concreto en vez de nulls "abiertos" (ver
+    // RegistroAuditoriaRepository.buscarGeneral).
+    private static final LocalDate DESDE_MINIMO = LocalDate.of(2000, 1, 1);
+    private static final LocalDate HASTA_MAXIMO = LocalDate.of(2099, 12, 31);
 
     private final RegistroAuditoriaRepository registroRepository;
     private final ObjectMapper objectMapper;
@@ -57,8 +61,10 @@ public class AuditoriaService {
     /** Panel de auditoría general del admin — "hasta" es inclusive del día completo. */
     @Transactional(readOnly = true)
     public Page<RegistroAuditoriaDto> buscarGeneral(String tipoEntidad, Long usuarioId, LocalDate desde, LocalDate hasta, Pageable pageable) {
-        Instant desdeInstant = desde != null ? desde.atStartOfDay(ZoneId.systemDefault()).toInstant() : null;
-        Instant hastaInstant = hasta != null ? hasta.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant() : null;
+        LocalDate desdeEfectivo = desde != null ? desde : DESDE_MINIMO;
+        LocalDate hastaEfectivo = hasta != null ? hasta : HASTA_MAXIMO;
+        Instant desdeInstant = desdeEfectivo.atStartOfDay(ZoneId.systemDefault()).toInstant();
+        Instant hastaInstant = hastaEfectivo.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant();
         return registroRepository.buscarGeneral(tipoEntidad, usuarioId, desdeInstant, hastaInstant, pageable)
                 .map(RegistroAuditoriaDto::de);
     }
