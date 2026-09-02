@@ -79,10 +79,41 @@ class AutorizacionRolesTest {
 
     @Test
     void unContadorNoPuedeAccederAEndpointsDeAdminNiDeMedico() throws Exception {
+        // No hace falta el 2FA acá: ROLE_CONTADOR_MFA_PENDIENTE tampoco matchea
+        // hasRole("ADMIN")/hasRole("MEDICO"), así que el 403 se prueba igual sin activarlo.
         String token = loginComo(crearUsuario("contador.a@test.com", Role.CONTADOR));
 
         mockMvc.perform(autenticado(get("/api/admin/resumen"), token)).andExpect(status().isForbidden());
         mockMvc.perform(autenticado(get("/api/medico/agenda-hoy"), token)).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void unContadorSinMfaActivadoNoPuedeVerLaCajaAunqueLaContraseñaSeaCorrecta() throws Exception {
+        // El CONTADOR ve toda la plata del centro — a diferencia de médico/admin, acá el 2FA
+        // no es opcional: sin activarlo, ni siquiera con la contraseña correcta se llega a
+        // /api/contador/**. Este usuario se crea sin tocar mfaHabilitado (queda en false).
+        Usuario contadorSinMfa = crearUsuario("contador.sinmfa@test.com", Role.CONTADOR);
+        String token = loginComo(contadorSinMfa);
+
+        mockMvc.perform(autenticado(get("/api/contador/caja/resumen"), token)).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void unContadorRecuperaAccesoInmediatamenteDespuesDeActivarMfaSinTenerQueVolverALoguearse() throws Exception {
+        Usuario contador = crearUsuario("contador.activando@test.com", Role.CONTADOR);
+        String token = loginComo(contador);
+
+        mockMvc.perform(autenticado(get("/api/contador/caja/resumen"), token)).andExpect(status().isForbidden());
+
+        // Simula que activó el 2FA (el flujo real es /api/mi-cuenta/mfa/**, disponible para
+        // cualquier cuenta logueada incluida esta "pendiente" — acá se fuerza el estado final
+        // directo para no reimplementar TOTP en el test).
+        contador.setMfaHabilitado(true);
+        usuarioRepository.save(contador);
+
+        // Mismo token: AppUserDetails se reconstruye desde la base en cada request
+        // (JwtAuthFilter), así que no hace falta un login nuevo para que el rol cambie.
+        mockMvc.perform(autenticado(get("/api/contador/caja/resumen"), token)).andExpect(status().isOk());
     }
 
     @Test

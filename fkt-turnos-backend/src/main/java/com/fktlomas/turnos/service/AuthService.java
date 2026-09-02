@@ -80,7 +80,7 @@ public class AuthService {
         usuario.setAceptaPoliticaPrivacidad(request.aceptaPoliticaPrivacidad());
         usuarioRepository.save(usuario);
 
-        return new AuthResponse(jwtService.generarToken(usuario), usuario.getNombreCompleto(), usuario.getEmail(), usuario.getRole().name());
+        return new AuthResponse(jwtService.generarToken(usuario), usuario.getNombreCompleto(), usuario.getEmail(), usuario.getRole().name(), false);
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -108,7 +108,8 @@ public class AuthService {
         }
 
         loginRateLimiterService.registrarExito(request.email());
-        return new AuthResponse(jwtService.generarToken(usuario), usuario.getNombreCompleto(), usuario.getEmail(), usuario.getRole().name());
+        boolean mfaSetupRequerido = usuario.getRole() == Role.CONTADOR && !usuario.isMfaHabilitado();
+        return new AuthResponse(jwtService.generarToken(usuario), usuario.getNombreCompleto(), usuario.getEmail(), usuario.getRole().name(), mfaSetupRequerido);
     }
 
     @Transactional

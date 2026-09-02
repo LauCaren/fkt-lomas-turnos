@@ -4,6 +4,7 @@ public record AuthResponse(
         String token,
         String nombreCompleto,
         String email,
-        String role
+        String role,
+        boolean mfaSetupRequerido
 ) {
 }
