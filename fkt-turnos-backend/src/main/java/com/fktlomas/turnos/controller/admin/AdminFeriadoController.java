@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 
+/** Ver los feriados es de lectura libre para ADMIN+SECRETARIA (la agenda los marca) — cargar/borrar cierres del centro sigue siendo ADMIN-only. */
 @RestController
 @RequestMapping("/api/admin/feriados")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class AdminFeriadoController {
 
     private final FeriadoService feriadoService;
@@ -28,11 +28,13 @@ public class AdminFeriadoController {
         return feriadoService.listar(desde, hasta);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public FeriadoDto crear(@Valid @RequestBody FeriadoRequest request) {
         return feriadoService.crear(request);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         feriadoService.eliminar(id);

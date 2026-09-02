@@ -3,6 +3,7 @@ package com.fktlomas.turnos.exception;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.validation.FieldError;
@@ -75,6 +76,24 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DisabledException.class)
     public ResponseEntity<Map<String, Object>> handleDisabled(DisabledException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(cuerpo(HttpStatus.UNAUTHORIZED, "Esta cuenta está desactivada", null));
+    }
+
+    /**
+     * Autenticado pero sin el rol necesario para este endpoint puntual — la vía @PreAuthorize
+     * a nivel de método/clase que separa ADMIN de SECRETARIA dentro de /api/admin/** (ver
+     * SecurityConfig y los controllers admin). Sin este handler explícito, Spring MVC deja que
+     * la excepción se resuelva por el camino por defecto de Spring Security — que en este setup
+     * (con @EnableMethodSecurity + un AuthenticationEntryPoint custom) termina devolviendo 401
+     * en vez de 403 para este caso puntual, y el frontend trata cualquier 401 como "la sesión
+     * venció" y desloguea — así que una secretaria autenticada que pisa un endpoint ADMIN-only
+     * quedaba deslogueada en el acto en vez de simplemente ver un botón/pantalla sin permiso.
+     * Verificado en vivo: sin este handler, GET /api/admin/medicos con un token de SECRETARIA
+     * válido devolvía 401 con el mensaje de "sesión vencida", no 403.
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(cuerpo(HttpStatus.FORBIDDEN, "No tenés permiso para hacer esto", null));
     }
 
     @ExceptionHandler(DemasiadosIntentosException.class)

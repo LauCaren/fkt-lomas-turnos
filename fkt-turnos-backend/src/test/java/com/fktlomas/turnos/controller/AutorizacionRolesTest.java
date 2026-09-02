@@ -127,8 +127,15 @@ class AutorizacionRolesTest {
                         .param("hasta", LocalDate.now().toString()), token))
                 .andExpect(status().isOk());
 
-        // No: alta de médicos/especialidades, caja, kinesiología (decisiones clínicas o de negocio).
-        mockMvc.perform(autenticado(get("/api/admin/medicos"), token)).andExpect(status().isForbidden());
+        // Puede VER médicos (la agenda los necesita para el filtro) pero no darlos de alta.
+        mockMvc.perform(autenticado(get("/api/admin/medicos"), token)).andExpect(status().isOk());
+        mockMvc.perform(autenticado(post("/api/admin/medicos"), token)
+                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"nombreCompleto":"Dr. Test","especialidadId":1,"duracionTurnoMinutos":30}
+                                """))
+                .andExpect(status().isForbidden());
+        // No: caja, kinesiología (decisiones clínicas o de negocio).
         mockMvc.perform(autenticado(get("/api/admin/caja/resumen"), token)).andExpect(status().isForbidden());
         mockMvc.perform(autenticado(put("/api/admin/kinesiologia/planes/1/validar"), token)).andExpect(status().isForbidden());
         // No: la plantilla/política de recordatorios (sí puede ver y reenviar los recordatorios en sí).
