@@ -71,7 +71,8 @@
     },
     "mac": {
       "target": [
-        "dmg"
+        "dmg",
+        "zip"
       ],
       "category": "public.app-category.business",
       "icon": "electron/build/icon.png"

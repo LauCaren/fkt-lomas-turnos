@@ -32,6 +32,21 @@ function carpetaDist() {
 function iniciarServidorEstatico() {
   return new Promise((resolve) => {
     const servidor = express();
+    // Defensa en profundidad: si alguna vez hay un XSS en el bundle de React, esto
+    // impide que ejecute scripts/estilos inline o cargue nada de un origen ajeno —
+    // el backend ya manda su propio CSP en sus respuestas, pero este es un servidor
+    // Express aparte (el bundle estático de dist/), que no la hereda.
+    servidor.use((_req, res, next) => {
+      // connect-src apunta al mismo backend que VITE_API_URL (.env.production) — hoy
+      // todavía localhost:8080 porque no se desplegó (ver README, sección Despliegue).
+      // Actualizar acá junto con VITE_API_URL cuando haya un dominio real, y volver a
+      // correr "npm run desktop:build".
+      res.setHeader('Content-Security-Policy',
+        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+        + "img-src 'self' data:; connect-src 'self' http://localhost:8080; "
+        + "frame-ancestors 'none'; object-src 'none'; base-uri 'none'");
+      next();
+    });
     servidor.use(express.static(carpetaDist(), {
       // index.html referencia los archivos con hash (assets/index-XXXX.js) por
       // nombre — si el propio index.html quedara cacheado, una actualización
@@ -81,7 +96,20 @@ async function crearVentana() {
   // build de escritorio no incluye el plugin de PWA.
   await ventana.webContents.session.clearCache();
   await ventana.webContents.session.clearStorageData({ storages: ['serviceworkers', 'cachestorage'] });
-  ventana.loadURL(`http://localhost:${PUERTO}`);
+
+  const origenPermitido = `http://localhost:${PUERTO}`;
+  // Sin esto, cualquier link/redirect que termine ejecutándose adentro de la SPA (un XSS
+  // futuro, un dato malicioso pegado en un campo) podría navegar toda la ventana a una
+  // página externa que se hace pasar por la app — mismo ícono, mismo título, sin barra de
+  // direcciones que lo delate. React Router usa la History API (pushState), que no dispara
+  // "will-navigate", así que esto no interfiere con la navegación normal de la app.
+  ventana.webContents.on('will-navigate', (evento, url) => {
+    if (!url.startsWith(origenPermitido)) {
+      evento.preventDefault();
+    }
+  });
+
+  ventana.loadURL(origenPermitido);
 }
 
 // Solo tiene sentido contra un build empaquetado y publicado — en desarrollo
