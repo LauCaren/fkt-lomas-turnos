@@ -7,6 +7,28 @@ on:
     branches: [main]
 
 jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # gitleaks necesita todo el historial, no solo el último commit
+      - name: Secret scan (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Dependency vulnerability scan (Trivy)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+          # go.sum/etc no aplica acá, pero limitar el escaneo a los manifiestos reales
+          # (pom.xml, package-lock.json) evita falsos positivos sobre node_modules/target
+          # si alguna vez quedan sin gitignorear en el runner.
+          skip-dirs: fkt-turnos-frontend/node_modules,fkt-turnos-backend/target,fkt-turnos-frontend/dist
+
   backend:
     runs-on: ubuntu-latest
     defaults:
@@ -33,6 +55,13 @@ jobs:
         # falta en la imagen final, un multi-stage mal armado) se note acá y no recién al
         # intentar desplegar.
         run: docker build -t fkt-turnos-backend:ci fkt-turnos-backend
+      - name: Container vulnerability scan (Trivy)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: fkt-turnos-backend:ci
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+          ignore-unfixed: true # una CVE sin fix disponible todavía no es algo que este repo pueda arreglar
 
   frontend:
     runs-on: ubuntu-latest

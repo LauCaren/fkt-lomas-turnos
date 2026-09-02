@@ -13,8 +13,9 @@ FKT Pagina/              Sitio estático de marketing (ya existía). Se agregaro
 
 fkt-turnos-backend/      API REST en Spring Boot (Java 17): auth JWT, turnos,
                           kinesiología, caja/gastos, historia clínica, auditoría,
-                          panel admin, contacto y postulaciones. Cuatro roles:
-                          PACIENTE, ADMIN, MEDICO, CONTADOR (ver "Roles" abajo).
+                          panel admin, contacto y postulaciones. Cinco roles:
+                          PACIENTE, ADMIN, SECRETARIA, MEDICO, CONTADOR (ver
+                          "Roles" abajo).
 
 fkt-turnos-frontend/     App React + Redux Toolkit: registro/login de pacientes,
                           reserva de turnos, panel de administración, y los
@@ -117,12 +118,17 @@ python -m http.server 5500
 
 ## Roles
 
-El sistema tiene cuatro roles, cada uno con su propio login y su propia superficie de la API (`SecurityConfig` bloquea `/api/admin/**`, `/api/medico/**` y `/api/contador/**` por rol a nivel de servidor, no solo ocultando botones en el frontend):
+El sistema tiene cinco roles, cada uno con su propio login y su propia superficie de la API (`SecurityConfig` bloquea `/api/admin/**`, `/api/medico/**` y `/api/contador/**` por rol a nivel de servidor, no solo ocultando botones en el frontend). Dentro de `/api/admin/**`, ADMIN y SECRETARIA comparten el namespace pero no los mismos permisos — la distinción fina se hace con `@PreAuthorize` a nivel de método/clase en cada controller (ver `AdminMedicoController`, `AdminCajaController`, etc.), no con un segundo namespace duplicado.
 
-- **PACIENTE**: reserva turnos, pide plan de kinesiología, ve/cancela sus propios turnos, gestiona su cuenta.
-- **ADMIN** (la secretaria/Fernando): panel completo — turnos, médicos, caja, reportes, todo lo de abajo.
-- **MEDICO**: portal propio (`/medico`) — agenda del día, cola de espera, historia clínica de sus pacientes, su saldo en caja. No ve nada de otros médicos ni del negocio en general.
-- **CONTADOR**: portal de solo lectura (`/contador`) — únicamente movimientos de caja (ingresos, retiros, gastos). Sin acceso a turnos, pacientes ni historias clínicas, ni para leer ni para escribir.
+| Rol | Qué puede hacer | Qué NO puede hacer |
+|---|---|---|
+| **PACIENTE** | Reservar/cancelar sus propios turnos, pedir plan de kinesiología, ver su historia clínica y exportar sus datos, gestionar su cuenta. | Ver datos de otros pacientes, nada de los paneles internos. |
+| **ADMIN** (Fernando) | Todo — el único rol con acceso a médicos/especialidades, caja, reportes financieros, kinesiología (validar/rechazar/cancelar planes), configuración de recordatorios, y gestión de las demás cuentas (crear secretarias, activar/desactivar/revocar sesiones de cualquier cuenta de staff). | — |
+| **SECRETARIA** | Agenda, reserva telefónica, cola de espera, búsqueda de pacientes, mensajes de contacto/postulaciones, recordatorios (ver/reenviar/mandar mensajes), alta telefónica de planes de kinesiología, pedidos de baja de cuenta de pacientes, reportes (exports de agenda/caja de solo lectura). | Médicos/especialidades, caja (operación ni configuración), validar/rechazar planes de kinesiología, configuración de recordatorios, ver el resumen financiero del admin, gestionar otras cuentas. |
+| **MEDICO** | Portal propio (`/medico`) — agenda del día, cola de espera, historia clínica de sus pacientes, su saldo en caja. | Nada de otros médicos ni del negocio en general. |
+| **CONTADOR** | Portal de solo lectura (`/contador`) — únicamente movimientos de caja (ingresos, retiros, gastos). | Turnos, pacientes, historias clínicas, ni para leer ni para escribir. 2FA obligatoria (ver abajo). |
+
+La secretaria usa su propia cuenta, no la de Fernando — cada acción queda registrada en la auditoría a nombre de quien la hizo de verdad (ver "Auditoría" abajo), y se le puede revocar el acceso sin tocar la contraseña del admin.
 
 ## Estado actual
 
@@ -155,15 +161,24 @@ Implementado y probado de punta a punta:
 
 **Auditoría**
 - Undo/redo de operaciones sobre turnos (reservar, cancelar, reasignar) con historial completo — pensado para revertir un error de carga de la secretaria sin tener que arreglarlo a mano en la base.
+- Además de turnos, queda registro de quién hizo qué en: altas/bajas de médicos y especialidades, anulaciones de ingresos/retiros/gastos de caja, y altas/bajas/activaciones de cuentas de staff. El admin lo navega con filtros (tipo de entidad, usuario, rango de fechas) desde la pestaña "Auditoría" del panel.
 
 **Administración**
 - Alta de especialidades y médicos, carga de horarios semanales por médico, generación de turnos a partir de esos horarios, bandeja de mensajes de "alquiler de consultorios" y de postulaciones con descarga de CV.
 - Agenda para la secretaria: vista de lista por día, y vista semanal tipo calendario (eligiendo un médico) con los turnos coloreados por estado, además de reserva de un turno en nombre de un paciente que llama por teléfono o WhatsApp (sin necesidad de que ese paciente tenga cuenta).
-- Búsqueda global de pacientes.
+- Búsqueda global de pacientes, con la cantidad de inasistencias (turnos reservados a los que no se presentó) visible en la ficha — señal informativa para el staff, no bloquea nada automáticamente.
 - El resumen del panel (admin y contador) además del snapshot de hoy muestra un gráfico de tendencia de los últimos 14 días (turnos reservados e ingresos para admin; ingresos vs. gastos para contador).
 
 **Seguridad de cuentas**
-- Verificación en dos pasos (TOTP, tipo Google Authenticator), disponible para ADMIN, MEDICO y CONTADOR — no para pacientes, para no agregarles fricción a los que reservan por teléfono.
+- Verificación en dos pasos (TOTP, tipo Google Authenticator), disponible para ADMIN, SECRETARIA, MEDICO y CONTADOR — no para pacientes, para no agregarles fricción a los que reservan por teléfono. Obligatoria (no opcional) para CONTADOR, que ve toda la plata del centro.
+- Rate limiting por IP en los endpoints públicos más expuestos (login, registro, olvidé/restablecer contraseña, contacto, postulaciones) más un límite independiente por email contra fuerza bruta dirigida a una cuenta puntual.
+- "Cerrar todas mis sesiones" por autoservicio (desde "Mi cuenta" / "Sesiones activas", cualquier rol) e igual mecanismo para que el admin desactive una cuenta de staff y le corte el acceso al instante, sin esperar a que expire el token (hasta 7 días) ni tener que cambiarle la contraseña.
+- Cuentas de staff (SECRETARIA/MEDICO/CONTADOR) se pueden activar/desactivar desde el panel del admin sin borrarlas — útil para bajas temporales o al desvincular a alguien.
+
+**Cumplimiento de datos personales (Ley 25.326) e historia clínica (Ley 26.529)**
+- El paciente tiene acceso de lectura a su propia historia clínica completa (todas las evoluciones de todos los médicos que lo atendieron, no solo un resumen) desde "Mi cuenta" — derecho de acceso irrestricto del art. 14 de la Ley 26.529.
+- "Exportar mis datos" desde "Mi cuenta": descarga un JSON con perfil, turnos, planes de kinesiología e historia clínica — todo lo que el sistema tiene sobre la cuenta.
+- "Solicitar baja de cuenta": no es un borrado directo de autoservicio — turnos, evoluciones e ingresos ya generados tienen que conservarse por la obligación legal de retención de historia clínica y de registros contables. El pedido queda en una cola (`Pedidos de baja`, visible para ADMIN y SECRETARIA); al aprobarse se anonimiza el PII de la cuenta (nombre, email, teléfono, DNI) en vez de borrar la fila, y se desactiva el login.
 
 **Comunicaciones**
 - Página de contacto para alquiler de consultorios y página "Trabajá con nosotros" con carga de CV en PDF, ambas en el sitio estático.
@@ -177,6 +192,20 @@ Implementado y probado de punta a punta:
 
 **API**
 - La API está documentada con OpenAPI/Swagger (`springdoc-openapi`) — con el backend corriendo, la UI interactiva está en `http://localhost:8080/swagger-ui.html` y el JSON crudo en `/v3/api-docs`.
+
+## CI y seguridad de la cadena de suministro
+
+`.github/workflows/ci.yml` corre en cada push/PR a `main`:
+- **security**: escaneo de secretos filtrados (gitleaks) sobre todo el historial, y escaneo de vulnerabilidades HIGH/CRITICAL en las dependencias (`pom.xml`, `package-lock.json`) con Trivy.
+- **backend**: tests + SpotBugs.
+- **docker**: build de la imagen del backend + escaneo de vulnerabilidades HIGH/CRITICAL de la imagen ya buildeada con Trivy.
+- **frontend**: lint + tests + build.
+
+`Dependabot` (`.github/dependabot.yml`) abre PRs semanales de actualización para Maven, npm y GitHub Actions. El `Dockerfile` corre como usuario no-root en el stage final.
+
+## Backups
+
+`scripts/backup-db.sh` hace un dump de Postgres y lo sube al mismo bucket S3/R2 que ya usa el sistema para archivos, bajo el prefijo `backups/`. Corre automáticamente todos los días vía `.github/workflows/backup.yml` (cron diario + disparo manual desde la pestaña Actions) — **queda inactivo hasta que se carguen los secrets** `DATABASE_URL`, `STORAGE_S3_BUCKET`, `STORAGE_S3_ACCESS_KEY`, `STORAGE_S3_SECRET_KEY`, `STORAGE_S3_ENDPOINT` y `STORAGE_S3_REGION` en Settings → Secrets and variables → Actions del repo (recién tiene sentido activarlo una vez que haya una base de producción real). El bucket necesita una regla de expiración/lifecycle propia para borrar backups viejos — a propósito no lo hace el script (ver comentario ahí).
 
 ## Despliegue
 
@@ -194,6 +223,8 @@ Todavía no está desplegado — se está preparando la infraestructura de a poc
   - SMTP real (Brevo sugerido) y cuenta de Twilio + aprobación de plantilla de WhatsApp en Meta.
   - Reemplazar las URLs de desarrollo hardcodeadas (`http://localhost:5173`, `http://localhost:5500`, `http://localhost:8080`) por las reales una vez que se conozcan los dominios definitivos — están en los `.html` del sitio estático, en `fkt-turnos-frontend/.env.production` (`VITE_SITE_URL`) y en la app de escritorio (hay que volver a correr `npm run desktop:build` después).
   - Certificado de firma de código para el instalador de Mac/Windows (hoy sale sin firmar).
+  - Cargar los secrets de `.github/workflows/backup.yml` (ver sección "Backups" arriba) una vez que haya una base de producción real.
+  - Verificar si `gitleaks-action` necesita una `GITLEAKS_LICENSE` para este repo — es gratuito para cuentas individuales/repos públicos, pero puede requerir licencia si el repo termina bajo una organización de GitHub.
 
 ## Pendiente / próximos pasos (fuera del alcance de esta versión)
 

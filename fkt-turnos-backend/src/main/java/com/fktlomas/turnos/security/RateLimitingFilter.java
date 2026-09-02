@@ -28,6 +28,11 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             new Regla("POST", "/api/auth/login", 15, Duration.ofMinutes(5)),
             new Regla("POST", "/api/auth/registro", 8, Duration.ofMinutes(10)),
             new Regla("POST", "/api/auth/olvide-password", 8, Duration.ofMinutes(10)),
+            // El endpoint que consume el token de recuperación estaba sin límite propio — es
+            // un blanco de fuerza bruta sobre el token en sí (32 bytes random, pero mejor no
+            // depender solo de eso). Más laxo que login porque un usuario real puede pifiarle
+            // al pegar el link/token alguna vez.
+            new Regla("POST", "/api/auth/restablecer-password", 15, Duration.ofMinutes(10)),
             new Regla("POST", "/api/contacto", 5, Duration.ofMinutes(10)),
             new Regla("POST", "/api/postulaciones", 5, Duration.ofMinutes(10))
     );

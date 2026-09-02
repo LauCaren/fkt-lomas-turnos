@@ -19,5 +19,11 @@ FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
+# No hace falta root para correr un jar — reduce el blast radius si algún día se
+# encuentra una RCE en una dependencia (menos que pueda hacer dentro del contenedor).
+RUN groupadd --system app && useradd --system --gid app --no-create-home app \
+    && chown -R app:app /app
+USER app
+
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
