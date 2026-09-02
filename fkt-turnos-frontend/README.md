@@ -13,12 +13,23 @@ Por defecto apunta al backend en `http://localhost:8080` (ver `.env.development`
 
 ## Rutas
 
-- `/login`, `/registro` — públicas
-- `/turnos` — asistente de reserva (especialidad → médico → fecha/horario → confirmación), requiere sesión de paciente
-- `/turnos/mis-turnos` — turnos del paciente, con opción de cancelar
-- `/admin` — panel de Fernando/secretaria (agenda con reserva telefónica, médicos y horarios, recordatorios de turno, mensajes de "alquiler de consultorios", postulaciones con descarga de CV, cambio de contraseña), requiere sesión de admin
+Públicas:
+- `/login`, `/registro` — login y alta de pacientes
+- `/olvide-password`, `/restablecer-password` — recuperación de contraseña por email
+- `/confirmar-turno` — confirmación/rechazo de asistencia sin login, desde el link del recordatorio (token por turno)
 
-El login es el mismo endpoint para pacientes y admin; la app redirige según el `role` que viene en el JWT.
+Paciente (`RutaPaciente`, requiere sesión con `role=PACIENTE`):
+- `/turnos` — asistente de reserva (especialidad → médico → fecha/horario → confirmación), con sugerencia de próximas fechas con lugar si la elegida no tiene horarios
+- `/turnos/kinesiologia` — pedido de plan de sesiones de kinesiología (orden médica, kinesiólogo, horarios fijos)
+- `/turnos/mis-turnos` — turnos del paciente, con opción de cancelar/reprogramar
+- `/turnos/mi-cuenta` — datos propios, cambio de contraseña, canal de notificación preferido
+
+Paneles internos (uno por rol, cada uno con su propio guard — `RutaAdmin`/`RutaMedico`/`RutaContador`):
+- `/admin` — panel de Fernando/secretaria: agenda (lista y semanal) con reserva telefónica, médicos y horarios, kinesiología, caja, reportes, recordatorios (config, mensaje puntual, mensaje masivo por rango de fechas), mensajes de "alquiler de consultorios", postulaciones, cuenta/2FA
+- `/medico` — agenda del día del médico, cola de espera, su propio saldo de caja, historia clínica de sus pacientes
+- `/contador` — solo lectura de caja (ingresos, retiros, gastos, tendencia), 2FA obligatorio
+
+El login es el mismo endpoint para los cuatro roles; la app redirige según el `role` que viene en el JWT.
 
 ## Variables de entorno
 

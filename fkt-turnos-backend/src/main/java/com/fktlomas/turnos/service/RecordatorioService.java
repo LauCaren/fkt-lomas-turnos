@@ -61,6 +61,7 @@ public class RecordatorioService {
     private final ConfiguracionRecordatoriosRepository configuracionRepository;
     private final EmailService emailService;
     private final WhatsAppService whatsAppService;
+    private final CanalFallbackService canalFallbackService;
 
     @Value("${app.frontend-url}")
     private String frontendUrl;
@@ -221,7 +222,12 @@ public class RecordatorioService {
                 turno.setTokenConfirmacion(UUID.randomUUID().toString());
                 turno = turnoRepository.save(turno);
             }
-            CanalNotificacion canalUsado = enviarRecordatorioConFallback(recordatorio.getCanal(), turno, plantilla);
+            Turno turnoFinal = turno;
+            // El fallback de canal (reintentar por el otro si falla el preferido) vive en
+            // CanalFallbackService, compartido con NotificacionTurnoService — acá solo se decide
+            // CÓMO se manda por cada canal.
+            CanalNotificacion canalUsado = canalFallbackService.enviarConFallback(turno.getPaciente(),
+                    canal -> enviarRecordatorioPorCanal(canal, turnoFinal, plantilla));
             recordatorio.setCanal(canalUsado);
             recordatorio.setEstado(EstadoRecordatorio.ENVIADO);
             recordatorio.setFechaEnvio(Instant.now());
@@ -235,29 +241,6 @@ public class RecordatorioService {
             log.warn("Fallo al enviar recordatorio del turno {}: {}", turno.getId(), e.getMessage());
         }
         recordatorioRepository.save(recordatorio);
-    }
-
-    /**
-     * Si falla el canal preferido, reintenta una vez por el otro canal antes de rendirse —
-     * solo si el paciente tiene un dato de contacto real para ese canal alternativo. Devuelve
-     * el canal que efectivamente se usó, para que quede reflejado en el historial.
-     */
-    private CanalNotificacion enviarRecordatorioConFallback(CanalNotificacion preferido, Turno turno, String plantilla) {
-        try {
-            enviarRecordatorioPorCanal(preferido, turno, plantilla);
-            return preferido;
-        } catch (Exception fallaOriginal) {
-            Usuario paciente = turno.getPaciente();
-            CanalNotificacion alternativo = preferido == CanalNotificacion.EMAIL ? CanalNotificacion.WHATSAPP : CanalNotificacion.EMAIL;
-            boolean tieneContactoAlternativo = alternativo == CanalNotificacion.EMAIL ? paciente.tieneEmailReal() : paciente.tieneTelefono();
-            if (!tieneContactoAlternativo) {
-                throw fallaOriginal;
-            }
-            log.warn("Fallo el recordatorio del turno {} por {} ({}), reintentando por {}",
-                    turno.getId(), preferido, fallaOriginal.getMessage(), alternativo);
-            enviarRecordatorioPorCanal(alternativo, turno, plantilla);
-            return alternativo;
-        }
     }
 
     private void enviarRecordatorioPorCanal(CanalNotificacion canal, Turno turno, String plantilla) {

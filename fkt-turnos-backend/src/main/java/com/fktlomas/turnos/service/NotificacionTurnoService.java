@@ -14,6 +14,11 @@ import java.time.LocalTime;
  * preferido, y aviso a la clínica cuando entra una reserva por la web.
  * Todo best-effort y asincrónico: si el envío falla, se loguea pero no
  * afecta la reserva/cancelación en sí, que ya se hizo antes de llamar acá.
+ *
+ * El email usa el diseño de marca de FKT Lomas (ver EmailService); WhatsApp
+ * sigue en texto plano, Twilio no soporta HTML. El fallback de canal (si
+ * falla el preferido, reintentar por el otro) vive en CanalFallbackService,
+ * compartido con RecordatorioService.
  */
 @Slf4j
 @Service
@@ -22,33 +27,17 @@ public class NotificacionTurnoService {
 
     private final EmailService emailService;
     private final WhatsAppService whatsAppService;
+    private final CanalFallbackService canalFallbackService;
 
     @Async
     public void confirmarReserva(Usuario paciente, String medicoNombre, String especialidadNombre,
                                   LocalDate fecha, LocalTime horaInicio, LocalTime horaFin) {
-        try {
-            switch (paciente.getCanalNotificacionPreferido()) {
+        enviarConFallback(paciente, canal -> {
+            switch (canal) {
                 case EMAIL -> emailService.enviarConfirmacionTurnoHtmlSync(paciente, medicoNombre, especialidadNombre, fecha, horaInicio, horaFin);
-                case WHATSAPP -> {
-                    String texto = """
-                            Hola %s,
-
-                            Tu turno fue reservado con éxito:
-                            Médico: %s
-                            Especialidad: %s
-                            Fecha: %s
-                            Horario: %s a %s
-
-                            Si necesitás cancelarlo, podés hacerlo desde tu cuenta.
-
-                            FKT Lomas
-                            """.formatted(paciente.getNombreCompleto(), medicoNombre, especialidadNombre, fecha, horaInicio, horaFin);
-                    whatsAppService.enviar(paciente.getTelefono(), texto);
-                }
+                case WHATSAPP -> whatsAppService.enviar(paciente.getTelefono(), textoConfirmacion(paciente, medicoNombre, especialidadNombre, fecha, horaInicio, horaFin));
             }
-        } catch (Exception e) {
-            log.warn("No se pudo notificar la reserva a {} por {}: {}", paciente.getEmail(), paciente.getCanalNotificacionPreferido(), e.getMessage());
-        }
+        });
 
         emailService.notificarNuevaReservaOnline(paciente, medicoNombre, especialidadNombre, fecha, horaInicio, horaFin);
     }
@@ -56,7 +45,75 @@ public class NotificacionTurnoService {
     @Async
     public void confirmarCancelacion(Usuario paciente, String medicoNombre, String especialidadNombre,
                                       LocalDate fecha, LocalTime horaInicio, LocalTime horaFin) {
-        String texto = """
+        enviarConFallback(paciente, canal -> {
+            switch (canal) {
+                case EMAIL -> emailService.enviarCancelacionTurnoHtmlSync(paciente, medicoNombre, especialidadNombre, fecha, horaInicio);
+                case WHATSAPP -> whatsAppService.enviar(paciente.getTelefono(), textoCancelacion(paciente, medicoNombre, especialidadNombre, fecha, horaInicio, horaFin));
+            }
+        });
+
+        emailService.notificarCancelacionOnline(paciente, medicoNombre, especialidadNombre, fecha, horaInicio, horaFin);
+    }
+
+    @Async
+    public void avisarPlanKinesiologiaValidado(Usuario paciente, int sesionesGeneradas, int cantidadSesiones) {
+        enviarConFallback(paciente, canal -> {
+            switch (canal) {
+                case EMAIL -> emailService.enviarPlanValidadoHtmlSync(paciente, sesionesGeneradas, cantidadSesiones);
+                case WHATSAPP -> whatsAppService.enviar(paciente.getTelefono(), textoPlanValidado(paciente, sesionesGeneradas, cantidadSesiones));
+            }
+        });
+    }
+
+    @Async
+    public void avisarPlanKinesiologiaRechazado(Usuario paciente, String motivo) {
+        enviarConFallback(paciente, canal -> {
+            switch (canal) {
+                case EMAIL -> emailService.enviarPlanRechazadoHtmlSync(paciente, motivo);
+                case WHATSAPP -> whatsAppService.enviar(paciente.getTelefono(), textoPlanRechazado(paciente, motivo));
+            }
+        });
+    }
+
+    @Async
+    public void avisarTurnoLiberado(Usuario paciente, String medicoNombre, String especialidadNombre, LocalDate fecha) {
+        enviarConFallback(paciente, canal -> {
+            switch (canal) {
+                case EMAIL -> emailService.enviarTurnoLiberadoHtmlSync(paciente, medicoNombre, especialidadNombre, fecha);
+                case WHATSAPP -> whatsAppService.enviar(paciente.getTelefono(), textoTurnoLiberado(paciente, medicoNombre, especialidadNombre, fecha));
+            }
+        });
+    }
+
+    /** Best-effort: si fallan tanto el canal preferido como el alternativo, se loguea y no se propaga — la operación real ya se hizo antes de notificar. */
+    private void enviarConFallback(Usuario paciente, CanalFallbackService.EnvioPorCanal envio) {
+        try {
+            canalFallbackService.enviarConFallback(paciente, envio);
+        } catch (Exception e) {
+            log.warn("No se pudo notificar a {} por ningún canal: {}", paciente.getEmail(), e.getMessage());
+        }
+    }
+
+    private String textoConfirmacion(Usuario paciente, String medicoNombre, String especialidadNombre,
+                                      LocalDate fecha, LocalTime horaInicio, LocalTime horaFin) {
+        return """
+                Hola %s,
+
+                Tu turno fue reservado con éxito:
+                Médico: %s
+                Especialidad: %s
+                Fecha: %s
+                Horario: %s a %s
+
+                Si necesitás cancelarlo, podés hacerlo desde tu cuenta.
+
+                FKT Lomas
+                """.formatted(paciente.getNombreCompleto(), medicoNombre, especialidadNombre, fecha, horaInicio, horaFin);
+    }
+
+    private String textoCancelacion(Usuario paciente, String medicoNombre, String especialidadNombre,
+                                     LocalDate fecha, LocalTime horaInicio, LocalTime horaFin) {
+        return """
                 Hola %s,
 
                 Tu turno fue cancelado:
@@ -69,14 +126,10 @@ public class NotificacionTurnoService {
 
                 FKT Lomas
                 """.formatted(paciente.getNombreCompleto(), medicoNombre, especialidadNombre, fecha, horaInicio, horaFin);
-        enviarSegunPreferencia(paciente, "Turno cancelado — FKT Lomas", texto);
-
-        emailService.notificarCancelacionOnline(paciente, medicoNombre, especialidadNombre, fecha, horaInicio, horaFin);
     }
 
-    @Async
-    public void avisarPlanKinesiologiaValidado(Usuario paciente, int sesionesGeneradas, int cantidadSesiones) {
-        String texto = """
+    private String textoPlanValidado(Usuario paciente, int sesionesGeneradas, int cantidadSesiones) {
+        return """
                 Hola %s,
 
                 Tu plan de kinesiología fue aprobado y ya se generaron %d de %d sesiones.
@@ -85,12 +138,10 @@ public class NotificacionTurnoService {
 
                 FKT Lomas
                 """.formatted(paciente.getNombreCompleto(), sesionesGeneradas, cantidadSesiones);
-        enviarSegunPreferencia(paciente, "Tu plan de kinesiología fue aprobado — FKT Lomas", texto);
     }
 
-    @Async
-    public void avisarPlanKinesiologiaRechazado(Usuario paciente, String motivo) {
-        String texto = """
+    private String textoPlanRechazado(Usuario paciente, String motivo) {
+        return """
                 Hola %s,
 
                 Tu plan de kinesiología no pudo aprobarse. Motivo: %s
@@ -99,12 +150,10 @@ public class NotificacionTurnoService {
 
                 FKT Lomas
                 """.formatted(paciente.getNombreCompleto(), motivo);
-        enviarSegunPreferencia(paciente, "Tu plan de kinesiología necesita otra revisión — FKT Lomas", texto);
     }
 
-    @Async
-    public void avisarTurnoLiberado(Usuario paciente, String medicoNombre, String especialidadNombre, LocalDate fecha) {
-        String texto = """
+    private String textoTurnoLiberado(Usuario paciente, String medicoNombre, String especialidadNombre, LocalDate fecha) {
+        return """
                 Hola %s,
 
                 Se liberó un turno de %s con %s para el %s.
@@ -113,17 +162,5 @@ public class NotificacionTurnoService {
 
                 FKT Lomas
                 """.formatted(paciente.getNombreCompleto(), especialidadNombre, medicoNombre, fecha);
-        enviarSegunPreferencia(paciente, "Se liberó un turno — FKT Lomas", texto);
-    }
-
-    private void enviarSegunPreferencia(Usuario paciente, String asunto, String texto) {
-        try {
-            switch (paciente.getCanalNotificacionPreferido()) {
-                case EMAIL -> emailService.enviarRecordatorioSync(paciente.getEmail(), asunto, texto);
-                case WHATSAPP -> whatsAppService.enviar(paciente.getTelefono(), texto);
-            }
-        } catch (Exception e) {
-            log.warn("No se pudo notificar a {} por {}: {}", paciente.getEmail(), paciente.getCanalNotificacionPreferido(), e.getMessage());
-        }
     }
 }

@@ -61,7 +61,7 @@ La API queda en `http://localhost:8080`. Documentación interactiva (Swagger) en
 ./mvnw test
 ```
 
-Incluye un test que verifica que, ante dos intentos de reserva sobre el mismo turno, solo uno tiene éxito (la reserva usa un `UPDATE` atómico condicionado a `estado = DISPONIBLE`, sin necesidad de locks explícitos).
+Cubren, entre otras cosas: que ante dos intentos de reserva sobre el mismo turno solo uno tiene éxito (la reserva usa un `UPDATE` atómico condicionado a `estado = DISPONIBLE`, sin locks explícitos), los límites de autorización por rol, la lógica de caja/kinesiología/undo, el rate limiting de login, y el fallback de canal de las notificaciones al paciente — turno reservado/cancelado, recordatorio, plan de kinesiología, lista de espera (`CanalFallbackService`: si falla el canal preferido, reintenta por el otro solo si hay un dato de contacto real para ese canal).
 
 ## Modelo de datos (resumen)
 

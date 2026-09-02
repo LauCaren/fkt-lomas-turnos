@@ -8,6 +8,8 @@ FKT Pagina/              Sitio estático de marketing (ya existía). Se agregaro
                           - trabaja-con-nosotros.html
                           - link "Pedir turno" apuntando a la app de turnos
                           - columna "Otros" en el footer con los dos links nuevos
+                          - CSS/JS compartidos entre las 10 páginas en assets/
+                            (antes cada .html tenía su propia copia duplicada)
 
 fkt-turnos-backend/      API REST en Spring Boot (Java 17): auth JWT, turnos,
                           kinesiología, caja/gastos, historia clínica, auditoría,
@@ -131,6 +133,7 @@ Implementado y probado de punta a punta:
 - Reserva de turnos por especialidad → médico → fecha → horario, con bloqueo real contra doble reserva (dos personas no pueden tomar el mismo horario).
 - Copago de IOMA: el paciente ve el aviso de copago antes de confirmar si su obra social y la especialidad lo requieren.
 - Cancelación de turnos propios (libera el horario para otros pacientes), lista de espera, y confirmación previa del turno (recordatorio con confirmar/cancelar) el día anterior.
+- Si la fecha elegida no tiene horarios libres, el asistente sugiere las próximas fechas con lugar para ese médico (en vez de que el paciente tenga que ir probando fecha por fecha).
 - Los pacientes pueden editar sus propios datos y cambiar su contraseña desde "Mi cuenta". "Olvidé mi contraseña" por email con link temporal.
 - Feriados nacionales de Argentina 2026 precargados (Ley 27.399, verificados contra el calendario oficial) — se excluyen automáticamente al generar turnos, y se marcan visualmente en la agenda. El admin puede sumar cierres propios del centro vía `POST /api/admin/feriados`.
 
@@ -157,14 +160,17 @@ Implementado y probado de punta a punta:
 - Alta de especialidades y médicos, carga de horarios semanales por médico, generación de turnos a partir de esos horarios, bandeja de mensajes de "alquiler de consultorios" y de postulaciones con descarga de CV.
 - Agenda para la secretaria: vista de lista por día, y vista semanal tipo calendario (eligiendo un médico) con los turnos coloreados por estado, además de reserva de un turno en nombre de un paciente que llama por teléfono o WhatsApp (sin necesidad de que ese paciente tenga cuenta).
 - Búsqueda global de pacientes.
+- El resumen del panel (admin y contador) además del snapshot de hoy muestra un gráfico de tendencia de los últimos 14 días (turnos reservados e ingresos para admin; ingresos vs. gastos para contador).
 
 **Seguridad de cuentas**
 - Verificación en dos pasos (TOTP, tipo Google Authenticator), disponible para ADMIN, MEDICO y CONTADOR — no para pacientes, para no agregarles fricción a los que reservan por teléfono.
 
 **Comunicaciones**
 - Página de contacto para alquiler de consultorios y página "Trabajá con nosotros" con carga de CV en PDF, ambas en el sitio estático.
-- Envío de emails (confirmación de turno, aviso de nuevo mensaje/postulación, resumen mensual de caja, alerta de fallo de job) — desactivado por defecto hasta que se configure un SMTP real (ver README del backend).
-- Recordatorios automáticos de turno (email o WhatsApp según el canal preferido de cada paciente) desde un job programado del backend, con reintentos, historial y reenvío manual, plantilla del mensaje y anticipación editables, y envío de un mensaje puntual a un paciente — todo desde la pestaña "Recordatorios" del panel de admin (ver README del backend para las variables de entorno de Twilio). WhatsApp desactivado hasta configurar Twilio; el canal por defecto de cada paciente es email.
+- Todos los emails al paciente sobre su turno o plan de kinesiología (confirmación, cancelación, recordatorio, plan aprobado/rechazado, turno liberado de la lista de espera) usan el diseño de marca de FKT Lomas (HTML, no texto plano) — ver `fkt-turnos-backend/src/main/resources/email-templates/`. Los emails internos a la clínica (aviso de nuevo mensaje/postulación, resumen mensual de caja, alerta de fallo de job) siguen en texto plano. Todo el envío está desactivado por defecto hasta que se configure un SMTP real (ver README del backend).
+- Si falla el canal preferido de un paciente (email o WhatsApp) al notificarle cualquiera de esos eventos, el sistema reintenta automáticamente por el otro canal antes de darse por vencido — solo si hay un dato de contacto real para ese canal alternativo.
+- Recordatorios automáticos de turno desde un job programado del backend, con reintentos, historial y reenvío manual, plantilla del mensaje (solo aplica al canal WhatsApp — el email usa el diseño fijo de arriba) y anticipación editables, y envío de un mensaje puntual a un paciente o masivo a todos los que tienen turno en un rango de fechas (ej. avisar un cierre por feriado) — todo desde la pestaña "Recordatorios" del panel de admin (ver README del backend para las variables de entorno de Twilio). WhatsApp desactivado hasta configurar Twilio; el canal por defecto de cada paciente es email.
+- Resumen semanal automático (turnos reservados, ingresos, gastos, retiros, caja física) al mail interno de la clínica, todos los lunes a la mañana — mismo diseño de marca que el resto de los avisos.
 
 **App de escritorio**
 - El panel de administración (y los portales de médico y contador) también se pueden empaquetar como app de escritorio para Windows y Mac (Electron) — ver `fkt-turnos-frontend/electron/` y el script `npm run desktop:build`. La app de escritorio es exclusivamente para los paneles internos: no tiene ningún link de salida al sitio informativo público.
@@ -191,4 +197,20 @@ Todavía no está desplegado — se está preparando la infraestructura de a poc
 
 ## Pendiente / próximos pasos (fuera del alcance de esta versión)
 
-- Reglas de disponibilidad particulares por médico (turnos rotativos, feriados, múltiples consultorios) — a definir con las especificaciones que faltan.
+**Bloqueado esperando respuestas de Fernando** (no conviene construir esto sin definiciones, para no tener que rehacerlo):
+- Confirmar qué médicos trabajan hoy realmente y su horario real por especialidad — la mayoría de las especialidades cargadas (Traumatología, Reumatología, Flebología, Nutrición, Psicología, Psiquiatría, Psicopedagogía, Genética ADN, Estética, Pilates) todavía no tienen ningún médico asignado en el sistema.
+- Tratamientos de capacidad simultánea (ej. magnetoterapia: un profesional atiende a varios pacientes a la vez conectados a una máquina) — el modelo actual asume un turno = un profesional ocupado con un paciente; necesita rediseño del lado de disponibilidad.
+- Copagos por obra social más allá de IOMA (ya resuelto) y el precio de la sesión particular (sin obra social) — hoy el sistema avisa que tiene costo pero no puede mostrar el monto.
+- Planes de sesiones recurrentes para especialidades que no sean kinesiología (ya resuelto ahí).
+- Ventana de anticipación para reservar/cancelar, tope de turnos activos por paciente, y si el centro cierra días propios además de los feriados nacionales (ya cargados).
+
+**Configuración pendiente** (el código ya está listo, falta crear cuentas/credenciales reales — ver sección "Despliegue" arriba):
+- SMTP real para que los emails salgan de verdad (`MAIL_ENABLED=false` por defecto).
+- Cuenta de Twilio + plantilla de WhatsApp Business aprobada por Meta, para que el canal WhatsApp de los recordatorios funcione.
+- El deploy en sí: elegir host de backend/Postgres, host de frontend, bucket S3/R2, y resolver el acceso al DNS de `fktlomas.com`.
+- Certificado de firma de código para el instalador de escritorio (Mac/Windows).
+
+**Mejoras de producto sin bloqueo**, candidatas para una próxima vuelta:
+- Reglas de disponibilidad particulares por médico (turnos rotativos, múltiples consultorios).
+- Rollout de las primitivas de UI (`TabNav`, `StatCard`) al resto de los tabs de admin/contador que todavía no las usan.
+- El destinatario del resumen semanal es siempre `ADMIN_NOTIFY_EMAIL` (no configurable desde el panel, a diferencia del reporte mensual de caja) — si en algún momento hace falta mandarlo a otra dirección, agregar esa opción a "Caja" o a una config propia.
