@@ -4,10 +4,7 @@ import { fetchSaldoMedico, limpiarMensajesMedico } from './medicoSlice';
 import MedicoAgendaTab from './MedicoAgendaTab';
 import MedicoColaEsperaTab from './MedicoColaEsperaTab';
 import CuentaSeguridadTab from '../../components/CuentaSeguridadTab';
-
-function formatMoneda(valor) {
-  return Number(valor || 0).toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
-}
+import { formatMoneda } from '../../utils/formato';
 
 const TABS = [
   { id: 'agenda', label: 'Mi agenda de hoy' },

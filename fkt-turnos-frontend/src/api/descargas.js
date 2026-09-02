@@ -24,3 +24,14 @@ function extraerNombreArchivo(contentDisposition) {
   const match = contentDisposition.match(/filename="?([^"]+)"?/);
   return match ? match[1] : null;
 }
+
+/**
+ * Abre un archivo de un endpoint admin-protegido en una pestaña nueva en vez de
+ * descargarlo (para "ver" una orden médica o un comprobante sin guardarlo).
+ */
+export async function verArchivo(url) {
+  const response = await axiosClient.get(url, { responseType: 'blob' });
+  const blobUrl = window.URL.createObjectURL(new Blob([response.data], { type: response.headers['content-type'] }));
+  window.open(blobUrl, '_blank', 'noopener');
+  setTimeout(() => window.URL.revokeObjectURL(blobUrl), 60000);
+}

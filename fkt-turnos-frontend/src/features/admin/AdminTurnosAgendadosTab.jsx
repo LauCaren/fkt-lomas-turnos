@@ -2,11 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchTurnosOcupados, fetchMedicosAdmin } from './adminSlice';
 import { fetchEspecialidades } from '../turnos/turnosSlice';
-
-function hoyISO() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
+import { hoyISO } from '../../utils/formato';
 
 function etiquetaFecha(fechaISO) {
   const [y, m, d] = fechaISO.split('-').map(Number);

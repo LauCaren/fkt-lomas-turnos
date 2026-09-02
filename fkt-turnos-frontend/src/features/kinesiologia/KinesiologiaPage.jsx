@@ -5,6 +5,7 @@ import {
   pausarPlanKinesiologia, reanudarPlanKinesiologia, limpiarMensajesKinesiologia, limpiarHorariosDisponibles,
 } from './kinesiologiaSlice';
 import { fetchEspecialidades, fetchMedicos } from '../turnos/turnosSlice';
+import { hoyISO } from '../../utils/formato';
 
 const DIA_LABEL = {
   MONDAY: 'Lunes',
@@ -28,11 +29,6 @@ const ESTADO_LABEL = {
   PAUSADO: 'Pausado',
   CANCELADO: 'Cancelado',
 };
-
-function hoyISO() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
 
 function NuevoPlanForm({ medicoKinesiologiaId, medicos }) {
   const dispatch = useDispatch();

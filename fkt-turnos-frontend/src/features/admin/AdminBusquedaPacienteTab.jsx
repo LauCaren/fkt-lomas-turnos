@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import axiosClient, { mensajeDeError } from '../../api/axiosClient';
-
-function formatMoneda(valor) {
-  return Number(valor || 0).toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
-}
+import { formatMoneda } from '../../utils/formato';
 
 const ESTADO_KINESIOLOGIA = {
   PENDIENTE_VALIDACION: 'Pendiente de revisión',

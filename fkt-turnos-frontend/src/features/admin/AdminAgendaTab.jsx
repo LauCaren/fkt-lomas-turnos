@@ -3,11 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchAgenda, fetchFeriados, fetchMedicosAdmin, reservarParaPaciente, actualizarAsistencia, deshacerTurno } from './adminSlice';
 import { fetchEspecialidades } from '../turnos/turnosSlice';
 import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../../constants/obrasSociales';
-
-function hoyISO() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
+import { hoyISO } from '../../utils/formato';
 
 function parseISO(fechaISO) {
   const [y, m, d] = fechaISO.split('-').map(Number);

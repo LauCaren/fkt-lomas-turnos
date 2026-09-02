@@ -1,10 +1,7 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchResumenAdmin } from './adminSlice';
-
-function formatMoneda(valor) {
-  return Number(valor || 0).toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
-}
+import { formatMoneda } from '../../utils/formato';
 
 function Tarjeta({ etiqueta, valor, destacado }) {
   return (

@@ -7,13 +7,11 @@ import {
   limpiarMensajesCaja,
 } from './cajaSlice';
 import { fetchMedicosAdmin } from '../admin/adminSlice';
-import axiosClient from '../../api/axiosClient';
+import { verArchivo } from '../../api/descargas';
+import { formatMoneda } from '../../utils/formato';
 
-async function verComprobante(gastoId) {
-  const response = await axiosClient.get(`/api/admin/caja/gastos/${gastoId}/comprobante`, { responseType: 'blob' });
-  const url = window.URL.createObjectURL(new Blob([response.data], { type: response.headers['content-type'] }));
-  window.open(url, '_blank', 'noopener');
-  setTimeout(() => window.URL.revokeObjectURL(url), 60000);
+function verComprobante(gastoId) {
+  return verArchivo(`/api/admin/caja/gastos/${gastoId}/comprobante`);
 }
 
 const METODOS_PAGO = [
@@ -21,11 +19,6 @@ const METODOS_PAGO = [
   { value: 'TRANSFERENCIA', label: 'Transferencia' },
   { value: 'MERCADOPAGO', label: 'MercadoPago' },
 ];
-
-function formatMoneda(valor) {
-  const n = Number(valor || 0);
-  return n.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
-}
 
 function AnularBoton({ onAnular }) {
   const [motivo, setMotivo] = useState('');

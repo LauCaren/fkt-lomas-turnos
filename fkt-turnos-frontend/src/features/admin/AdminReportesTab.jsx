@@ -1,11 +1,7 @@
 import { useEffect, useState } from 'react';
 import axiosClient, { mensajeDeError } from '../../api/axiosClient';
 import { descargarArchivo } from '../../api/descargas';
-
-function hoyISO() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
+import { hoyISO } from '../../utils/formato';
 
 function primerDiaMesISO() {
   const d = new Date();

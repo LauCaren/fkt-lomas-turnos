@@ -7,6 +7,7 @@ import {
 } from './adminSlice';
 import { fetchEspecialidades } from '../turnos/turnosSlice';
 import Lightbox from '../../components/Lightbox';
+import { hoyISO } from '../../utils/formato';
 
 const DIAS = [
   { value: 'MONDAY', label: 'Lunes' },
@@ -15,11 +16,6 @@ const DIAS = [
   { value: 'THURSDAY', label: 'Jueves' },
   { value: 'FRIDAY', label: 'Viernes' },
 ];
-
-function hoyISO() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
 
 function CredencialesMedico({ medico }) {
   const dispatch = useDispatch();

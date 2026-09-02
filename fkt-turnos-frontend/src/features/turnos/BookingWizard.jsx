@@ -7,13 +7,9 @@ import {
 } from './turnosSlice';
 import { fetchMiPerfil } from '../cuenta/cuentaSlice';
 import AgregarCalendario from '../../components/AgregarCalendario';
+import { hoyISO } from '../../utils/formato';
 
 const WHATSAPP_CONSULTORIO = { numero: '5491123515402', texto: 'Hola, quiero confirmar mi turno con copago IOMA.' };
-
-function hoyISO() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
 
 export default function BookingWizard() {
   const dispatch = useDispatch();

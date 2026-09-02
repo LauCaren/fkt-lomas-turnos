@@ -1,11 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchColaEsperaAdmin, fetchMedicosAdmin } from './adminSlice';
-
-function hoyISO() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
+import { hoyISO } from '../../utils/formato';
 
 export default function AdminColaEsperaTab() {
   const dispatch = useDispatch();

@@ -1,18 +1,10 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import axiosClient from '../../api/axiosClient';
 import { fetchPostulaciones, marcarPostulacionRevisada } from './adminSlice';
+import { descargarArchivo } from '../../api/descargas';
 
-async function descargarCv(id, nombreArchivo) {
-  const response = await axiosClient.get(`/api/admin/postulaciones/${id}/cv`, { responseType: 'blob' });
-  const url = window.URL.createObjectURL(new Blob([response.data]));
-  const link = document.createElement('a');
-  link.href = url;
-  link.setAttribute('download', nombreArchivo);
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  window.URL.revokeObjectURL(url);
+function descargarCv(id, nombreArchivo) {
+  return descargarArchivo(`/api/admin/postulaciones/${id}/cv`, undefined, nombreArchivo);
 }
 
 export default function AdminPostulacionesTab() {

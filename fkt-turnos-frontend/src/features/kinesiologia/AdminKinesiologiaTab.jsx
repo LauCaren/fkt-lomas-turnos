@@ -6,13 +6,11 @@ import {
 } from './kinesiologiaSlice';
 import { fetchMedicosAdmin } from '../admin/adminSlice';
 import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../../constants/obrasSociales';
-import axiosClient from '../../api/axiosClient';
+import { verArchivo } from '../../api/descargas';
+import { hoyISO } from '../../utils/formato';
 
-async function verOrdenMedica(planId) {
-  const response = await axiosClient.get(`/api/admin/kinesiologia/planes/${planId}/orden-medica`, { responseType: 'blob' });
-  const url = window.URL.createObjectURL(new Blob([response.data], { type: response.headers['content-type'] }));
-  window.open(url, '_blank', 'noopener');
-  setTimeout(() => window.URL.revokeObjectURL(url), 60000);
+function verOrdenMedica(planId) {
+  return verArchivo(`/api/admin/kinesiologia/planes/${planId}/orden-medica`);
 }
 
 const DIAS = [
@@ -32,11 +30,6 @@ const ESTADOS = [
   { value: 'CANCELADO', label: 'Cancelados' },
 ];
 
-function hoyISO() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-
 const TELEFONICO_VACIO = {
   dni: '', nombreCompleto: '', telefono: '', obraSocial: '', email: '',
   medicoId: '', cantidadSesiones: 10, fechaInicio: hoyISO(),
@@ -45,7 +38,7 @@ const TELEFONICO_VACIO = {
 function NuevoPlanTelefonico({ medicosKinesiologia }) {
   const dispatch = useDispatch();
   const [form, setForm] = useState(TELEFONICO_VACIO);
-  const [horarios, setHorarios] = useState([{ diaSemana: 'MONDAY', horaInicio: '15:00' }]);
+  const [horarios, setHorarios] = useState([{ id: crypto.randomUUID(), diaSemana: 'MONDAY', horaInicio: '15:00' }]);
   const [ordenMedica, setOrdenMedica] = useState(null);
   const [abierto, setAbierto] = useState(false);
 
@@ -61,7 +54,7 @@ function NuevoPlanTelefonico({ medicosKinesiologia }) {
     formData.append('ordenMedica', ordenMedica);
     dispatch(crearPlanKinesiologiaPorTelefono(formData)).unwrap().then(() => {
       setForm(TELEFONICO_VACIO);
-      setHorarios([{ diaSemana: 'MONDAY', horaInicio: '15:00' }]);
+      setHorarios([{ id: crypto.randomUUID(), diaSemana: 'MONDAY', horaInicio: '15:00' }]);
       setOrdenMedica(null);
       setAbierto(false);
     }).catch(() => {});
@@ -117,18 +110,18 @@ function NuevoPlanTelefonico({ medicosKinesiologia }) {
         </div>
         <div className="field" style={{ marginBottom: 0 }}>
           <label>Horarios fijos semanales</label>
-          {horarios.map((h, i) => (
-            <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-              <select value={h.diaSemana} onChange={(e) => setHorarios(horarios.map((x, idx) => idx === i ? { ...x, diaSemana: e.target.value } : x))}>
+          {horarios.map((h) => (
+            <div key={h.id} style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+              <select value={h.diaSemana} onChange={(e) => setHorarios(horarios.map((x) => x.id === h.id ? { ...x, diaSemana: e.target.value } : x))}>
                 {DIAS.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
               </select>
-              <input type="time" value={h.horaInicio} onChange={(e) => setHorarios(horarios.map((x, idx) => idx === i ? { ...x, horaInicio: e.target.value } : x))} />
+              <input type="time" value={h.horaInicio} onChange={(e) => setHorarios(horarios.map((x) => x.id === h.id ? { ...x, horaInicio: e.target.value } : x))} />
               {horarios.length > 1 && (
-                <button type="button" className="btn btn-outline" style={{ padding: '4px 10px', fontSize: 12 }} onClick={() => setHorarios(horarios.filter((_, idx) => idx !== i))}>Quitar</button>
+                <button type="button" className="btn btn-outline" style={{ padding: '4px 10px', fontSize: 12 }} onClick={() => setHorarios(horarios.filter((x) => x.id !== h.id))}>Quitar</button>
               )}
             </div>
           ))}
-          <button type="button" className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => setHorarios([...horarios, { diaSemana: 'MONDAY', horaInicio: '15:00' }])}>
+          <button type="button" className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => setHorarios([...horarios, { id: crypto.randomUUID(), diaSemana: 'MONDAY', horaInicio: '15:00' }])}>
             + Agregar horario
           </button>
         </div>

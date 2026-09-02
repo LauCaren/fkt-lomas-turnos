@@ -2,10 +2,7 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchGastosContador } from './contadorSlice';
 import EstadoVacio from '../../components/EstadoVacio';
-
-function formatMoneda(valor) {
-  return Number(valor || 0).toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
-}
+import { formatMoneda } from '../../utils/formato';
 
 export default function ContadorGastosTab() {
   const dispatch = useDispatch();
