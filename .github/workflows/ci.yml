@@ -21,6 +21,18 @@ jobs:
           cache: maven
       - name: Test
         run: ./mvnw -B test
+      - name: Static analysis (SpotBugs)
+        run: ./mvnw -B spotbugs:check
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build backend image
+        # Solo build, sin push — el objetivo es que un Dockerfile roto (una dependencia que
+        # falta en la imagen final, un multi-stage mal armado) se note acá y no recién al
+        # intentar desplegar.
+        run: docker build -t fkt-turnos-backend:ci fkt-turnos-backend
 
   frontend:
     runs-on: ubuntu-latest

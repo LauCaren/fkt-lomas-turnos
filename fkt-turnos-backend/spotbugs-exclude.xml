@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Filtro de SpotBugs. Excluye categorías que son ruido estructural en este tipo de proyecto
+  (JPA + Lombok + DTOs) en vez de bugs reales — sin esto, "mvn spotbugs:check" ahoga los
+  hallazgos genuinos en cientos de falsos positivos y nadie termina mirando el reporte.
+-->
+<FindBugsFilter>
+  <!-- Toda entidad JPA con getters (Lombok o manuales) "expone su representación interna" —
+       es el patrón normal de JPA/Hibernate, no un bug de encapsulamiento. -->
+  <Match>
+    <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2" />
+  </Match>
+  <!-- Los campos de las entidades @Entity los lee/escribe Hibernate por reflection, no el
+       código Java — SpotBugs no puede verlo y los marca como "nunca leídos/escritos". -->
+  <Match>
+    <Bug pattern="URF_UNREAD_FIELD,UWF_UNWRITTEN_FIELD" />
+    <Class name="~.*\.domain\..*" />
+  </Match>
+  <!-- Los tests no son parte del código que se despliega: no hace falta el mismo nivel de
+       rigor de encapsulamiento/serialización que en main/. -->
+  <Match>
+    <Class name="~.*Test" />
+  </Match>
+  <!-- \n (no %n) es intencional en los cuerpos de email/texto de estos servicios: son
+       plantillas de contenido, no logs — %n insertaría CRLF en Windows, que no es lo que
+       se quiere en un email. -->
+  <Match>
+    <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE" />
+  </Match>
+  <!-- CT_CONSTRUCTOR_THROW asume un atacante que subclasea la clase para "resucitar" un
+       objeto a medio construir vía finalizer. Ninguna clase acá tiene finalize(), y son todos
+       beans de Spring instanciados por el propio framework, no por código atacante. -->
+  <Match>
+    <Bug pattern="CT_CONSTRUCTOR_THROW" />
+  </Match>
+  <!-- AppUserDetails.usuario "no serializable" solo importa si esta clase se llega a
+       serializar — la app es 100% stateless (SecurityConfig usa SessionCreationPolicy.
+       STATELESS, sin HttpSession), así que UserDetails nunca se serializa en la práctica. -->
+  <Match>
+    <Bug pattern="SE_BAD_FIELD" />
+    <Class name="com.fktlomas.turnos.security.AppUserDetails" />
+  </Match>
+  <!-- Falso positivo: SpotBugs no ve que validarArchivo(cv), llamado al principio de
+       recibir(), ya tira ArchivoInvalidoException si cv.getContentType() es null — para
+       cuando se llega a esta línea, ya no puede serlo. -->
+  <Match>
+    <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE" />
+    <Class name="com.fktlomas.turnos.service.PostulacionService" />
+    <Method name="recibir" />
+  </Match>
+</FindBugsFilter>

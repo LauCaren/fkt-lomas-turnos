@@ -32,6 +32,9 @@ public class MfaSecretConverter implements AttributeConverter<String, String> {
     private static final String CLAVE_POR_DEFECTO = "changeme-dev-mfa-key-change-in-prod-please";
     private static final int TAMANO_IV_BYTES = 12;
     private static final int TAMANO_TAG_BITS = 128;
+    // Una sola instancia reusada: SecureRandom es thread-safe (sincroniza internamente) y
+    // crear una nueva por llamada tiene un costo de inicialización/sembrado innecesario.
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     private final SecretKey clave;
 
@@ -54,7 +57,7 @@ public class MfaSecretConverter implements AttributeConverter<String, String> {
         }
         try {
             byte[] iv = new byte[TAMANO_IV_BYTES];
-            new SecureRandom().nextBytes(iv);
+            RANDOM.nextBytes(iv);
             Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
             cipher.init(Cipher.ENCRYPT_MODE, clave, new GCMParameterSpec(TAMANO_TAG_BITS, iv));
             byte[] cifrado = cipher.doFinal(secretoPlano.getBytes(StandardCharsets.UTF_8));

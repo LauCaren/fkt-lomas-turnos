@@ -172,7 +172,11 @@ public class MedicoService {
         if (archivo == null || archivo.isEmpty()) {
             throw new ArchivoInvalidoException("Adjuntá una imagen");
         }
-        String extension = EXTENSIONES_PERMITIDAS.get(archivo.getContentType());
+        // EXTENSIONES_PERMITIDAS es un Map.of(): a diferencia de un HashMap, su get(null) tira
+        // NullPointerException en vez de devolver null — y el Content-Type puede venir null (un
+        // cliente puede no mandarlo). El chequeo de null antes evita un 500 sin sentido en vez
+        // del error de validación esperado.
+        String extension = archivo.getContentType() == null ? null : EXTENSIONES_PERMITIDAS.get(archivo.getContentType());
         if (extension == null) {
             throw new ArchivoInvalidoException("La imagen debe ser JPG o PNG");
         }

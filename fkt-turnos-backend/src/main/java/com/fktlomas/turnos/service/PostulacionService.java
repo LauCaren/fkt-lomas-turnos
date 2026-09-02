@@ -59,7 +59,11 @@ public class PostulacionService {
         if (cv == null || cv.isEmpty()) {
             throw new ArchivoInvalidoException("Adjuntá tu CV en formato PDF");
         }
-        if (!TIPOS_PERMITIDOS.contains(cv.getContentType())) {
+        // TIPOS_PERMITIDOS es un Set.of(): a diferencia de un HashSet, su contains(null) tira
+        // NullPointerException en vez de devolver false — y el Content-Type puede venir null
+        // (un cliente puede no mandarlo). El chequeo de null antes evita un 500 sin sentido en
+        // vez del error de validación esperado.
+        if (cv.getContentType() == null || !TIPOS_PERMITIDOS.contains(cv.getContentType())) {
             throw new ArchivoInvalidoException("El CV debe ser un archivo PDF");
         }
         if (cv.getSize() > TAMANO_MAXIMO_BYTES) {

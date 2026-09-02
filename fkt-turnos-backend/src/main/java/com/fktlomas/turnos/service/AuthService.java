@@ -39,6 +39,9 @@ public class AuthService {
     private static final int MINUTOS_VALIDEZ_TOKEN_RESET = 60;
     private static final int MAX_REGISTROS_POR_HORA = 5;
     private static final int MAX_OLVIDE_PASSWORD_POR_HORA = 5;
+    // Una sola instancia reusada: SecureRandom es thread-safe y crear una nueva por llamada
+    // tiene un costo de inicialización/sembrado innecesario.
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
@@ -113,7 +116,7 @@ public class AuthService {
         verificarLimite(request.email(), MAX_OLVIDE_PASSWORD_POR_HORA);
         usuarioRepository.findByEmail(request.email()).ifPresent(usuario -> {
             byte[] bytes = new byte[32];
-            new SecureRandom().nextBytes(bytes);
+            RANDOM.nextBytes(bytes);
             String token = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
 
             usuario.setResetToken(token);

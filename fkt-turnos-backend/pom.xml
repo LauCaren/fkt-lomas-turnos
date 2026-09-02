@@ -176,6 +176,19 @@
           </excludes>
         </configuration>
       </plugin>
+      <!-- No atado a ninguna fase del build (ni siquiera "verify") a propósito: correrlo en
+           cada "mvn test" local frenaría el ciclo de desarrollo. Se invoca explícitamente
+           en el CI (job "backend", "mvnw spotbugs:check") — ver .github/workflows/ci.yml. -->
+      <plugin>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+        <version>4.8.6.4</version>
+        <configuration>
+          <effort>Default</effort>
+          <threshold>Medium</threshold>
+          <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 </project>

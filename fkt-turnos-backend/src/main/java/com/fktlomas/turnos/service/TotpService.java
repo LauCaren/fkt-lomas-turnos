@@ -19,10 +19,13 @@ public class TotpService {
     private static final int PERIODO_SEGUNDOS = 30;
     private static final int DIGITOS = 6;
     private static final int VENTANA_TOLERANCIA = 1;
+    // Una sola instancia reusada: SecureRandom es thread-safe y crear una nueva por llamada
+    // tiene un costo de inicialización/sembrado innecesario.
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     public String generarSecreto() {
         byte[] bytes = new byte[SECRET_BYTES];
-        new SecureRandom().nextBytes(bytes);
+        RANDOM.nextBytes(bytes);
         return base32Encode(bytes);
     }
 
