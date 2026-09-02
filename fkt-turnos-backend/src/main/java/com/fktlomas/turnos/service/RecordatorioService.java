@@ -17,6 +17,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -42,6 +43,11 @@ public class RecordatorioService {
     private static final ZoneId ZONA_CLINICA = ZoneId.of("America/Argentina/Buenos_Aires");
     private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final DateTimeFormatter FORMATO_HORA = DateTimeFormatter.ofPattern("HH:mm");
+    // Este job corre cada pocos minutos (app.recordatorios.intervalo-minutos); sin este
+    // enfriamiento, una falla persistente (ej. la fila de configuración borrada, la base
+    // caída) le mandaría un mail nuevo al admin en cada corrida en vez de uno solo por hora.
+    private static final Duration ENFRIAMIENTO_ALERTA_FALLO = Duration.ofHours(1);
+    private volatile Instant ultimaAlertaFallo;
 
     private final TurnoRepository turnoRepository;
     private final RecordatorioRepository recordatorioRepository;
@@ -55,30 +61,50 @@ public class RecordatorioService {
 
     @Scheduled(fixedDelayString = "#{${app.recordatorios.intervalo-minutos} * 60000}")
     public void procesarPendientes() {
-        ConfiguracionRecordatorios config = obtenerConfiguracionEntidad();
-        ZonedDateTime ahora = ZonedDateTime.now(ZONA_CLINICA);
-        ZonedDateTime limite = ahora.plusHours(config.getHorasAnticipacion());
+        // Los fallos de un recordatorio puntual (Twilio/SMTP caído, etc.) ya los maneja
+        // intentarEnvio() por turno, marcando el Recordatorio como FALLIDO con reintento
+        // manual desde el panel — este try/catch es para lo que puede tirar el método entero
+        // antes de llegar ahí (ej. falta la fila de configuración, la base no responde), que
+        // si no se avisa, deja de correr en silencio hasta que un paciente falta a un turno.
+        try {
+            ConfiguracionRecordatorios config = obtenerConfiguracionEntidad();
+            ZonedDateTime ahora = ZonedDateTime.now(ZONA_CLINICA);
+            ZonedDateTime limite = ahora.plusHours(config.getHorasAnticipacion());
 
-        List<Turno> candidatos = turnoRepository.findReservadosEntreFechas(ahora.toLocalDate(), limite.toLocalDate());
+            List<Turno> candidatos = turnoRepository.findReservadosEntreFechas(ahora.toLocalDate(), limite.toLocalDate());
 
-        int procesados = 0;
-        for (Turno turno : candidatos) {
-            ZonedDateTime fechaHoraTurno = ZonedDateTime.of(turno.getFecha(), turno.getHoraInicio(), ZONA_CLINICA);
-            if (fechaHoraTurno.isBefore(ahora) || fechaHoraTurno.isAfter(limite)) {
-                continue;
+            int procesados = 0;
+            for (Turno turno : candidatos) {
+                ZonedDateTime fechaHoraTurno = ZonedDateTime.of(turno.getFecha(), turno.getHoraInicio(), ZONA_CLINICA);
+                if (fechaHoraTurno.isBefore(ahora) || fechaHoraTurno.isAfter(limite)) {
+                    continue;
+                }
+
+                Recordatorio recordatorio = recordatorioRepository.findByTurnoId(turno.getId())
+                        .orElseGet(() -> recordatorioRepository.save(
+                                new Recordatorio(turno, turno.getPaciente().getCanalNotificacionPreferido())));
+
+                if (recordatorio.getEstado() != EstadoRecordatorio.PENDIENTE) {
+                    continue;
+                }
+                intentarEnvio(recordatorio, config.getPlantillaMensaje());
+                procesados++;
             }
-
-            Recordatorio recordatorio = recordatorioRepository.findByTurnoId(turno.getId())
-                    .orElseGet(() -> recordatorioRepository.save(
-                            new Recordatorio(turno, turno.getPaciente().getCanalNotificacionPreferido())));
-
-            if (recordatorio.getEstado() != EstadoRecordatorio.PENDIENTE) {
-                continue;
-            }
-            intentarEnvio(recordatorio, config.getPlantillaMensaje());
-            procesados++;
+            log.info("Recordatorios procesados en esta corrida: {}", procesados);
+        } catch (Exception e) {
+            log.error("El job de recordatorios falló y no procesó nada en esta corrida", e);
+            alertarFalloSiCorresponde(e);
         }
-        log.info("Recordatorios procesados en esta corrida: {}", procesados);
+    }
+
+    private void alertarFalloSiCorresponde(Exception causa) {
+        Instant ahora = Instant.now();
+        Instant ultima = ultimaAlertaFallo;
+        if (ultima != null && Duration.between(ultima, ahora).compareTo(ENFRIAMIENTO_ALERTA_FALLO) < 0) {
+            return;
+        }
+        ultimaAlertaFallo = ahora;
+        emailService.notificarFalloJobRecordatorios(causa.getMessage());
     }
 
     /** Reintento manual desde el panel — corre aunque el recordatorio ya haya llegado a FALLIDO (el tope de intentos solo frena los reintentos automáticos). */

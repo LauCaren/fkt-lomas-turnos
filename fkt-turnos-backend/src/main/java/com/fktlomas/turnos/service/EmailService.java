@@ -162,6 +162,27 @@ public class EmailService {
     }
 
     /**
+     * Si procesarPendientes() (RecordatorioService) falla antes de llegar a mandar un solo
+     * recordatorio — falta la fila de configuración, la base no responde, etc. — el job
+     * simplemente deja de correr en silencio hasta que un paciente falta a un turno porque
+     * nunca le llegó el aviso. RecordatorioService enfría este envío a como mucho uno por
+     * hora, para no inundar al admin si la falla persiste corrida tras corrida.
+     */
+    public void notificarFalloJobRecordatorios(String motivo) {
+        String asunto = "El job de recordatorios de turno falló — FKT Lomas";
+        String cuerpo = """
+                El job automático que envía los recordatorios de turno (email/WhatsApp) falló
+                y no procesó nada en esta corrida.
+
+                Motivo: %s
+
+                Mientras no se resuelva, los pacientes con turno próximo no van a recibir
+                recordatorio. Revisá los logs del backend para más detalle.
+                """.formatted(motivo);
+        enviar(adminNotifyEmail, asunto, cuerpo);
+    }
+
+    /**
      * A diferencia de los métodos de arriba (@Async, no le importa a nadie el
      * resultado), este es sincrónico y tira excepción si falla: lo usa
      * RecordatorioService, que necesita saber en el momento si el envío
