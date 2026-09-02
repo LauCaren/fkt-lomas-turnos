@@ -5,8 +5,12 @@ import com.fktlomas.turnos.domain.Postulacion;
 import com.fktlomas.turnos.domain.Usuario;
 
 import jakarta.mail.internet.MimeMessage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +26,15 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class EmailService {
 
+    private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter FORMATO_HORA = DateTimeFormatter.ofPattern("HH:mm");
+
+    // Plantillas HTML (diseño de mail de FKT Lomas) leídas una sola vez del classpath —
+    // ver src/main/resources/email-templates/. Placeholders: {paciente} {profesional}
+    // {especialidad} {fecha} {hora} {token} {frontendUrl}.
+    private static final String PLANTILLA_CONFIRMACION_HTML = leerPlantilla("confirmacion-turno.html");
+    private static final String PLANTILLA_RECORDATORIO_HTML = leerPlantilla("recordatorio-turno.html");
+
     private final JavaMailSender mailSender;
 
     @Value("${app.mail.enabled}")
@@ -33,24 +46,64 @@ public class EmailService {
     @Value("${app.admin.notify-email}")
     private String adminNotifyEmail;
 
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
+
     @Async
     public void enviarConfirmacionTurno(Usuario paciente, String medicoNombre, String especialidadNombre,
                                          LocalDate fecha, LocalTime horaInicio, LocalTime horaFin) {
-        String asunto = "Confirmación de turno — FKT Lomas";
-        String cuerpo = """
-                Hola %s,
+        String html = renderizarConfirmacionHtml(paciente.getNombreCompleto(), medicoNombre, especialidadNombre, fecha, horaInicio);
+        enviarHtml(paciente.getEmail(), "Turno confirmado — FKT Lomas", html);
+    }
 
-                Tu turno fue reservado con éxito:
-                Médico: %s
-                Especialidad: %s
-                Fecha: %s
-                Horario: %s a %s
+    /**
+     * Igual que {@link #enviarConfirmacionTurno}, pero sincrónico y tira excepción si falla —
+     * lo usa NotificacionTurnoService cuando el paciente eligió email como canal preferido,
+     * para poder loguear el fallo puntual sin afectar la reserva en sí.
+     */
+    public void enviarConfirmacionTurnoHtmlSync(Usuario paciente, String medicoNombre, String especialidadNombre,
+                                                 LocalDate fecha, LocalTime horaInicio, LocalTime horaFin) {
+        String html = renderizarConfirmacionHtml(paciente.getNombreCompleto(), medicoNombre, especialidadNombre, fecha, horaInicio);
+        enviarHtmlSync(paciente.getEmail(), "Turno confirmado — FKT Lomas", html);
+    }
 
-                Si necesitás cancelarlo, podés hacerlo desde tu cuenta.
+    /** Sincrónico y tira excepción si falla — lo usa RecordatorioService, que necesita saber si el envío funcionó para marcar el Recordatorio como ENVIADO o FALLIDO. */
+    public void enviarRecordatorioTurnoHtmlSync(String destinatario, String paciente, String profesional, String especialidad,
+                                                 LocalDate fecha, LocalTime horaInicio, String token) {
+        String html = PLANTILLA_RECORDATORIO_HTML
+                .replace("{paciente}", escapeHtml(paciente))
+                .replace("{profesional}", escapeHtml(profesional))
+                .replace("{especialidad}", escapeHtml(especialidad))
+                .replace("{fecha}", fecha.format(FORMATO_FECHA))
+                .replace("{hora}", horaInicio.format(FORMATO_HORA))
+                .replace("{token}", token)
+                .replace("{frontendUrl}", frontendUrl);
+        enviarHtmlSync(destinatario, "Recordatorio de turno — FKT Lomas", html);
+    }
 
-                FKT Lomas
-                """.formatted(paciente.getNombreCompleto(), medicoNombre, especialidadNombre, fecha, horaInicio, horaFin);
-        enviar(paciente.getEmail(), asunto, cuerpo);
+    private String renderizarConfirmacionHtml(String paciente, String profesional, String especialidad, LocalDate fecha, LocalTime horaInicio) {
+        return PLANTILLA_CONFIRMACION_HTML
+                .replace("{paciente}", escapeHtml(paciente))
+                .replace("{profesional}", escapeHtml(profesional))
+                .replace("{especialidad}", escapeHtml(especialidad))
+                .replace("{fecha}", fecha.format(FORMATO_FECHA))
+                .replace("{hora}", horaInicio.format(FORMATO_HORA))
+                .replace("{frontendUrl}", frontendUrl);
+    }
+
+    private static String escapeHtml(String s) {
+        return s == null ? "" : s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+    }
+
+    private static String leerPlantilla(String nombre) {
+        try (InputStream in = EmailService.class.getResourceAsStream("/email-templates/" + nombre)) {
+            if (in == null) {
+                throw new IllegalStateException("No se encontró la plantilla de email: " + nombre);
+            }
+            return new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new IllegalStateException("Error leyendo la plantilla de email: " + nombre, e);
+        }
     }
 
     @Async
@@ -238,6 +291,41 @@ public class EmailService {
             mailSender.send(message);
         } catch (Exception e) {
             log.error("No se pudo enviar el email a {}: {}", to, e.getMessage());
+        }
+    }
+
+    private void enviarHtml(String to, String asunto, String html) {
+        if (!mailEnabled) {
+            log.info("Envío de email deshabilitado (app.mail.enabled=false). Destinatario: {}, asunto: {}", to, asunto);
+            return;
+        }
+        try {
+            MimeMessage mensaje = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mensaje, "UTF-8");
+            helper.setFrom(from);
+            helper.setTo(to);
+            helper.setSubject(asunto);
+            helper.setText(html, true);
+            mailSender.send(mensaje);
+        } catch (Exception e) {
+            log.error("No se pudo enviar el email HTML a {}: {}", to, e.getMessage());
+        }
+    }
+
+    private void enviarHtmlSync(String to, String asunto, String html) {
+        if (!mailEnabled) {
+            throw new IllegalStateException("El canal Email está deshabilitado (app.mail.enabled=false)");
+        }
+        try {
+            MimeMessage mensaje = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mensaje, "UTF-8");
+            helper.setFrom(from);
+            helper.setTo(to);
+            helper.setSubject(asunto);
+            helper.setText(html, true);
+            mailSender.send(mensaje);
+        } catch (Exception e) {
+            throw new IllegalStateException("Error enviando email a " + to + ": " + e.getMessage(), e);
         }
     }
 }

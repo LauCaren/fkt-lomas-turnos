@@ -26,20 +26,29 @@ public class NotificacionTurnoService {
     @Async
     public void confirmarReserva(Usuario paciente, String medicoNombre, String especialidadNombre,
                                   LocalDate fecha, LocalTime horaInicio, LocalTime horaFin) {
-        String texto = """
-                Hola %s,
+        try {
+            switch (paciente.getCanalNotificacionPreferido()) {
+                case EMAIL -> emailService.enviarConfirmacionTurnoHtmlSync(paciente, medicoNombre, especialidadNombre, fecha, horaInicio, horaFin);
+                case WHATSAPP -> {
+                    String texto = """
+                            Hola %s,
 
-                Tu turno fue reservado con éxito:
-                Médico: %s
-                Especialidad: %s
-                Fecha: %s
-                Horario: %s a %s
+                            Tu turno fue reservado con éxito:
+                            Médico: %s
+                            Especialidad: %s
+                            Fecha: %s
+                            Horario: %s a %s
 
-                Si necesitás cancelarlo, podés hacerlo desde tu cuenta.
+                            Si necesitás cancelarlo, podés hacerlo desde tu cuenta.
 
-                FKT Lomas
-                """.formatted(paciente.getNombreCompleto(), medicoNombre, especialidadNombre, fecha, horaInicio, horaFin);
-        enviarSegunPreferencia(paciente, "Confirmación de turno — FKT Lomas", texto);
+                            FKT Lomas
+                            """.formatted(paciente.getNombreCompleto(), medicoNombre, especialidadNombre, fecha, horaInicio, horaFin);
+                    whatsAppService.enviar(paciente.getTelefono(), texto);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("No se pudo notificar la reserva a {} por {}: {}", paciente.getEmail(), paciente.getCanalNotificacionPreferido(), e.getMessage());
+        }
 
         emailService.notificarNuevaReservaOnline(paciente, medicoNombre, especialidadNombre, fecha, horaInicio, horaFin);
     }

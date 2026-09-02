@@ -172,8 +172,17 @@ public class RecordatorioService {
                 turno.setTokenConfirmacion(UUID.randomUUID().toString());
                 turno = turnoRepository.save(turno);
             }
-            String texto = renderizarPlantilla(plantilla, turno);
-            enviarPorCanal(recordatorio.getCanal(), turno.getPaciente(), "Recordatorio de turno — FKT Lomas", texto);
+            Usuario paciente = turno.getPaciente();
+            switch (recordatorio.getCanal()) {
+                // El email usa el diseño HTML de la clínica con copy fijo — la plantilla editable
+                // por el admin (`plantilla`) no tiene dónde insertarse en ese layout, así que solo
+                // se usa para WhatsApp, que sigue siendo texto plano.
+                case EMAIL -> emailService.enviarRecordatorioTurnoHtmlSync(
+                        paciente.getEmail(), paciente.getNombreCompleto(),
+                        turno.getMedico().getNombreCompleto(), turno.getMedico().getEspecialidad().getNombre(),
+                        turno.getFecha(), turno.getHoraInicio(), turno.getTokenConfirmacion());
+                case WHATSAPP -> whatsAppService.enviar(paciente.getTelefono(), renderizarPlantilla(plantilla, turno));
+            }
 
             recordatorio.setEstado(EstadoRecordatorio.ENVIADO);
             recordatorio.setFechaEnvio(Instant.now());
