@@ -58,6 +58,10 @@ app:
     bootstrap-email: ${ADMIN_BOOTSTRAP_EMAIL:fernando@fktlomas.com}
     bootstrap-password: ${ADMIN_BOOTSTRAP_PASSWORD:cambiar-esta-clave}
     notify-email: ${ADMIN_NOTIFY_EMAIL:fernando@fktlomas.com}
+  demo-data:
+    # Carga pacientes/turnos/caja/etc de ejemplo al arrancar (ver DemoDataSeeder) — SOLO para
+    # desarrollo local, nunca activar en producción. Apagado por defecto a propósito.
+    enabled: ${DEMO_DATA_ENABLED:false}
   mail:
     from: ${MAIL_FROM:no-reply@fktlomas.com}
     enabled: ${MAIL_ENABLED:false}
