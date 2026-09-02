@@ -30,7 +30,6 @@ import java.util.*;
 @RequiredArgsConstructor
 public class KinesiologiaService {
 
-    private static final String DOMINIO_EMAIL_SINTETICO = "@sin-email.fktlomas.local";
     private static final long TAMANO_MAXIMO_BYTES = 5L * 1024 * 1024;
     private static final int MAX_SESIONES = 60;
     /** Tope de semanas a explorar buscando huecos libres antes de darse por vencido con lo que se pudo generar. */
@@ -137,7 +136,7 @@ public class KinesiologiaService {
     }
 
     private Usuario crearPacienteTelefonico(String dni, String nombreCompleto, String telefono, String obraSocial, String email) {
-        String emailEfectivo = (email != null && !email.isBlank()) ? email : dni + DOMINIO_EMAIL_SINTETICO;
+        String emailEfectivo = (email != null && !email.isBlank()) ? email : dni + Usuario.DOMINIO_EMAIL_SINTETICO;
         if (usuarioRepository.existsByEmail(emailEfectivo)) {
             throw new ConflictoDeDatosException("Ya existe un paciente registrado con ese email");
         }

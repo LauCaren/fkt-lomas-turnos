@@ -5,6 +5,7 @@ import com.fktlomas.turnos.dto.ConfiguracionRecordatoriosDto;
 import com.fktlomas.turnos.dto.PacienteBusquedaDto;
 import com.fktlomas.turnos.dto.RecordatorioDto;
 import com.fktlomas.turnos.dto.admin.ConfiguracionRecordatoriosRequest;
+import com.fktlomas.turnos.dto.admin.MensajeMasivoResponse;
 import com.fktlomas.turnos.exception.RecursoNoEncontradoException;
 import com.fktlomas.turnos.repository.ConfiguracionRecordatoriosRepository;
 import com.fktlomas.turnos.repository.RecordatorioRepository;
@@ -19,11 +20,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Job de recordatorios de turno. A propósito NO envuelve todo procesarPendientes()
@@ -40,6 +45,7 @@ public class RecordatorioService {
 
     private static final int MAX_INTENTOS = 3;
     private static final int MAX_LARGO_ERROR = 500;
+    private static final int MAX_DIAS_MENSAJE_MASIVO = 60;
     private static final ZoneId ZONA_CLINICA = ZoneId.of("America/Argentina/Buenos_Aires");
     private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final DateTimeFormatter FORMATO_HORA = DateTimeFormatter.ofPattern("HH:mm");
@@ -156,6 +162,49 @@ public class RecordatorioService {
         enviarPorCanal(canal, paciente, "Mensaje de FKT Lomas", mensaje);
     }
 
+    /** Vista previa de a quién le llegaría un aviso masivo — mismo criterio que {@link #enviarMensajeMasivo}, sin enviar nada. */
+    @Transactional(readOnly = true)
+    public List<PacienteBusquedaDto> pacientesEnRango(LocalDate desde, LocalDate hasta, Long medicoId) {
+        return pacientesConTurnoEnRango(desde, hasta, medicoId).stream().map(PacienteBusquedaDto::de).toList();
+    }
+
+    /**
+     * Aviso libre a todos los pacientes con un turno reservado en un rango de fechas (ej. "cerramos
+     * el feriado tal") — a diferencia de {@link #enviarMensajeManual}, no es a un paciente puntual.
+     * Cada paciente recibe el mensaje por su canal preferido; un paciente con varios turnos en el
+     * rango lo recibe una sola vez. Best-effort: si falla el envío a un paciente puntual, se loguea
+     * y se sigue con el resto — no tiene sentido que uno solo tire abajo todo el envío.
+     */
+    @Transactional(readOnly = true)
+    public MensajeMasivoResponse enviarMensajeMasivo(LocalDate desde, LocalDate hasta, Long medicoId, String mensaje) {
+        if (hasta.isBefore(desde)) {
+            throw new IllegalArgumentException("La fecha 'hasta' debe ser posterior a 'desde'");
+        }
+        if (desde.plusDays(MAX_DIAS_MENSAJE_MASIVO).isBefore(hasta)) {
+            throw new IllegalArgumentException("El rango no puede superar los " + MAX_DIAS_MENSAJE_MASIVO + " días");
+        }
+        int enviados = 0;
+        for (Usuario paciente : pacientesConTurnoEnRango(desde, hasta, medicoId)) {
+            try {
+                enviarPorCanal(paciente.getCanalNotificacionPreferido(), paciente, "Aviso de FKT Lomas", mensaje);
+                enviados++;
+            } catch (Exception e) {
+                log.warn("No se pudo enviar el aviso masivo a {} ({}): {}", paciente.getNombreCompleto(), paciente.getEmail(), e.getMessage());
+            }
+        }
+        return new MensajeMasivoResponse(enviados);
+    }
+
+    private List<Usuario> pacientesConTurnoEnRango(LocalDate desde, LocalDate hasta, Long medicoId) {
+        return turnoRepository.findReservadosEntreFechas(desde, hasta).stream()
+                .filter(t -> medicoId == null || t.getMedico().getId().equals(medicoId))
+                .map(Turno::getPaciente)
+                .collect(Collectors.toMap(Usuario::getId, p -> p, (a, b) -> a, LinkedHashMap::new))
+                .values().stream()
+                .sorted(Comparator.comparing(Usuario::getNombreCompleto))
+                .toList();
+    }
+
     private Usuario obtenerPaciente(Long pacienteId) {
         Usuario paciente = usuarioRepository.findById(pacienteId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Paciente no encontrado"));
@@ -172,18 +221,8 @@ public class RecordatorioService {
                 turno.setTokenConfirmacion(UUID.randomUUID().toString());
                 turno = turnoRepository.save(turno);
             }
-            Usuario paciente = turno.getPaciente();
-            switch (recordatorio.getCanal()) {
-                // El email usa el diseño HTML de la clínica con copy fijo — la plantilla editable
-                // por el admin (`plantilla`) no tiene dónde insertarse en ese layout, así que solo
-                // se usa para WhatsApp, que sigue siendo texto plano.
-                case EMAIL -> emailService.enviarRecordatorioTurnoHtmlSync(
-                        paciente.getEmail(), paciente.getNombreCompleto(),
-                        turno.getMedico().getNombreCompleto(), turno.getMedico().getEspecialidad().getNombre(),
-                        turno.getFecha(), turno.getHoraInicio(), turno.getTokenConfirmacion());
-                case WHATSAPP -> whatsAppService.enviar(paciente.getTelefono(), renderizarPlantilla(plantilla, turno));
-            }
-
+            CanalNotificacion canalUsado = enviarRecordatorioConFallback(recordatorio.getCanal(), turno, plantilla);
+            recordatorio.setCanal(canalUsado);
             recordatorio.setEstado(EstadoRecordatorio.ENVIADO);
             recordatorio.setFechaEnvio(Instant.now());
             recordatorio.setErrorMensaje(null);
@@ -196,6 +235,43 @@ public class RecordatorioService {
             log.warn("Fallo al enviar recordatorio del turno {}: {}", turno.getId(), e.getMessage());
         }
         recordatorioRepository.save(recordatorio);
+    }
+
+    /**
+     * Si falla el canal preferido, reintenta una vez por el otro canal antes de rendirse —
+     * solo si el paciente tiene un dato de contacto real para ese canal alternativo. Devuelve
+     * el canal que efectivamente se usó, para que quede reflejado en el historial.
+     */
+    private CanalNotificacion enviarRecordatorioConFallback(CanalNotificacion preferido, Turno turno, String plantilla) {
+        try {
+            enviarRecordatorioPorCanal(preferido, turno, plantilla);
+            return preferido;
+        } catch (Exception fallaOriginal) {
+            Usuario paciente = turno.getPaciente();
+            CanalNotificacion alternativo = preferido == CanalNotificacion.EMAIL ? CanalNotificacion.WHATSAPP : CanalNotificacion.EMAIL;
+            boolean tieneContactoAlternativo = alternativo == CanalNotificacion.EMAIL ? paciente.tieneEmailReal() : paciente.tieneTelefono();
+            if (!tieneContactoAlternativo) {
+                throw fallaOriginal;
+            }
+            log.warn("Fallo el recordatorio del turno {} por {} ({}), reintentando por {}",
+                    turno.getId(), preferido, fallaOriginal.getMessage(), alternativo);
+            enviarRecordatorioPorCanal(alternativo, turno, plantilla);
+            return alternativo;
+        }
+    }
+
+    private void enviarRecordatorioPorCanal(CanalNotificacion canal, Turno turno, String plantilla) {
+        Usuario paciente = turno.getPaciente();
+        switch (canal) {
+            // El email usa el diseño HTML de la clínica con copy fijo — la plantilla editable
+            // por el admin (`plantilla`) no tiene dónde insertarse en ese layout, así que solo
+            // se usa para WhatsApp, que sigue siendo texto plano.
+            case EMAIL -> emailService.enviarRecordatorioTurnoHtmlSync(
+                    paciente.getEmail(), paciente.getNombreCompleto(),
+                    turno.getMedico().getNombreCompleto(), turno.getMedico().getEspecialidad().getNombre(),
+                    turno.getFecha(), turno.getHoraInicio(), turno.getTokenConfirmacion());
+            case WHATSAPP -> whatsAppService.enviar(paciente.getTelefono(), renderizarPlantilla(plantilla, turno));
+        }
     }
 
     private void enviarPorCanal(CanalNotificacion canal, Usuario paciente, String asunto, String texto) {

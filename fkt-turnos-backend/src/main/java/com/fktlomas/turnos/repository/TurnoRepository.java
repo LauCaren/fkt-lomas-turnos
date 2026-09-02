@@ -18,6 +18,21 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
 
     List<Turno> findByMedicoIdAndFechaAndEstadoOrderByHoraInicioAsc(Long medicoId, LocalDate fecha, EstadoTurno estado);
 
+    /**
+     * Próximas fechas (a partir de, sin incluir, :desde) en las que ese médico tiene al menos
+     * un turno DISPONIBLE — para sugerirle al paciente el próximo día con lugar cuando la fecha
+     * que eligió no tiene horarios. Pageable acota cuántas fechas devolver (ver TurnoService).
+     */
+    @Query("""
+            select t.fecha from Turno t
+            where t.medico.id = :medicoId
+            and t.estado = com.fktlomas.turnos.domain.EstadoTurno.DISPONIBLE
+            and t.fecha > :desde
+            group by t.fecha
+            order by t.fecha asc
+            """)
+    List<LocalDate> proximasFechasConDisponibilidad(@Param("medicoId") Long medicoId, @Param("desde") LocalDate desde, Pageable pageable);
+
     List<Turno> findByPacienteIdOrderByFechaDescHoraInicioDesc(Long pacienteId);
 
     boolean existsByMedicoIdAndFechaAndHoraInicio(Long medicoId, LocalDate fecha, java.time.LocalTime horaInicio);

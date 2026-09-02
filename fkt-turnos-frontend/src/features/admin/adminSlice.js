@@ -316,6 +316,33 @@ export const enviarMensajeManual = createAsyncThunk('admin/enviarMensajeManual',
   }
 });
 
+export const fetchPacientesEnRango = createAsyncThunk('admin/fetchPacientesEnRango', async ({ desde, hasta, medicoId }, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/admin/recordatorios/pacientes-en-rango', { params: { desde, hasta, medicoId: medicoId || undefined } });
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
+export const enviarMensajeMasivo = createAsyncThunk('admin/enviarMensajeMasivo', async (payload, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.post('/api/admin/recordatorios/mensaje-masivo', payload);
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudo enviar el aviso'));
+  }
+});
+
+export const fetchTendenciaAdmin = createAsyncThunk('admin/fetchTendencia', async (dias, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/admin/resumen/tendencia', { params: { dias } });
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
 const adminSlice = createSlice({
   name: 'admin',
   initialState: {
@@ -335,6 +362,9 @@ const adminSlice = createSlice({
     recordatorios: [],
     configuracionRecordatorios: null,
     resultadosBusquedaPacientes: [],
+    pacientesEnRango: [],
+    pacientesEnRangoCargando: false,
+    tendencia: [],
     error: null,
     mensajeExito: null,
   },
@@ -452,7 +482,17 @@ const adminSlice = createSlice({
       })
       .addCase(actualizarCanalPreferido.rejected, (state, action) => { state.error = action.payload; })
       .addCase(enviarMensajeManual.fulfilled, (state) => { state.mensajeExito = 'Mensaje enviado correctamente'; })
-      .addCase(enviarMensajeManual.rejected, (state, action) => { state.error = action.payload; });
+      .addCase(enviarMensajeManual.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(fetchPacientesEnRango.pending, (state) => { state.pacientesEnRangoCargando = true; })
+      .addCase(fetchPacientesEnRango.fulfilled, (state, action) => { state.pacientesEnRango = action.payload; state.pacientesEnRangoCargando = false; })
+      .addCase(fetchPacientesEnRango.rejected, (state, action) => { state.error = action.payload; state.pacientesEnRangoCargando = false; })
+      .addCase(enviarMensajeMasivo.fulfilled, (state, action) => {
+        state.mensajeExito = `Aviso enviado a ${action.payload.enviados} paciente${action.payload.enviados === 1 ? '' : 's'}`;
+        state.pacientesEnRango = [];
+      })
+      .addCase(enviarMensajeMasivo.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(fetchTendenciaAdmin.fulfilled, (state, action) => { state.tendencia = action.payload; })
+      .addCase(fetchTendenciaAdmin.rejected, (state, action) => { state.error = action.payload; });
   },
 });
 

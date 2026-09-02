@@ -37,6 +37,18 @@ export const fetchTurnosDisponibles = createAsyncThunk(
   }
 );
 
+export const fetchProximaDisponibilidad = createAsyncThunk(
+  'turnos/fetchProximaDisponibilidad',
+  async ({ medicoId, desde }, { rejectWithValue }) => {
+    try {
+      const { data } = await axiosClient.get(`/api/medicos/${medicoId}/proxima-disponibilidad`, { params: { desde } });
+      return data;
+    } catch (error) {
+      return rejectWithValue(mensajeDeError(error));
+    }
+  }
+);
+
 export const reservarTurno = createAsyncThunk(
   'turnos/reservarTurno',
   async ({ turnoId, motivoConsulta }, { rejectWithValue }) => {
@@ -116,6 +128,7 @@ const turnosSlice = createSlice({
     medicos: [],
     disponibles: [],
     disponiblesRequestId: null,
+    proximaDisponibilidad: [],
     misTurnos: [],
     status: 'idle',
     error: null,
@@ -130,6 +143,7 @@ const turnosSlice = createSlice({
     limpiarDisponibles(state) {
       state.disponibles = [];
       state.miAnotacionListaEspera = null;
+      state.proximaDisponibilidad = [];
     },
   },
   extraReducers: (builder) => {
@@ -167,6 +181,7 @@ const turnosSlice = createSlice({
       .addCase(cancelarTurno.fulfilled, (state, action) => {
         state.misTurnos = state.misTurnos.map((t) => t.id === action.payload ? { ...t, estado: 'CANCELADO' } : t);
       })
+      .addCase(fetchProximaDisponibilidad.fulfilled, (state, action) => { state.proximaDisponibilidad = action.payload; })
       .addCase(fetchMiAnotacionListaEspera.fulfilled, (state, action) => { state.miAnotacionListaEspera = action.payload; })
       .addCase(anotarseListaEspera.fulfilled, (state, action) => { state.miAnotacionListaEspera = action.payload; })
       .addCase(darseDeBajaListaEspera.fulfilled, (state) => { state.miAnotacionListaEspera = null; });

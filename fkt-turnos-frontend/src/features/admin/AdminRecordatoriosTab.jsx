@@ -3,7 +3,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchRecordatorios, reenviarRecordatorio, fetchConfiguracionRecordatorios,
   actualizarConfiguracionRecordatorios, buscarPacientes, actualizarCanalPreferido, enviarMensajeManual,
+  fetchMedicosAdmin, fetchPacientesEnRango, enviarMensajeMasivo,
 } from './adminSlice';
+import { hoyISO } from '../../utils/formato';
 
 function nombreCanal(valor) {
   return CANALES.find((c) => c.value === valor)?.label || valor;
@@ -49,6 +51,10 @@ function ConfiguracionRecordatorios() {
           <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>
             Placeholders disponibles: {'{paciente}'}, {'{profesional}'}, {'{especialidad}'}, {'{fecha}'}, {'{hora}'}
           </span>
+          <div className="alert" style={{ marginTop: 10, background: 'var(--teal-tint)', color: 'var(--teal-dark)', border: '1px solid var(--teal)' }}>
+            Este texto se usa solo para los recordatorios por <strong>WhatsApp</strong>. Los recordatorios por email
+            usan un diseño fijo con la misma información del turno — cambiar este texto no afecta cómo se ven los emails.
+          </div>
         </div>
         <div className="field">
           <label>Con cuántas horas de anticipación avisar</label>
@@ -173,6 +179,97 @@ function MensajePuntual() {
   );
 }
 
+function MensajeMasivo() {
+  const dispatch = useDispatch();
+  const medicos = useSelector((state) => state.admin.medicos);
+  const pacientesEnRango = useSelector((state) => state.admin.pacientesEnRango);
+  const pacientesEnRangoCargando = useSelector((state) => state.admin.pacientesEnRangoCargando);
+  const [desde, setDesde] = useState(hoyISO());
+  const [hasta, setHasta] = useState(hoyISO());
+  const [medicoId, setMedicoId] = useState('');
+  const [mensaje, setMensaje] = useState('');
+  const [vistoPrevia, setVistoPrevia] = useState(false);
+
+  useEffect(() => {
+    if (medicos.length === 0) dispatch(fetchMedicosAdmin());
+  }, [dispatch, medicos.length]);
+
+  function handleVerDestinatarios(e) {
+    e.preventDefault();
+    dispatch(fetchPacientesEnRango({ desde, hasta, medicoId: medicoId || undefined })).unwrap().then(() => {
+      setVistoPrevia(true);
+    }).catch(() => {});
+  }
+
+  function handleEnviar(e) {
+    e.preventDefault();
+    if (!mensaje.trim() || pacientesEnRango.length === 0) return;
+    dispatch(enviarMensajeMasivo({ desde, hasta, medicoId: medicoId || undefined, mensaje: mensaje.trim() })).unwrap().then(() => {
+      setMensaje('');
+      setVistoPrevia(false);
+    }).catch(() => {});
+  }
+
+  return (
+    <div className="card" style={{ marginBottom: 20 }}>
+      <h3 style={{ fontSize: 17, marginBottom: 6 }}>Aviso masivo</h3>
+      <p style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 14 }}>
+        Manda un mensaje a todos los pacientes con un turno reservado en un rango de fechas — por ejemplo, para avisar
+        que el centro cierra un feriado. Cada uno lo recibe por su canal preferido (email o WhatsApp).
+      </p>
+
+      <form onSubmit={handleVerDestinatarios} style={{ display: 'flex', gap: 8, alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: 14 }}>
+        <div className="field" style={{ marginBottom: 0 }}>
+          <label>Desde</label>
+          <input type="date" value={desde} onChange={(e) => { setDesde(e.target.value); setVistoPrevia(false); }} />
+        </div>
+        <div className="field" style={{ marginBottom: 0 }}>
+          <label>Hasta</label>
+          <input type="date" value={hasta} onChange={(e) => { setHasta(e.target.value); setVistoPrevia(false); }} />
+        </div>
+        <div className="field" style={{ marginBottom: 0 }}>
+          <label>Médico (opcional)</label>
+          <select value={medicoId} onChange={(e) => { setMedicoId(e.target.value); setVistoPrevia(false); }}>
+            <option value="">Todos</option>
+            {medicos.map((m) => <option key={m.id} value={m.id}>{m.nombreCompleto}</option>)}
+          </select>
+        </div>
+        <button type="submit" className="btn btn-outline" disabled={pacientesEnRangoCargando}>
+          {pacientesEnRangoCargando ? 'Buscando…' : 'Ver destinatarios'}
+        </button>
+      </form>
+
+      {vistoPrevia && (
+        pacientesEnRango.length === 0 ? (
+          <p style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 14 }}>No hay pacientes con turno reservado en ese rango.</p>
+        ) : (
+          <>
+            <p style={{ fontSize: 13.5, marginBottom: 10 }}>
+              Se va a enviar a <strong>{pacientesEnRango.length}</strong> paciente{pacientesEnRango.length === 1 ? '' : 's'}:{' '}
+              <span style={{ color: 'var(--muted)' }}>{pacientesEnRango.map((p) => p.nombreCompleto).join(', ')}</span>
+            </p>
+            <form onSubmit={handleEnviar}>
+              <div className="field">
+                <label>Mensaje</label>
+                <textarea
+                  rows={3}
+                  maxLength={1600}
+                  value={mensaje}
+                  onChange={(e) => setMensaje(e.target.value)}
+                  style={{ width: '100%', padding: '10px 14px', border: '1.5px solid var(--line)', borderRadius: 6, fontFamily: 'inherit' }}
+                />
+              </div>
+              <button type="submit" className="btn btn-primary">
+                Enviar a {pacientesEnRango.length} paciente{pacientesEnRango.length === 1 ? '' : 's'}
+              </button>
+            </form>
+          </>
+        )
+      )}
+    </div>
+  );
+}
+
 export default function AdminRecordatoriosTab() {
   const dispatch = useDispatch();
   const { recordatorios, error, mensajeExito } = useSelector((state) => state.admin);
@@ -188,6 +285,7 @@ export default function AdminRecordatoriosTab() {
 
       <ConfiguracionRecordatorios />
       <MensajePuntual />
+      <MensajeMasivo />
 
       <h3 style={{ fontSize: 17, marginBottom: 14 }}>Recordatorios</h3>
       {recordatorios.length === 0 && <p style={{ fontSize: 14, color: 'var(--muted)' }}>No hay recordatorios para mostrar todavía.</p>}

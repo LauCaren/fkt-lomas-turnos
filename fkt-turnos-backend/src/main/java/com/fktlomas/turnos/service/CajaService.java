@@ -1,6 +1,7 @@
 package com.fktlomas.turnos.service;
 
 import com.fktlomas.turnos.domain.ConfiguracionCaja;
+import com.fktlomas.turnos.domain.Gasto;
 import com.fktlomas.turnos.domain.Ingreso;
 import com.fktlomas.turnos.domain.Medico;
 import com.fktlomas.turnos.domain.Retiro;
@@ -23,7 +24,10 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -163,5 +167,40 @@ public class CajaService {
                 .toList();
 
         return new CajaResumenDto(ingresosTotal, retirosTotal, gastosTotal, cajaFisica, saldos);
+    }
+
+    private static final int TENDENCIA_DIAS_MAXIMO = 90;
+
+    /** Ingresos/gastos/retiros por día de los últimos "dias" días (incluye hoy) — para el gráfico de tendencia del panel de contador. */
+    @Transactional(readOnly = true)
+    public List<TendenciaCajaDiaDto> tendencia(int dias) {
+        int diasEfectivos = Math.min(Math.max(dias, 1), TENDENCIA_DIAS_MAXIMO);
+        LocalDate hasta = LocalDate.now();
+        LocalDate desde = hasta.minusDays(diasEfectivos - 1L);
+
+        Map<LocalDate, BigDecimal> ingresosPorDia = ingresoRepository.buscar(null, desde, hasta).stream()
+                .filter(i -> !i.isAnulado())
+                .collect(Collectors.groupingBy(Ingreso::getFecha, Collectors.reducing(BigDecimal.ZERO, Ingreso::getMonto, BigDecimal::add)));
+
+        Map<LocalDate, BigDecimal> gastosPorDia = gastoRepository.buscar(null, desde, hasta).stream()
+                .filter(g -> !g.isAnulado())
+                .collect(Collectors.groupingBy(Gasto::getFecha, Collectors.reducing(BigDecimal.ZERO, Gasto::getMonto, BigDecimal::add)));
+
+        Instant desdeInstant = desde.atStartOfDay(ZoneId.systemDefault()).toInstant();
+        Instant hastaInstant = hasta.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant();
+        Map<LocalDate, BigDecimal> retirosPorDia = retiroRepository.buscar(null, desdeInstant, hastaInstant).stream()
+                .filter(r -> !r.isAnulado())
+                .collect(Collectors.groupingBy(
+                        r -> r.getFechaHora().atZone(ZoneId.systemDefault()).toLocalDate(),
+                        Collectors.reducing(BigDecimal.ZERO, Retiro::getMonto, BigDecimal::add)));
+
+        List<TendenciaCajaDiaDto> resultado = new ArrayList<>();
+        for (LocalDate fecha = desde; !fecha.isAfter(hasta); fecha = fecha.plusDays(1)) {
+            resultado.add(new TendenciaCajaDiaDto(fecha,
+                    ingresosPorDia.getOrDefault(fecha, BigDecimal.ZERO),
+                    gastosPorDia.getOrDefault(fecha, BigDecimal.ZERO),
+                    retirosPorDia.getOrDefault(fecha, BigDecimal.ZERO)));
+        }
+        return resultado;
     }
 }

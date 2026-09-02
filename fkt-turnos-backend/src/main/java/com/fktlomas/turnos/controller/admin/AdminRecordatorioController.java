@@ -6,12 +6,16 @@ import com.fktlomas.turnos.dto.RecordatorioDto;
 import com.fktlomas.turnos.dto.admin.CanalPreferidoRequest;
 import com.fktlomas.turnos.dto.admin.ConfiguracionRecordatoriosRequest;
 import com.fktlomas.turnos.dto.admin.MensajeManualRequest;
+import com.fktlomas.turnos.dto.admin.MensajeMasivoRequest;
+import com.fktlomas.turnos.dto.admin.MensajeMasivoResponse;
 import com.fktlomas.turnos.service.RecordatorioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -55,5 +59,18 @@ public class AdminRecordatorioController {
     public ResponseEntity<Void> enviarMensajeManual(@Valid @RequestBody MensajeManualRequest request) {
         recordatorioService.enviarMensajeManual(request.pacienteId(), request.canal(), request.mensaje());
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/pacientes-en-rango")
+    public List<PacienteBusquedaDto> pacientesEnRango(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+            @RequestParam(required = false) Long medicoId) {
+        return recordatorioService.pacientesEnRango(desde, hasta, medicoId);
+    }
+
+    @PostMapping("/mensaje-masivo")
+    public MensajeMasivoResponse enviarMensajeMasivo(@Valid @RequestBody MensajeMasivoRequest request) {
+        return recordatorioService.enviarMensajeMasivo(request.desde(), request.hasta(), request.medicoId(), request.mensaje());
     }
 }

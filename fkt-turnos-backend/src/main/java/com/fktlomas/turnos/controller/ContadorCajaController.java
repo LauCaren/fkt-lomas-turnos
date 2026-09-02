@@ -4,6 +4,7 @@ import com.fktlomas.turnos.dto.caja.CajaResumenDto;
 import com.fktlomas.turnos.dto.caja.GastoDto;
 import com.fktlomas.turnos.dto.caja.IngresoDto;
 import com.fktlomas.turnos.dto.caja.RetiroDto;
+import com.fktlomas.turnos.dto.caja.TendenciaCajaDiaDto;
 import com.fktlomas.turnos.service.CajaService;
 import com.fktlomas.turnos.service.GastoService;
 import lombok.RequiredArgsConstructor;
@@ -50,5 +51,10 @@ public class ContadorCajaController {
                                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
                                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
         return gastoService.listar(categoriaId, desde, hasta);
+    }
+
+    @GetMapping("/tendencia")
+    public List<TendenciaCajaDiaDto> tendencia(@RequestParam(defaultValue = "14") int dias) {
+        return cajaService.tendencia(dias);
     }
 }

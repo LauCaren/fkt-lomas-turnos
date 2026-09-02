@@ -3,13 +3,18 @@ package com.fktlomas.turnos.service;
 import com.fktlomas.turnos.domain.EstadoPlanKinesiologia;
 import com.fktlomas.turnos.dto.TurnoAdminDto;
 import com.fktlomas.turnos.dto.admin.AdminResumenDto;
+import com.fktlomas.turnos.dto.admin.TendenciaDiaDto;
+import com.fktlomas.turnos.dto.caja.IngresoDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,5 +39,31 @@ public class AdminResumenService {
         BigDecimal cajaFisica = cajaService.resumen().cajaFisica();
 
         return new AdminResumenDto(hoy, (int) reservados, (int) disponibles, enEspera, planesPendientes, ingresosHoy, cajaFisica);
+    }
+
+    private static final int TENDENCIA_DIAS_MAXIMO = 90;
+
+    /** Turnos reservados + ingresos por día de los últimos "dias" días (incluye hoy) — para el gráfico de tendencia del panel. */
+    @Transactional(readOnly = true)
+    public List<TendenciaDiaDto> tendencia(int dias) {
+        int diasEfectivos = Math.min(Math.max(dias, 1), TENDENCIA_DIAS_MAXIMO);
+        LocalDate hasta = LocalDate.now();
+        LocalDate desde = hasta.minusDays(diasEfectivos - 1L);
+
+        Map<LocalDate, Long> turnosPorDia = turnoService.agenda(desde, hasta, null, null).stream()
+                .filter(t -> "RESERVADO".equals(t.estado()))
+                .collect(Collectors.groupingBy(TurnoAdminDto::fecha, Collectors.counting()));
+
+        Map<LocalDate, BigDecimal> ingresosPorDia = cajaService.listarIngresos(null, desde, hasta).stream()
+                .filter(i -> !i.anulado())
+                .collect(Collectors.groupingBy(IngresoDto::fecha, Collectors.reducing(BigDecimal.ZERO, IngresoDto::monto, BigDecimal::add)));
+
+        List<TendenciaDiaDto> resultado = new ArrayList<>();
+        for (LocalDate fecha = desde; !fecha.isAfter(hasta); fecha = fecha.plusDays(1)) {
+            resultado.add(new TendenciaDiaDto(fecha,
+                    turnosPorDia.getOrDefault(fecha, 0L).intValue(),
+                    ingresosPorDia.getOrDefault(fecha, BigDecimal.ZERO)));
+        }
+        return resultado;
     }
 }

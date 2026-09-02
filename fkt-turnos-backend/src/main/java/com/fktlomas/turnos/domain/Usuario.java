@@ -15,6 +15,9 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 public class Usuario {
 
+    /** Email sintético asignado a pacientes cargados por teléfono sin email real (ver TurnoService.crearPacienteTelefonico). */
+    public static final String DOMINIO_EMAIL_SINTETICO = "@sin-email.fktlomas.local";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -94,5 +97,13 @@ public class Usuario {
         if (email != null) {
             email = email.trim().toLowerCase();
         }
+    }
+
+    public boolean tieneEmailReal() {
+        return email != null && !email.endsWith(DOMINIO_EMAIL_SINTETICO);
+    }
+
+    public boolean tieneTelefono() {
+        return telefono != null && !telefono.isBlank();
     }
 }

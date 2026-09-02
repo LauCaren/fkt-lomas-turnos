@@ -20,6 +20,7 @@ import com.fktlomas.turnos.repository.TurnoRepository;
 import com.fktlomas.turnos.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -36,7 +37,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TurnoService {
 
-    private static final String DOMINIO_EMAIL_SINTETICO = "@sin-email.fktlomas.local";
     private static final String AUDITORIA_TIPO_TURNO = "TURNO";
 
     private final TurnoRepository turnoRepository;
@@ -73,6 +73,14 @@ public class TurnoService {
     public List<TurnoDto> disponiblesDeMedico(Long medicoId, LocalDate fecha) {
         return turnoRepository.findByMedicoIdAndFechaAndEstadoOrderByHoraInicioAsc(medicoId, fecha, EstadoTurno.DISPONIBLE)
                 .stream().map(TurnoDto::de).toList();
+    }
+
+    private static final int SUGERENCIAS_PROXIMA_DISPONIBILIDAD = 5;
+
+    /** Próximas fechas con lugar para ese médico, a partir de (sin incluir) la fecha dada — para sugerirle otro día al paciente cuando la elegida no tiene horarios. */
+    @Transactional(readOnly = true)
+    public List<LocalDate> proximaDisponibilidad(Long medicoId, LocalDate desde) {
+        return turnoRepository.proximasFechasConDisponibilidad(medicoId, desde, PageRequest.of(0, SUGERENCIAS_PROXIMA_DISPONIBILIDAD));
     }
 
     @Transactional
@@ -207,7 +215,7 @@ public class TurnoService {
 
         Turno actualizado = turnoRepository.findById(turnoId).orElseThrow();
         auditoriaService.registrar(actor, AUDITORIA_TIPO_TURNO, turnoId, "RESERVAR_PARA_PACIENTE", antes, snapshotDe(actualizado));
-        if (paciente.getEmail() != null && !paciente.getEmail().endsWith(DOMINIO_EMAIL_SINTETICO)) {
+        if (paciente.tieneEmailReal()) {
             emailService.enviarConfirmacionTurno(paciente, actualizado.getMedico().getNombreCompleto(),
                     actualizado.getMedico().getEspecialidad().getNombre(), actualizado.getFecha(),
                     actualizado.getHoraInicio(), actualizado.getHoraFin());
@@ -240,7 +248,7 @@ public class TurnoService {
     private Usuario crearPacienteTelefonico(ReservarParaPacienteRequest request) {
         String email = (request.email() != null && !request.email().isBlank())
                 ? request.email()
-                : request.dni() + DOMINIO_EMAIL_SINTETICO;
+                : request.dni() + Usuario.DOMINIO_EMAIL_SINTETICO;
 
         if (usuarioRepository.existsByEmail(email)) {
             throw new ConflictoDeDatosException("Ya existe un paciente registrado con ese email");

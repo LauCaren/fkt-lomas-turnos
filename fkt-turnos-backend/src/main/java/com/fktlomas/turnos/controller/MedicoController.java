@@ -33,6 +33,13 @@ public class MedicoController {
         return turnoService.disponiblesDeMedico(id, fecha);
     }
 
+    /** Próximas fechas con lugar para este médico a partir de "desde" — para sugerir otro día cuando la fecha elegida no tiene horarios. */
+    @GetMapping("/{id}/proxima-disponibilidad")
+    public List<LocalDate> proximaDisponibilidad(@PathVariable Long id,
+                                                  @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde) {
+        return turnoService.proximaDisponibilidad(id, desde);
+    }
+
     /**
      * Público a propósito (bajo /api/medicos/**, ya permitAll en SecurityConfig):
      * la ficha del profesional en el sitio de marketing (equipo.html) necesita

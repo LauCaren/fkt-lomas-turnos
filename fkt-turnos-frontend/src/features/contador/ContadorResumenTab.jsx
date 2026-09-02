@@ -1,15 +1,19 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import StatCard from '../../components/ui/StatCard';
-import { fetchResumenCajaContador } from './contadorSlice';
+import TrendChart from '../../components/ui/TrendChart';
+import { fetchResumenCajaContador, fetchTendenciaContador } from './contadorSlice';
 import EstadoVacio from '../../components/EstadoVacio';
 import { formatMoneda } from '../../utils/formato';
 
 export default function ContadorResumenTab() {
   const dispatch = useDispatch();
-  const { resumen, resumenCargando, error } = useSelector((state) => state.contador);
+  const { resumen, resumenCargando, tendencia, error } = useSelector((state) => state.contador);
 
-  useEffect(() => { dispatch(fetchResumenCajaContador()); }, [dispatch]);
+  useEffect(() => {
+    dispatch(fetchResumenCajaContador());
+    dispatch(fetchTendenciaContador(14));
+  }, [dispatch]);
 
   if (error) return <div className="alert alert-error">{error}</div>;
   if (resumenCargando && !resumen) return <p style={{ color: 'var(--muted)' }}>Cargando…</p>;
@@ -39,6 +43,17 @@ export default function ContadorResumenTab() {
               </span>
             </div>
           ))}
+        </div>
+      )}
+
+      {tendencia.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 28 }}>
+          <div style={{ flex: '1 1 320px' }}>
+            <TrendChart titulo="Ingresos por día (últimos 14 días)" datos={tendencia} valorDe={(d) => d.ingresos} formatValor={formatMoneda} />
+          </div>
+          <div style={{ flex: '1 1 320px' }}>
+            <TrendChart titulo="Gastos por día (últimos 14 días)" datos={tendencia} valorDe={(d) => d.gastos} formatValor={formatMoneda} color="var(--red)" />
+          </div>
         </div>
       )}
     </div>

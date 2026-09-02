@@ -37,6 +37,15 @@ export const fetchGastosContador = createAsyncThunk('contador/fetchGastos', asyn
   }
 });
 
+export const fetchTendenciaContador = createAsyncThunk('contador/fetchTendencia', async (dias, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/contador/caja/tendencia', { params: { dias } });
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
 const contadorSlice = createSlice({
   name: 'contador',
   initialState: {
@@ -48,6 +57,7 @@ const contadorSlice = createSlice({
     retirosCargando: false,
     gastos: [],
     gastosCargando: false,
+    tendencia: [],
     error: null,
   },
   reducers: {
@@ -68,7 +78,9 @@ const contadorSlice = createSlice({
       .addCase(fetchRetirosContador.rejected, (state, action) => { state.error = action.payload; state.retirosCargando = false; })
       .addCase(fetchGastosContador.pending, (state) => { state.gastosCargando = true; })
       .addCase(fetchGastosContador.fulfilled, (state, action) => { state.gastos = action.payload; state.gastosCargando = false; })
-      .addCase(fetchGastosContador.rejected, (state, action) => { state.error = action.payload; state.gastosCargando = false; });
+      .addCase(fetchGastosContador.rejected, (state, action) => { state.error = action.payload; state.gastosCargando = false; })
+      .addCase(fetchTendenciaContador.fulfilled, (state, action) => { state.tendencia = action.payload; })
+      .addCase(fetchTendenciaContador.rejected, (state, action) => { state.error = action.payload; });
   },
 });
 

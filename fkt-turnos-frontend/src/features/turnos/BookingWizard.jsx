@@ -3,11 +3,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   fetchEspecialidades, fetchMedicos, fetchTurnosDisponibles, reservarTurno, cancelarTurno, limpiarReserva, limpiarDisponibles,
-  fetchMiAnotacionListaEspera, anotarseListaEspera, darseDeBajaListaEspera,
+  fetchMiAnotacionListaEspera, anotarseListaEspera, darseDeBajaListaEspera, fetchProximaDisponibilidad,
 } from './turnosSlice';
 import { fetchMiPerfil } from '../cuenta/cuentaSlice';
 import AgregarCalendario from '../../components/AgregarCalendario';
-import { hoyISO } from '../../utils/formato';
+import { hoyISO, formatFechaCorta } from '../../utils/formato';
 
 const WHATSAPP_CONSULTORIO = { numero: '5491123515402', texto: 'Hola, quiero confirmar mi turno con copago IOMA.' };
 
@@ -15,7 +15,7 @@ export default function BookingWizard() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { especialidades, medicos, disponibles, status, error, reservaExitosa, miAnotacionListaEspera } = useSelector((state) => state.turnos);
+  const { especialidades, medicos, disponibles, status, error, reservaExitosa, miAnotacionListaEspera, proximaDisponibilidad } = useSelector((state) => state.turnos);
   const perfil = useSelector((state) => state.cuenta.perfil);
   const [anotandoListaEspera, setAnotandoListaEspera] = useState(false);
 
@@ -70,6 +70,7 @@ export default function BookingWizard() {
   useEffect(() => {
     if (medicoId && fecha && status !== 'loading' && disponibles.length === 0) {
       dispatch(fetchMiAnotacionListaEspera({ medicoId, fecha }));
+      dispatch(fetchProximaDisponibilidad({ medicoId, desde: fecha }));
     }
   }, [medicoId, fecha, status, disponibles.length, dispatch]);
 
@@ -219,6 +220,24 @@ export default function BookingWizard() {
             {status !== 'loading' && disponibles.length === 0 && (
               <>
                 <p style={{ color: 'var(--muted)' }}>No hay horarios disponibles para esa fecha. Probá con otro día.</p>
+                {proximaDisponibilidad.length > 0 && (
+                  <div style={{ marginTop: 8, marginBottom: 12 }}>
+                    <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 6 }}>Próxima disponibilidad:</p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                      {proximaDisponibilidad.map((f) => (
+                        <button
+                          type="button"
+                          key={f}
+                          className="btn btn-outline"
+                          style={{ padding: '8px 16px', fontSize: 13.5 }}
+                          onClick={() => { setFecha(f); setTurnoSeleccionado(null); }}
+                        >
+                          {formatFechaCorta(f)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {miAnotacionListaEspera ? (
                   <p style={{ fontSize: 13.5, color: 'var(--teal-dark)' }}>
                     Ya estás anotado en la lista de espera para este día — te avisamos por si se libera un turno.{' '}
