@@ -50,29 +50,35 @@ export default function CuentaSeguridadTab() {
   }, [dispatch]);
 
   return (
-    <div style={{ maxWidth: 480 }}>
+    <div>
       {error && <div className="alert alert-error" style={{ marginBottom: 20 }}>{error}</div>}
       {mensajeExito && <div className="alert alert-success" style={{ marginBottom: 20 }}>{mensajeExito}</div>}
 
       {!perfil && <p style={{ color: 'var(--muted)' }}>Cargando…</p>}
 
       {perfil && (
-        <>
-          <h2 style={{ fontSize: 18, marginBottom: 16 }}>Cambiar contraseña</h2>
-          <CambiarPassword />
+        <div className="cuenta-grid">
+          <div>
+            <h2 style={{ fontSize: 18, marginBottom: 16 }}>Cambiar contraseña</h2>
+            <CambiarPassword />
+          </div>
 
-          <h2 style={{ fontSize: 18, marginTop: 32, marginBottom: 16 }}>Verificación en dos pasos</h2>
-          <SeccionMfa
-            perfil={perfil}
-            mfaSetup={mfaSetup}
-            onIniciar={() => dispatch(iniciarMfaCuenta())}
-            onActivar={(codigo) => dispatch(activarMfaCuenta(codigo)).unwrap().then(() => dispatch(fetchMiPerfil()))}
-            onDesactivar={(codigo) => dispatch(desactivarMfaCuenta(codigo)).unwrap().then(() => dispatch(fetchMiPerfil()))}
-          />
+          <div>
+            <h2 style={{ fontSize: 18, marginBottom: 16 }}>Verificación en dos pasos</h2>
+            <SeccionMfa
+              perfil={perfil}
+              mfaSetup={mfaSetup}
+              onIniciar={() => dispatch(iniciarMfaCuenta())}
+              onActivar={(codigo) => dispatch(activarMfaCuenta(codigo)).unwrap().then(() => dispatch(fetchMiPerfil()))}
+              onDesactivar={(codigo) => dispatch(desactivarMfaCuenta(codigo)).unwrap().then(() => dispatch(fetchMiPerfil()))}
+            />
+          </div>
 
-          <h2 style={{ fontSize: 18, marginTop: 32, marginBottom: 16 }}>Sesiones activas</h2>
-          <SeccionRevocarSesiones />
-        </>
+          <div>
+            <h2 style={{ fontSize: 18, marginBottom: 16 }}>Sesiones activas</h2>
+            <SeccionRevocarSesiones />
+          </div>
+        </div>
       )}
     </div>
   );

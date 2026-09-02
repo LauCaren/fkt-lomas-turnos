@@ -23,7 +23,7 @@ export default function SeccionRevocarSesiones() {
   }
 
   return (
-    <div className="card" style={{ marginTop: 20 }}>
+    <div className="card">
       <p style={{ fontSize: 14, marginBottom: 12 }}>
         Cierra cualquier sesión abierta con tu cuenta en otros dispositivos o navegadores (y también esta).
         Usalo si compartiste tu contraseña sin querer o dejaste una sesión abierta en un equipo que no es tuyo.

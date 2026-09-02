@@ -17,7 +17,7 @@ export default function SeccionMfa({ perfil, mfaSetup, onIniciar, onActivar, onD
 
   if (perfil.mfaHabilitado) {
     return (
-      <form onSubmit={handleDesactivar} className="card" style={{ marginTop: 20 }}>
+      <form onSubmit={handleDesactivar} className="card">
         <p style={{ fontSize: 14, marginBottom: 12 }}>
           <span className="badge badge-disponible">Activada</span> La verificación en dos pasos está activa en tu cuenta.
         </p>
@@ -32,7 +32,7 @@ export default function SeccionMfa({ perfil, mfaSetup, onIniciar, onActivar, onD
 
   if (mfaSetup) {
     return (
-      <form onSubmit={handleActivar} className="card" style={{ marginTop: 20 }}>
+      <form onSubmit={handleActivar} className="card">
         <p style={{ fontSize: 14, marginBottom: 10 }}>
           1. Abrí Google Authenticator (o cualquier app de códigos TOTP) y agregá una cuenta nueva "manual".<br />
           2. Cargá este código secreto:
@@ -51,7 +51,7 @@ export default function SeccionMfa({ perfil, mfaSetup, onIniciar, onActivar, onD
   }
 
   return (
-    <div className="card" style={{ marginTop: 20 }}>
+    <div className="card">
       <p style={{ fontSize: 14, marginBottom: 14 }}>
         <span className="badge badge-cancelado">Desactivada</span> Agregá un paso extra al iniciar sesión con una app de autenticación (Google Authenticator, Authy, etc.).
       </p>

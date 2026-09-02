@@ -127,6 +127,22 @@ input, select, textarea { font: inherit; }
 }
 .field-error { color: var(--red); font-size: 12.5px; }
 
+/**
+ * Grillas de "Mi cuenta" (paciente/admin/secretaria/médico/contador): cada sección (datos,
+ * contraseña, 2FA, sesiones, etc.) es un ítem que se acomoda solo en columnas — 1 en mobile,
+ * 2+ en desktop — en vez de la pila vertical angosta de siempre que obligaba a scrollear
+ * mucho aunque sobrara ancho de pantalla. auto-fit/minmax hace el cambio de columnas sin
+ * media queries: cada ítem nunca baja de 360px, así que en mobile (viewport < 360+gap) ya
+ * no entra una segunda columna y queda apilado solo, sin animación de layout ni JS.
+ */
+.cuenta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 24px;
+  align-items: start;
+}
+.cuenta-grid > .cuenta-full { grid-column: 1 / -1; }
+
 .password-field { position: relative; }
 .password-field input { width: 100%; padding-right: 42px; }
 .password-toggle {

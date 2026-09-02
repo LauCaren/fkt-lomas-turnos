@@ -27,35 +27,43 @@ export default function AdminCuentaTab() {
   }
 
   return (
-    <div style={{ maxWidth: 420 }}>
-      {error && <div className="alert alert-error">{error}</div>}
-      {mensajeExito && <div className="alert alert-success">{mensajeExito}</div>}
+    <div>
+      {error && <div className="alert alert-error" style={{ marginBottom: 20 }}>{error}</div>}
+      {mensajeExito && <div className="alert alert-success" style={{ marginBottom: 20 }}>{mensajeExito}</div>}
 
-      <h3 style={{ fontSize: 17, marginBottom: 14 }}>Cambiar contraseña</h3>
-      <form onSubmit={handleSubmit} className="card">
-        <div className="field">
-          <label>Contraseña actual</label>
-          <PasswordInput required value={form.passwordActual} onChange={(e) => setForm({ ...form, passwordActual: e.target.value })} />
+      <div className="cuenta-grid">
+        <div>
+          <h3 style={{ fontSize: 17, marginBottom: 14 }}>Cambiar contraseña</h3>
+          <form onSubmit={handleSubmit} className="card">
+            <div className="field">
+              <label>Contraseña actual</label>
+              <PasswordInput required value={form.passwordActual} onChange={(e) => setForm({ ...form, passwordActual: e.target.value })} />
+            </div>
+            <div className="field">
+              <label>Contraseña nueva</label>
+              <PasswordInput required minLength={8} pattern={PATRON_PASSWORD} title={TITULO_PASSWORD} value={form.passwordNueva} onChange={(e) => setForm({ ...form, passwordNueva: e.target.value })} />
+              <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{AYUDA_PASSWORD}</p>
+            </div>
+            <button type="submit" className="btn btn-primary">Actualizar contraseña</button>
+          </form>
         </div>
-        <div className="field">
-          <label>Contraseña nueva</label>
-          <PasswordInput required minLength={8} pattern={PATRON_PASSWORD} title={TITULO_PASSWORD} value={form.passwordNueva} onChange={(e) => setForm({ ...form, passwordNueva: e.target.value })} />
-          <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{AYUDA_PASSWORD}</p>
+
+        <div>
+          <h3 style={{ fontSize: 17, marginBottom: 14 }}>Verificación en dos pasos</h3>
+          <SeccionMfa
+            perfil={perfil}
+            mfaSetup={mfaSetup}
+            onIniciar={() => dispatch(iniciarMfa())}
+            onActivar={(codigo) => dispatch(activarMfa(codigo)).unwrap().then(() => dispatch(fetchMiPerfil()))}
+            onDesactivar={(codigo) => dispatch(desactivarMfa(codigo)).unwrap().then(() => dispatch(fetchMiPerfil()))}
+          />
         </div>
-        <button type="submit" className="btn btn-primary">Actualizar contraseña</button>
-      </form>
 
-      <h3 style={{ fontSize: 17, marginTop: 28, marginBottom: 14 }}>Verificación en dos pasos</h3>
-      <SeccionMfa
-        perfil={perfil}
-        mfaSetup={mfaSetup}
-        onIniciar={() => dispatch(iniciarMfa())}
-        onActivar={(codigo) => dispatch(activarMfa(codigo)).unwrap().then(() => dispatch(fetchMiPerfil()))}
-        onDesactivar={(codigo) => dispatch(desactivarMfa(codigo)).unwrap().then(() => dispatch(fetchMiPerfil()))}
-      />
-
-      <h3 style={{ fontSize: 17, marginTop: 28, marginBottom: 14 }}>Sesiones activas</h3>
-      <SeccionRevocarSesiones />
+        <div>
+          <h3 style={{ fontSize: 17, marginBottom: 14 }}>Sesiones activas</h3>
+          <SeccionRevocarSesiones />
+        </div>
+      </div>
     </div>
   );
 }

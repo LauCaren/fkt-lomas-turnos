@@ -146,6 +146,15 @@ function MiHistoriaClinica() {
   );
 }
 
+function Seccion({ titulo, full, children }) {
+  return (
+    <div className={full ? 'cuenta-full' : undefined}>
+      <h2 style={{ fontSize: 18, marginBottom: 14 }}>{titulo}</h2>
+      {children}
+    </div>
+  );
+}
+
 export default function MiCuentaPage() {
   const dispatch = useDispatch();
   const { perfil, mfaSetup, error, mensajeExito } = useSelector((state) => state.cuenta);
@@ -156,7 +165,7 @@ export default function MiCuentaPage() {
   }, [dispatch]);
 
   return (
-    <div style={{ maxWidth: 480, margin: '0 auto' }}>
+    <div>
       <span className="eyebrow">Mi cuenta</span>
       <h1 style={{ marginTop: 12, fontSize: 30 }}>Tus datos</h1>
 
@@ -166,31 +175,37 @@ export default function MiCuentaPage() {
       {!perfil && <p style={{ color: 'var(--muted)', marginTop: 20 }}>Cargando…</p>}
 
       {perfil && (
-        <>
-          <div style={{ marginTop: 24 }}>
+        <div className="cuenta-grid" style={{ marginTop: 24 }}>
+          <Seccion titulo="Datos personales">
             <DatosPersonales key={perfil.id} perfil={perfil} />
-          </div>
-          <h2 style={{ fontSize: 20, marginTop: 32, marginBottom: 16 }}>Cambiar contraseña</h2>
-          <CambiarPassword />
+          </Seccion>
 
-          <h2 style={{ fontSize: 20, marginTop: 32, marginBottom: 16 }}>Verificación en dos pasos</h2>
-          <SeccionMfa
-            perfil={perfil}
-            mfaSetup={mfaSetup}
-            onIniciar={() => dispatch(iniciarMfaCuenta())}
-            onActivar={(codigo) => dispatch(activarMfaCuenta(codigo)).unwrap().then(() => dispatch(fetchMiPerfil()))}
-            onDesactivar={(codigo) => dispatch(desactivarMfaCuenta(codigo)).unwrap().then(() => dispatch(fetchMiPerfil()))}
-          />
+          <Seccion titulo="Cambiar contraseña">
+            <CambiarPassword />
+          </Seccion>
 
-          <h2 style={{ fontSize: 20, marginTop: 32, marginBottom: 16 }}>Sesiones activas</h2>
-          <SeccionRevocarSesiones />
+          <Seccion titulo="Verificación en dos pasos">
+            <SeccionMfa
+              perfil={perfil}
+              mfaSetup={mfaSetup}
+              onIniciar={() => dispatch(iniciarMfaCuenta())}
+              onActivar={(codigo) => dispatch(activarMfaCuenta(codigo)).unwrap().then(() => dispatch(fetchMiPerfil()))}
+              onDesactivar={(codigo) => dispatch(desactivarMfaCuenta(codigo)).unwrap().then(() => dispatch(fetchMiPerfil()))}
+            />
+          </Seccion>
 
-          <h2 style={{ fontSize: 20, marginTop: 32, marginBottom: 16 }}>Mi historia clínica</h2>
-          <MiHistoriaClinica />
+          <Seccion titulo="Sesiones activas">
+            <SeccionRevocarSesiones />
+          </Seccion>
 
-          <h2 style={{ fontSize: 20, marginTop: 32, marginBottom: 16 }}>Mis datos personales</h2>
-          <SeccionPrivacidad />
-        </>
+          <Seccion titulo="Mi historia clínica" full>
+            <MiHistoriaClinica />
+          </Seccion>
+
+          <Seccion titulo="Mis datos personales" full>
+            <SeccionPrivacidad />
+          </Seccion>
+        </div>
       )}
     </div>
   );
