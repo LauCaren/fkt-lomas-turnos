@@ -22,7 +22,7 @@
     <jjwt.version>0.12.6</jjwt.version>
     <springdoc.version>2.6.0</springdoc.version>
     <aws-sdk.version>2.28.29</aws-sdk.version>
-    <poi.version>5.3.0</poi.version>
+    <poi.version>5.5.1</poi.version>
     <pdfbox.version>3.0.3</pdfbox.version>
   </properties>
 
