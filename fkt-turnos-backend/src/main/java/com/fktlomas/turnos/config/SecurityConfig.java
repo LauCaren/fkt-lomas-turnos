@@ -87,7 +87,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/especialidades/**", "/api/medicos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/turnos/confirmacion").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/contacto", "/api/postulaciones").permitAll()
-                        .requestMatchers("/docs/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        // "/v3/api-docs" (sin barra final, el JSON del OpenAPI en sí) va aparte de
+                        // "/v3/api-docs/**" para que quede explícito que hace falta cubrir ambos.
+                        .requestMatchers("/docs/**", "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/medico/**").hasRole("MEDICO")
