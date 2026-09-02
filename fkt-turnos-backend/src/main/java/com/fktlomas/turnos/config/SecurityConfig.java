@@ -9,6 +9,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -24,6 +25,7 @@ import java.time.Instant;
 import java.util.List;
 
 @Configuration
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -91,7 +93,13 @@ public class SecurityConfig {
                         // "/v3/api-docs/**" para que quede explícito que hace falta cubrir ambos.
                         .requestMatchers("/docs/**", "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        // Puerta gruesa por URL: ambos roles de staff de oficina entran acá. La
+                        // distinción fina (qué puede tocar cada uno dentro de /api/admin/**) se
+                        // resuelve con @PreAuthorize a nivel de método/clase en cada controller
+                        // — ver AdminMedicoController, AdminCajaController, etc. Se eligió reusar
+                        // este namespace en vez de duplicarlo en /api/secretaria/** para no
+                        // duplicar también los ~7 componentes de frontend que ya pegan acá.
+                        .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "SECRETARIA")
                         .requestMatchers("/api/medico/**").hasRole("MEDICO")
                         .requestMatchers("/api/contador/**").hasRole("CONTADOR")
                         .anyRequest().authenticated()

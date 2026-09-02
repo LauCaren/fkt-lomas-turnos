@@ -10,6 +10,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,9 +19,11 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+/** Operación diaria de la caja (registrar/anular movimientos, configuración): queda para ADMIN. La secretaria puede pedir un export de solo lectura vía AdminReportesController. */
 @RestController
 @RequestMapping("/api/admin/caja")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminCajaController {
 
     private final CajaService cajaService;
@@ -54,8 +57,8 @@ public class AdminCajaController {
     }
 
     @PutMapping("/ingresos/{id}/anular")
-    public IngresoDto anularIngreso(@PathVariable Long id, @Valid @RequestBody AnularRequest request) {
-        return cajaService.anularIngreso(id, request.motivo());
+    public IngresoDto anularIngreso(@AuthenticationPrincipal AppUserDetails principal, @PathVariable Long id, @Valid @RequestBody AnularRequest request) {
+        return cajaService.anularIngreso(id, request.motivo(), principal.getUsuario());
     }
 
     @GetMapping("/retiros")
@@ -71,8 +74,8 @@ public class AdminCajaController {
     }
 
     @PutMapping("/retiros/{id}/anular")
-    public RetiroDto anularRetiro(@PathVariable Long id, @Valid @RequestBody AnularRequest request) {
-        return cajaService.anularRetiro(id, request.motivo());
+    public RetiroDto anularRetiro(@AuthenticationPrincipal AppUserDetails principal, @PathVariable Long id, @Valid @RequestBody AnularRequest request) {
+        return cajaService.anularRetiro(id, request.motivo(), principal.getUsuario());
     }
 
     @GetMapping("/gastos/categorias")
@@ -103,8 +106,8 @@ public class AdminCajaController {
     }
 
     @PutMapping("/gastos/{id}/anular")
-    public GastoDto anularGasto(@PathVariable Long id, @Valid @RequestBody AnularRequest request) {
-        return gastoService.anular(id, request.motivo());
+    public GastoDto anularGasto(@AuthenticationPrincipal AppUserDetails principal, @PathVariable Long id, @Valid @RequestBody AnularRequest request) {
+        return gastoService.anular(id, request.motivo(), principal.getUsuario());
     }
 
     @GetMapping("/gastos/{id}/comprobante")

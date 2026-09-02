@@ -36,11 +36,14 @@ public class MedicoService {
     private static final Map<String, String> EXTENSIONES_PERMITIDAS = Map.of("image/jpeg", ".jpg", "image/png", ".png");
     private static final long TAMANO_MAXIMO_BYTES = 5L * 1024 * 1024;
 
+    private static final String AUDITORIA_TIPO_MEDICO = "MEDICO";
+
     private final MedicoRepository medicoRepository;
     private final UsuarioRepository usuarioRepository;
     private final EspecialidadService especialidadService;
     private final FileStorageService fileStorageService;
     private final PasswordEncoder passwordEncoder;
+    private final AuditoriaService auditoriaService;
 
     @Transactional(readOnly = true)
     public List<MedicoDto> listar(Long especialidadId) {
@@ -60,7 +63,7 @@ public class MedicoService {
                 .orElseThrow(() -> new RecursoNoEncontradoException("Médico no encontrado"));
     }
 
-    public MedicoAdminDto crear(CrearMedicoRequest request) {
+    public MedicoAdminDto crear(CrearMedicoRequest request, Usuario actor) {
         Especialidad especialidad = especialidadService.obtenerEntidad(request.especialidadId());
         Medico medico = new Medico();
         medico.setNombreCompleto(request.nombreCompleto());
@@ -68,7 +71,9 @@ public class MedicoService {
         medico.setMatricula(request.matricula());
         medico.setDuracionTurnoMinutos(request.duracionTurnoMinutos());
         medico.setAnosExperiencia(request.anosExperiencia());
-        return MedicoAdminDto.de(medicoRepository.save(medico));
+        MedicoAdminDto creado = MedicoAdminDto.de(medicoRepository.save(medico));
+        auditoriaService.registrar(actor, AUDITORIA_TIPO_MEDICO, creado.id(), "CREAR", null, creado);
+        return creado;
     }
 
     /**
@@ -80,8 +85,9 @@ public class MedicoService {
      * LazyInitializationException. Con @Transactional todo el método comparte una sola sesión.
      */
     @Transactional
-    public MedicoAdminDto actualizar(Long id, ActualizarMedicoRequest request) {
+    public MedicoAdminDto actualizar(Long id, ActualizarMedicoRequest request, Usuario actor) {
         Medico medico = obtenerEntidad(id);
+        MedicoAdminDto antes = MedicoAdminDto.de(medico);
         Especialidad especialidad = especialidadService.obtenerEntidad(request.especialidadId());
         medico.setNombreCompleto(request.nombreCompleto());
         medico.setEspecialidad(especialidad);
@@ -91,7 +97,9 @@ public class MedicoService {
         medico.setAnosExperiencia(request.anosExperiencia());
         medico.setCobraCopagoIoma(request.cobraCopagoIoma());
         medico.setTarifaConsulta(request.tarifaConsulta());
-        return MedicoAdminDto.de(medicoRepository.save(medico));
+        MedicoAdminDto actualizado = MedicoAdminDto.de(medicoRepository.save(medico));
+        auditoriaService.registrar(actor, AUDITORIA_TIPO_MEDICO, id, "ACTUALIZAR", antes, actualizado);
+        return actualizado;
     }
 
     /**

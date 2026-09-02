@@ -39,6 +39,10 @@ public class CajaService {
     private final MedicoRepository medicoRepository;
     private final TurnoRepository turnoRepository;
     private final ConfiguracionCajaRepository configuracionCajaRepository;
+    private final AuditoriaService auditoriaService;
+
+    private static final String AUDITORIA_TIPO_INGRESO = "INGRESO";
+    private static final String AUDITORIA_TIPO_RETIRO = "RETIRO";
 
     // Postgres no puede inferir el tipo de un parámetro cuyo único uso en la consulta es
     // "? is null" (a diferencia de medicoId, que sí resuelve bien) — se evita pasando
@@ -93,14 +97,17 @@ public class CajaService {
     }
 
     @Transactional
-    public IngresoDto anularIngreso(Long id, String motivo) {
+    public IngresoDto anularIngreso(Long id, String motivo, Usuario actor) {
         Ingreso ingreso = ingresoRepository.findById(id).orElseThrow(() -> new RecursoNoEncontradoException("Ingreso no encontrado"));
         if (ingreso.isAnulado()) {
             throw new ConflictoDeDatosException("Este ingreso ya está anulado");
         }
+        IngresoDto antes = IngresoDto.de(ingreso);
         ingreso.setAnulado(true);
         ingreso.setMotivoAnulacion(motivo);
-        return IngresoDto.de(ingresoRepository.save(ingreso));
+        IngresoDto anulado = IngresoDto.de(ingresoRepository.save(ingreso));
+        auditoriaService.registrar(actor, AUDITORIA_TIPO_INGRESO, id, "ANULAR", antes, anulado);
+        return anulado;
     }
 
     @Transactional(readOnly = true)
@@ -130,14 +137,17 @@ public class CajaService {
     }
 
     @Transactional
-    public RetiroDto anularRetiro(Long id, String motivo) {
+    public RetiroDto anularRetiro(Long id, String motivo, Usuario actor) {
         Retiro retiro = retiroRepository.findById(id).orElseThrow(() -> new RecursoNoEncontradoException("Retiro no encontrado"));
         if (retiro.isAnulado()) {
             throw new ConflictoDeDatosException("Este retiro ya está anulado");
         }
+        RetiroDto antes = RetiroDto.de(retiro);
         retiro.setAnulado(true);
         retiro.setMotivoAnulacion(motivo);
-        return RetiroDto.de(retiroRepository.save(retiro));
+        RetiroDto anulado = RetiroDto.de(retiroRepository.save(retiro));
+        auditoriaService.registrar(actor, AUDITORIA_TIPO_RETIRO, id, "ANULAR", antes, anulado);
+        return anulado;
     }
 
     /** Saldo propio de un médico (para su panel) — nunca la caja física ni la de otros médicos. */

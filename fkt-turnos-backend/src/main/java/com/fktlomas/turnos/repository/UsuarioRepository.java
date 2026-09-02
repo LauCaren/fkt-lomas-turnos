@@ -1,5 +1,6 @@
 package com.fktlomas.turnos.repository;
 
+import com.fktlomas.turnos.domain.Role;
 import com.fktlomas.turnos.domain.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,6 +15,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     Optional<Usuario> findByResetToken(String resetToken);
     boolean existsByEmail(String email);
     boolean existsByDni(String dni);
+    List<Usuario> findByRoleOrderByNombreCompletoAsc(Role role);
 
     @Query("""
             select u from Usuario u

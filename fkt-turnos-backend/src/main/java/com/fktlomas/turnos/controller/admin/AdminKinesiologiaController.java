@@ -11,6 +11,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +20,11 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * La alta telefónica (crearPorTelefono) y la consulta son tarea de secretaria, igual que la
+ * reserva de turnos comunes. Validar/rechazar/cancelar/pausar un plan sí quedan ADMIN-only:
+ * son una decisión sobre un tratamiento, no una tarea administrativa.
+ */
 @RestController
 @RequestMapping("/api/admin/kinesiologia/planes")
 @RequiredArgsConstructor
@@ -61,22 +67,26 @@ public class AdminKinesiologiaController {
         return ResponseEntity.ok().contentType(mediaType).body(recurso);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}/validar")
     public PlanKinesiologiaDto validar(@AuthenticationPrincipal AppUserDetails principal, @PathVariable Long id) {
         return kinesiologiaService.validar(id, principal.getUsuario());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}/rechazar")
     public PlanKinesiologiaDto rechazar(@AuthenticationPrincipal AppUserDetails principal, @PathVariable Long id,
                                          @Valid @RequestBody RechazarPlanRequest request) {
         return kinesiologiaService.rechazar(id, request.motivo(), principal.getUsuario());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}/cancelar")
     public PlanKinesiologiaDto cancelar(@PathVariable Long id) {
         return kinesiologiaService.cancelar(id, null);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}/pausar")
     public PlanKinesiologiaDto pausar(@PathVariable Long id) {
         return kinesiologiaService.pausar(id, null);

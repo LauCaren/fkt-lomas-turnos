@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -35,11 +36,15 @@ public class AdminRecordatorioController {
         return recordatorioService.reenviar(id);
     }
 
+    // La plantilla del mensaje y la anticipación son política del centro, no operación diaria
+    // — el resto del controller (ver/reenviar/mandar mensajes) sí es tarea de secretaria.
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/configuracion")
     public ConfiguracionRecordatoriosDto obtenerConfiguracion() {
         return recordatorioService.obtenerConfiguracion();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/configuracion")
     public ConfiguracionRecordatoriosDto actualizarConfiguracion(@Valid @RequestBody ConfiguracionRecordatoriosRequest request) {
         return recordatorioService.actualizarConfiguracion(request);

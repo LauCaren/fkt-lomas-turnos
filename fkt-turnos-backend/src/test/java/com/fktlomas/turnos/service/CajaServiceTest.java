@@ -71,7 +71,7 @@ class CajaServiceTest {
                 new CrearIngresoRequest(medicoB.getId(), null, new BigDecimal("200"), MetodoPago.MERCADOPAGO, null), secretaria);
         cajaService.registrarRetiro(new CrearRetiroRequest(medicoA.getId(), new BigDecimal("300")), secretaria);
 
-        cajaService.anularIngreso(ingreso500.id(), "Cobrado por error");
+        cajaService.anularIngreso(ingreso500.id(), "Cobrado por error", secretaria);
 
         gastoService.crearCategoria(new com.fktlomas.turnos.dto.caja.CrearCategoriaGastoRequest("Insumos test"));
         Long categoriaId = gastoService.listarCategorias().stream()
@@ -117,9 +117,9 @@ class CajaServiceTest {
         IngresoDto ingreso = cajaService.registrarIngreso(
                 new CrearIngresoRequest(medico.getId(), null, new BigDecimal("100"), MetodoPago.EFECTIVO, null), secretaria);
 
-        cajaService.anularIngreso(ingreso.id(), "Motivo 1");
+        cajaService.anularIngreso(ingreso.id(), "Motivo 1", secretaria);
 
-        assertThatThrownBy(() -> cajaService.anularIngreso(ingreso.id(), "Motivo 2"))
+        assertThatThrownBy(() -> cajaService.anularIngreso(ingreso.id(), "Motivo 2", secretaria))
                 .isInstanceOf(ConflictoDeDatosException.class);
     }
 

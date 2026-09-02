@@ -22,6 +22,7 @@ import java.time.LocalTime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -114,6 +115,81 @@ class AutorizacionRolesTest {
         // Mismo token: AppUserDetails se reconstruye desde la base en cada request
         // (JwtAuthFilter), así que no hace falta un login nuevo para que el rol cambie.
         mockMvc.perform(autenticado(get("/api/contador/caja/resumen"), token)).andExpect(status().isOk());
+    }
+
+    @Test
+    void unaSecretariaPuedeAccederAAgendaYMensajesPeroNoAMedicosNiCajaNiKinesiologiaClinica() throws Exception {
+        String token = loginComo(crearUsuario("secretaria.a@test.com", Role.SECRETARIA));
+
+        // Sí: agenda / reserva telefónica / cola de espera — el trabajo diario de la secretaria.
+        mockMvc.perform(autenticado(get("/api/admin/turnos")
+                        .param("desde", LocalDate.now().toString())
+                        .param("hasta", LocalDate.now().toString()), token))
+                .andExpect(status().isOk());
+
+        // No: alta de médicos/especialidades, caja, kinesiología (decisiones clínicas o de negocio).
+        mockMvc.perform(autenticado(get("/api/admin/medicos"), token)).andExpect(status().isForbidden());
+        mockMvc.perform(autenticado(get("/api/admin/caja/resumen"), token)).andExpect(status().isForbidden());
+        mockMvc.perform(autenticado(put("/api/admin/kinesiologia/planes/1/validar"), token)).andExpect(status().isForbidden());
+        // No: la plantilla/política de recordatorios (sí puede ver y reenviar los recordatorios en sí).
+        mockMvc.perform(autenticado(get("/api/admin/recordatorios/configuracion"), token)).andExpect(status().isForbidden());
+        // No: gestión de otras cuentas de staff.
+        mockMvc.perform(autenticado(get("/api/admin/secretarias"), token)).andExpect(status().isForbidden());
+        // No: el resumen de arranque del admin trae ingresosHoy/cajaFisica (AdminResumenDto).
+        mockMvc.perform(autenticado(get("/api/admin/resumen"), token)).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void unAdminPuedeCrearDesactivarYRevocarLasSesionesDeUnaSecretaria() throws Exception {
+        Usuario admin = crearUsuario("admin.gestor@test.com", Role.ADMIN);
+        String tokenAdmin = loginComo(admin);
+
+        String respuestaCreacion = mockMvc.perform(autenticado(post("/api/admin/secretarias"), tokenAdmin)
+                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"nombreCompleto":"Secretaria Nueva","email":"secretaria.nueva@test.com","password":"%s"}
+                                """.formatted(CLAVE)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        Long secretariaId = objectMapper.readTree(respuestaCreacion).get("id").asLong();
+
+        // La cuenta recién creada puede loguearse con normalidad.
+        String tokenSecretaria = loginComo(usuarioRepository.findById(secretariaId).orElseThrow());
+        mockMvc.perform(autenticado(get("/api/admin/turnos")
+                        .param("desde", LocalDate.now().toString())
+                        .param("hasta", LocalDate.now().toString()), tokenSecretaria))
+                .andExpect(status().isOk());
+
+        // El "iat" del JWT y sessionsRevokedAt se comparan truncados a segundos (mismo criterio
+        // que passwordChangedAt en JwtAuthFilter, ver su comentario); sin este margen, si login
+        // y desactivación caen en el mismo segundo de reloj (muy probable en un test rápido) la
+        // desactivación no invalidaría el token ya emitido.
+        Thread.sleep(1100);
+
+        // El admin la desactiva: el token ya emitido deja de servir de inmediato (no hace
+        // falta esperar a que expire), y un login nuevo también queda bloqueado.
+        mockMvc.perform(autenticado(put("/api/admin/usuarios/" + secretariaId + "/desactivar"), tokenAdmin))
+                .andExpect(status().isOk());
+        mockMvc.perform(autenticado(get("/api/admin/turnos")
+                        .param("desde", LocalDate.now().toString())
+                        .param("hasta", LocalDate.now().toString()), tokenSecretaria))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"secretaria.nueva@test.com","password":"%s"}
+                                """.formatted(CLAVE)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void revocarMisSesionesInvalidaElTokenActual() throws Exception {
+        String token = loginComo(crearUsuario("paciente.sesiones@test.com", Role.PACIENTE));
+
+        mockMvc.perform(autenticado(get("/api/mi-cuenta"), token)).andExpect(status().isOk());
+        Thread.sleep(1100); // ver comentario equivalente más arriba sobre la precisión de segundos del "iat"
+        mockMvc.perform(autenticado(put("/api/mi-cuenta/revocar-sesiones"), token)).andExpect(status().isOk());
+        mockMvc.perform(autenticado(get("/api/mi-cuenta"), token)).andExpect(status().isUnauthorized());
     }
 
     @Test

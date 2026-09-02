@@ -74,6 +74,14 @@ public class Usuario {
     @Column(name = "canal_notificacion_preferido", nullable = false, length = 20)
     private CanalNotificacion canalNotificacionPreferido = CanalNotificacion.EMAIL;
 
+    /** Cuenta de staff (MEDICO/CONTADOR/SECRETARIA/ADMIN) desactivada por un admin — ver AppUserDetails.isEnabled(). No aplica a pacientes, que nunca se desactivan por esta vía. */
+    @Column(nullable = false)
+    private boolean activo = true;
+
+    /** Igual que passwordChangedAt pero para "cerrar todas las sesiones" sin obligar a cambiar la contraseña — ver JwtAuthFilter. */
+    @Column(name = "sessions_revoked_at")
+    private Instant sessionsRevokedAt;
+
     @PrePersist
     void prePersist() {
         if (createdAt == null) {

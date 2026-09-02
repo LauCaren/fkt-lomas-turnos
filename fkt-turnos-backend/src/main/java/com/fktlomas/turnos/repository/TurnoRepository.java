@@ -35,6 +35,9 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
 
     List<Turno> findByPacienteIdOrderByFechaDescHoraInicioDesc(Long pacienteId);
 
+    /** Cuántas veces este paciente no se presentó a un turno — señal informativa para el staff, ver AdminPacienteService.ficha. */
+    long countByPacienteIdAndEstadoAsistencia(Long pacienteId, EstadoAsistencia estadoAsistencia);
+
     boolean existsByMedicoIdAndFechaAndHoraInicio(Long medicoId, LocalDate fecha, java.time.LocalTime horaInicio);
 
     @Query("""

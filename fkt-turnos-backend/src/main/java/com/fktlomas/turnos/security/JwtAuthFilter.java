@@ -55,6 +55,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     return;
                 }
 
+                // Mismo mecanismo que passwordChangedAt, para "cerrar todas las sesiones" sin
+                // forzar un cambio de contraseña — usado al desactivar una cuenta de staff o
+                // por autoservicio desde "mi cuenta" (ver AdminUsuarioController).
+                Instant sesionesRevocadasEn = userDetails.getUsuario().getSessionsRevokedAt() == null
+                        ? null : userDetails.getUsuario().getSessionsRevokedAt().truncatedTo(java.time.temporal.ChronoUnit.SECONDS);
+                if (sesionesRevocadasEn != null && emitidoEn.isBefore(sesionesRevocadasEn)) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

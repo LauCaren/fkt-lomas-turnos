@@ -36,9 +36,12 @@ public class GastoService {
     private static final LocalDate DESDE_MINIMO = LocalDate.of(2000, 1, 1);
     private static final LocalDate HASTA_MAXIMO = LocalDate.of(2099, 12, 31);
 
+    private static final String AUDITORIA_TIPO = "GASTO";
+
     private final GastoRepository gastoRepository;
     private final CategoriaGastoRepository categoriaGastoRepository;
     private final FileStorageService fileStorageService;
+    private final AuditoriaService auditoriaService;
 
     @Transactional(readOnly = true)
     public List<CategoriaGastoDto> listarCategorias() {
@@ -89,14 +92,17 @@ public class GastoService {
     }
 
     @Transactional
-    public GastoDto anular(Long id, String motivo) {
+    public GastoDto anular(Long id, String motivo, Usuario actor) {
         Gasto gasto = gastoRepository.findById(id).orElseThrow(() -> new RecursoNoEncontradoException("Gasto no encontrado"));
         if (gasto.isAnulado()) {
             throw new ConflictoDeDatosException("Este gasto ya está anulado");
         }
+        GastoDto antes = GastoDto.de(gasto);
         gasto.setAnulado(true);
         gasto.setMotivoAnulacion(motivo);
-        return GastoDto.de(gastoRepository.save(gasto));
+        GastoDto anulado = GastoDto.de(gastoRepository.save(gasto));
+        auditoriaService.registrar(actor, AUDITORIA_TIPO, id, "ANULAR", antes, anulado);
+        return anulado;
     }
 
     public Resource descargarComprobante(Long id) {

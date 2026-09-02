@@ -16,6 +16,7 @@ public record FichaPacienteDto(
         PacienteBusquedaDto paciente,
         List<TurnoDto> turnos,
         List<PlanKinesiologiaDto> planesKinesiologia,
-        List<IngresoDto> ingresos
+        List<IngresoDto> ingresos,
+        long ausenciasCount
 ) {
 }

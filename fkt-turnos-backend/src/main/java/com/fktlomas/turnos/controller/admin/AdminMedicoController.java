@@ -1,20 +1,25 @@
 package com.fktlomas.turnos.controller.admin;
 
 import com.fktlomas.turnos.dto.admin.*;
+import com.fktlomas.turnos.security.AppUserDetails;
 import com.fktlomas.turnos.service.DisponibilidadService;
 import com.fktlomas.turnos.service.MedicoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
 
+/** Alta de médicos, especialidades y horarios: decisión clínica/de negocio del centro, no tarea de secretaria. */
 @RestController
 @RequestMapping("/api/admin/medicos")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminMedicoController {
 
     private final MedicoService medicoService;
@@ -26,13 +31,13 @@ public class AdminMedicoController {
     }
 
     @PostMapping
-    public ResponseEntity<MedicoAdminDto> crear(@Valid @RequestBody CrearMedicoRequest request) {
-        return ResponseEntity.ok(medicoService.crear(request));
+    public ResponseEntity<MedicoAdminDto> crear(@AuthenticationPrincipal AppUserDetails principal, @Valid @RequestBody CrearMedicoRequest request) {
+        return ResponseEntity.ok(medicoService.crear(request, principal.getUsuario()));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MedicoAdminDto> actualizar(@PathVariable Long id, @Valid @RequestBody ActualizarMedicoRequest request) {
-        return ResponseEntity.ok(medicoService.actualizar(id, request));
+    public ResponseEntity<MedicoAdminDto> actualizar(@AuthenticationPrincipal AppUserDetails principal, @PathVariable Long id, @Valid @RequestBody ActualizarMedicoRequest request) {
+        return ResponseEntity.ok(medicoService.actualizar(id, request, principal.getUsuario()));
     }
 
     @PutMapping("/{id}/credenciales")

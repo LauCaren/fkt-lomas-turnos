@@ -1,10 +1,12 @@
 package com.fktlomas.turnos.service;
 
+import com.fktlomas.turnos.domain.EstadoAsistencia;
 import com.fktlomas.turnos.domain.Role;
 import com.fktlomas.turnos.domain.Usuario;
 import com.fktlomas.turnos.dto.PacienteBusquedaDto;
 import com.fktlomas.turnos.dto.admin.FichaPacienteDto;
 import com.fktlomas.turnos.exception.RecursoNoEncontradoException;
+import com.fktlomas.turnos.repository.TurnoRepository;
 import com.fktlomas.turnos.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ import java.util.List;
 public class AdminPacienteService {
 
     private final UsuarioRepository usuarioRepository;
+    private final TurnoRepository turnoRepository;
     private final TurnoService turnoService;
     private final KinesiologiaService kinesiologiaService;
     private final CajaService cajaService;
@@ -45,7 +48,8 @@ public class AdminPacienteService {
                 PacienteBusquedaDto.de(paciente),
                 turnoService.misTurnos(pacienteId),
                 kinesiologiaService.misPlanes(pacienteId),
-                cajaService.ingresosDePaciente(pacienteId)
+                cajaService.ingresosDePaciente(pacienteId),
+                turnoRepository.countByPacienteIdAndEstadoAsistencia(pacienteId, EstadoAsistencia.AUSENTE)
         );
     }
 }
