@@ -62,6 +62,12 @@ const medicoSlice = createSlice({
     agendaCargando: false,
     colaEspera: [],
     colaEsperaCargando: false,
+    // Turno recién marcado "atendido" desde la cola de espera, a la espera de su evolución.
+    // Se guarda aparte (no adentro de colaEspera) porque esa lista se pisa entera cada 10s con
+    // el polling del backend (que solo devuelve turnos LLEGO) — si dejáramos el turno atendido
+    // ahí, el próximo poll podía hacerlo desaparecer de la pantalla a mitad de que el médico
+    // esté escribiendo la nota, antes de guardarla.
+    turnoParaEvolucion: null,
     evolucionesPorPaciente: {},
     saldo: null,
     error: null,
@@ -82,11 +88,18 @@ const medicoSlice = createSlice({
       .addCase(fetchColaEsperaMedico.fulfilled, (state, action) => { state.colaEspera = action.payload; state.colaEsperaCargando = false; })
       .addCase(fetchColaEsperaMedico.rejected, (state, action) => { state.error = action.payload; state.colaEsperaCargando = false; })
       .addCase(marcarAtendido.fulfilled, (state, action) => {
+        const turno = state.colaEspera.find((t) => t.id === action.payload);
         state.colaEspera = state.colaEspera.filter((t) => t.id !== action.payload);
+        state.agendaHoy = state.agendaHoy.map((t) => t.id === action.payload ? { ...t, estadoAsistencia: 'ATENDIDO' } : t);
+        if (turno) state.turnoParaEvolucion = { ...turno, estadoAsistencia: 'ATENDIDO' };
         state.mensajeExito = 'Paciente marcado como atendido';
       })
       .addCase(marcarAtendido.rejected, (state, action) => { state.error = action.payload; })
-      .addCase(crearEvolucion.fulfilled, (state) => { state.mensajeExito = 'Evolución guardada'; })
+      .addCase(crearEvolucion.fulfilled, (state, action) => {
+        state.agendaHoy = state.agendaHoy.map((t) => t.id === action.payload.turnoId ? { ...t, tieneEvolucion: true } : t);
+        if (state.turnoParaEvolucion?.id === action.payload.turnoId) state.turnoParaEvolucion = null;
+        state.mensajeExito = 'Evolución guardada';
+      })
       .addCase(crearEvolucion.rejected, (state, action) => { state.error = action.payload; })
       .addCase(fetchEvolucionesDePaciente.fulfilled, (state, action) => {
         state.evolucionesPorPaciente[action.payload.pacienteId] = action.payload.evoluciones;
