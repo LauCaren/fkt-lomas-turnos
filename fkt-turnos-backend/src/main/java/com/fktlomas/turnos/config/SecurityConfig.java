@@ -54,8 +54,19 @@ public class SecurityConfig {
                 // de content-type) con cabeceras que Spring Security no manda por defecto (CSP, HSTS).
                 .headers(headers -> headers
                         .contentSecurityPolicy(csp -> csp.policyDirectives(
+                                // La única página HTML que sirve este backend es Swagger UI (springdoc).
+                                // Verificado cargándola de verdad en el navegador: script-src ya no
+                                // necesita 'unsafe-inline' (el bundle estático de swagger-ui-5.x no
+                                // inyecta ningún <script> inline). style-src sí lo sigue necesitando —
+                                // probado primero con un hash puntual (sha256-RL3ie0nH+...), pero
+                                // swagger-ui-bundle.js fija estilos vía el atributo style="..." en el DOM
+                                // dinámicamente, no vía <style>: los hash-source de CSP solo cubren
+                                // elementos <style>/<script>, no atributos style inline, así que ningún
+                                // hash fijo alcanza. Bajo riesgo real: es el bundle de un tercero
+                                // conocido, sirviendo solo la documentación de la API, no contenido de
+                                // usuario.
                                 "default-src 'self'; "
-                                        + "script-src 'self' 'unsafe-inline'; "
+                                        + "script-src 'self'; "
                                         + "style-src 'self' 'unsafe-inline'; "
                                         + "img-src 'self' data:; "
                                         + "frame-ancestors 'none'; "
