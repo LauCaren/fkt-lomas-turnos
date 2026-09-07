@@ -42,8 +42,9 @@ public class Ingreso {
     @Column(nullable = false)
     private LocalDate fecha;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "registrado_por_id", nullable = false)
+    /** Null para un pago online confirmado por el webhook de Mercado Pago — no lo carga ningún miembro del staff (ver MercadoPagoService). */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "registrado_por_id")
     private Usuario registradoPor;
 
     @Column(nullable = false)

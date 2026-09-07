@@ -24,7 +24,7 @@ public interface IngresoRepository extends JpaRepository<Ingreso, Long> {
             select i from Ingreso i
             join fetch i.medico m
             left join fetch i.turno
-            join fetch i.registradoPor
+            left join fetch i.registradoPor
             where (:medicoId is null or m.id = :medicoId)
             and i.fecha between :desde and :hasta
             order by i.fecha desc, i.createdAt desc
@@ -39,7 +39,7 @@ public interface IngresoRepository extends JpaRepository<Ingreso, Long> {
             select i from Ingreso i
             join fetch i.medico
             left join fetch i.turno
-            join fetch i.registradoPor
+            left join fetch i.registradoPor
             where i.turno.paciente.id = :pacienteId
             order by i.fecha desc, i.createdAt desc
             """)
@@ -52,7 +52,7 @@ public interface IngresoRepository extends JpaRepository<Ingreso, Long> {
             join fetch m.especialidad
             left join fetch i.turno t
             left join fetch t.paciente
-            join fetch i.registradoPor
+            left join fetch i.registradoPor
             where i.id = :id
             """)
     Optional<Ingreso> buscarPorIdConDetalle(@Param("id") Long id);

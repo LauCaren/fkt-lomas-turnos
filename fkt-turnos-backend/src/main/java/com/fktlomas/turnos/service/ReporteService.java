@@ -202,7 +202,7 @@ public class ReporteService {
                     new String[]{"Profesional", ingreso.getMedico().getNombreCompleto() + " — " + ingreso.getMedico().getEspecialidad().getNombre()},
                     new String[]{"Monto", "$ " + ingreso.getMonto()},
                     new String[]{"Método de pago", ingreso.getMetodoPago().name()},
-                    new String[]{"Registrado por", ingreso.getRegistradoPor().getNombreCompleto()}
+                    new String[]{"Registrado por", ingreso.getRegistradoPor() != null ? ingreso.getRegistradoPor().getNombreCompleto() : "Pago online"}
             ));
             escritor.parrafo("Este comprobante es un registro interno de FKT Lomas y no constituye una");
             escritor.parrafo("factura ni un comprobante fiscal válido ante AFIP.");

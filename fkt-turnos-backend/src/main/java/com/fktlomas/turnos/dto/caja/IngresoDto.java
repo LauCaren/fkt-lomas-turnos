@@ -28,7 +28,7 @@ public record IngresoDto(
                 i.getMonto(),
                 i.getMetodoPago().name(),
                 i.getFecha(),
-                i.getRegistradoPor().getNombreCompleto(),
+                i.getRegistradoPor() != null ? i.getRegistradoPor().getNombreCompleto() : "Pago online",
                 i.isAnulado(),
                 i.getMotivoAnulacion(),
                 i.getCreatedAt()

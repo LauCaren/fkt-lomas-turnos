@@ -2,6 +2,8 @@ package com.fktlomas.turnos.dto;
 
 import com.fktlomas.turnos.domain.Medico;
 
+import java.math.BigDecimal;
+
 public record MedicoDto(
         Long id,
         String nombreCompleto,
@@ -13,7 +15,8 @@ public record MedicoDto(
         Integer anosExperiencia,
         boolean tieneFoto,
         boolean tieneTitulo,
-        boolean cobraCopagoIoma
+        boolean cobraCopagoIoma,
+        BigDecimal tarifaConsulta
 ) {
     public static MedicoDto de(Medico m) {
         return new MedicoDto(
@@ -27,7 +30,8 @@ public record MedicoDto(
                 m.getAnosExperiencia(),
                 m.getFotoPath() != null,
                 m.getTituloImagenPath() != null,
-                m.isCobraCopagoIoma()
+                m.isCobraCopagoIoma(),
+                m.getTarifaConsulta()
         );
     }
 }

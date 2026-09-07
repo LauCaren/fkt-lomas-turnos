@@ -61,6 +61,32 @@ export const reservarTurno = createAsyncThunk(
   }
 );
 
+// Público (sin auth): el wizard lo consulta apenas carga la pantalla de reserva para saber si
+// mostrar el paso de "pagar ahora" — ver SecurityConfig.
+export const fetchMercadoPagoEstado = createAsyncThunk(
+  'turnos/fetchMercadoPagoEstado',
+  async () => {
+    try {
+      const { data } = await axiosClient.get('/api/pagos/mercadopago/estado');
+      return !!data.habilitado;
+    } catch {
+      return false; // Sin esto un error de red dejaría el botón de pago mostrado sin poder usarse.
+    }
+  }
+);
+
+export const pagarTurnoOnline = createAsyncThunk(
+  'turnos/pagarTurnoOnline',
+  async (turnoId, { rejectWithValue }) => {
+    try {
+      const { data } = await axiosClient.post(`/api/turnos/${turnoId}/pago-online`);
+      return data;
+    } catch (error) {
+      return rejectWithValue(mensajeDeError(error, 'No pudimos iniciar el pago online'));
+    }
+  }
+);
+
 export const fetchMisTurnos = createAsyncThunk(
   'turnos/fetchMisTurnos',
   async (_, { rejectWithValue }) => {
@@ -134,11 +160,15 @@ const turnosSlice = createSlice({
     error: null,
     reservaExitosa: null,
     miAnotacionListaEspera: null,
+    mercadoPagoHabilitado: false,
+    pagoOnlineCargando: false,
+    pagoOnlineError: null,
   },
   reducers: {
     limpiarReserva(state) {
       state.reservaExitosa = null;
       state.error = null;
+      state.pagoOnlineError = null;
     },
     limpiarDisponibles(state) {
       state.disponibles = [];
@@ -177,6 +207,10 @@ const turnosSlice = createSlice({
         state.status = 'idle';
         state.error = action.payload;
       })
+      .addCase(fetchMercadoPagoEstado.fulfilled, (state, action) => { state.mercadoPagoHabilitado = action.payload; })
+      .addCase(pagarTurnoOnline.pending, (state) => { state.pagoOnlineCargando = true; state.pagoOnlineError = null; })
+      .addCase(pagarTurnoOnline.fulfilled, (state) => { state.pagoOnlineCargando = false; })
+      .addCase(pagarTurnoOnline.rejected, (state, action) => { state.pagoOnlineCargando = false; state.pagoOnlineError = action.payload; })
       .addCase(fetchMisTurnos.fulfilled, (state, action) => { state.misTurnos = action.payload; })
       .addCase(cancelarTurno.fulfilled, (state, action) => {
         state.misTurnos = state.misTurnos.map((t) => t.id === action.payload ? { ...t, estado: 'CANCELADO' } : t);

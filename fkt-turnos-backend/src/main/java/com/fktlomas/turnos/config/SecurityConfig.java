@@ -89,6 +89,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/especialidades/**", "/api/medicos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/turnos/confirmacion").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/contacto", "/api/postulaciones").permitAll()
+                        // El estado lo consulta el wizard de reserva sin loguearse necesariamente, y al
+                        // webhook le pega Mercado Pago, no un usuario con sesión — la seguridad de este
+                        // último es la validación de firma (ver MercadoPagoService.validarFirma), no el JWT.
+                        .requestMatchers(HttpMethod.GET, "/api/pagos/mercadopago/estado").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/pagos/mercadopago/webhook").permitAll()
                         // "/v3/api-docs" (sin barra final, el JSON del OpenAPI en sí) va aparte de
                         // "/v3/api-docs/**" para que quede explícito que hace falta cubrir ambos.
                         .requestMatchers("/docs/**", "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui/**").permitAll()

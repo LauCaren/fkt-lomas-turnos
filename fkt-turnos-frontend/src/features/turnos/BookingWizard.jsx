@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   fetchEspecialidades, fetchMedicos, fetchTurnosDisponibles, reservarTurno, cancelarTurno, limpiarReserva, limpiarDisponibles,
   fetchMiAnotacionListaEspera, anotarseListaEspera, darseDeBajaListaEspera, fetchProximaDisponibilidad,
+  fetchMercadoPagoEstado, pagarTurnoOnline,
 } from './turnosSlice';
 import { fetchMiPerfil } from '../cuenta/cuentaSlice';
 import AgregarCalendario from '../../components/AgregarCalendario';
@@ -15,7 +16,10 @@ export default function BookingWizard() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { especialidades, medicos, disponibles, status, error, reservaExitosa, miAnotacionListaEspera, proximaDisponibilidad } = useSelector((state) => state.turnos);
+  const {
+    especialidades, medicos, disponibles, status, error, reservaExitosa, miAnotacionListaEspera, proximaDisponibilidad,
+    mercadoPagoHabilitado, pagoOnlineCargando, pagoOnlineError,
+  } = useSelector((state) => state.turnos);
   const perfil = useSelector((state) => state.cuenta.perfil);
   const [anotandoListaEspera, setAnotandoListaEspera] = useState(false);
 
@@ -32,6 +36,7 @@ export default function BookingWizard() {
 
   useEffect(() => {
     dispatch(fetchEspecialidades());
+    dispatch(fetchMercadoPagoEstado());
   }, [dispatch]);
 
   useEffect(() => {
@@ -117,9 +122,22 @@ export default function BookingWizard() {
     }
   }
 
+  async function handlePagarOnline() {
+    try {
+      const { initPoint } = await dispatch(pagarTurnoOnline(reservaExitosa.id)).unwrap();
+      window.location.href = initPoint;
+    } catch {
+      // El error ya queda en turnos.pagoOnlineError y se muestra abajo.
+    }
+  }
+
   if (reservaExitosa) {
     const medicoReservado = medicos.find((m) => m.id === reservaExitosa.medicoId);
     const mostrarAvisoCopagoIoma = perfil?.obraSocial === 'IOMA' && medicoReservado?.cobraCopagoIoma;
+    // Mismo criterio que el backend (MercadoPagoService.crearPreferencia): nada de kinesiología
+    // acá porque ese flujo nunca pasa por este wizard (se redirige aparte, ver handleEspecialidadChange),
+    // así que alcanza con que el médico tenga tarifa de consulta cargada.
+    const puedePagarOnline = mercadoPagoHabilitado && !!medicoReservado?.tarifaConsulta;
     return (
       <div className="card" style={{ maxWidth: 480, margin: '0 auto', textAlign: 'center' }}>
         <div className="alert alert-success">
@@ -148,6 +166,19 @@ export default function BookingWizard() {
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
           <AgregarCalendario turno={reservaExitosa} />
         </div>
+
+        {puedePagarOnline && (
+          <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid var(--line)' }}>
+            <p style={{ fontSize: 14, color: 'var(--muted)', marginBottom: 12 }}>
+              También podés pagar la consulta ahora online. Si preferís, se puede pagar en el consultorio igual.
+            </p>
+            {pagoOnlineError && <div className="alert alert-error" style={{ marginBottom: 10 }}>{pagoOnlineError}</div>}
+            <button className="btn btn-primary btn-block" onClick={handlePagarOnline} disabled={pagoOnlineCargando}>
+              {pagoOnlineCargando ? 'Iniciando pago…' : 'Pagar ahora con Mercado Pago'}
+            </button>
+          </div>
+        )}
+
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 24 }}>
           <button className="btn btn-outline" onClick={() => {
             dispatch(limpiarReserva());

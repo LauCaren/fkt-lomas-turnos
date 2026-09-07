@@ -5,8 +5,10 @@ import com.fktlomas.turnos.dto.ListaEsperaDto;
 import com.fktlomas.turnos.dto.ListaEsperaRequest;
 import com.fktlomas.turnos.dto.ReservarTurnoRequest;
 import com.fktlomas.turnos.dto.TurnoDto;
+import com.fktlomas.turnos.dto.pago.PagoOnlineDto;
 import com.fktlomas.turnos.security.AppUserDetails;
 import com.fktlomas.turnos.service.ListaEsperaService;
+import com.fktlomas.turnos.service.MercadoPagoService;
 import com.fktlomas.turnos.service.TurnoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class TurnoController {
 
     private final TurnoService turnoService;
     private final ListaEsperaService listaEsperaService;
+    private final MercadoPagoService mercadoPagoService;
 
     @PostMapping("/{id}/reservar")
     public ResponseEntity<TurnoDto> reservar(@PathVariable Long id,
@@ -31,6 +34,12 @@ public class TurnoController {
                                               @Valid @RequestBody(required = false) ReservarTurnoRequest request) {
         ReservarTurnoRequest cuerpo = request != null ? request : new ReservarTurnoRequest(null);
         return ResponseEntity.ok(turnoService.reservar(id, principal.getUsuario(), cuerpo));
+    }
+
+    /** Paso opcional después de reservar — el turno ya queda confirmado sin esto, se puede pagar en el consultorio igual. */
+    @PostMapping("/{id}/pago-online")
+    public PagoOnlineDto pagoOnline(@PathVariable Long id, @AuthenticationPrincipal AppUserDetails principal) {
+        return mercadoPagoService.crearPreferencia(id, principal.getUsuario());
     }
 
     @GetMapping("/mios")

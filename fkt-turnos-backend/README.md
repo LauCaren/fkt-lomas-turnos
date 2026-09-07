@@ -32,6 +32,9 @@ API REST en Spring Boot 3 (Java 17) para el sistema de turnos, contacto y postul
 | `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` | vacío | Credenciales de [Twilio](https://www.twilio.com), para el canal WhatsApp de los recordatorios de turno |
 | `TWILIO_NUMERO_ORIGEN_WHATSAPP` | vacío | Número de Twilio para WhatsApp, **sin** el prefijo `whatsapp:` (el código lo agrega solo) |
 | `RECORDATORIOS_INTERVALO_MINUTOS` | `15` | Cada cuánto corre el job que revisa turnos próximos y manda recordatorios. La anticipación (cuántas horas antes) y el texto del mensaje se configuran desde el panel de admin, no acá |
+| `BACKEND_URL` | vacío | URL pública **https** de este backend, para que Mercado Pago le pegue al webhook de confirmación de pago (`/api/pagos/mercadopago/webhook`, ver `MercadoPagoService`). Sin esto, la preferencia de pago se crea igual pero sin `notification_url` — la confirmación nunca llega |
+| `MERCADOPAGO_ACCESS_TOKEN` / `MERCADOPAGO_PUBLIC_KEY` | vacío | Credenciales de [Mercado Pago](https://www.mercadopago.com.ar/developers/panel) ("Tus integraciones" > Credenciales). Sin `MERCADOPAGO_ACCESS_TOKEN`, el pago online al reservar queda deshabilitado y solo se puede pagar en el consultorio, como antes |
+| `MERCADOPAGO_WEBHOOK_SECRET` | vacío | Firma secreta del webhook ("Tus integraciones" > Webhooks > Configurar notificaciones). A diferencia de otras integraciones de este proyecto, sin esto **el webhook rechaza toda notificación** — ver `MercadoPagoService.validarFirma` |
 
 Con `MAIL_ENABLED=false` (default) los emails no se envían, solo se loguean — así se puede probar todo el flujo sin tener un SMTP configurado. Mismo criterio para WhatsApp: sin credenciales de Twilio, ese canal simplemente no se registra (los recordatorios de pacientes con ese canal preferido quedan en FALLIDO con un mensaje de error claro, no rompen el resto). El canal SMS no existe en el sistema — solo email y WhatsApp.
 
