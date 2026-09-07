@@ -28,7 +28,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.datasource.username=sa",
         "spring.datasource.password=",
         "spring.jpa.hibernate.ddl-auto=create-drop",
-        "spring.flyway.enabled=false"
+        "spring.flyway.enabled=false",
+        // Sin esto, cada registro de este test le pegaría de verdad a la API de HaveIBeenPwned
+        // (ver PasswordFiltradaService) — lento, no determinístico, y depende de tener salida a
+        // internet en CI. La contraseña de prueba de este archivo no está filtrada de todos
+        // modos, pero no vale la pena depender de un servicio externo para que el test pase.
+        "app.seguridad.chequeo-password-filtrada=false"
 })
 class AuthControllerTest {
 

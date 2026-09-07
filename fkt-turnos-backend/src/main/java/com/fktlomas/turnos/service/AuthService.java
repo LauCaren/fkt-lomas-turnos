@@ -70,6 +70,7 @@ public class AuthService {
     private final EmailService emailService;
     private final LoginRateLimiterService loginRateLimiterService;
     private final RateLimiterService rateLimiterService;
+    private final PasswordFiltradaService passwordFiltradaService;
 
     @Value("${app.frontend-url}")
     private String frontendUrl;
@@ -92,6 +93,7 @@ public class AuthService {
         if (usuarioRepository.existsByDni(request.dni())) {
             throw new ConflictoDeDatosException("Ya existe una cuenta registrada con ese DNI");
         }
+        passwordFiltradaService.verificar(request.password());
 
         Usuario usuario = new Usuario();
         usuario.setDni(request.dni());
@@ -190,6 +192,7 @@ public class AuthService {
         if (usuario.getResetTokenExpira() == null || usuario.getResetTokenExpira().isBefore(OffsetDateTime.now())) {
             throw new RecursoNoEncontradoException("El link de recuperación venció, pedí uno nuevo");
         }
+        passwordFiltradaService.verificar(request.passwordNueva());
 
         usuario.setPasswordHash(passwordEncoder.encode(request.passwordNueva()));
         usuario.setPasswordChangedAt(Instant.now());
@@ -203,6 +206,7 @@ public class AuthService {
         if (!passwordEncoder.matches(request.passwordActual(), usuario.getPasswordHash())) {
             throw new BadCredentialsException("La contraseña actual no es correcta");
         }
+        passwordFiltradaService.verificar(request.passwordNueva());
         usuario.setPasswordHash(passwordEncoder.encode(request.passwordNueva()));
         usuario.setPasswordChangedAt(Instant.now());
         usuarioRepository.save(usuario);

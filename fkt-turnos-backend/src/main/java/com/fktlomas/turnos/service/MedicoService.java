@@ -44,6 +44,7 @@ public class MedicoService {
     private final FileStorageService fileStorageService;
     private final PasswordEncoder passwordEncoder;
     private final AuditoriaService auditoriaService;
+    private final PasswordFiltradaService passwordFiltradaService;
 
     @Transactional(readOnly = true)
     public List<MedicoDto> listar(Long especialidadId) {
@@ -122,6 +123,7 @@ public class MedicoService {
         } else if (!usuario.getEmail().equalsIgnoreCase(emailNormalizado) && usuarioRepository.existsByEmail(emailNormalizado)) {
             throw new ConflictoDeDatosException("Ya existe una cuenta con ese email");
         }
+        passwordFiltradaService.verificar(request.password());
 
         usuario.setNombreCompleto(medico.getNombreCompleto());
         usuario.setEmail(emailNormalizado);

@@ -15,6 +15,7 @@ public record CrearSecretariaRequest(
 
         @NotBlank(message = "La contraseña es obligatoria")
         @Pattern(regexp = Patrones.PASSWORD_FUERTE, message = Patrones.PASSWORD_FUERTE_MENSAJE)
+        @Size(max = Patrones.PASSWORD_LONGITUD_MAXIMA, message = Patrones.PASSWORD_LONGITUD_MENSAJE)
         String password
 ) {
 }

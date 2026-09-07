@@ -27,6 +27,7 @@ public class SecretariaService {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuditoriaService auditoriaService;
+    private final PasswordFiltradaService passwordFiltradaService;
 
     @Transactional(readOnly = true)
     public List<CuentaStaffDto> listar() {
@@ -40,6 +41,7 @@ public class SecretariaService {
         if (usuarioRepository.existsByEmail(emailNormalizado)) {
             throw new ConflictoDeDatosException("Ya existe una cuenta con ese email");
         }
+        passwordFiltradaService.verificar(request.password());
 
         Usuario usuario = new Usuario();
         usuario.setRole(Role.SECRETARIA);

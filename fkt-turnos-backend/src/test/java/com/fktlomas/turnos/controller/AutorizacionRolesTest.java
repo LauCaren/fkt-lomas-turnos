@@ -47,7 +47,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.datasource.username=sa",
         "spring.datasource.password=",
         "spring.jpa.hibernate.ddl-auto=create-drop",
-        "spring.flyway.enabled=false"
+        "spring.flyway.enabled=false",
+        // Este archivo crea una cuenta de secretaria de verdad vía /api/admin/secretarias — sin
+        // esto le pegaría a la API de HaveIBeenPwned en cada corrida (ver PasswordFiltradaService).
+        "app.seguridad.chequeo-password-filtrada=false"
 })
 class AutorizacionRolesTest {
 

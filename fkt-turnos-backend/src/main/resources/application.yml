@@ -98,6 +98,11 @@ app:
     # el login, solo alerta (ver AuthService.alertarLoginFueraDeHorarioSiCorresponde).
     horario-inicio: ${SEGURIDAD_HORARIO_INICIO:07:00}
     horario-fin: ${SEGURIDAD_HORARIO_FIN:21:00}
+    # Chequea contraseñas nuevas contra la API pública "Pwned Passwords" de HaveIBeenPwned
+    # (k-anonymity, no requiere API key ni manda la contraseña real) — ver PasswordFiltradaService.
+    # Apagar solo si el host no tiene salida a internet; sin conexión igual falla "abierto" (deja
+    # pasar la contraseña) en vez de romper el registro/cambio de contraseña.
+    chequeo-password-filtrada: ${CHEQUEO_PASSWORD_FILTRADA:true}
   mercadopago:
     # Sin access-token configurado, el pago online al reservar queda deshabilitado (ver
     # MercadoPagoService.habilitado()) y el paciente solo puede pagar en el consultorio, como

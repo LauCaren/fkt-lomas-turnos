@@ -14,6 +14,15 @@ public final class Patrones {
     public static final String PASSWORD_FUERTE_MENSAJE =
             "La contraseña debe tener al menos 8 caracteres, con mayúsculas, minúsculas, números y un símbolo";
 
+    /**
+     * Sin este tope, BCrypt trunca en silencio a 72 bytes (ver PasswordEncoder) — dos
+     * contraseñas distintas después del byte 72 terminarían siendo "la misma" para el hash.
+     * 128 caracteres deja margen de sobra para cualquier passphrase real.
+     */
+    public static final int PASSWORD_LONGITUD_MAXIMA = 128;
+
+    public static final String PASSWORD_LONGITUD_MENSAJE = "La contraseña no puede superar los " + PASSWORD_LONGITUD_MAXIMA + " caracteres";
+
     private Patrones() {
     }
 }

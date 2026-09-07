@@ -17,6 +17,12 @@ function IconOjo({ oculto }) {
   );
 }
 
+// 128 acá tiene que coincidir con Patrones.PASSWORD_LONGITUD_MAXIMA del backend — evita que
+// alguien escriba una contraseña larguísima para después chocar contra el límite recién al
+// enviar el formulario (y de paso, defensa en profundidad contra el truncado silencioso de
+// BCrypt a 72 bytes, ver el comentario en Patrones.java).
+const LONGITUD_MAXIMA_PASSWORD = 128;
+
 export default function PasswordInput({ id, name, value, onChange, required, minLength, disabled, autoFocus, placeholder, pattern, title }) {
   const [visible, setVisible] = useState(false);
 
@@ -28,6 +34,7 @@ export default function PasswordInput({ id, name, value, onChange, required, min
         type={visible ? 'text' : 'password'}
         required={required}
         minLength={minLength}
+        maxLength={LONGITUD_MAXIMA_PASSWORD}
         disabled={disabled}
         autoFocus={autoFocus}
         placeholder={placeholder}
