@@ -51,6 +51,12 @@ public class CajaService {
     private static final LocalDate DESDE_MINIMO = LocalDate.of(2000, 1, 1);
     private static final LocalDate HASTA_MAXIMO = LocalDate.of(2099, 12, 31);
 
+    // Ventana para detectar un doble-submit (doble click, reintento de red) del mismo cobro o
+    // retiro — ver IngresoRepository.existeDuplicadoRecientePorTurno / RetiroRepository.existeDuplicadoReciente.
+    // Corta a propósito: solo busca cazar un reintento accidental inmediato, no bloquear dos
+    // operaciones reales y distintas que por casualidad coinciden en monto.
+    private static final java.time.Duration VENTANA_DUPLICADO = java.time.Duration.ofSeconds(5);
+
     @Transactional(readOnly = true)
     public ConfiguracionCajaDto obtenerConfiguracion() {
         return ConfiguracionCajaDto.de(configuracionCajaRepository.findById((short) 1)
@@ -104,6 +110,11 @@ public class CajaService {
         if (request.turnoId() != null) {
             turno = turnoRepository.findById(request.turnoId())
                     .orElseThrow(() -> new RecursoNoEncontradoException("Turno no encontrado"));
+            boolean duplicado = ingresoRepository.existeDuplicadoRecientePorTurno(request.turnoId(), request.monto(),
+                    request.metodoPago(), registradoPor.getId(), Instant.now().minus(VENTANA_DUPLICADO));
+            if (duplicado) {
+                throw new ConflictoDeDatosException("Ya se registró un cobro igual para este turno hace unos segundos — revisá antes de cargarlo de nuevo");
+            }
         }
         Ingreso ingreso = new Ingreso();
         ingreso.setMedico(medico);
@@ -146,6 +157,11 @@ public class CajaService {
         BigDecimal saldoActual = ingresoRepository.totalIngresos(medico.getId()).subtract(retiroRepository.totalRetiros(medico.getId()));
         if (request.monto().compareTo(saldoActual) > 0) {
             throw new IllegalArgumentException("El monto supera el saldo acumulado del médico ($" + saldoActual + ")");
+        }
+        boolean duplicado = retiroRepository.existeDuplicadoReciente(medico.getId(), request.monto(),
+                entregadoPor.getId(), Instant.now().minus(VENTANA_DUPLICADO));
+        if (duplicado) {
+            throw new ConflictoDeDatosException("Ya se registró un retiro igual para este médico hace unos segundos — revisá antes de cargarlo de nuevo");
         }
 
         Retiro retiro = new Retiro();

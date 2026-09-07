@@ -1,11 +1,13 @@
 package com.fktlomas.turnos.repository;
 
 import com.fktlomas.turnos.domain.Ingreso;
+import com.fktlomas.turnos.domain.MetodoPago;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -54,4 +56,25 @@ public interface IngresoRepository extends JpaRepository<Ingreso, Long> {
             where i.id = :id
             """)
     Optional<Ingreso> buscarPorIdConDetalle(@Param("id") Long id);
+
+    /**
+     * Detecta un doble-submit del mismo cobro (doble click, reintento de red) para el mismo
+     * turno: mismo turno, monto, método de pago y quién lo cargó, en los últimos segundos —
+     * ver ventana en CajaService. Acotado a turnoId no nulo a propósito: dos cobros sin turno
+     * asociado (ej. dos pacientes distintos pagando el mismo monto en efectivo, uno detrás del
+     * otro) son un caso legítimo y no hay forma de distinguirlos de un duplicado real sin ese
+     * dato.
+     */
+    @Query("""
+            select count(i) > 0 from Ingreso i
+            where i.turno.id = :turnoId
+            and i.monto = :monto
+            and i.metodoPago = :metodoPago
+            and i.registradoPor.id = :registradoPorId
+            and i.anulado = false
+            and i.createdAt >= :desde
+            """)
+    boolean existeDuplicadoRecientePorTurno(@Param("turnoId") Long turnoId, @Param("monto") BigDecimal monto,
+            @Param("metodoPago") MetodoPago metodoPago, @Param("registradoPorId") Long registradoPorId,
+            @Param("desde") Instant desde);
 }
