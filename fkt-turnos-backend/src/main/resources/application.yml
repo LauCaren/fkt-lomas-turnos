@@ -88,6 +88,12 @@ app:
     # plantilla del mensaje y las horas de anticipación, esto NO es editable
     # desde el panel (ver RecordatorioService).
     intervalo-minutos: ${RECORDATORIOS_INTERVALO_MINUTOS:15}
+  seguridad:
+    # Ventana horaria "normal" de login del personal de oficina (ADMIN/SECRETARIA/CONTADOR,
+    # hora de Argentina) — fuera de este rango, AuthService avisa por mail al admin. No bloquea
+    # el login, solo alerta (ver AuthService.alertarLoginFueraDeHorarioSiCorresponde).
+    horario-inicio: ${SEGURIDAD_HORARIO_INICIO:07:00}
+    horario-fin: ${SEGURIDAD_HORARIO_FIN:21:00}
 
 springdoc:
   swagger-ui:

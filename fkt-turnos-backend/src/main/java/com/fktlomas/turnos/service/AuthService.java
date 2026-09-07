@@ -29,8 +29,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Base64;
+import java.util.EnumSet;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +49,15 @@ public class AuthService {
     // tiene un costo de inicialización/sembrado innecesario.
     private static final SecureRandom RANDOM = new SecureRandom();
 
+    private static final ZoneId ZONA_CLINICA = ZoneId.of("America/Argentina/Buenos_Aires");
+    private static final Set<Role> ROLES_ALERTA_HORARIO = EnumSet.of(Role.ADMIN, Role.SECRETARIA, Role.CONTADOR);
+    // Por usuario, no global: a diferencia del job de recordatorios (una sola corrida), acá
+    // cada persona que loguea fuera de horario merece su propio aviso — el enfriamiento es
+    // solo para no mandar un mail por cada request si alguien queda logueando en loop (ej. un
+    // script de monitoreo con credenciales de staff, o varios intentos fallidos de MFA).
+    private static final Duration ENFRIAMIENTO_ALERTA_POR_USUARIO = Duration.ofHours(1);
+    private final ConcurrentHashMap<Long, Instant> ultimaAlertaHorarioPorUsuario = new ConcurrentHashMap<>();
+
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -54,6 +69,12 @@ public class AuthService {
 
     @Value("${app.frontend-url}")
     private String frontendUrl;
+
+    @Value("${app.seguridad.horario-inicio}")
+    private LocalTime horarioInicio;
+
+    @Value("${app.seguridad.horario-fin}")
+    private LocalTime horarioFin;
 
     @Transactional
     public AuthResponse registrarPaciente(RegistroRequest request) {
@@ -108,8 +129,35 @@ public class AuthService {
         }
 
         loginRateLimiterService.registrarExito(request.email());
+        alertarLoginFueraDeHorarioSiCorresponde(usuario);
         boolean mfaSetupRequerido = usuario.getRole() == Role.CONTADOR && !usuario.isMfaHabilitado();
         return new AuthResponse(jwtService.generarToken(usuario), usuario.getNombreCompleto(), usuario.getEmail(), usuario.getRole().name(), mfaSetupRequerido);
+    }
+
+    /**
+     * Avisa por mail cuando personal de oficina (ADMIN/SECRETARIA/CONTADOR) inicia sesión
+     * fuera del horario configurado (app.seguridad.horario-*). No bloquea el login — es una
+     * alerta, no un control de acceso — y no aplica a MEDICO ni PACIENTE: los médicos entran
+     * a horarios más variables (guardias, recuperar turnos) y un paciente puede sacar un turno
+     * a cualquier hora sin que eso sea señal de nada.
+     */
+    private void alertarLoginFueraDeHorarioSiCorresponde(Usuario usuario) {
+        if (!ROLES_ALERTA_HORARIO.contains(usuario.getRole())) {
+            return;
+        }
+        ZonedDateTime ahora = ZonedDateTime.now(ZONA_CLINICA);
+        LocalTime hora = ahora.toLocalTime();
+        boolean dentroDeHorario = !hora.isBefore(horarioInicio) && hora.isBefore(horarioFin);
+        if (dentroDeHorario) {
+            return;
+        }
+
+        Instant ultima = ultimaAlertaHorarioPorUsuario.get(usuario.getId());
+        if (ultima != null && Duration.between(ultima, Instant.now()).compareTo(ENFRIAMIENTO_ALERTA_POR_USUARIO) < 0) {
+            return;
+        }
+        ultimaAlertaHorarioPorUsuario.put(usuario.getId(), Instant.now());
+        emailService.notificarLoginFueraDeHorario(usuario, ahora);
     }
 
     @Transactional

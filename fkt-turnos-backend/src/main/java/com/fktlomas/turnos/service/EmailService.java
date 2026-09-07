@@ -357,6 +357,26 @@ public class EmailService {
     }
 
     /**
+     * Login de personal de oficina (ADMIN/SECRETARIA/CONTADOR) fuera del horario configurado
+     * (ver AuthService) — no bloquea el login, solo avisa para que quede a la vista un acceso
+     * en un horario inusual. @Async para no sumarle latencia SMTP al login del usuario.
+     */
+    @Async
+    public void notificarLoginFueraDeHorario(Usuario usuario, java.time.ZonedDateTime momento) {
+        String asunto = "Login fuera de horario — FKT Lomas";
+        String cuerpo = """
+                %s (%s, rol %s) inició sesión fuera del horario habitual configurado.
+
+                Fecha y hora: %s
+
+                Si no lo esperabas, valdría la pena confirmar con esa persona o revisar la
+                Auditoría en el panel de administración.
+                """.formatted(usuario.getNombreCompleto(), usuario.getEmail(), usuario.getRole(),
+                momento.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+        enviar(adminNotifyEmail, asunto, cuerpo);
+    }
+
+    /**
      * A diferencia de los métodos de arriba (@Async, no le importa a nadie el
      * resultado), este es sincrónico y tira excepción si falla: lo usa
      * RecordatorioService, que necesita saber en el momento si el envío
