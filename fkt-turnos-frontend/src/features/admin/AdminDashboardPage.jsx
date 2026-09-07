@@ -20,6 +20,7 @@ import AdminBusquedaPacienteTab from './AdminBusquedaPacienteTab';
 import AdminSecretariasTab from './AdminSecretariasTab';
 import AdminAuditoriaTab from './AdminAuditoriaTab';
 import AdminSolicitudesBajaTab from './AdminSolicitudesBajaTab';
+import AdminResenasTab from './AdminResenasTab';
 
 const TABS = [
   { id: 'resumen', label: 'Resumen' },
@@ -36,6 +37,7 @@ const TABS = [
   { id: 'postulaciones', label: 'Postulaciones' },
   { id: 'secretarias', label: 'Cuentas de secretaria' },
   { id: 'solicitudes-baja', label: 'Pedidos de baja' },
+  { id: 'resenas', label: 'Reseñas' },
   { id: 'auditoria', label: 'Auditoría' },
   { id: 'cuenta', label: 'Mi cuenta' },
 ];
@@ -95,6 +97,7 @@ export default function AdminDashboardPage() {
             {tab === 'postulaciones' && <AdminPostulacionesTab />}
             {tab === 'secretarias' && <AdminSecretariasTab />}
             {tab === 'solicitudes-baja' && <AdminSolicitudesBajaTab />}
+            {tab === 'resenas' && <AdminResenasTab />}
             {tab === 'auditoria' && <AdminAuditoriaTab />}
             {tab === 'cuenta' && <AdminCuentaTab />}
           </TabPanel>

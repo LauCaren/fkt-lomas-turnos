@@ -87,6 +87,18 @@ export const pagarTurnoOnline = createAsyncThunk(
   }
 );
 
+export const crearResenaTurno = createAsyncThunk(
+  'turnos/crearResenaTurno',
+  async ({ turnoId, puntaje, comentario }, { rejectWithValue }) => {
+    try {
+      await axiosClient.post(`/api/turnos/${turnoId}/resena`, { puntaje, comentario });
+      return turnoId;
+    } catch (error) {
+      return rejectWithValue({ turnoId, mensaje: mensajeDeError(error, 'No pudimos guardar tu reseña') });
+    }
+  }
+);
+
 export const fetchMisTurnos = createAsyncThunk(
   'turnos/fetchMisTurnos',
   async (_, { rejectWithValue }) => {
@@ -163,6 +175,8 @@ const turnosSlice = createSlice({
     mercadoPagoHabilitado: false,
     pagoOnlineCargando: false,
     pagoOnlineError: null,
+    resenaEnCurso: null,
+    resenaErrorPorTurno: {},
   },
   reducers: {
     limpiarReserva(state) {
@@ -212,6 +226,18 @@ const turnosSlice = createSlice({
       .addCase(pagarTurnoOnline.fulfilled, (state) => { state.pagoOnlineCargando = false; })
       .addCase(pagarTurnoOnline.rejected, (state, action) => { state.pagoOnlineCargando = false; state.pagoOnlineError = action.payload; })
       .addCase(fetchMisTurnos.fulfilled, (state, action) => { state.misTurnos = action.payload; })
+      .addCase(crearResenaTurno.pending, (state, action) => {
+        state.resenaEnCurso = action.meta.arg.turnoId;
+        delete state.resenaErrorPorTurno[action.meta.arg.turnoId];
+      })
+      .addCase(crearResenaTurno.fulfilled, (state, action) => {
+        state.resenaEnCurso = null;
+        state.misTurnos = state.misTurnos.map((t) => t.id === action.payload ? { ...t, tieneResena: true } : t);
+      })
+      .addCase(crearResenaTurno.rejected, (state, action) => {
+        state.resenaEnCurso = null;
+        state.resenaErrorPorTurno[action.payload.turnoId] = action.payload.mensaje;
+      })
       .addCase(cancelarTurno.fulfilled, (state, action) => {
         state.misTurnos = state.misTurnos.map((t) => t.id === action.payload ? { ...t, estado: 'CANCELADO' } : t);
       })

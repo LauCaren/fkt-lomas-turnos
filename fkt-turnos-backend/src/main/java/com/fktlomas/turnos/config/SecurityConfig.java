@@ -87,6 +87,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/especialidades/**", "/api/medicos/**").permitAll()
+                        // Reseñas aprobadas del centro entero (opiniones.html) — las de un médico puntual
+                        // ya están cubiertas arriba, bajo /api/medicos/**.
+                        .requestMatchers(HttpMethod.GET, "/api/resenas").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/turnos/confirmacion").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/contacto", "/api/postulaciones").permitAll()
                         // El estado lo consulta el wizard de reserva sin loguearse necesariamente, y al

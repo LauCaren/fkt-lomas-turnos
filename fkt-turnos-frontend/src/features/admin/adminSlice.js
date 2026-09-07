@@ -415,6 +415,33 @@ export const rechazarSolicitudBaja = createAsyncThunk('admin/rechazarSolicitudBa
   }
 });
 
+export const fetchResenas = createAsyncThunk('admin/fetchResenas', async (estado, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/admin/resenas', { params: { estado: estado || undefined } });
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
+export const aprobarResena = createAsyncThunk('admin/aprobarResena', async (id, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.put(`/api/admin/resenas/${id}/aprobar`);
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudo aprobar la reseña'));
+  }
+});
+
+export const rechazarResena = createAsyncThunk('admin/rechazarResena', async ({ id, motivo }, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.put(`/api/admin/resenas/${id}/rechazar`, { motivo });
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudo rechazar la reseña'));
+  }
+});
+
 export const fetchAuditoria = createAsyncThunk('admin/fetchAuditoria', async ({ tipoEntidad, desde, hasta, page } = {}, { rejectWithValue }) => {
   try {
     const { data } = await axiosClient.get('/api/admin/auditoria', {
@@ -450,6 +477,7 @@ const adminSlice = createSlice({
     tendencia: [],
     secretarias: [],
     solicitudesBaja: [],
+    resenas: [],
     auditoria: { content: [], totalPages: 0, number: 0 },
     error: null,
     mensajeExito: null,
@@ -613,7 +641,19 @@ const adminSlice = createSlice({
         state.solicitudesBaja = state.solicitudesBaja.map((s) => s.id === action.payload.id ? action.payload : s);
         state.mensajeExito = 'Pedido rechazado';
       })
-      .addCase(rechazarSolicitudBaja.rejected, (state, action) => { state.error = action.payload; });
+      .addCase(rechazarSolicitudBaja.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(fetchResenas.fulfilled, (state, action) => { state.resenas = action.payload; })
+      .addCase(fetchResenas.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(aprobarResena.fulfilled, (state, action) => {
+        state.resenas = state.resenas.map((r) => r.id === action.payload.id ? action.payload : r);
+        state.mensajeExito = 'Reseña aprobada — ya es pública';
+      })
+      .addCase(aprobarResena.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(rechazarResena.fulfilled, (state, action) => {
+        state.resenas = state.resenas.map((r) => r.id === action.payload.id ? action.payload : r);
+        state.mensajeExito = 'Reseña rechazada';
+      })
+      .addCase(rechazarResena.rejected, (state, action) => { state.error = action.payload; });
   },
 });
 

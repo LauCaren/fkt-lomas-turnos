@@ -12,6 +12,7 @@ import AdminMensajesTab from '../admin/AdminMensajesTab';
 import AdminPostulacionesTab from '../admin/AdminPostulacionesTab';
 import AdminRecordatoriosTab from '../admin/AdminRecordatoriosTab';
 import AdminSolicitudesBajaTab from '../admin/AdminSolicitudesBajaTab';
+import AdminResenasTab from '../admin/AdminResenasTab';
 import AdminCuentaTab from '../admin/AdminCuentaTab';
 
 // Reusa los mismos componentes que el panel de admin (pegan a /api/admin/**, que esta cuenta
@@ -28,6 +29,7 @@ const TABS = [
   { id: 'mensajes', label: 'Alquiler de consultorios' },
   { id: 'postulaciones', label: 'Postulaciones' },
   { id: 'solicitudes-baja', label: 'Pedidos de baja' },
+  { id: 'resenas', label: 'Reseñas' },
   { id: 'cuenta', label: 'Mi cuenta' },
 ];
 
@@ -74,6 +76,7 @@ export default function SecretariaDashboardPage() {
             {tab === 'mensajes' && <AdminMensajesTab />}
             {tab === 'postulaciones' && <AdminPostulacionesTab />}
             {tab === 'solicitudes-baja' && <AdminSolicitudesBajaTab />}
+            {tab === 'resenas' && <AdminResenasTab />}
             {tab === 'cuenta' && <AdminCuentaTab />}
           </TabPanel>
         </>

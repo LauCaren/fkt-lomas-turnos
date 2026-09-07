@@ -15,9 +15,15 @@ public record TurnoDto(
         LocalTime horaInicio,
         LocalTime horaFin,
         String estado,
-        String motivoConsulta
+        String motivoConsulta,
+        String estadoAsistencia,
+        boolean tieneResena
 ) {
     public static TurnoDto de(Turno t) {
+        return de(t, false);
+    }
+
+    public static TurnoDto de(Turno t, boolean tieneResena) {
         return new TurnoDto(
                 t.getId(),
                 t.getMedico().getId(),
@@ -28,7 +34,9 @@ public record TurnoDto(
                 t.getHoraInicio(),
                 t.getHoraFin(),
                 t.getEstado().name(),
-                t.getMotivoConsulta()
+                t.getMotivoConsulta(),
+                t.getEstadoAsistencia().name(),
+                tieneResena
         );
     }
 }

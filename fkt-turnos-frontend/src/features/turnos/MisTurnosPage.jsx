@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { fetchMisTurnos, cancelarTurno } from './turnosSlice';
 import AgregarCalendario from '../../components/AgregarCalendario';
+import DejarResenaTurno from './DejarResenaTurno';
 
 // Mercado Pago vuelve acá con ?pago=exito|pendiente|fallo (ver MercadoPagoService.crearPreferenciaEnMercadoPago,
 // back_urls) — el pago en sí se confirma por webhook, esto es solo feedback inmediato al paciente.
@@ -87,6 +88,9 @@ export default function MisTurnosPage() {
                 <div style={{ marginTop: 10 }}>
                   <AgregarCalendario turno={t} />
                 </div>
+              )}
+              {t.estadoAsistencia === 'ATENDIDO' && !t.tieneResena && (
+                <DejarResenaTurno turnoId={t.id} />
               )}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>

@@ -17,6 +17,7 @@ import com.fktlomas.turnos.exception.ConflictoDeDatosException;
 import com.fktlomas.turnos.exception.RecursoNoEncontradoException;
 import com.fktlomas.turnos.exception.TurnoNoDisponibleException;
 import com.fktlomas.turnos.repository.EvolucionClinicaRepository;
+import com.fktlomas.turnos.repository.ResenaRepository;
 import com.fktlomas.turnos.repository.TurnoRepository;
 import com.fktlomas.turnos.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +49,7 @@ public class TurnoService {
     private final ListaEsperaService listaEsperaService;
     private final AuditoriaService auditoriaService;
     private final EvolucionClinicaRepository evolucionClinicaRepository;
+    private final ResenaRepository resenaRepository;
 
     /**
      * Marca en cada turno si el médico ya cargó una evolución — nunca el contenido, que es
@@ -105,8 +107,10 @@ public class TurnoService {
 
     @Transactional(readOnly = true)
     public List<TurnoDto> misTurnos(Long pacienteId) {
-        return turnoRepository.findByPacienteIdOrderByFechaDescHoraInicioDesc(pacienteId)
-                .stream().map(TurnoDto::de).toList();
+        List<Turno> turnos = turnoRepository.findByPacienteIdOrderByFechaDescHoraInicioDesc(pacienteId);
+        Set<Long> turnoIds = turnos.stream().map(Turno::getId).collect(Collectors.toSet());
+        Set<Long> conResena = turnoIds.isEmpty() ? Set.of() : Set.copyOf(resenaRepository.turnoIdsConResena(turnoIds));
+        return turnos.stream().map(t -> TurnoDto.de(t, conResena.contains(t.getId()))).toList();
     }
 
     @Transactional

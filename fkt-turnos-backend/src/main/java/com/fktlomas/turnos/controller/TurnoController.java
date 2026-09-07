@@ -6,9 +6,12 @@ import com.fktlomas.turnos.dto.ListaEsperaRequest;
 import com.fktlomas.turnos.dto.ReservarTurnoRequest;
 import com.fktlomas.turnos.dto.TurnoDto;
 import com.fktlomas.turnos.dto.pago.PagoOnlineDto;
+import com.fktlomas.turnos.dto.resena.CrearResenaRequest;
+import com.fktlomas.turnos.dto.resena.ResenaDto;
 import com.fktlomas.turnos.security.AppUserDetails;
 import com.fktlomas.turnos.service.ListaEsperaService;
 import com.fktlomas.turnos.service.MercadoPagoService;
+import com.fktlomas.turnos.service.ResenaService;
 import com.fktlomas.turnos.service.TurnoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +30,7 @@ public class TurnoController {
     private final TurnoService turnoService;
     private final ListaEsperaService listaEsperaService;
     private final MercadoPagoService mercadoPagoService;
+    private final ResenaService resenaService;
 
     @PostMapping("/{id}/reservar")
     public ResponseEntity<TurnoDto> reservar(@PathVariable Long id,
@@ -40,6 +44,13 @@ public class TurnoController {
     @PostMapping("/{id}/pago-online")
     public PagoOnlineDto pagoOnline(@PathVariable Long id, @AuthenticationPrincipal AppUserDetails principal) {
         return mercadoPagoService.crearPreferencia(id, principal.getUsuario());
+    }
+
+    /** Solo se puede calificar un turno propio ya ATENDIDO, uno por turno — ver ResenaService.crear. */
+    @PostMapping("/{id}/resena")
+    public ResenaDto crearResena(@PathVariable Long id, @AuthenticationPrincipal AppUserDetails principal,
+                                  @Valid @RequestBody CrearResenaRequest request) {
+        return resenaService.crear(id, principal.getUsuario(), request);
     }
 
     @GetMapping("/mios")

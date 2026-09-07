@@ -2,7 +2,9 @@ package com.fktlomas.turnos.controller;
 
 import com.fktlomas.turnos.dto.MedicoDto;
 import com.fktlomas.turnos.dto.TurnoDto;
+import com.fktlomas.turnos.dto.resena.ResumenResenasDto;
 import com.fktlomas.turnos.service.MedicoService;
+import com.fktlomas.turnos.service.ResenaService;
 import com.fktlomas.turnos.service.TurnoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -21,6 +23,7 @@ public class MedicoController {
 
     private final MedicoService medicoService;
     private final TurnoService turnoService;
+    private final ResenaService resenaService;
 
     @GetMapping
     public List<MedicoDto> listar(@RequestParam(required = false) Long especialidadId) {
@@ -38,6 +41,12 @@ public class MedicoController {
     public List<LocalDate> proximaDisponibilidad(@PathVariable Long id,
                                                   @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde) {
         return turnoService.proximaDisponibilidad(id, desde);
+    }
+
+    /** Público (bajo /api/medicos/**, ya permitAll): reseñas aprobadas, para el sitio de marketing o la ficha del médico en la app. */
+    @GetMapping("/{id}/resenas")
+    public ResumenResenasDto resenas(@PathVariable Long id) {
+        return resenaService.publicasDeMedico(id);
     }
 
     /**
