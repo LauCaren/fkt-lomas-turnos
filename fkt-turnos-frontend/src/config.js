@@ -24,3 +24,8 @@ export const APP_URL = import.meta.env.VITE_APP_URL
 // App.jsx (InicioRedirect) y LoginPage, que antes tenían cada uno su propia
 // copia del mapeo y podían desincronizarse si se agregaba un rol nuevo.
 export const RUTA_POR_ROL = { ADMIN: '/admin', SECRETARIA: '/secretaria', MEDICO: '/medico', CONTADOR: '/contador' };
+
+// Roles para los que el backend exige 2FA y no permite desactivarla (ver AuthService.ROLES_MFA_OBLIGATORIO
+// y AppUserDetails en el backend) — usado para bloquear el panel hasta que la activen y para
+// ocultar la opción de desactivarla una vez activa.
+export const ROLES_MFA_OBLIGATORIO = ['ADMIN', 'SECRETARIA', 'CONTADOR'];

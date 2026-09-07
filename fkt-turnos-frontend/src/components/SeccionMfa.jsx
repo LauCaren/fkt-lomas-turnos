@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ROLES_MFA_OBLIGATORIO } from '../config';
 
 export default function SeccionMfa({ perfil, mfaSetup, onIniciar, onActivar, onDesactivar }) {
   const [codigo, setCodigo] = useState('');
@@ -16,17 +17,26 @@ export default function SeccionMfa({ perfil, mfaSetup, onIniciar, onActivar, onD
   if (!perfil) return null;
 
   if (perfil.mfaHabilitado) {
+    const esObligatoria = ROLES_MFA_OBLIGATORIO.includes(perfil.role);
     return (
-      <form onSubmit={handleDesactivar} className="card">
-        <p style={{ fontSize: 14, marginBottom: 12 }}>
+      <div className="card">
+        <p style={{ fontSize: 14, marginBottom: esObligatoria ? 0 : 12 }}>
           <span className="badge badge-disponible">Activada</span> La verificación en dos pasos está activa en tu cuenta.
         </p>
-        <div className="field">
-          <label>Código de tu app de autenticación (para desactivar)</label>
-          <input inputMode="numeric" pattern="\d{6}" maxLength={6} required value={codigo} onChange={(e) => setCodigo(e.target.value)} placeholder="123456" />
-        </div>
-        <button type="submit" className="btn btn-outline">Desactivar verificación en dos pasos</button>
-      </form>
+        {esObligatoria ? (
+          <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 8 }}>
+            Es obligatoria para tu rol y no se puede desactivar.
+          </p>
+        ) : (
+          <form onSubmit={handleDesactivar}>
+            <div className="field" style={{ marginTop: 12 }}>
+              <label>Código de tu app de autenticación (para desactivar)</label>
+              <input inputMode="numeric" pattern="\d{6}" maxLength={6} required value={codigo} onChange={(e) => setCodigo(e.target.value)} placeholder="123456" />
+            </div>
+            <button type="submit" className="btn btn-outline">Desactivar verificación en dos pasos</button>
+          </form>
+        )}
+      </div>
     );
   }
 

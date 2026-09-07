@@ -7,9 +7,15 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 public class AppUserDetails implements UserDetails {
+
+    // Mantenido en sync a mano con AuthService.ROLES_MFA_OBLIGATORIO: los tres roles de
+    // oficina/finanzas (ven caja, historia clínica o ambas) no son opcionales para 2FA.
+    private static final Set<Role> ROLES_MFA_OBLIGATORIO = EnumSet.of(Role.ADMIN, Role.SECRETARIA, Role.CONTADOR);
 
     private final Usuario usuario;
 
@@ -23,15 +29,15 @@ public class AppUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // El CONTADOR ve todos los movimientos de caja del centro — a diferencia de
-        // médico/admin, para este rol el 2FA no es opcional. Mientras no lo tenga activado
-        // no recibe ROLE_CONTADOR (así que /api/contador/** le devuelve 403, ver
-        // SecurityConfig), solo el authority genérico de abajo, que igual le alcanza para
-        // entrar a /api/mi-cuenta/mfa/** (no restringido por rol) y activarlo — en cuanto lo
-        // activa, el siguiente request ya recalcula esto desde la base y le da el rol
-        // completo, sin necesidad de un login nuevo.
-        if (usuario.getRole() == Role.CONTADOR && !usuario.isMfaHabilitado()) {
-            return List.of(new SimpleGrantedAuthority("ROLE_CONTADOR_MFA_PENDIENTE"));
+        // ADMIN/SECRETARIA escriben sobre historia clínica y caja física, y CONTADOR ve todos
+        // los movimientos de caja del centro — para estos tres el 2FA no es opcional. Mientras
+        // no lo tengan activado no reciben su rol real (así que /api/admin/**, /api/contador/**
+        // les devuelve 403, ver SecurityConfig), solo el authority "pendiente" de abajo, que
+        // igual alcanza para entrar a /api/mi-cuenta/mfa/** (no restringido por rol) y
+        // activarlo — en cuanto lo activan, el siguiente request ya recalcula esto desde la
+        // base y les da el rol completo, sin necesidad de un login nuevo.
+        if (ROLES_MFA_OBLIGATORIO.contains(usuario.getRole()) && !usuario.isMfaHabilitado()) {
+            return List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getRole().name() + "_MFA_PENDIENTE"));
         }
         return List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getRole().name()));
     }

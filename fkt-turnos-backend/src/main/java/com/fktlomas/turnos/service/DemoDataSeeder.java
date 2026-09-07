@@ -116,8 +116,8 @@ public class DemoDataSeeder implements CommandLineRunner {
                 ================================================================
                 DemoDataSeeder: listo. Usuarios de prueba (todos con la misma
                 contraseña "{}"):
-                  ADMIN       fernando@fktlomas.com   (bootstrap — ver ADMIN_BOOTSTRAP_PASSWORD)
-                  SECRETARIA  {}
+                  ADMIN       fernando@fktlomas.com   (bootstrap — ver ADMIN_BOOTSTRAP_PASSWORD; 2FA obligatoria)
+                  SECRETARIA  {}   (2FA obligatoria: se configura en el primer login)
                   MEDICO      {}
                   CONTADOR    {}   (2FA obligatoria: se configura en el primer login)
                   PACIENTE    {}

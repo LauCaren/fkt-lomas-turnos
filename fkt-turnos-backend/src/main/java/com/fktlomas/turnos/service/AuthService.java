@@ -51,6 +51,10 @@ public class AuthService {
 
     private static final ZoneId ZONA_CLINICA = ZoneId.of("America/Argentina/Buenos_Aires");
     private static final Set<Role> ROLES_ALERTA_HORARIO = EnumSet.of(Role.ADMIN, Role.SECRETARIA, Role.CONTADOR);
+    // Mantenido en sync a mano con AppUserDetails.ROLES_MFA_OBLIGATORIO. Coincide hoy con
+    // ROLES_ALERTA_HORARIO, pero son conceptos distintos (uno avisa, el otro bloquea acceso)
+    // que podrían divergir — por eso una constante propia en vez de reusar la de arriba.
+    private static final Set<Role> ROLES_MFA_OBLIGATORIO = EnumSet.of(Role.ADMIN, Role.SECRETARIA, Role.CONTADOR);
     // Por usuario, no global: a diferencia del job de recordatorios (una sola corrida), acá
     // cada persona que loguea fuera de horario merece su propio aviso — el enfriamiento es
     // solo para no mandar un mail por cada request si alguien queda logueando en loop (ej. un
@@ -130,7 +134,7 @@ public class AuthService {
 
         loginRateLimiterService.registrarExito(request.email());
         alertarLoginFueraDeHorarioSiCorresponde(usuario);
-        boolean mfaSetupRequerido = usuario.getRole() == Role.CONTADOR && !usuario.isMfaHabilitado();
+        boolean mfaSetupRequerido = ROLES_MFA_OBLIGATORIO.contains(usuario.getRole()) && !usuario.isMfaHabilitado();
         return new AuthResponse(jwtService.generarToken(usuario), usuario.getNombreCompleto(), usuario.getEmail(), usuario.getRole().name(), mfaSetupRequerido);
     }
 
@@ -227,6 +231,9 @@ public class AuthService {
 
     @Transactional
     public void desactivarMfa(Usuario usuario, String codigo) {
+        if (ROLES_MFA_OBLIGATORIO.contains(usuario.getRole())) {
+            throw new IllegalArgumentException("La verificación en dos pasos es obligatoria para tu rol y no se puede desactivar");
+        }
         if (!usuario.isMfaHabilitado() || !totpService.verificar(usuario.getMfaSecret(), codigo)) {
             throw new IllegalArgumentException("El código no es correcto");
         }

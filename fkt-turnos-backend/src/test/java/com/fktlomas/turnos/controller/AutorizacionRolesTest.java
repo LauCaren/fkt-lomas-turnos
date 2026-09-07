@@ -118,8 +118,62 @@ class AutorizacionRolesTest {
     }
 
     @Test
+    void unAdminOUnaSecretariaSinMfaActivadoNoPuedenUsarElPanelAunqueLaContraseñaSeaCorrecta() throws Exception {
+        // Mismo mecanismo que el CONTADOR de arriba, extendido a ADMIN y SECRETARIA (ver
+        // AppUserDetails.ROLES_MFA_OBLIGATORIO): sin 2FA activado, ninguno de los dos llega
+        // a /api/admin/** aunque el login en sí (usuario + contraseña) sea correcto.
+        String tokenAdmin = loginComo(crearUsuario("admin.sinmfa@test.com", Role.ADMIN));
+        String tokenSecretaria = loginComo(crearUsuario("secretaria.sinmfa@test.com", Role.SECRETARIA));
+
+        mockMvc.perform(autenticado(get("/api/admin/resumen"), tokenAdmin)).andExpect(status().isForbidden());
+        mockMvc.perform(autenticado(get("/api/admin/resumen"), tokenSecretaria)).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void unAdminRecuperaAccesoInmediatamenteDespuesDeActivarMfaSinTenerQueVolverALoguearse() throws Exception {
+        Usuario admin = crearUsuario("admin.activando@test.com", Role.ADMIN);
+        String token = loginComo(admin);
+
+        mockMvc.perform(autenticado(get("/api/admin/resumen"), token)).andExpect(status().isForbidden());
+
+        // Mismo truco que con el contador: se fuerza el estado final directo en vez de
+        // reimplementar TOTP acá, ver /api/mi-cuenta/mfa/** para el flujo real.
+        admin.setMfaHabilitado(true);
+        usuarioRepository.save(admin);
+
+        mockMvc.perform(autenticado(get("/api/admin/resumen"), token)).andExpect(status().isOk());
+    }
+
+    @Test
+    void unAdminOUnaSecretariaNoPuedenDesactivarSu2FAUnaVezActivado() throws Exception {
+        // "Obligatorio" tiene que valer también para el camino de vuelta: si se pudiera
+        // desactivar por autoservicio, la garantía de arriba (sin 2FA no hay acceso) sería
+        // solo una fricción de un solo uso, no una obligación real.
+        // Login primero (mientras el 2FA todavía está deshabilitado, así el login en sí no
+        // exige un código) y recién después se activa el 2FA a mano, mismo truco que en
+        // unAdminRecuperaAccesoInmediatamenteDespuesDeActivarMfaSinTenerQueVolverALoguearse.
+        Usuario admin = crearUsuario("admin.condesactivar@test.com", Role.ADMIN);
+        String token = loginComo(admin);
+        habilitarMfa(admin);
+
+        mockMvc.perform(autenticado(post("/api/mi-cuenta/mfa/desactivar"), token)
+                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"codigo":"000000"}
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void unaSecretariaPuedeAccederAAgendaYMensajesPeroNoAMedicosNiCajaNiKinesiologiaClinica() throws Exception {
-        String token = loginComo(crearUsuario("secretaria.a@test.com", Role.SECRETARIA));
+        // Con MFA activado: ADMIN/SECRETARIA son roles obligatorios (ver AppUserDetails), así
+        // que sin esto la cuenta quedaría en ROLE_SECRETARIA_MFA_PENDIENTE y ni siquiera vería
+        // la agenda — eso ya lo cubre el test de arriba, este prueba la autorización fina. Login
+        // primero (con el 2FA todavía deshabilitado) y se activa recién después, mismo truco
+        // que en unAdminRecuperaAccesoInmediatamenteDespuesDeActivarMfaSinTenerQueVolverALoguearse.
+        Usuario secretaria = crearUsuario("secretaria.a@test.com", Role.SECRETARIA);
+        String token = loginComo(secretaria);
+        habilitarMfa(secretaria);
 
         // Sí: agenda / reserva telefónica / cola de espera — el trabajo diario de la secretaria.
         mockMvc.perform(autenticado(get("/api/admin/turnos")
@@ -150,6 +204,7 @@ class AutorizacionRolesTest {
     void unAdminPuedeCrearDesactivarYRevocarLasSesionesDeUnaSecretaria() throws Exception {
         Usuario admin = crearUsuario("admin.gestor@test.com", Role.ADMIN);
         String tokenAdmin = loginComo(admin);
+        habilitarMfa(admin);
 
         String respuestaCreacion = mockMvc.perform(autenticado(post("/api/admin/secretarias"), tokenAdmin)
                         .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
@@ -160,8 +215,13 @@ class AutorizacionRolesTest {
                 .andReturn().getResponse().getContentAsString();
         Long secretariaId = objectMapper.readTree(respuestaCreacion).get("id").asLong();
 
-        // La cuenta recién creada puede loguearse con normalidad.
-        String tokenSecretaria = loginComo(usuarioRepository.findById(secretariaId).orElseThrow());
+        // La cuenta recién creada puede loguearse con normalidad, pero como cualquier
+        // ADMIN/SECRETARIA nueva todavía no tiene el 2FA obligatorio activado — se lo activamos
+        // acá (después del login, no antes: el login en sí ya exigiría un código) para poder
+        // probar el resto del flujo (creación/desactivación/revocación).
+        Usuario secretariaNueva = usuarioRepository.findById(secretariaId).orElseThrow();
+        String tokenSecretaria = loginComo(secretariaNueva);
+        habilitarMfa(secretariaNueva);
         mockMvc.perform(autenticado(get("/api/admin/turnos")
                         .param("desde", LocalDate.now().toString())
                         .param("hasta", LocalDate.now().toString()), tokenSecretaria))
@@ -254,6 +314,11 @@ class AutorizacionRolesTest {
         usuario.setObraSocial("Particular");
         usuario.setPasswordHash(passwordEncoder.encode(CLAVE));
         usuario.setRole(role);
+        return usuarioRepository.save(usuario);
+    }
+
+    private Usuario habilitarMfa(Usuario usuario) {
+        usuario.setMfaHabilitado(true);
         return usuarioRepository.save(usuario);
     }
 
