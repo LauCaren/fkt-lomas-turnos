@@ -73,7 +73,8 @@ public class DemoDataSeeder implements CommandLineRunner {
         }
         log.info("DemoDataSeeder: cargando datos de ejemplo...");
 
-        Especialidad kinesiologia = especialidadRepository.findAll().stream()
+        // Solo valida que la especialidad exista (¿corrió Flyway?) — nada más del método la usa.
+        especialidadRepository.findAll().stream()
                 .filter(Especialidad::isEsKinesiologia).findFirst()
                 .orElseThrow(() -> new IllegalStateException("No hay especialidad de kinesiología sembrada — ¿corrió Flyway?"));
 
@@ -97,7 +98,6 @@ public class DemoDataSeeder implements CommandLineRunner {
         medicoRepository.save(medicoDemo2);
 
         List<Usuario> pacientes = crearPacientes();
-        Usuario pacientePrimario = pacientes.get(0);
 
         List<Turno> turnosDemo1 = generarAgenda(medicoDemo, pacientes);
         List<Turno> turnosDemo2 = generarAgenda(medicoDemo2, pacientes);
