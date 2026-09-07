@@ -142,6 +142,7 @@ Implementado y probado de punta a punta:
 - Si la fecha elegida no tiene horarios libres, el asistente sugiere las próximas fechas con lugar para ese médico (en vez de que el paciente tenga que ir probando fecha por fecha).
 - Los pacientes pueden editar sus propios datos y cambiar su contraseña desde "Mi cuenta". "Olvidé mi contraseña" por email con link temporal.
 - Feriados nacionales de Argentina 2026 precargados (Ley 27.399, verificados contra el calendario oficial) — se excluyen automáticamente al generar turnos, y se marcan visualmente en la agenda. El admin puede sumar cierres propios del centro vía `POST /api/admin/feriados`.
+- Check-in por QR en la sala de espera: un cartel fijo (`/checkin`, generado e imprimible desde la pestaña "Cola de espera" del admin) que el paciente escanea con su celular al llegar. Si tiene un turno reservado para hoy, se marca "Llegó" automáticamente — salvo que tenga copago de IOMA para esa consulta, en cuyo caso el cartel le pide que se acerque al mostrador a abonar antes de sumarse a la cola (la secretaria lo sigue pudiendo marcar a mano como siempre, desde la Agenda).
 
 **Kinesiología**
 - Plan de sesiones con orden médica obligatoria (subida de foto/PDF, validada por firma binaria del archivo, no por extensión ni por el Content-Type que manda el navegador) y validación manual del admin antes de generar los turnos.
@@ -153,6 +154,7 @@ Implementado y probado de punta a punta:
 - Cierre/resumen mensual con reenvío automático por email el último día del mes.
 - Exportación a PDF y Excel (Apache PDFBox / POI, ambas Apache-2.0) de los movimientos, para que la secretaria le mande al dueño un resumen de un día o período puntual.
 - El rol CONTADOR ve estos movimientos en su propio portal, de solo lectura.
+- El paciente ve sus propios pagos (solo los que están atados a un turno suyo) desde "Mi cuenta" y puede bajar un comprobante en PDF de cada uno — aclara explícitamente que es un registro interno, no una factura ni un comprobante fiscal válido ante AFIP.
 
 **Historia clínica y el rol MEDICO**
 - Cada médico tiene su propia cuenta (vinculada a su `Medico` desde el panel admin) y ve solo su agenda del día, su cola de espera de pacientes que llegaron, y puede marcar "atendido" y cargar una evolución clínica de la consulta.
@@ -215,16 +217,19 @@ Todavía no está desplegado — se está preparando la infraestructura de a poc
 - **Uploads** (fotos de médicos, CVs): ya no dependen de disco local — hay un backend de storage S3-compatible (`STORAGE_TYPE=s3`, AWS S3 o Cloudflare R2) además del local de siempre. Ver `fkt-turnos-backend/README.md`.
 - **Frontend** (`fkt-turnos-frontend/`): `vercel.json` y `public/_redirects` ya agregados — cubren el rewrite de SPA (todas las rutas caen en `index.html`) para Vercel, Netlify y Cloudflare Pages por igual.
 - **Secretos de producción** (`JWT_SECRET`, `MFA_ENCRYPTION_KEY`, contraseña de admin): ya generados y guardados en `.secrets-local/produccion.env` (fuera de git, ver `.gitignore`) — listos para copiar al panel del host que se elija.
+- **Backups de la base**: el backup diario automático a S3/R2 (`scripts/backup-db.sh` + `.github/workflows/backup.yml`) es el mecanismo de producción — ver sección "Backups" arriba. Además, `scripts/backup-db-local.sh` (`pg_dump` con `--clean --if-exists`, comprimido, con retención de 14 días) y `scripts/restore-db-local.sh` sirven para un backup/restore manual sin depender del bucket — probados de punta a punta (backup + restore a una base nueva, verificando que las filas coincidan). Útiles para desarrollo local, o como respaldo manual "por las dudas" antes de una migración o cambio riesgoso contra la base real. Sin argumentos apuntan al Postgres local de `docker-compose.yml`; contra la base real hay que exportar `PGHOST/PGPORT/PGDATABASE/PGUSER/PGPASSWORD` con los datos que dé el host de Postgres administrado.
+- **Monitoreo**: `/actuator/health` ya está expuesto públicamente y sin filtrar detalles internos (`show-details: never`, ver `fkt-turnos-backend/src/main/resources/application.yml`) — listo para que un servicio externo gratuito (UptimeRobot, Better Uptime, etc.) le pegue cada 5 minutos una vez que el backend tenga una URL real, y avise por mail/Telegram si se cae. El frontend tiene tracking de errores opcional vía Sentry (`VITE_SENTRY_DSN`, ver `fkt-turnos-frontend/README.md`) — sin configurar, es un no-op completo (ni se carga el SDK en el bundle).
 - **Todavía pendiente** (necesita elegir proveedor / crear cuentas — se deja para cuando esté todo listo del lado de negocio):
   - Elegir y crear cuenta en el host del backend + su Postgres administrado.
   - Elegir y crear cuenta en el host del frontend/sitio estático.
   - Crear el bucket S3/R2 real y cargar sus credenciales.
   - Resolver el acceso al DNS de `fktlomas.com` (lo armó un contratista externo).
   - SMTP real (Brevo sugerido) y cuenta de Twilio + aprobación de plantilla de WhatsApp en Meta.
-  - Reemplazar las URLs de desarrollo hardcodeadas (`http://localhost:5173`, `http://localhost:5500`, `http://localhost:8080`) por las reales una vez que se conozcan los dominios definitivos — están en los `.html` del sitio estático, en `fkt-turnos-frontend/.env.production` (`VITE_SITE_URL`) y en la app de escritorio (hay que volver a correr `npm run desktop:build` después).
+  - Reemplazar las URLs de desarrollo hardcodeadas (`http://localhost:5173`, `http://localhost:5500`, `http://localhost:8080`) por las reales una vez que se conozcan los dominios definitivos — están en los `.html` del sitio estático, en `fkt-turnos-frontend/.env.production` (`VITE_SITE_URL`, y `VITE_APP_URL` que hace falta agregar ahí para el cartel QR de check-in) y en la app de escritorio (hay que volver a correr `npm run desktop:build` después).
   - Certificado de firma de código para el instalador de Mac/Windows (hoy sale sin firmar).
   - Cargar los secrets de `.github/workflows/backup.yml` (ver sección "Backups" arriba) una vez que haya una base de producción real.
   - Verificar si `gitleaks-action` necesita una `GITLEAKS_LICENSE` para este repo — es gratuito para cuentas individuales/repos públicos, pero puede requerir licencia si el repo termina bajo una organización de GitHub.
+  - Cuenta de UptimeRobot (o similar) apuntando a `/actuator/health`, y cuenta de Sentry si se quiere activar el tracking de errores del frontend — ninguna de las dos es indispensable para salir a producción, pero conviene tenerlas desde el primer día en vivo.
 
 ## Pendiente / próximos pasos (fuera del alcance de esta versión)
 

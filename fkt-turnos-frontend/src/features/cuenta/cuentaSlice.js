@@ -86,6 +86,15 @@ export const solicitarBajaCuenta = createAsyncThunk('cuenta/solicitarBaja', asyn
   }
 });
 
+export const fetchMisPagos = createAsyncThunk('cuenta/fetchPagos', async (_, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/mi-cuenta/pagos');
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
 const cuentaSlice = createSlice({
   name: 'cuenta',
   initialState: {
@@ -93,6 +102,7 @@ const cuentaSlice = createSlice({
     mfaSetup: null,
     misEvoluciones: [],
     solicitudBaja: null,
+    pagos: [],
     error: null,
     mensajeExito: null,
   },
@@ -126,7 +136,9 @@ const cuentaSlice = createSlice({
         state.solicitudBaja = action.payload;
         state.mensajeExito = 'Registramos tu pedido de baja — el centro lo va a revisar y confirmar por email.';
       })
-      .addCase(solicitarBajaCuenta.rejected, (state, action) => { state.error = action.payload; });
+      .addCase(solicitarBajaCuenta.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(fetchMisPagos.fulfilled, (state, action) => { state.pagos = action.payload; })
+      .addCase(fetchMisPagos.rejected, (state, action) => { state.error = action.payload; });
   },
 });
 

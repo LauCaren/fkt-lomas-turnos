@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchMiPerfil, actualizarPerfil, cambiarPasswordCuenta, limpiarMensajesCuenta,
-  iniciarMfaCuenta, activarMfaCuenta, desactivarMfaCuenta, fetchMisEvoluciones,
+  iniciarMfaCuenta, activarMfaCuenta, desactivarMfaCuenta, fetchMisEvoluciones, fetchMisPagos,
 } from './cuentaSlice';
 import { actualizarUsuarioLocal } from '../auth/authSlice';
 import PasswordInput from '../../components/PasswordInput';
@@ -11,6 +11,8 @@ import SeccionRevocarSesiones from '../../components/SeccionRevocarSesiones';
 import SeccionPrivacidad from '../../components/SeccionPrivacidad';
 import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../../constants/obrasSociales';
 import { PATRON_PASSWORD, TITULO_PASSWORD, AYUDA_PASSWORD } from '../../constants/validacion';
+import { descargarArchivo } from '../../api/descargas';
+import { formatMoneda } from '../../utils/formato';
 
 const GENEROS = [
   { value: '', label: 'Seleccioná una opción' },
@@ -146,6 +148,42 @@ function MiHistoriaClinica() {
   );
 }
 
+function MisPagos() {
+  const dispatch = useDispatch();
+  const pagos = useSelector((state) => state.cuenta.pagos);
+
+  useEffect(() => {
+    dispatch(fetchMisPagos());
+  }, [dispatch]);
+
+  if (pagos.length === 0) {
+    return <p style={{ color: 'var(--muted)' }}>Todavía no tenés pagos registrados.</p>;
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {pagos.map((p) => (
+        <div key={p.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+          <div>
+            <strong>{formatMoneda(p.monto)}</strong>
+            <span style={{ color: 'var(--muted)', fontSize: 13.5 }}> · {p.medicoNombre} · {new Date(p.fecha).toLocaleDateString('es-AR', { timeZone: 'UTC' })}</span>
+            {p.anulado && <span className="badge" style={{ marginLeft: 8 }}>Anulado</span>}
+          </div>
+          {!p.anulado && (
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => descargarArchivo(`/api/mi-cuenta/pagos/${p.id}/comprobante`, null, `comprobante_${p.id}.pdf`)}
+            >
+              Descargar comprobante
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function Seccion({ titulo, full, children }) {
   return (
     <div className={full ? 'cuenta-full' : undefined}>
@@ -200,6 +238,10 @@ export default function MiCuentaPage() {
 
           <Seccion titulo="Mi historia clínica" full>
             <MiHistoriaClinica />
+          </Seccion>
+
+          <Seccion titulo="Mis pagos" full>
+            <MisPagos />
           </Seccion>
 
           <Seccion titulo="Mis datos personales" full>

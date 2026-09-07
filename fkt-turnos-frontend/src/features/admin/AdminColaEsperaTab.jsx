@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchColaEsperaAdmin, fetchMedicosAdmin } from './adminSlice';
 import { hoyISO } from '../../utils/formato';
+import SalaEsperaQr from './SalaEsperaQr';
 
 export default function AdminColaEsperaTab() {
   const dispatch = useDispatch();
@@ -21,6 +22,8 @@ export default function AdminColaEsperaTab() {
 
   return (
     <div>
+      <SalaEsperaQr />
+
       <p style={{ color: 'var(--muted)', marginBottom: 16 }}>
         Pacientes marcados como "Llegó" en la agenda de hoy, todavía no atendidos por el médico — ordenados por el
         horario de su turno.

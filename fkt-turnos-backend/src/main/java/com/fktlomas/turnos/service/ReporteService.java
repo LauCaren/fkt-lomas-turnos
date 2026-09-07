@@ -1,5 +1,6 @@
 package com.fktlomas.turnos.service;
 
+import com.fktlomas.turnos.domain.Ingreso;
 import com.fktlomas.turnos.dto.TurnoAdminDto;
 import com.fktlomas.turnos.dto.caja.GastoDto;
 import com.fktlomas.turnos.dto.caja.IngresoDto;
@@ -182,6 +183,38 @@ public class ReporteService {
         }
     }
 
+    /**
+     * Recibo simple para que el paciente baje su propio comprobante de pago desde "Mi cuenta".
+     * Aclaración explícita de que NO es una factura: la clínica no emite comprobantes fiscales
+     * desde este sistema, esto es solo un registro interno de lo que se cobró.
+     */
+    public byte[] pdfComprobante(Ingreso ingreso) {
+        try (PDDocument doc = new PDDocument()) {
+            EscritorPdf escritor = new EscritorPdf(doc, "Comprobante de pago — FKT Lomas");
+            String pacienteNombre = ingreso.getTurno() != null && ingreso.getTurno().getPaciente() != null
+                    ? ingreso.getTurno().getPaciente().getNombreCompleto() : "";
+            String pacienteDni = ingreso.getTurno() != null && ingreso.getTurno().getPaciente() != null
+                    ? nullASvacio(ingreso.getTurno().getPaciente().getDni()) : "";
+            escritor.tabla(new String[]{"Concepto", "Detalle"}, new float[]{150, 300}, List.of(
+                    new String[]{"Comprobante N°", "#" + ingreso.getId()},
+                    new String[]{"Fecha", ingreso.getFecha().toString()},
+                    new String[]{"Paciente", pacienteNombre + (pacienteDni.isBlank() ? "" : " (DNI " + pacienteDni + ")")},
+                    new String[]{"Profesional", ingreso.getMedico().getNombreCompleto() + " — " + ingreso.getMedico().getEspecialidad().getNombre()},
+                    new String[]{"Monto", "$ " + ingreso.getMonto()},
+                    new String[]{"Método de pago", ingreso.getMetodoPago().name()},
+                    new String[]{"Registrado por", ingreso.getRegistradoPor().getNombreCompleto()}
+            ));
+            escritor.parrafo("Este comprobante es un registro interno de FKT Lomas y no constituye una");
+            escritor.parrafo("factura ni un comprobante fiscal válido ante AFIP.");
+            escritor.cerrar();
+            ByteArrayOutputStream salida = new ByteArrayOutputStream();
+            doc.save(salida);
+            return salida.toByteArray();
+        } catch (IOException e) {
+            throw new UncheckedIOException("No se pudo generar el comprobante", e);
+        }
+    }
+
     private byte[] generarPdf(String titulo, String[] columnas, float[] anchos, List<String[]> filas) {
         try (PDDocument doc = new PDDocument()) {
             EscritorPdf escritor = new EscritorPdf(doc, titulo);
@@ -260,6 +293,17 @@ public class ReporteService {
         void titulo(String texto) throws IOException {
             asegurarEspacio(ALTO_FILA * 2);
             cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 12);
+            cs.beginText();
+            cs.newLineAtOffset(MARGEN, y);
+            cs.showText(texto);
+            cs.endText();
+            y -= ALTO_FILA;
+        }
+
+        void parrafo(String texto) throws IOException {
+            asegurarEspacio(ALTO_FILA * 1.5f);
+            y -= ALTO_FILA / 2;
+            cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_OBLIQUE), 9);
             cs.beginText();
             cs.newLineAtOffset(MARGEN, y);
             cs.showText(texto);

@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface IngresoRepository extends JpaRepository<Ingreso, Long> {
 
@@ -41,4 +42,16 @@ public interface IngresoRepository extends JpaRepository<Ingreso, Long> {
             order by i.fecha desc, i.createdAt desc
             """)
     List<Ingreso> findByTurnoPacienteId(@Param("pacienteId") Long pacienteId);
+
+    /** Para generar el comprobante de un ingreso puntual — trae todo lo que necesita el PDF en una sola vuelta. */
+    @Query("""
+            select i from Ingreso i
+            join fetch i.medico m
+            join fetch m.especialidad
+            left join fetch i.turno t
+            left join fetch t.paciente
+            join fetch i.registradoPor
+            where i.id = :id
+            """)
+    Optional<Ingreso> buscarPorIdConDetalle(@Param("id") Long id);
 }

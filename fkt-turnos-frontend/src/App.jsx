@@ -15,6 +15,7 @@ import MedicoDashboardPage from './features/medico/MedicoDashboardPage';
 import ContadorDashboardPage from './features/contador/ContadorDashboardPage';
 import KinesiologiaPage from './features/kinesiologia/KinesiologiaPage';
 import ConfirmarTurnoPage from './features/turnos/ConfirmarTurnoPage';
+import CheckInPage from './features/turnos/CheckInPage';
 import { RUTA_POR_ROL } from './config';
 
 function InicioRedirect() {
@@ -37,6 +38,7 @@ export default function App() {
         <Route path="/turnos/kinesiologia" element={<RutaPaciente><KinesiologiaPage /></RutaPaciente>} />
         <Route path="/turnos/mis-turnos" element={<RutaPaciente><MisTurnosPage /></RutaPaciente>} />
         <Route path="/turnos/mi-cuenta" element={<RutaPaciente><MiCuentaPage /></RutaPaciente>} />
+        <Route path="/checkin" element={<RutaPaciente><CheckInPage /></RutaPaciente>} />
         <Route path="/admin" element={<RutaAdmin><AdminDashboardPage /></RutaAdmin>} />
         <Route path="/secretaria" element={<RutaSecretaria><SecretariaDashboardPage /></RutaSecretaria>} />
         <Route path="/medico" element={<RutaMedico><MedicoDashboardPage /></RutaMedico>} />

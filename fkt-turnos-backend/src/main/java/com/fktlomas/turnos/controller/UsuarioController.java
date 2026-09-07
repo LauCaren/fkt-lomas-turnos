@@ -7,12 +7,17 @@ import com.fktlomas.turnos.dto.PerfilDto;
 import com.fktlomas.turnos.dto.SolicitarBajaRequest;
 import com.fktlomas.turnos.dto.admin.CambiarPasswordRequest;
 import com.fktlomas.turnos.dto.admin.SolicitudBajaDto;
+import com.fktlomas.turnos.dto.caja.IngresoDto;
 import com.fktlomas.turnos.security.AppUserDetails;
 import com.fktlomas.turnos.service.AuthService;
+import com.fktlomas.turnos.service.CajaService;
 import com.fktlomas.turnos.service.SolicitudBajaService;
 import com.fktlomas.turnos.service.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +32,7 @@ public class UsuarioController {
     private final UsuarioService usuarioService;
     private final AuthService authService;
     private final SolicitudBajaService solicitudBajaService;
+    private final CajaService cajaService;
 
     @GetMapping
     public PerfilDto miPerfil(@AuthenticationPrincipal AppUserDetails principal) {
@@ -66,5 +72,18 @@ public class UsuarioController {
     public SolicitudBajaDto solicitarBaja(@AuthenticationPrincipal AppUserDetails principal,
                                            @Valid @RequestBody(required = false) SolicitarBajaRequest request) {
         return solicitudBajaService.solicitar(principal.getUsuario(), request != null ? request : new SolicitarBajaRequest(null));
+    }
+
+    @GetMapping("/pagos")
+    public List<IngresoDto> misPagos(@AuthenticationPrincipal AppUserDetails principal) {
+        return cajaService.ingresosDePaciente(principal.getUsuario().getId());
+    }
+
+    @GetMapping("/pagos/{id}/comprobante")
+    public ResponseEntity<byte[]> comprobante(@AuthenticationPrincipal AppUserDetails principal, @PathVariable Long id) {
+        byte[] pdf = cajaService.comprobantePdf(id, principal.getUsuario().getId());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentDisposition(ContentDisposition.attachment().filename("comprobante_" + id + ".pdf").build());
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).headers(headers).body(pdf);
     }
 }

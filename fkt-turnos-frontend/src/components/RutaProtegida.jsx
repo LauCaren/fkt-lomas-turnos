@@ -1,9 +1,12 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 export function RutaPaciente({ children }) {
   const { token, usuario } = useSelector((state) => state.auth);
-  if (!token || !usuario) return <Navigate to="/login" replace />;
+  const location = useLocation();
+  if (!token || !usuario) {
+    return <Navigate to={`/login?returnTo=${encodeURIComponent(location.pathname)}`} replace />;
+  }
   if (usuario.role !== 'PACIENTE') return <Navigate to="/" replace />;
   return children;
 }

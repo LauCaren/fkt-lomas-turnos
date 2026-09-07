@@ -1,5 +1,6 @@
 package com.fktlomas.turnos.controller;
 
+import com.fktlomas.turnos.dto.CheckInDto;
 import com.fktlomas.turnos.dto.ListaEsperaDto;
 import com.fktlomas.turnos.dto.ListaEsperaRequest;
 import com.fktlomas.turnos.dto.ReservarTurnoRequest;
@@ -61,5 +62,11 @@ public class TurnoController {
     public ResponseEntity<Void> darseDeBajaListaEspera(@PathVariable Long id, @AuthenticationPrincipal AppUserDetails principal) {
         listaEsperaService.darseDeBaja(id, principal.getUsuario());
         return ResponseEntity.noContent().build();
+    }
+
+    /** Lo dispara el propio paciente al escanear el QR de la sala de espera. */
+    @PostMapping("/checkin")
+    public CheckInDto checkIn(@AuthenticationPrincipal AppUserDetails principal) {
+        return turnoService.checkInPorQr(principal.getUsuario());
     }
 }

@@ -6,6 +6,7 @@ import com.fktlomas.turnos.domain.EstadoTurno;
 import com.fktlomas.turnos.domain.Role;
 import com.fktlomas.turnos.domain.Turno;
 import com.fktlomas.turnos.domain.Usuario;
+import com.fktlomas.turnos.dto.CheckInDto;
 import com.fktlomas.turnos.dto.ReservarTurnoRequest;
 import com.fktlomas.turnos.dto.TurnoAdminDto;
 import com.fktlomas.turnos.dto.TurnoDto;
@@ -186,6 +187,43 @@ public class TurnoService {
         Turno actualizado = turnoRepository.findById(turnoId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Turno no encontrado"));
         return TurnoAdminDto.de(actualizado);
+    }
+
+    /**
+     * Check-in que el propio paciente dispara al escanear el QR pegado en la sala de espera.
+     * Los pacientes con copago de IOMA (mismo criterio que el aviso de WhatsApp post-reserva,
+     * ver BookingWizard.jsx) no se autoregistran: tienen que pasar por el mostrador a abonar
+     * antes de que la secretaria los sume a la cola de espera.
+     */
+    @Transactional
+    public CheckInDto checkInPorQr(Usuario paciente) {
+        List<Turno> turnosHoy = turnoRepository.turnosDeHoyDePaciente(paciente.getId(), LocalDate.now());
+        if (turnosHoy.isEmpty()) {
+            return new CheckInDto(CheckInDto.Resultado.SIN_TURNO_HOY,
+                    "No encontramos ningún turno tuyo para hoy. Si venís por un turno, avisale a la secretaria en el mostrador.",
+                    null, null);
+        }
+
+        Turno turno = turnosHoy.stream().filter(t -> t.getEstadoAsistencia() == EstadoAsistencia.PENDIENTE).findFirst().orElse(null);
+        if (turno == null) {
+            Turno primero = turnosHoy.get(0);
+            return new CheckInDto(CheckInDto.Resultado.YA_REGISTRADO,
+                    "Ya habíamos registrado tu turno de hoy. Esperá que te llamen.",
+                    primero.getMedico().getNombreCompleto(), primero.getHoraInicio());
+        }
+
+        boolean requiereMostrador = "IOMA".equals(paciente.getObraSocial()) && turno.getMedico().isCobraCopagoIoma();
+        if (requiereMostrador) {
+            return new CheckInDto(CheckInDto.Resultado.REQUIERE_MOSTRADOR,
+                    "Tenés copago de IOMA para esta consulta — acercate al mostrador para registrarte y abonar antes de pasar.",
+                    turno.getMedico().getNombreCompleto(), turno.getHoraInicio());
+        }
+
+        turno.setEstadoAsistencia(EstadoAsistencia.LLEGO);
+        turnoRepository.save(turno);
+        return new CheckInDto(CheckInDto.Resultado.LLEGO,
+                "¡Listo! Ya avisamos que llegaste. Esperá que te llamen.",
+                turno.getMedico().getNombreCompleto(), turno.getHoraInicio());
     }
 
     private static final LocalDate DESDE_MINIMO = LocalDate.of(2000, 1, 1);

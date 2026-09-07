@@ -35,6 +35,8 @@ El login es el mismo endpoint para los cuatro roles; la app redirige según el `
 
 - `VITE_API_URL` — URL base del backend.
 - `VITE_SITE_URL` — URL del sitio de marketing estático (a dónde apunta el logo del header). En desarrollo apunta a `http://localhost:5500` (ver más abajo); en producción hay que setearla a la URL real del sitio nuevo una vez desplegado — **no** a `fktlomas.com` (esa es la web vieja).
+- `VITE_APP_URL` — URL pública de esta misma app (la de turnos), la usa el cartel QR de check-in de la sala de espera (`SalaEsperaQr.jsx`, pestaña "Cola de espera" del admin). En el navegador normal se puede omitir (usa `window.location.origin`, que ya es la URL correcta), **pero en el build de escritorio (Electron) es obligatoria**: ahí `window.location.origin` es `http://localhost:43117` (el servidor local de `electron/main.cjs`), una URL que solo existe en la computadora de la secretaria — sin `VITE_APP_URL` seteada a la URL real (ej. `https://turnos.fktlomas.com`), el panel avisa en vez de imprimir un QR roto.
+- `VITE_SENTRY_DSN` — opcional. Si no está seteada (el default), el tracking de errores del frontend (`src/monitoring.js`, `@sentry/react`) es un no-op completo: no se inicializa nada ni se manda tráfico a ningún lado. Para activarlo hace falta crear una cuenta en sentry.io (gratis hasta cierto volumen) y pegar el DSN del proyecto acá.
 
 ## Ver también el logo apuntando al sitio nuevo
 

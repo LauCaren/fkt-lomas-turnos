@@ -40,6 +40,7 @@ public class CajaService {
     private final TurnoRepository turnoRepository;
     private final ConfiguracionCajaRepository configuracionCajaRepository;
     private final AuditoriaService auditoriaService;
+    private final ReporteService reporteService;
 
     private static final String AUDITORIA_TIPO_INGRESO = "INGRESO";
     private static final String AUDITORIA_TIPO_RETIRO = "RETIRO";
@@ -75,6 +76,24 @@ public class CajaService {
     @Transactional(readOnly = true)
     public List<IngresoDto> ingresosDePaciente(Long pacienteId) {
         return ingresoRepository.findByTurnoPacienteId(pacienteId).stream().map(IngresoDto::de).toList();
+    }
+
+    /**
+     * Comprobante en PDF de un ingreso puntual, para que el paciente lo baje desde "Mi cuenta".
+     * Devuelve 404 (no 403) si el ingreso no es suyo, para no filtrar si el id existe.
+     */
+    @Transactional(readOnly = true)
+    public byte[] comprobantePdf(Long ingresoId, Long pacienteId) {
+        Ingreso ingreso = ingresoRepository.buscarPorIdConDetalle(ingresoId)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Comprobante no encontrado"));
+        if (ingreso.getTurno() == null || ingreso.getTurno().getPaciente() == null
+                || !ingreso.getTurno().getPaciente().getId().equals(pacienteId)) {
+            throw new RecursoNoEncontradoException("Comprobante no encontrado");
+        }
+        if (ingreso.isAnulado()) {
+            throw new ConflictoDeDatosException("Este comprobante fue anulado y ya no es válido");
+        }
+        return reporteService.pdfComprobante(ingreso);
     }
 
     @Transactional

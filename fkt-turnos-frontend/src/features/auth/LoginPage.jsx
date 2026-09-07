@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { login, limpiarMensajesAuth } from './authSlice';
 import PasswordInput from '../../components/PasswordInput';
 import { RUTA_POR_ROL } from '../../config';
@@ -8,8 +8,14 @@ import { RUTA_POR_ROL } from '../../config';
 export default function LoginPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { status, error, requiereMfa } = useSelector((state) => state.auth);
   const [form, setForm] = useState({ email: '', password: '', codigoMfa: '' });
+
+  // Solo se usa si es una ruta interna (nunca una URL absoluta) — evita un open-redirect
+  // si alguien arma un link de login con un ?returnTo= apuntando a otro sitio.
+  const returnTo = searchParams.get('returnTo');
+  const destinoValido = returnTo && returnTo.startsWith('/') && !returnTo.startsWith('//');
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -18,7 +24,7 @@ export default function LoginPage() {
   function handleSubmit(e) {
     e.preventDefault();
     dispatch(login(form)).unwrap().then((data) => {
-      navigate(RUTA_POR_ROL[data.role] || '/turnos');
+      navigate(destinoValido ? returnTo : (RUTA_POR_ROL[data.role] || '/turnos'));
     }).catch(() => {});
   }
 

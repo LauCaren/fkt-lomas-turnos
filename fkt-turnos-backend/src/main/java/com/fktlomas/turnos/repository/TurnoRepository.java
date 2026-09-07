@@ -18,6 +18,17 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
 
     List<Turno> findByMedicoIdAndFechaAndEstadoOrderByHoraInicioAsc(Long medicoId, LocalDate fecha, EstadoTurno estado);
 
+    /** Turnos reservados de hoy de un paciente — para el check-in por QR de la sala de espera. */
+    @Query("""
+            select t from Turno t
+            join fetch t.medico m
+            where t.paciente.id = :pacienteId
+            and t.fecha = :fecha
+            and t.estado = com.fktlomas.turnos.domain.EstadoTurno.RESERVADO
+            order by t.horaInicio asc
+            """)
+    List<Turno> turnosDeHoyDePaciente(@Param("pacienteId") Long pacienteId, @Param("fecha") LocalDate fecha);
+
     /**
      * Próximas fechas (a partir de, sin incluir, :desde) en las que ese médico tiene al menos
      * un turno DISPONIBLE — para sugerirle al paciente el próximo día con lugar cuando la fecha
