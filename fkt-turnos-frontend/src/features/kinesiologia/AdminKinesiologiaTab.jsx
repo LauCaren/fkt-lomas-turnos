@@ -70,20 +70,20 @@ function NuevoPlanTelefonico({ medicosKinesiologia }) {
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           <div className="field" style={{ marginBottom: 0, flex: '1 1 140px' }}>
-            <label>DNI</label>
-            <input required value={form.dni} onChange={(e) => setForm({ ...form, dni: e.target.value })} />
+            <label htmlFor="kineTelefonicoDni">DNI</label>
+            <input id="kineTelefonicoDni" required value={form.dni} onChange={(e) => setForm({ ...form, dni: e.target.value })} />
           </div>
           <div className="field" style={{ marginBottom: 0, flex: '2 1 220px' }}>
-            <label>Nombre completo</label>
-            <input required value={form.nombreCompleto} onChange={(e) => setForm({ ...form, nombreCompleto: e.target.value })} />
+            <label htmlFor="kineTelefonicoNombre">Nombre completo</label>
+            <input id="kineTelefonicoNombre" required value={form.nombreCompleto} onChange={(e) => setForm({ ...form, nombreCompleto: e.target.value })} />
           </div>
           <div className="field" style={{ marginBottom: 0, flex: '1 1 160px' }}>
-            <label>Teléfono</label>
-            <input required value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
+            <label htmlFor="kineTelefonicoTelefono">Teléfono</label>
+            <input id="kineTelefonicoTelefono" required value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
           </div>
           <div className="field" style={{ marginBottom: 0, flex: '1 1 160px' }}>
-            <label>Obra social</label>
-            <select required value={form.obraSocial} onChange={(e) => setForm({ ...form, obraSocial: e.target.value })}>
+            <label htmlFor="kineTelefonicoObraSocial">Obra social</label>
+            <select id="kineTelefonicoObraSocial" required value={form.obraSocial} onChange={(e) => setForm({ ...form, obraSocial: e.target.value })}>
               <option value="">Seleccioná</option>
               <option value={OBRA_SOCIAL_PARTICULAR}>{OBRA_SOCIAL_PARTICULAR}</option>
               {OBRAS_SOCIALES.map((os) => <option key={os} value={os}>{os}</option>)}
@@ -93,23 +93,23 @@ function NuevoPlanTelefonico({ medicosKinesiologia }) {
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           <div className="field" style={{ marginBottom: 0, flex: '1 1 200px' }}>
-            <label>Kinesiólogo</label>
-            <select required value={form.medicoId} onChange={(e) => setForm({ ...form, medicoId: e.target.value })}>
+            <label htmlFor="kineTelefonicoMedico">Kinesiólogo</label>
+            <select id="kineTelefonicoMedico" required value={form.medicoId} onChange={(e) => setForm({ ...form, medicoId: e.target.value })}>
               <option value="">Seleccioná</option>
               {medicosKinesiologia.map((m) => <option key={m.id} value={m.id}>{m.nombreCompleto}</option>)}
             </select>
           </div>
           <div className="field" style={{ marginBottom: 0, flex: '1 1 120px' }}>
-            <label>Sesiones</label>
-            <input type="number" min={1} max={60} required value={form.cantidadSesiones} onChange={(e) => setForm({ ...form, cantidadSesiones: e.target.value })} />
+            <label htmlFor="kineTelefonicoSesiones">Sesiones</label>
+            <input id="kineTelefonicoSesiones" type="number" min={1} max={60} required value={form.cantidadSesiones} onChange={(e) => setForm({ ...form, cantidadSesiones: e.target.value })} />
           </div>
           <div className="field" style={{ marginBottom: 0, flex: '1 1 160px' }}>
-            <label>Fecha de inicio</label>
-            <input type="date" required value={form.fechaInicio} onChange={(e) => setForm({ ...form, fechaInicio: e.target.value })} />
+            <label htmlFor="kineTelefonicoFechaInicio">Fecha de inicio</label>
+            <input id="kineTelefonicoFechaInicio" type="date" required value={form.fechaInicio} onChange={(e) => setForm({ ...form, fechaInicio: e.target.value })} />
           </div>
         </div>
-        <div className="field" style={{ marginBottom: 0 }}>
-          <label>Horarios fijos semanales</label>
+        <div className="field" style={{ marginBottom: 0 }} role="group" aria-labelledby="kineTelefonicoHorariosLabel">
+          <label id="kineTelefonicoHorariosLabel">Horarios fijos semanales</label>
           {horarios.map((h) => (
             <div key={h.id} style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
               <select value={h.diaSemana} onChange={(e) => setHorarios(horarios.map((x) => x.id === h.id ? { ...x, diaSemana: e.target.value } : x))}>
@@ -126,8 +126,8 @@ function NuevoPlanTelefonico({ medicosKinesiologia }) {
           </button>
         </div>
         <div className="field" style={{ marginBottom: 0 }}>
-          <label>Orden médica (foto o PDF)</label>
-          <input type="file" required accept="image/jpeg,image/png,application/pdf" onChange={(e) => setOrdenMedica(e.target.files[0] || null)} />
+          <label htmlFor="kineTelefonicoOrdenMedica">Orden médica (foto o PDF)</label>
+          <input id="kineTelefonicoOrdenMedica" type="file" required accept="image/jpeg,image/png,application/pdf" onChange={(e) => setOrdenMedica(e.target.files[0] || null)} />
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button type="submit" className="btn btn-primary">Cargar plan</button>
@@ -216,8 +216,8 @@ export default function AdminKinesiologiaTab() {
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
         <div className="field" style={{ marginBottom: 0, minWidth: 220 }}>
-          <label>Filtrar por estado</label>
-          <select value={estado} onChange={(e) => { setEstado(e.target.value); dispatch(limpiarMensajesKinesiologia()); }}>
+          <label htmlFor="kineFiltroEstado">Filtrar por estado</label>
+          <select id="kineFiltroEstado" value={estado} onChange={(e) => { setEstado(e.target.value); dispatch(limpiarMensajesKinesiologia()); }}>
             {ESTADOS.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
           </select>
         </div>

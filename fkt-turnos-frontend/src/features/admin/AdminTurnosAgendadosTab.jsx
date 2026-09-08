@@ -55,26 +55,26 @@ export default function AdminTurnosAgendadosTab() {
 
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: 20 }}>
         <div className="field" style={{ marginBottom: 0 }}>
-          <label>Especialidad</label>
-          <select value={especialidadId} onChange={(e) => handleEspecialidadChange(e.target.value)}>
+          <label htmlFor="turnosAgendadosEspecialidad">Especialidad</label>
+          <select id="turnosAgendadosEspecialidad" value={especialidadId} onChange={(e) => handleEspecialidadChange(e.target.value)}>
             <option value="">Todas las especialidades</option>
             {especialidades.map((esp) => <option key={esp.id} value={esp.id}>{esp.nombre}</option>)}
           </select>
         </div>
         <div className="field" style={{ marginBottom: 0 }}>
-          <label>Profesional</label>
-          <select value={medicoId} onChange={(e) => setMedicoId(e.target.value)}>
+          <label htmlFor="turnosAgendadosProfesional">Profesional</label>
+          <select id="turnosAgendadosProfesional" value={medicoId} onChange={(e) => setMedicoId(e.target.value)}>
             <option value="">Todos los profesionales</option>
             {medicosFiltrados.map((m) => <option key={m.id} value={m.id}>{m.nombreCompleto}</option>)}
           </select>
         </div>
         <div className="field" style={{ marginBottom: 0 }}>
-          <label>Desde</label>
-          <input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} />
+          <label htmlFor="turnosAgendadosDesde">Desde</label>
+          <input id="turnosAgendadosDesde" type="date" value={desde} onChange={(e) => setDesde(e.target.value)} />
         </div>
         <div className="field" style={{ marginBottom: 0 }}>
-          <label>Hasta (opcional)</label>
-          <input type="date" value={hasta} min={desde || undefined} onChange={(e) => setHasta(e.target.value)} />
+          <label htmlFor="turnosAgendadosHasta">Hasta (opcional)</label>
+          <input id="turnosAgendadosHasta" type="date" value={hasta} min={desde || undefined} onChange={(e) => setHasta(e.target.value)} />
         </div>
       </div>
 

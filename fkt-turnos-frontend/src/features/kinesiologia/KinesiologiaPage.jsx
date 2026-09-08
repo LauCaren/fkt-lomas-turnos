@@ -153,15 +153,15 @@ function NuevoPlanForm({ medicoKinesiologiaId, medicos }) {
           )}
         </div>
         <div className="field">
-          <label>Cantidad de sesiones indicadas</label>
-          <input type="number" min={1} max={60} required value={cantidadSesiones} onChange={(e) => setCantidadSesiones(e.target.value)} style={{ width: 100 }} />
+          <label htmlFor="kineCantidadSesiones">Cantidad de sesiones indicadas</label>
+          <input id="kineCantidadSesiones" type="number" min={1} max={60} required value={cantidadSesiones} onChange={(e) => setCantidadSesiones(e.target.value)} style={{ width: 100 }} />
         </div>
         <div className="field">
-          <label>Fecha de inicio</label>
-          <input type="date" min={hoyISO()} required value={fechaInicio} onChange={(e) => setFechaInicio(e.target.value)} />
+          <label htmlFor="kineFechaInicio">Fecha de inicio</label>
+          <input id="kineFechaInicio" type="date" min={hoyISO()} required value={fechaInicio} onChange={(e) => setFechaInicio(e.target.value)} />
         </div>
-        <div className="field">
-          <label>Horarios fijos semanales</label>
+        <div className="field" role="group" aria-labelledby="kineHorariosFijosLabel">
+          <label id="kineHorariosFijosLabel">Horarios fijos semanales</label>
           {!modoIndiferente && !medicoId && (
             <p style={{ fontSize: 13, color: 'var(--muted)' }}>Elegí primero un kinesiólogo para ver sus horarios disponibles.</p>
           )}
@@ -194,8 +194,8 @@ function NuevoPlanForm({ medicoKinesiologiaId, medicos }) {
           )}
         </div>
         <div className="field">
-          <label>Orden médica (foto o PDF)</label>
-          <input type="file" required accept="image/jpeg,image/png,application/pdf" onChange={(e) => setOrdenMedica(e.target.files[0] || null)} />
+          <label htmlFor="kineOrdenMedica">Orden médica (foto o PDF)</label>
+          <input id="kineOrdenMedica" type="file" required accept="image/jpeg,image/png,application/pdf" onChange={(e) => setOrdenMedica(e.target.files[0] || null)} />
         </div>
         <button type="submit" className="btn btn-primary" disabled={enviando || seleccionados.length === 0}>{enviando ? 'Enviando…' : 'Enviar plan'}</button>
         <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 8 }}>

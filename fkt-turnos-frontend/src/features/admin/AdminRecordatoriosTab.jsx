@@ -41,8 +41,9 @@ function ConfiguracionRecordatorios() {
       <h3 style={{ fontSize: 17, marginBottom: 14 }}>Configuración</h3>
       <form onSubmit={handleGuardar}>
         <div className="field">
-          <label>Mensaje del recordatorio</label>
+          <label htmlFor="recordatoriosPlantilla">Mensaje del recordatorio</label>
           <textarea
+            id="recordatoriosPlantilla"
             rows={4}
             value={form.plantillaMensaje}
             onChange={(e) => setForm({ ...form, plantillaMensaje: e.target.value })}
@@ -57,8 +58,9 @@ function ConfiguracionRecordatorios() {
           </div>
         </div>
         <div className="field">
-          <label>Con cuántas horas de anticipación avisar</label>
+          <label htmlFor="recordatoriosHorasAnticipacion">Con cuántas horas de anticipación avisar</label>
           <input
+            id="recordatoriosHorasAnticipacion"
             type="number" min={1} max={168}
             value={form.horasAnticipacion}
             onChange={(e) => setForm({ ...form, horasAnticipacion: Number(e.target.value) })}
@@ -146,8 +148,8 @@ function MensajePuntual() {
 
           <form onSubmit={handleGuardarCanalPreferido} style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginBottom: 20 }}>
             <div className="field" style={{ marginBottom: 0 }}>
-              <label>Canal preferido para los recordatorios automáticos</label>
-              <select value={canalPreferido} onChange={(e) => setCanalPreferido(e.target.value)}>
+              <label htmlFor="recordatoriosCanalPreferido">Canal preferido para los recordatorios automáticos</label>
+              <select id="recordatoriosCanalPreferido" value={canalPreferido} onChange={(e) => setCanalPreferido(e.target.value)}>
                 {CANALES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
               </select>
             </div>
@@ -156,14 +158,15 @@ function MensajePuntual() {
 
           <form onSubmit={handleEnviar}>
             <div className="field">
-              <label>Canal del mensaje</label>
-              <select value={canal} onChange={(e) => setCanal(e.target.value)}>
+              <label htmlFor="recordatoriosCanalMensaje">Canal del mensaje</label>
+              <select id="recordatoriosCanalMensaje" value={canal} onChange={(e) => setCanal(e.target.value)}>
                 {CANALES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
               </select>
             </div>
             <div className="field">
-              <label>Mensaje</label>
+              <label htmlFor="recordatoriosMensajeIndividual">Mensaje</label>
               <textarea
+                id="recordatoriosMensajeIndividual"
                 rows={3}
                 maxLength={1600}
                 value={mensaje}
@@ -220,16 +223,16 @@ function MensajeMasivo() {
 
       <form onSubmit={handleVerDestinatarios} style={{ display: 'flex', gap: 8, alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: 14 }}>
         <div className="field" style={{ marginBottom: 0 }}>
-          <label>Desde</label>
-          <input type="date" value={desde} onChange={(e) => { setDesde(e.target.value); setVistoPrevia(false); }} />
+          <label htmlFor="masivoDesde">Desde</label>
+          <input id="masivoDesde" type="date" value={desde} onChange={(e) => { setDesde(e.target.value); setVistoPrevia(false); }} />
         </div>
         <div className="field" style={{ marginBottom: 0 }}>
-          <label>Hasta</label>
-          <input type="date" value={hasta} onChange={(e) => { setHasta(e.target.value); setVistoPrevia(false); }} />
+          <label htmlFor="masivoHasta">Hasta</label>
+          <input id="masivoHasta" type="date" value={hasta} onChange={(e) => { setHasta(e.target.value); setVistoPrevia(false); }} />
         </div>
         <div className="field" style={{ marginBottom: 0 }}>
-          <label>Médico (opcional)</label>
-          <select value={medicoId} onChange={(e) => { setMedicoId(e.target.value); setVistoPrevia(false); }}>
+          <label htmlFor="masivoMedico">Médico (opcional)</label>
+          <select id="masivoMedico" value={medicoId} onChange={(e) => { setMedicoId(e.target.value); setVistoPrevia(false); }}>
             <option value="">Todos</option>
             {medicos.map((m) => <option key={m.id} value={m.id}>{m.nombreCompleto}</option>)}
           </select>
@@ -250,8 +253,9 @@ function MensajeMasivo() {
             </p>
             <form onSubmit={handleEnviar}>
               <div className="field">
-                <label>Mensaje</label>
+                <label htmlFor="recordatoriosMensajeMasivo">Mensaje</label>
                 <textarea
+                  id="recordatoriosMensajeMasivo"
                   rows={3}
                   maxLength={1600}
                   value={mensaje}

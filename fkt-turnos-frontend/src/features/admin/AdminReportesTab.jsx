@@ -29,12 +29,12 @@ function ExportarSeccion({ titulo, descripcion, endpoint, prefijoArchivo }) {
       {error && <div className="alert alert-error" role="alert" style={{ marginBottom: 12 }}>{error}</div>}
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
         <div className="field" style={{ marginBottom: 0 }}>
-          <label>Desde</label>
-          <input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} />
+          <label htmlFor={`reporteDesde-${prefijoArchivo}`}>Desde</label>
+          <input id={`reporteDesde-${prefijoArchivo}`} type="date" value={desde} onChange={(e) => setDesde(e.target.value)} />
         </div>
         <div className="field" style={{ marginBottom: 0 }}>
-          <label>Hasta</label>
-          <input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} />
+          <label htmlFor={`reporteHasta-${prefijoArchivo}`}>Hasta</label>
+          <input id={`reporteHasta-${prefijoArchivo}`} type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} />
         </div>
         <button className="btn btn-outline" disabled={!!descargando} onClick={() => handleExportar('excel')}>
           {descargando === 'excel' ? 'Generando…' : 'Descargar Excel'}
@@ -81,8 +81,8 @@ function ConfiguracionReporteMensual() {
       {mensaje && <div className="alert alert-success" role="status" style={{ marginBottom: 12 }}>{mensaje}</div>}
       <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 10, alignItems: 'flex-end', flexWrap: 'wrap' }}>
         <div className="field" style={{ marginBottom: 0, flex: '1 1 260px' }}>
-          <label>Email de destino</label>
-          <input type="email" placeholder="contador@ejemplo.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <label htmlFor="reporteEmailDestino">Email de destino</label>
+          <input id="reporteEmailDestino" type="email" placeholder="contador@ejemplo.com" value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
         <button type="submit" className="btn btn-primary" disabled={guardando}>{guardando ? 'Guardando…' : 'Guardar'}</button>
       </form>

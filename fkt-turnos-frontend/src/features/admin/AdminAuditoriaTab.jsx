@@ -47,18 +47,18 @@ export default function AdminAuditoriaTab() {
 
       <form onSubmit={handleBuscar} style={{ display: 'flex', gap: 10, alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: 20 }}>
         <div className="field" style={{ marginBottom: 0, minWidth: 180 }}>
-          <label>Tipo</label>
-          <select value={filtros.tipoEntidad} onChange={(e) => setFiltros({ ...filtros, tipoEntidad: e.target.value })}>
+          <label htmlFor="auditoriaTipo">Tipo</label>
+          <select id="auditoriaTipo" value={filtros.tipoEntidad} onChange={(e) => setFiltros({ ...filtros, tipoEntidad: e.target.value })}>
             {TIPOS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
         </div>
         <div className="field" style={{ marginBottom: 0 }}>
-          <label>Desde</label>
-          <input type="date" value={filtros.desde} onChange={(e) => setFiltros({ ...filtros, desde: e.target.value })} />
+          <label htmlFor="auditoriaDesde">Desde</label>
+          <input id="auditoriaDesde" type="date" value={filtros.desde} onChange={(e) => setFiltros({ ...filtros, desde: e.target.value })} />
         </div>
         <div className="field" style={{ marginBottom: 0 }}>
-          <label>Hasta</label>
-          <input type="date" value={filtros.hasta} onChange={(e) => setFiltros({ ...filtros, hasta: e.target.value })} />
+          <label htmlFor="auditoriaHasta">Hasta</label>
+          <input id="auditoriaHasta" type="date" value={filtros.hasta} onChange={(e) => setFiltros({ ...filtros, hasta: e.target.value })} />
         </div>
         <button type="submit" className="btn btn-outline">Buscar</button>
       </form>

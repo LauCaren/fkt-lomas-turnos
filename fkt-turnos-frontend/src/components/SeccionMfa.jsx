@@ -30,8 +30,8 @@ export default function SeccionMfa({ perfil, mfaSetup, onIniciar, onActivar, onD
         ) : (
           <form onSubmit={handleDesactivar}>
             <div className="field" style={{ marginTop: 12 }}>
-              <label>Código de tu app de autenticación (para desactivar)</label>
-              <input inputMode="numeric" pattern="\d{6}" maxLength={6} required value={codigo} onChange={(e) => setCodigo(e.target.value)} placeholder="123456" />
+              <label htmlFor="mfaCodigoDesactivar">Código de tu app de autenticación (para desactivar)</label>
+              <input id="mfaCodigoDesactivar" inputMode="numeric" pattern="\d{6}" maxLength={6} required value={codigo} onChange={(e) => setCodigo(e.target.value)} placeholder="123456" />
             </div>
             <button type="submit" className="btn btn-outline">Desactivar verificación en dos pasos</button>
           </form>
@@ -52,8 +52,8 @@ export default function SeccionMfa({ perfil, mfaSetup, onIniciar, onActivar, onD
         </code>
         <p style={{ fontSize: 14, marginBottom: 12 }}>3. Escribí el código de 6 dígitos que te muestra la app para confirmar:</p>
         <div className="field">
-          <label>Código</label>
-          <input inputMode="numeric" pattern="\d{6}" maxLength={6} required autoFocus value={codigo} onChange={(e) => setCodigo(e.target.value)} placeholder="123456" />
+          <label htmlFor="mfaCodigoActivar">Código</label>
+          <input id="mfaCodigoActivar" inputMode="numeric" pattern="\d{6}" maxLength={6} required autoFocus value={codigo} onChange={(e) => setCodigo(e.target.value)} placeholder="123456" />
         </div>
         <button type="submit" className="btn btn-primary">Confirmar y activar</button>
       </form>

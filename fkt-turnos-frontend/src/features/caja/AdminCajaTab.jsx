@@ -122,25 +122,25 @@ function IngresosTab() {
         <h3 style={{ fontSize: 16, marginBottom: 12 }}>Registrar cobro</h3>
         <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
           <div className="field" style={{ marginBottom: 0, flex: '1 1 200px' }}>
-            <label>Médico</label>
-            <select required value={form.medicoId} onChange={(e) => handleMedicoChange(e.target.value)}>
+            <label htmlFor="cajaCobroMedico">Médico</label>
+            <select id="cajaCobroMedico" required value={form.medicoId} onChange={(e) => handleMedicoChange(e.target.value)}>
               <option value="">Seleccioná un médico</option>
               {medicos.map((m) => <option key={m.id} value={m.id}>{m.nombreCompleto}</option>)}
             </select>
           </div>
           <div className="field" style={{ marginBottom: 0, flex: '1 1 140px' }}>
-            <label>Monto</label>
-            <input type="number" min="0.01" step="0.01" required value={form.monto} onChange={(e) => setForm({ ...form, monto: e.target.value })} />
+            <label htmlFor="cajaCobroMonto">Monto</label>
+            <input id="cajaCobroMonto" type="number" min="0.01" step="0.01" required value={form.monto} onChange={(e) => setForm({ ...form, monto: e.target.value })} />
           </div>
           <div className="field" style={{ marginBottom: 0, flex: '1 1 160px' }}>
-            <label>Método de pago</label>
-            <select value={form.metodoPago} onChange={(e) => setForm({ ...form, metodoPago: e.target.value })}>
+            <label htmlFor="cajaCobroMetodo">Método de pago</label>
+            <select id="cajaCobroMetodo" value={form.metodoPago} onChange={(e) => setForm({ ...form, metodoPago: e.target.value })}>
               {METODOS_PAGO.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
             </select>
           </div>
           <div className="field" style={{ marginBottom: 0, flex: '1 1 140px' }}>
-            <label>Fecha (opcional)</label>
-            <input type="date" value={form.fecha} onChange={(e) => setForm({ ...form, fecha: e.target.value })} />
+            <label htmlFor="cajaCobroFecha">Fecha (opcional)</label>
+            <input id="cajaCobroFecha" type="date" value={form.fecha} onChange={(e) => setForm({ ...form, fecha: e.target.value })} />
           </div>
           <button type="submit" className="btn btn-primary">Registrar</button>
         </form>
@@ -187,15 +187,15 @@ function RetirosTab() {
         <h3 style={{ fontSize: 16, marginBottom: 12 }}>Registrar retiro</h3>
         <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
           <div className="field" style={{ marginBottom: 0, flex: '1 1 200px' }}>
-            <label>Médico</label>
-            <select required value={form.medicoId} onChange={(e) => setForm({ ...form, medicoId: e.target.value })}>
+            <label htmlFor="cajaRetiroMedico">Médico</label>
+            <select id="cajaRetiroMedico" required value={form.medicoId} onChange={(e) => setForm({ ...form, medicoId: e.target.value })}>
               <option value="">Seleccioná un médico</option>
               {medicos.map((m) => <option key={m.id} value={m.id}>{m.nombreCompleto}</option>)}
             </select>
           </div>
           <div className="field" style={{ marginBottom: 0, flex: '1 1 140px' }}>
-            <label>Monto entregado</label>
-            <input type="number" min="0.01" step="0.01" required value={form.monto} onChange={(e) => setForm({ ...form, monto: e.target.value })} />
+            <label htmlFor="cajaRetiroMonto">Monto entregado</label>
+            <input id="cajaRetiroMonto" type="number" min="0.01" step="0.01" required value={form.monto} onChange={(e) => setForm({ ...form, monto: e.target.value })} />
           </div>
           <button type="submit" className="btn btn-primary">Registrar retiro</button>
         </form>
@@ -268,27 +268,27 @@ function GastosTab() {
         <h3 style={{ fontSize: 16, marginBottom: 12 }}>Registrar gasto</h3>
         <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
           <div className="field" style={{ marginBottom: 0, flex: '1 1 180px' }}>
-            <label>Categoría</label>
-            <select required value={form.categoriaId} onChange={(e) => setForm({ ...form, categoriaId: e.target.value })}>
+            <label htmlFor="cajaGastoCategoria">Categoría</label>
+            <select id="cajaGastoCategoria" required value={form.categoriaId} onChange={(e) => setForm({ ...form, categoriaId: e.target.value })}>
               <option value="">Seleccioná una categoría</option>
               {categorias.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
             </select>
           </div>
           <div className="field" style={{ marginBottom: 0, flex: '1 1 140px' }}>
-            <label>Monto</label>
-            <input type="number" min="0.01" step="0.01" required value={form.monto} onChange={(e) => setForm({ ...form, monto: e.target.value })} />
+            <label htmlFor="cajaGastoMonto">Monto</label>
+            <input id="cajaGastoMonto" type="number" min="0.01" step="0.01" required value={form.monto} onChange={(e) => setForm({ ...form, monto: e.target.value })} />
           </div>
           <div className="field" style={{ marginBottom: 0, flex: '1 1 140px' }}>
-            <label>Fecha (opcional)</label>
-            <input type="date" value={form.fecha} onChange={(e) => setForm({ ...form, fecha: e.target.value })} />
+            <label htmlFor="cajaGastoFecha">Fecha (opcional)</label>
+            <input id="cajaGastoFecha" type="date" value={form.fecha} onChange={(e) => setForm({ ...form, fecha: e.target.value })} />
           </div>
           <div className="field" style={{ marginBottom: 0, flex: '2 1 220px' }}>
-            <label>Descripción</label>
-            <input value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })} />
+            <label htmlFor="cajaGastoDescripcion">Descripción</label>
+            <input id="cajaGastoDescripcion" value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })} />
           </div>
           <div className="field" style={{ marginBottom: 0 }}>
-            <label>Comprobante (opcional)</label>
-            <input type="file" accept="image/jpeg,image/png,application/pdf" onChange={(e) => setComprobante(e.target.files[0] || null)} style={{ fontSize: 12.5 }} />
+            <label htmlFor="cajaGastoComprobante">Comprobante (opcional)</label>
+            <input id="cajaGastoComprobante" type="file" accept="image/jpeg,image/png,application/pdf" onChange={(e) => setComprobante(e.target.files[0] || null)} style={{ fontSize: 12.5 }} />
           </div>
           <button type="submit" className="btn btn-primary">Registrar gasto</button>
         </form>

@@ -77,8 +77,8 @@ export default function AdminResenasTab() {
       </p>
 
       <div className="field" style={{ maxWidth: 220, marginBottom: 20 }}>
-        <label>Estado</label>
-        <select value={estado} onChange={(e) => setEstado(e.target.value)}>
+        <label htmlFor="resenasFiltroEstado">Estado</label>
+        <select id="resenasFiltroEstado" value={estado} onChange={(e) => setEstado(e.target.value)}>
           {ESTADOS.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
         </select>
       </div>

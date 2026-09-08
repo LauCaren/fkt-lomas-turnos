@@ -47,22 +47,22 @@ function FormularioReserva({ turno, onCancelar }) {
     <form onSubmit={handleSubmit} style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--line)', display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
         <div className="field" style={{ marginBottom: 0, flex: '1 1 140px' }}>
-          <label>DNI</label>
-          <input required value={datos.dni} onChange={(e) => setDatos({ ...datos, dni: e.target.value })} placeholder="30123456" />
+          <label htmlFor="agendaReservaDni">DNI</label>
+          <input id="agendaReservaDni" required value={datos.dni} onChange={(e) => setDatos({ ...datos, dni: e.target.value })} placeholder="30123456" />
         </div>
         <div className="field" style={{ marginBottom: 0, flex: '2 1 220px' }}>
-          <label>Nombre completo</label>
-          <input required value={datos.nombreCompleto} onChange={(e) => setDatos({ ...datos, nombreCompleto: e.target.value })} />
+          <label htmlFor="agendaReservaNombre">Nombre completo</label>
+          <input id="agendaReservaNombre" required value={datos.nombreCompleto} onChange={(e) => setDatos({ ...datos, nombreCompleto: e.target.value })} />
         </div>
       </div>
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
         <div className="field" style={{ marginBottom: 0, flex: '1 1 160px' }}>
-          <label>Teléfono</label>
-          <input required value={datos.telefono} onChange={(e) => setDatos({ ...datos, telefono: e.target.value })} placeholder="11 5950-5888" />
+          <label htmlFor="agendaReservaTelefono">Teléfono</label>
+          <input id="agendaReservaTelefono" required value={datos.telefono} onChange={(e) => setDatos({ ...datos, telefono: e.target.value })} placeholder="11 5950-5888" />
         </div>
         <div className="field" style={{ marginBottom: 0, flex: '1 1 160px' }}>
-          <label>Obra social</label>
-          <select required value={datos.obraSocial} onChange={(e) => setDatos({ ...datos, obraSocial: e.target.value })}>
+          <label htmlFor="agendaReservaObraSocial">Obra social</label>
+          <select id="agendaReservaObraSocial" required value={datos.obraSocial} onChange={(e) => setDatos({ ...datos, obraSocial: e.target.value })}>
             <option value="">Seleccioná una obra social</option>
             <option value={OBRA_SOCIAL_PARTICULAR}>{OBRA_SOCIAL_PARTICULAR}</option>
             {OBRAS_SOCIALES.map((os) => <option key={os} value={os}>{os}</option>)}
@@ -70,13 +70,13 @@ function FormularioReserva({ turno, onCancelar }) {
           </select>
         </div>
         <div className="field" style={{ marginBottom: 0, flex: '1 1 200px' }}>
-          <label>Email (opcional)</label>
-          <input type="email" value={datos.email} onChange={(e) => setDatos({ ...datos, email: e.target.value })} />
+          <label htmlFor="agendaReservaEmail">Email (opcional)</label>
+          <input id="agendaReservaEmail" type="email" value={datos.email} onChange={(e) => setDatos({ ...datos, email: e.target.value })} />
         </div>
       </div>
       <div className="field" style={{ marginBottom: 0 }}>
-        <label>Motivo de consulta (opcional)</label>
-        <input value={datos.motivoConsulta} onChange={(e) => setDatos({ ...datos, motivoConsulta: e.target.value })} />
+        <label htmlFor="agendaReservaMotivo">Motivo de consulta (opcional)</label>
+        <input id="agendaReservaMotivo" value={datos.motivoConsulta} onChange={(e) => setDatos({ ...datos, motivoConsulta: e.target.value })} />
       </div>
       <p style={{ fontSize: 12.5, color: 'var(--muted)' }}>Si el DNI ya está registrado, se usa esa cuenta y se ignoran los demás datos.</p>
       <div style={{ display: 'flex', gap: 8 }}>
@@ -421,19 +421,19 @@ export default function AdminAgendaTab() {
 
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: 20 }}>
         <div className="field" style={{ marginBottom: 0 }}>
-          <label>{vista === 'semana' ? 'Semana de' : 'Día'}</label>
-          <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+          <label htmlFor="agendaFecha">{vista === 'semana' ? 'Semana de' : 'Día'}</label>
+          <input id="agendaFecha" type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
         </div>
         <div className="field" style={{ marginBottom: 0 }}>
-          <label>Especialidad</label>
-          <select value={especialidadId} onChange={(e) => handleEspecialidadChange(e.target.value)}>
+          <label htmlFor="agendaEspecialidad">Especialidad</label>
+          <select id="agendaEspecialidad" value={especialidadId} onChange={(e) => handleEspecialidadChange(e.target.value)}>
             <option value="">Todas las especialidades</option>
             {especialidades.map((esp) => <option key={esp.id} value={esp.id}>{esp.nombre}</option>)}
           </select>
         </div>
         <div className="field" style={{ marginBottom: 0 }}>
-          <label>Médico</label>
-          <select value={medicoId} onChange={(e) => setMedicoId(e.target.value)}>
+          <label htmlFor="agendaMedico">Médico</label>
+          <select id="agendaMedico" value={medicoId} onChange={(e) => setMedicoId(e.target.value)}>
             <option value="">Todos los médicos</option>
             {medicosFiltrados.map((m) => <option key={m.id} value={m.id}>{m.nombreCompleto}</option>)}
           </select>

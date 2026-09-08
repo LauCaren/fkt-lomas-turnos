@@ -78,8 +78,8 @@ function SolicitarBaja() {
       ) : (
         <form onSubmit={handleSolicitar}>
           <div className="field">
-            <label>Motivo (opcional)</label>
-            <textarea rows={2} value={motivo} onChange={(e) => setMotivo(e.target.value)}
+            <label htmlFor="privacidadMotivoBaja">Motivo (opcional)</label>
+            <textarea id="privacidadMotivoBaja" rows={2} value={motivo} onChange={(e) => setMotivo(e.target.value)}
               style={{ width: '100%', padding: '10px 14px', border: '1.5px solid var(--line)', borderRadius: 6, fontFamily: 'inherit' }} />
           </div>
           <div style={{ display: 'flex', gap: 8 }}>

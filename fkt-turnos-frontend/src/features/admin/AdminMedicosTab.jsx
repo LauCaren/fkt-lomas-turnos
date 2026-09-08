@@ -40,12 +40,12 @@ function CredencialesMedico({ medico }) {
       </p>
       <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'flex-end' }}>
         <div className="field" style={{ marginBottom: 0, flex: '1 1 220px' }}>
-          <label>Email</label>
-          <input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          <label htmlFor={`medicoCredencialesEmail-${medico.id}`}>Email</label>
+          <input id={`medicoCredencialesEmail-${medico.id}`} type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
         </div>
         <div className="field" style={{ marginBottom: 0, flex: '1 1 220px' }}>
-          <label>{medico.usuarioEmail ? 'Nueva contraseña' : 'Contraseña inicial'}</label>
-          <input type="password" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+          <label htmlFor={`medicoCredencialesPassword-${medico.id}`}>{medico.usuarioEmail ? 'Nueva contraseña' : 'Contraseña inicial'}</label>
+          <input id={`medicoCredencialesPassword-${medico.id}`} type="password" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
         </div>
         <button type="submit" className="btn btn-outline" disabled={enviando}>{enviando ? 'Guardando…' : 'Guardar credenciales'}</button>
       </form>
@@ -138,8 +138,8 @@ function MedicoDetalle({ medico }) {
       <h4 style={{ fontSize: 15, marginBottom: 10 }}>Ficha pública (página "Equipo")</h4>
       <form onSubmit={handleGuardarAnosExperiencia} style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginBottom: 16 }}>
         <div className="field" style={{ marginBottom: 0 }}>
-          <label>Años de experiencia</label>
-          <input type="number" min={0} max={70} value={anosExperiencia} onChange={(e) => setAnosExperiencia(e.target.value)} style={{ width: 100 }} />
+          <label htmlFor={`medicoAnosExperiencia-${medico.id}`}>Años de experiencia</label>
+          <input id={`medicoAnosExperiencia-${medico.id}`} type="number" min={0} max={70} value={anosExperiencia} onChange={(e) => setAnosExperiencia(e.target.value)} style={{ width: 100 }} />
         </div>
         <button type="submit" className="btn btn-outline">Guardar</button>
       </form>
@@ -174,8 +174,8 @@ function MedicoDetalle({ medico }) {
       <h4 style={{ fontSize: 15, marginBottom: 10 }}>Tarifa de consulta</h4>
       <form onSubmit={handleGuardarTarifa} style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginBottom: 20 }}>
         <div className="field" style={{ marginBottom: 0 }}>
-          <label>Monto (se autocompleta al cobrar en caja)</label>
-          <input type="number" min={0} step="0.01" value={tarifaConsulta} onChange={(e) => setTarifaConsulta(e.target.value)} style={{ width: 140 }} />
+          <label htmlFor={`medicoTarifaConsulta-${medico.id}`}>Monto (se autocompleta al cobrar en caja)</label>
+          <input id={`medicoTarifaConsulta-${medico.id}`} type="number" min={0} step="0.01" value={tarifaConsulta} onChange={(e) => setTarifaConsulta(e.target.value)} style={{ width: 140 }} />
         </div>
         <button type="submit" className="btn btn-outline">Guardar</button>
       </form>
@@ -194,18 +194,18 @@ function MedicoDetalle({ medico }) {
 
       <form onSubmit={handleAgregarRegla} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: 20 }}>
         <div className="field" style={{ marginBottom: 0 }}>
-          <label>Día</label>
-          <select value={nuevaRegla.diaSemana} onChange={(e) => setNuevaRegla({ ...nuevaRegla, diaSemana: e.target.value })}>
+          <label htmlFor={`medicoReglaDia-${medico.id}`}>Día</label>
+          <select id={`medicoReglaDia-${medico.id}`} value={nuevaRegla.diaSemana} onChange={(e) => setNuevaRegla({ ...nuevaRegla, diaSemana: e.target.value })}>
             {DIAS.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
           </select>
         </div>
         <div className="field" style={{ marginBottom: 0 }}>
-          <label>Desde</label>
-          <input type="time" min="08:00" max="20:00" value={nuevaRegla.horaInicio} onChange={(e) => setNuevaRegla({ ...nuevaRegla, horaInicio: e.target.value })} />
+          <label htmlFor={`medicoReglaDesde-${medico.id}`}>Desde</label>
+          <input id={`medicoReglaDesde-${medico.id}`} type="time" min="08:00" max="20:00" value={nuevaRegla.horaInicio} onChange={(e) => setNuevaRegla({ ...nuevaRegla, horaInicio: e.target.value })} />
         </div>
         <div className="field" style={{ marginBottom: 0 }}>
-          <label>Hasta</label>
-          <input type="time" min="08:00" max="20:00" value={nuevaRegla.horaFin} onChange={(e) => setNuevaRegla({ ...nuevaRegla, horaFin: e.target.value })} />
+          <label htmlFor={`medicoReglaHasta-${medico.id}`}>Hasta</label>
+          <input id={`medicoReglaHasta-${medico.id}`} type="time" min="08:00" max="20:00" value={nuevaRegla.horaFin} onChange={(e) => setNuevaRegla({ ...nuevaRegla, horaFin: e.target.value })} />
         </div>
         <button type="submit" className="btn btn-outline">Agregar horario</button>
       </form>
@@ -213,12 +213,12 @@ function MedicoDetalle({ medico }) {
       <h4 style={{ fontSize: 15, marginBottom: 10 }}>Generar turnos a partir de los horarios</h4>
       <form onSubmit={handleGenerar} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'flex-end' }}>
         <div className="field" style={{ marginBottom: 0 }}>
-          <label>Desde</label>
-          <input type="date" value={rango.desde} onChange={(e) => setRango({ ...rango, desde: e.target.value })} />
+          <label htmlFor={`medicoGenerarDesde-${medico.id}`}>Desde</label>
+          <input id={`medicoGenerarDesde-${medico.id}`} type="date" value={rango.desde} onChange={(e) => setRango({ ...rango, desde: e.target.value })} />
         </div>
         <div className="field" style={{ marginBottom: 0 }}>
-          <label>Hasta</label>
-          <input type="date" value={rango.hasta} onChange={(e) => setRango({ ...rango, hasta: e.target.value })} />
+          <label htmlFor={`medicoGenerarHasta-${medico.id}`}>Hasta</label>
+          <input id={`medicoGenerarHasta-${medico.id}`} type="date" value={rango.hasta} onChange={(e) => setRango({ ...rango, hasta: e.target.value })} />
         </div>
         <button type="submit" className="btn btn-primary">Generar turnos</button>
       </form>
@@ -289,27 +289,27 @@ export default function AdminMedicosTab() {
         <h3 style={{ fontSize: 17, marginBottom: 14 }}>Nuevo médico</h3>
         <form onSubmit={handleCrearMedico}>
           <div className="field">
-            <label>Nombre completo</label>
-            <input required value={nuevoMedico.nombreCompleto} onChange={(e) => setNuevoMedico({ ...nuevoMedico, nombreCompleto: e.target.value })} />
+            <label htmlFor="nuevoMedicoNombre">Nombre completo</label>
+            <input id="nuevoMedicoNombre" required value={nuevoMedico.nombreCompleto} onChange={(e) => setNuevoMedico({ ...nuevoMedico, nombreCompleto: e.target.value })} />
           </div>
           <div className="field">
-            <label>Especialidad</label>
-            <select required value={nuevoMedico.especialidadId} onChange={(e) => setNuevoMedico({ ...nuevoMedico, especialidadId: e.target.value })}>
+            <label htmlFor="nuevoMedicoEspecialidad">Especialidad</label>
+            <select id="nuevoMedicoEspecialidad" required value={nuevoMedico.especialidadId} onChange={(e) => setNuevoMedico({ ...nuevoMedico, especialidadId: e.target.value })}>
               <option value="">Seleccioná una especialidad</option>
               {especialidades.map((e) => <option key={e.id} value={e.id}>{e.nombre}</option>)}
             </select>
           </div>
           <div className="field">
-            <label>Matrícula (opcional)</label>
-            <input value={nuevoMedico.matricula} onChange={(e) => setNuevoMedico({ ...nuevoMedico, matricula: e.target.value })} />
+            <label htmlFor="nuevoMedicoMatricula">Matrícula (opcional)</label>
+            <input id="nuevoMedicoMatricula" value={nuevoMedico.matricula} onChange={(e) => setNuevoMedico({ ...nuevoMedico, matricula: e.target.value })} />
           </div>
           <div className="field">
-            <label>Duración del turno (minutos)</label>
-            <input type="number" min={10} step={5} value={nuevoMedico.duracionTurnoMinutos} onChange={(e) => setNuevoMedico({ ...nuevoMedico, duracionTurnoMinutos: Number(e.target.value) })} />
+            <label htmlFor="nuevoMedicoDuracion">Duración del turno (minutos)</label>
+            <input id="nuevoMedicoDuracion" type="number" min={10} step={5} value={nuevoMedico.duracionTurnoMinutos} onChange={(e) => setNuevoMedico({ ...nuevoMedico, duracionTurnoMinutos: Number(e.target.value) })} />
           </div>
           <div className="field">
-            <label>Años de experiencia (opcional, para la ficha pública)</label>
-            <input type="number" min={0} max={70} value={nuevoMedico.anosExperiencia} onChange={(e) => setNuevoMedico({ ...nuevoMedico, anosExperiencia: e.target.value })} />
+            <label htmlFor="nuevoMedicoAnosExperiencia">Años de experiencia (opcional, para la ficha pública)</label>
+            <input id="nuevoMedicoAnosExperiencia" type="number" min={0} max={70} value={nuevoMedico.anosExperiencia} onChange={(e) => setNuevoMedico({ ...nuevoMedico, anosExperiencia: e.target.value })} />
           </div>
           <button type="submit" className="btn btn-primary">Crear médico</button>
         </form>

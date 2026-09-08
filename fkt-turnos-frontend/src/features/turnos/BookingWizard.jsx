@@ -246,7 +246,7 @@ export default function BookingWizard() {
 
         {medicoId && (
           <div className="field">
-            <label>Horarios disponibles</label>
+            <label id="horariosDisponiblesLabel">Horarios disponibles</label>
             {status === 'loading' && <p style={{ color: 'var(--muted)' }}>Buscando horarios…</p>}
             {status !== 'loading' && disponibles.length === 0 && (
               <>
@@ -287,13 +287,14 @@ export default function BookingWizard() {
                 )}
               </>
             )}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <div role="group" aria-labelledby="horariosDisponiblesLabel" style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {disponibles.map((t) => (
                 <button
                   type="button"
                   key={t.id}
                   onClick={() => setTurnoSeleccionado(t)}
                   className="btn"
+                  aria-pressed={turnoSeleccionado?.id === t.id}
                   style={{
                     border: turnoSeleccionado?.id === t.id ? '1.5px solid var(--teal)' : '1.5px solid var(--line)',
                     background: turnoSeleccionado?.id === t.id ? 'var(--teal-tint)' : 'var(--white)',

@@ -30,8 +30,8 @@ export default function AdminColaEsperaTab() {
       </p>
 
       <div className="field" style={{ maxWidth: 280, marginBottom: 20 }}>
-        <label>Médico</label>
-        <select value={medicoId} onChange={(e) => setMedicoId(e.target.value)}>
+        <label htmlFor="colaEsperaMedico">Médico</label>
+        <select id="colaEsperaMedico" value={medicoId} onChange={(e) => setMedicoId(e.target.value)}>
           <option value="">Todos los médicos</option>
           {medicos.map((m) => <option key={m.id} value={m.id}>{m.nombreCompleto}</option>)}
         </select>
