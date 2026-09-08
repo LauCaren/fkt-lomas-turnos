@@ -32,10 +32,10 @@ export default function CheckInPage() {
 
       <div className="card" style={{ marginTop: 24 }}>
         {estado === 'cargando' && <p style={{ color: 'var(--muted)' }}>Registrando tu llegada…</p>}
-        {estado === 'error' && <div className="alert alert-error">{error}</div>}
+        {estado === 'error' && <div className="alert alert-error" role="alert">{error}</div>}
         {estado === 'listo' && (
           <>
-            <div className={`alert ${ESTILO_POR_RESULTADO[resultado.resultado] || 'alert-error'}`}>
+            <div className={`alert ${ESTILO_POR_RESULTADO[resultado.resultado] || 'alert-error'}`} role="status">
               {resultado.mensaje}
             </div>
             {resultado.medicoNombre && (

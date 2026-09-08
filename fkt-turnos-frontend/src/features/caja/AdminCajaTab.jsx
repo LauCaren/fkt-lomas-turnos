@@ -331,8 +331,8 @@ export default function AdminCajaTab() {
 
   return (
     <div>
-      {error && <div className="alert alert-error" style={{ marginBottom: 14 }}>{error}</div>}
-      {mensajeExito && <div className="alert alert-success" style={{ marginBottom: 14 }}>{mensajeExito}</div>}
+      {error && <div className="alert alert-error" role="alert" style={{ marginBottom: 14 }}>{error}</div>}
+      {mensajeExito && <div className="alert alert-success" role="status" style={{ marginBottom: 14 }}>{mensajeExito}</div>}
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
         {SUBTABS.map((t) => (

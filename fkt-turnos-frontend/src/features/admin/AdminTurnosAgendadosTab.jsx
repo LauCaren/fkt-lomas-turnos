@@ -47,7 +47,7 @@ export default function AdminTurnosAgendadosTab() {
 
   return (
     <div>
-      {error && <div className="alert alert-error">{error}</div>}
+      {error && <div className="alert alert-error" role="alert">{error}</div>}
 
       <p style={{ color: 'var(--muted)', marginBottom: 20 }}>
         Solo turnos ya reservados. Filtrá por profesional para ver únicamente su agenda ocupada.

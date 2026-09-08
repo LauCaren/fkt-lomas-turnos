@@ -274,8 +274,8 @@ export default function AdminMedicosTab() {
 
   return (
     <div>
-      {error && <div className="alert alert-error">{error}</div>}
-      {mensajeExito && <div className="alert alert-success">{mensajeExito}</div>}
+      {error && <div className="alert alert-error" role="alert">{error}</div>}
+      {mensajeExito && <div className="alert alert-success" role="status">{mensajeExito}</div>}
 
       <div className="card" style={{ marginBottom: 20 }}>
         <h3 style={{ fontSize: 17, marginBottom: 14 }}>Nueva especialidad</h3>

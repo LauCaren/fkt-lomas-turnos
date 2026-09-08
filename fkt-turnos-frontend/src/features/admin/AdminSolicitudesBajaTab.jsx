@@ -65,8 +65,8 @@ export default function AdminSolicitudesBajaTab() {
 
   return (
     <div>
-      {error && <div className="alert alert-error" style={{ marginBottom: 14 }}>{error}</div>}
-      {mensajeExito && <div className="alert alert-success" style={{ marginBottom: 14 }}>{mensajeExito}</div>}
+      {error && <div className="alert alert-error" role="alert" style={{ marginBottom: 14 }}>{error}</div>}
+      {mensajeExito && <div className="alert alert-success" role="status" style={{ marginBottom: 14 }}>{mensajeExito}</div>}
 
       <p style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 16, maxWidth: 640 }}>
         Pedidos de baja de cuenta que hicieron los pacientes desde "Mi cuenta". Al aprobar, sus datos

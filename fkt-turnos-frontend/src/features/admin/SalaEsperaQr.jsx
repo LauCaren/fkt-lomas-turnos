@@ -41,7 +41,7 @@ export default function SalaEsperaQr() {
         <button type="button" className="btn btn-secondary" onClick={() => window.print()}>Imprimir cartel</button>
       </div>
 
-      {error && <div className="alert alert-error" style={{ marginTop: 12 }}>{error}</div>}
+      {error && <div className="alert alert-error" role="alert" style={{ marginTop: 12 }}>{error}</div>}
 
       <div id="cartel-qr-imprimir" style={{ textAlign: 'center', marginTop: 20, padding: 24, border: '1px solid var(--line)', borderRadius: 'var(--radius-m)' }}>
         <div className="eyebrow">FKT Lomas</div>

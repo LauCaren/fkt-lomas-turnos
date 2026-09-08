@@ -54,8 +54,8 @@ function DatosPersonales({ perfil }) {
   return (
     <form onSubmit={handleSubmit} className="card">
       <div className="field">
-        <label>DNI</label>
-        <input value={perfil.dni || ''} disabled style={{ background: 'var(--bg-soft)', color: 'var(--muted)' }} />
+        <label htmlFor="dni">DNI</label>
+        <input id="dni" value={perfil.dni || ''} disabled style={{ background: 'var(--bg-soft)', color: 'var(--muted)' }} />
       </div>
       <div className="field">
         <label htmlFor="nombreCompleto">Nombre completo</label>
@@ -110,12 +110,12 @@ function CambiarPassword() {
   return (
     <form onSubmit={handleSubmit} className="card">
       <div className="field">
-        <label>Contraseña actual</label>
-        <PasswordInput required value={form.passwordActual} onChange={(e) => setForm({ ...form, passwordActual: e.target.value })} />
+        <label htmlFor="passwordActual">Contraseña actual</label>
+        <PasswordInput id="passwordActual" required value={form.passwordActual} onChange={(e) => setForm({ ...form, passwordActual: e.target.value })} />
       </div>
       <div className="field">
-        <label>Contraseña nueva</label>
-        <PasswordInput required minLength={8} pattern={PATRON_PASSWORD} title={TITULO_PASSWORD} value={form.passwordNueva} onChange={(e) => setForm({ ...form, passwordNueva: e.target.value })} />
+        <label htmlFor="passwordNueva">Contraseña nueva</label>
+        <PasswordInput id="passwordNueva" required minLength={8} pattern={PATRON_PASSWORD} title={TITULO_PASSWORD} value={form.passwordNueva} onChange={(e) => setForm({ ...form, passwordNueva: e.target.value })} />
         <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{AYUDA_PASSWORD}</p>
       </div>
       <button type="submit" className="btn btn-primary">Actualizar contraseña</button>
@@ -207,8 +207,8 @@ export default function MiCuentaPage() {
       <span className="eyebrow">Mi cuenta</span>
       <h1 style={{ marginTop: 12, fontSize: 30 }}>Tus datos</h1>
 
-      {error && <div className="alert alert-error" style={{ marginTop: 20 }}>{error}</div>}
-      {mensajeExito && <div className="alert alert-success" style={{ marginTop: 20 }}>{mensajeExito}</div>}
+      {error && <div className="alert alert-error" role="alert" style={{ marginTop: 20 }}>{error}</div>}
+      {mensajeExito && <div className="alert alert-success" role="status" style={{ marginTop: 20 }}>{mensajeExito}</div>}
 
       {!perfil && <p style={{ color: 'var(--muted)', marginTop: 20 }}>Cargando…</p>}
 

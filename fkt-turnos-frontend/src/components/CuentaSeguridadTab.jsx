@@ -24,12 +24,12 @@ function CambiarPassword() {
   return (
     <form onSubmit={handleSubmit} className="card">
       <div className="field">
-        <label>Contraseña actual</label>
-        <PasswordInput required value={form.passwordActual} onChange={(e) => setForm({ ...form, passwordActual: e.target.value })} />
+        <label htmlFor="passwordActual">Contraseña actual</label>
+        <PasswordInput id="passwordActual" required value={form.passwordActual} onChange={(e) => setForm({ ...form, passwordActual: e.target.value })} />
       </div>
       <div className="field">
-        <label>Contraseña nueva</label>
-        <PasswordInput required minLength={8} pattern={PATRON_PASSWORD} title={TITULO_PASSWORD} value={form.passwordNueva} onChange={(e) => setForm({ ...form, passwordNueva: e.target.value })} />
+        <label htmlFor="passwordNueva">Contraseña nueva</label>
+        <PasswordInput id="passwordNueva" required minLength={8} pattern={PATRON_PASSWORD} title={TITULO_PASSWORD} value={form.passwordNueva} onChange={(e) => setForm({ ...form, passwordNueva: e.target.value })} />
         <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{AYUDA_PASSWORD}</p>
       </div>
       <button type="submit" className="btn btn-primary">Actualizar contraseña</button>
@@ -51,8 +51,8 @@ export default function CuentaSeguridadTab() {
 
   return (
     <div>
-      {error && <div className="alert alert-error" style={{ marginBottom: 20 }}>{error}</div>}
-      {mensajeExito && <div className="alert alert-success" style={{ marginBottom: 20 }}>{mensajeExito}</div>}
+      {error && <div className="alert alert-error" role="alert" style={{ marginBottom: 20 }}>{error}</div>}
+      {mensajeExito && <div className="alert alert-success" role="status" style={{ marginBottom: 20 }}>{mensajeExito}</div>}
 
       {!perfil && <p style={{ color: 'var(--muted)' }}>Cargando…</p>}
 

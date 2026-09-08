@@ -109,7 +109,7 @@ export default function AdminBusquedaPacienteTab() {
         <button type="submit" className="btn btn-primary" disabled={cargando}>Buscar</button>
       </form>
 
-      {error && <div className="alert alert-error">{error}</div>}
+      {error && <div className="alert alert-error" role="alert">{error}</div>}
 
       {!ficha && resultados.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

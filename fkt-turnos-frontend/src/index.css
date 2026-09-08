@@ -12,11 +12,18 @@
   --teal-tint: #E1F3F2;
   --black: #13232C;
   --white: #FFFFFF;
-  --red: #C23F12;
+  /* #BE3E12, no #C23F12: el texto de .alert-error sobre --red-tint quedaba en 4.48:1,
+     apenas por debajo del mínimo AA de 4.5:1 para texto normal — este tono, casi
+     idéntico a simple vista, lo deja en 4.63:1. */
+  --red: #BE3E12;
   --red-tint: #FBEAE4;
   --green: #2E7D32;
   --amber: #B4740E;
   --amber-tint: #FBF1DF;
+  /* Solo para texto sobre --amber-tint (.alert-warning): --amber ahí da 3.44:1, no
+     alcanza AA (4.5:1) para texto normal. --amber en sí no se toca porque también se
+     usa como color de fondo/borde en otros lados donde este tono más oscuro no queda bien. */
+  --amber-dark: #97610C;
   --radius-s: 6px;
   --radius-m: 16px;
   --maxw: 960px;
@@ -124,8 +131,16 @@ input, select, textarea { font: inherit; }
   color: var(--ink);
 }
 .field input:focus, .field select:focus, .field textarea:focus {
-  outline: none;
   border-color: var(--teal);
+}
+/* Sin esto, el foco por teclado en cualquier campo de formulario (la inmensa mayoría de la
+   app pasa por .field) no tenía ningún indicador visible más que este leve cambio de borde
+   (2.79:1 contra el borde en reposo — no alcanza ni el mínimo de 3:1 para componentes de UI):
+   la regla global :focus-visible de más abajo nunca llegaba a aplicarse acá porque esta
+   selectora tiene más especificidad y antes pisaba el outline con "none". */
+.field input:focus-visible, .field select:focus-visible, .field textarea:focus-visible {
+  outline: 2px solid var(--teal-dark);
+  outline-offset: 2px;
 }
 .field-error { color: var(--red); font-size: 12.5px; }
 
@@ -205,12 +220,13 @@ input, select, textarea { font: inherit; }
 }
 .alert-error { background: var(--red-tint); color: var(--red); border: 1px solid var(--red); }
 .alert-success { background: #E8F5E9; color: var(--green); border: 1px solid var(--green); }
-.alert-warning { background: var(--amber-tint); color: var(--amber); border: 1px solid var(--amber); }
+.alert-warning { background: var(--amber-tint); color: var(--amber-dark); border: 1px solid var(--amber); }
 
 .badge { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 12px; font-weight: 600; }
 .badge-disponible { background: #E8F5E9; color: var(--green); }
 .badge-reservado { background: var(--red-tint); color: var(--red); }
-.badge-cancelado { background: var(--line); color: var(--muted); }
+/* --muted acá daba 3.35:1 sobre --line, no alcanza AA — --ink-soft es un tono que ya existe en la paleta, no uno nuevo. */
+.badge-cancelado { background: var(--line); color: var(--ink-soft); }
 
 :focus-visible { outline: 2px solid var(--teal-dark); outline-offset: 2px; }
 

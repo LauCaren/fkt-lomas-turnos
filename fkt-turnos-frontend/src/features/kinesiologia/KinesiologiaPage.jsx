@@ -118,7 +118,7 @@ function NuevoPlanForm({ medicoKinesiologiaId, medicos }) {
   if (tieneOrden === false) {
     return (
       <div className="card">
-        <div className="alert alert-error">
+        <div className="alert alert-error" role="alert">
           No podés reservar un turno de kinesiología sin orden médica. Conseguila con tu médico de cabecera y volvé
           a intentarlo.
         </div>
@@ -222,7 +222,7 @@ function PlanCard({ plan }) {
       </div>
 
       {plan.estado === 'RECHAZADO' && plan.motivoRechazo && (
-        <div className="alert alert-error" style={{ marginTop: 10 }}>Motivo: {plan.motivoRechazo}</div>
+        <div className="alert alert-error" role="alert" style={{ marginTop: 10 }}>Motivo: {plan.motivoRechazo}</div>
       )}
 
       {plan.sesiones.length > 0 && (
@@ -285,8 +285,8 @@ export default function KinesiologiaPage() {
       <span className="eyebrow">Kinesiología</span>
       <h1 style={{ marginTop: 12, fontSize: 30 }}>Plan de sesiones</h1>
 
-      {error && <div className="alert alert-error" style={{ marginTop: 16 }}>{error}</div>}
-      {mensajeExito && <div className="alert alert-success" style={{ marginTop: 16 }}>{mensajeExito}</div>}
+      {error && <div className="alert alert-error" role="alert" style={{ marginTop: 16 }}>{error}</div>}
+      {mensajeExito && <div className="alert alert-success" role="status" style={{ marginTop: 16 }}>{mensajeExito}</div>}
 
       <div style={{ marginTop: 20 }}>
         {especialidadKinesiologia && <NuevoPlanForm medicoKinesiologiaId={especialidadKinesiologia.id} medicos={medicosPorEspecialidad} />}

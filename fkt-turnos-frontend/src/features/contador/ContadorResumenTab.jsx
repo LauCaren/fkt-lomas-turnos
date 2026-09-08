@@ -15,7 +15,7 @@ export default function ContadorResumenTab() {
     dispatch(fetchTendenciaContador(14));
   }, [dispatch]);
 
-  if (error) return <div className="alert alert-error">{error}</div>;
+  if (error) return <div className="alert alert-error" role="alert">{error}</div>;
   if (resumenCargando && !resumen) return <p style={{ color: 'var(--muted)' }}>Cargando…</p>;
   if (!resumen) return null;
 

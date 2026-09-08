@@ -211,8 +211,8 @@ export default function AdminKinesiologiaTab() {
 
   return (
     <div>
-      {error && <div className="alert alert-error" style={{ marginBottom: 14 }}>{error}</div>}
-      {mensajeExito && <div className="alert alert-success" style={{ marginBottom: 14 }}>{mensajeExito}</div>}
+      {error && <div className="alert alert-error" role="alert" style={{ marginBottom: 14 }}>{error}</div>}
+      {mensajeExito && <div className="alert alert-success" role="status" style={{ marginBottom: 14 }}>{mensajeExito}</div>}
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
         <div className="field" style={{ marginBottom: 0, minWidth: 220 }}>

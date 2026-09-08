@@ -68,8 +68,8 @@ export default function AdminResenasTab() {
 
   return (
     <div>
-      {error && <div className="alert alert-error" style={{ marginBottom: 14 }}>{error}</div>}
-      {mensajeExito && <div className="alert alert-success" style={{ marginBottom: 14 }}>{mensajeExito}</div>}
+      {error && <div className="alert alert-error" role="alert" style={{ marginBottom: 14 }}>{error}</div>}
+      {mensajeExito && <div className="alert alert-success" role="status" style={{ marginBottom: 14 }}>{mensajeExito}</div>}
 
       <p style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 16, maxWidth: 640 }}>
         Reseñas que dejaron pacientes sobre un turno que ya tuvieron atendido. Solo las aprobadas se

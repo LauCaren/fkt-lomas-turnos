@@ -385,8 +385,8 @@ export default function AdminAgendaTab() {
 
   return (
     <div>
-      {error && <div className="alert alert-error">{error}</div>}
-      {mensajeExito && <div className="alert alert-success">{mensajeExito}</div>}
+      {error && <div className="alert alert-error" role="alert">{error}</div>}
+      {mensajeExito && <div className="alert alert-success" role="status">{mensajeExito}</div>}
 
       {resumenDia && !agendaCargando && (
         <div className="card" style={{ marginBottom: 20, display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>

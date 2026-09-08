@@ -284,8 +284,8 @@ export default function AdminRecordatoriosTab() {
 
   return (
     <div>
-      {error && <div className="alert alert-error">{error}</div>}
-      {mensajeExito && <div className="alert alert-success">{mensajeExito}</div>}
+      {error && <div className="alert alert-error" role="alert">{error}</div>}
+      {mensajeExito && <div className="alert alert-success" role="status">{mensajeExito}</div>}
 
       {esAdmin && <ConfiguracionRecordatorios />}
       <MensajePuntual />

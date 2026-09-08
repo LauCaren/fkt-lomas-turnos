@@ -56,7 +56,7 @@ export default function MisTurnosPage() {
       <h1 style={{ marginTop: 12, fontSize: 30 }}>Tus turnos reservados</h1>
 
       {avisoPago && (
-        <div className={`alert ${avisoPago.clase}`} style={{ marginTop: 20 }}>
+        <div className={`alert ${avisoPago.clase}`} role="status" style={{ marginTop: 20 }}>
           {avisoPago.texto}
           <button
             type="button"

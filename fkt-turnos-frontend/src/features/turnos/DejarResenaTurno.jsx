@@ -37,7 +37,7 @@ export default function DejarResenaTurno({ turnoId }) {
 
   return (
     <form onSubmit={handleSubmit} className="card" style={{ marginTop: 10, padding: 14 }}>
-      {error && <div className="alert alert-error" style={{ marginBottom: 10, fontSize: 13 }}>{error}</div>}
+      {error && <div className="alert alert-error" role="alert" style={{ marginBottom: 10, fontSize: 13 }}>{error}</div>}
       <div style={{ display: 'flex', gap: 4 }} role="radiogroup" aria-label="Puntaje">
         {ESTRELLAS.map((n) => (
           <button

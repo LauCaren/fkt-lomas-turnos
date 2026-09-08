@@ -140,10 +140,10 @@ export default function BookingWizard() {
     const puedePagarOnline = mercadoPagoHabilitado && !!medicoReservado?.tarifaConsulta;
     return (
       <div className="card" style={{ maxWidth: 480, margin: '0 auto', textAlign: 'center' }}>
-        <div className="alert alert-success">
+        <div className="alert alert-success" role="status">
           {reprogramadoOk ? '¡Turno reprogramado con éxito!' : '¡Turno reservado con éxito!'}
         </div>
-        {avisoReprogramacion && <div className="alert alert-error" style={{ marginTop: 10 }}>{avisoReprogramacion}</div>}
+        {avisoReprogramacion && <div className="alert alert-error" role="alert" style={{ marginTop: 10 }}>{avisoReprogramacion}</div>}
         {mostrarAvisoCopagoIoma && (
           <div className="alert" style={{ marginTop: 10, background: 'var(--teal-tint)', color: 'var(--teal-dark)', border: '1px solid var(--teal)', textAlign: 'left' }}>
             Este médico cobra un copago a pacientes con IOMA. Por favor escribinos por WhatsApp para terminar de confirmar el turno.
@@ -172,7 +172,7 @@ export default function BookingWizard() {
             <p style={{ fontSize: 14, color: 'var(--muted)', marginBottom: 12 }}>
               También podés pagar la consulta ahora online. Si preferís, se puede pagar en el consultorio igual.
             </p>
-            {pagoOnlineError && <div className="alert alert-error" style={{ marginBottom: 10 }}>{pagoOnlineError}</div>}
+            {pagoOnlineError && <div className="alert alert-error" role="alert" style={{ marginBottom: 10 }}>{pagoOnlineError}</div>}
             <button className="btn btn-primary btn-block" onClick={handlePagarOnline} disabled={pagoOnlineCargando}>
               {pagoOnlineCargando ? 'Iniciando pago…' : 'Pagar ahora con Mercado Pago'}
             </button>
@@ -216,7 +216,7 @@ export default function BookingWizard() {
       )}
 
       <div className="card" style={{ marginTop: 28 }}>
-        {error && <div className="alert alert-error">{error}</div>}
+        {error && <div className="alert alert-error" role="alert">{error}</div>}
 
         <div className="field">
           <label htmlFor="especialidad">Especialidad</label>

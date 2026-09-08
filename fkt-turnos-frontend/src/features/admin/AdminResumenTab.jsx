@@ -16,7 +16,7 @@ export default function AdminResumenTab({ irACola, irAKinesiologia, irACaja }) {
     return () => clearInterval(intervalo);
   }, [dispatch]);
 
-  if (error) return <div className="alert alert-error">{error}</div>;
+  if (error) return <div className="alert alert-error" role="alert">{error}</div>;
   if (!resumen) return <p style={{ color: 'var(--muted)' }}>Cargando…</p>;
 
   return (

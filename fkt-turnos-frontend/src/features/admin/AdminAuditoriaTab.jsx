@@ -38,7 +38,7 @@ export default function AdminAuditoriaTab() {
 
   return (
     <div>
-      {error && <div className="alert alert-error" style={{ marginBottom: 14 }}>{error}</div>}
+      {error && <div className="alert alert-error" role="alert" style={{ marginBottom: 14 }}>{error}</div>}
 
       <p style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 16, maxWidth: 640 }}>
         Quién hizo qué y cuándo — incluye altas/bajas de cuentas de staff y movimientos de caja,

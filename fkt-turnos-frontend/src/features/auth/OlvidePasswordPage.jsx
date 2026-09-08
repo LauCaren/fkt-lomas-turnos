@@ -20,8 +20,8 @@ export default function OlvidePasswordPage() {
       <p style={{ marginTop: 10, color: 'var(--muted)' }}>Ingresá tu email y te mandamos un link para elegir una nueva contraseña.</p>
 
       <form onSubmit={handleSubmit} className="card" style={{ marginTop: 28 }}>
-        {error && <div className="alert alert-error">{error}</div>}
-        {mensajeExito && <div className="alert alert-success">{mensajeExito}</div>}
+        {error && <div className="alert alert-error" role="alert">{error}</div>}
+        {mensajeExito && <div className="alert alert-success" role="status">{mensajeExito}</div>}
         <div className="field">
           <label htmlFor="email">Email</label>
           <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />

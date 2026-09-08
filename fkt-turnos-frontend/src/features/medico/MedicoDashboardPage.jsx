@@ -36,8 +36,8 @@ export default function MedicoDashboardPage() {
         )}
       </div>
 
-      {error && <div className="alert alert-error" style={{ marginTop: 20 }}>{error}</div>}
-      {mensajeExito && <div className="alert alert-success" style={{ marginTop: 20 }}>{mensajeExito}</div>}
+      {error && <div className="alert alert-error" role="alert" style={{ marginTop: 20 }}>{error}</div>}
+      {mensajeExito && <div className="alert alert-success" role="status" style={{ marginTop: 20 }}>{mensajeExito}</div>}
 
       <TabNav tabs={TABS} active={tab} onChange={(id) => { setTab(id); dispatch(limpiarMensajesMedico()); }} />
 

@@ -23,7 +23,7 @@ export default function RestablecerPasswordPage() {
   if (!token) {
     return (
       <div style={{ maxWidth: 420, margin: '0 auto' }}>
-        <div className="alert alert-error">Este link no es válido. Pedí uno nuevo desde "¿Olvidaste tu contraseña?".</div>
+        <div className="alert alert-error" role="alert">Este link no es válido. Pedí uno nuevo desde "¿Olvidaste tu contraseña?".</div>
         <p style={{ marginTop: 18, textAlign: 'center' }}>
           <Link to="/olvide-password" style={{ color: 'var(--teal-dark)', fontWeight: 600 }}>Pedir un link nuevo</Link>
         </p>
@@ -37,8 +37,8 @@ export default function RestablecerPasswordPage() {
       <h1 style={{ marginTop: 12, fontSize: 30 }}>Elegí una nueva contraseña</h1>
 
       <form onSubmit={handleSubmit} className="card" style={{ marginTop: 28 }}>
-        {error && <div className="alert alert-error">{error}</div>}
-        {mensajeExito && <div className="alert alert-success">{mensajeExito}</div>}
+        {error && <div className="alert alert-error" role="alert">{error}</div>}
+        {mensajeExito && <div className="alert alert-success" role="status">{mensajeExito}</div>}
         <div className="field">
           <label htmlFor="passwordNueva">Contraseña nueva</label>
           <PasswordInput id="passwordNueva" required minLength={8} pattern={PATRON_PASSWORD} title={TITULO_PASSWORD} value={passwordNueva} onChange={(e) => setPasswordNueva(e.target.value)} />

@@ -10,7 +10,7 @@ export default function ContadorIngresosTab() {
 
   useEffect(() => { dispatch(fetchIngresosContador()); }, [dispatch]);
 
-  if (error) return <div className="alert alert-error">{error}</div>;
+  if (error) return <div className="alert alert-error" role="alert">{error}</div>;
   if (ingresosCargando && ingresos.length === 0) return <p style={{ color: 'var(--muted)' }}>Cargando ingresos…</p>;
 
   if (ingresos.length === 0) {

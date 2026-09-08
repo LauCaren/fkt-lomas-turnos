@@ -45,7 +45,7 @@ export default function RegisterPage() {
       <p style={{ marginTop: 10, color: 'var(--muted)' }}>Necesitamos estos datos para gestionar tu atención en el centro.</p>
 
       <form onSubmit={handleSubmit} className="card" style={{ marginTop: 28 }}>
-        {error && <div className="alert alert-error">{error}</div>}
+        {error && <div className="alert alert-error" role="alert">{error}</div>}
 
         <div className="field">
           <label htmlFor="nombreCompleto">Nombre completo</label>

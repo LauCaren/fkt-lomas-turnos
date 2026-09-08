@@ -10,7 +10,7 @@ export default function ContadorGastosTab() {
 
   useEffect(() => { dispatch(fetchGastosContador()); }, [dispatch]);
 
-  if (error) return <div className="alert alert-error">{error}</div>;
+  if (error) return <div className="alert alert-error" role="alert">{error}</div>;
   if (gastosCargando && gastos.length === 0) return <p style={{ color: 'var(--muted)' }}>Cargando gastos…</p>;
 
   if (gastos.length === 0) {

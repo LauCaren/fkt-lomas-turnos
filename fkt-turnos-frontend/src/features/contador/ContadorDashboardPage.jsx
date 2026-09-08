@@ -38,7 +38,7 @@ export default function ContadorDashboardPage() {
         <p style={{ color: 'var(--muted)', marginTop: 24 }}>Cargando…</p>
       ) : mfaPendiente ? (
         <>
-          <div className="alert alert-error" style={{ marginTop: 24 }}>
+          <div className="alert alert-error" role="alert" style={{ marginTop: 24 }}>
             Por seguridad, la cuenta de contador tiene que activar la verificación en dos pasos antes de poder ver la caja.
           </div>
           <div style={{ marginTop: 20 }}>

@@ -26,7 +26,7 @@ function ExportarSeccion({ titulo, descripcion, endpoint, prefijoArchivo }) {
     <div className="card" style={{ marginBottom: 20 }}>
       <h3 style={{ fontSize: 16, marginBottom: 6 }}>{titulo}</h3>
       <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14 }}>{descripcion}</p>
-      {error && <div className="alert alert-error" style={{ marginBottom: 12 }}>{error}</div>}
+      {error && <div className="alert alert-error" role="alert" style={{ marginBottom: 12 }}>{error}</div>}
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
         <div className="field" style={{ marginBottom: 0 }}>
           <label>Desde</label>
@@ -77,8 +77,8 @@ function ConfiguracionReporteMensual() {
         El último día de cada mes se manda automáticamente un Excel con todos los ingresos, retiros y gastos del mes
         a esta dirección. Dejalo vacío para desactivar el envío.
       </p>
-      {error && <div className="alert alert-error" style={{ marginBottom: 12 }}>{error}</div>}
-      {mensaje && <div className="alert alert-success" style={{ marginBottom: 12 }}>{mensaje}</div>}
+      {error && <div className="alert alert-error" role="alert" style={{ marginBottom: 12 }}>{error}</div>}
+      {mensaje && <div className="alert alert-success" role="status" style={{ marginBottom: 12 }}>{mensaje}</div>}
       <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 10, alignItems: 'flex-end', flexWrap: 'wrap' }}>
         <div className="field" style={{ marginBottom: 0, flex: '1 1 260px' }}>
           <label>Email de destino</label>

@@ -10,7 +10,7 @@ export default function ContadorRetirosTab() {
 
   useEffect(() => { dispatch(fetchRetirosContador()); }, [dispatch]);
 
-  if (error) return <div className="alert alert-error">{error}</div>;
+  if (error) return <div className="alert alert-error" role="alert">{error}</div>;
   if (retirosCargando && retiros.length === 0) return <p style={{ color: 'var(--muted)' }}>Cargando retiros…</p>;
 
   if (retiros.length === 0) {

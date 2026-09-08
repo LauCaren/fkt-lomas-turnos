@@ -28,16 +28,16 @@ function NuevaSecretaria() {
   return (
     <form onSubmit={handleSubmit} className="card" style={{ marginBottom: 20, maxWidth: 420 }}>
       <div className="field">
-        <label>Nombre completo</label>
-        <input required value={form.nombreCompleto} onChange={(e) => setForm({ ...form, nombreCompleto: e.target.value })} />
+        <label htmlFor="secretariaNombreCompleto">Nombre completo</label>
+        <input id="secretariaNombreCompleto" required value={form.nombreCompleto} onChange={(e) => setForm({ ...form, nombreCompleto: e.target.value })} />
       </div>
       <div className="field">
-        <label>Email</label>
-        <input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+        <label htmlFor="secretariaEmail">Email</label>
+        <input id="secretariaEmail" type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
       </div>
       <div className="field">
-        <label>Contraseña</label>
-        <PasswordInput required minLength={8} pattern={PATRON_PASSWORD} title={TITULO_PASSWORD}
+        <label htmlFor="secretariaPassword">Contraseña</label>
+        <PasswordInput id="secretariaPassword" required minLength={8} pattern={PATRON_PASSWORD} title={TITULO_PASSWORD}
           value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
         <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{AYUDA_PASSWORD}</p>
       </div>
@@ -91,8 +91,8 @@ export default function AdminSecretariasTab() {
 
   return (
     <div>
-      {error && <div className="alert alert-error" style={{ marginBottom: 14 }}>{error}</div>}
-      {mensajeExito && <div className="alert alert-success" style={{ marginBottom: 14 }}>{mensajeExito}</div>}
+      {error && <div className="alert alert-error" role="alert" style={{ marginBottom: 14 }}>{error}</div>}
+      {mensajeExito && <div className="alert alert-success" role="status" style={{ marginBottom: 14 }}>{mensajeExito}</div>}
 
       <p style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 16, maxWidth: 640 }}>
         Cada secretaria entra con su propia cuenta — ve agenda, reserva telefónica, mensajes,

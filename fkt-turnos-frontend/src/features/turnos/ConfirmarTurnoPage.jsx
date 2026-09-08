@@ -32,9 +32,9 @@ export default function ConfirmarTurnoPage() {
 
       <div className="card" style={{ marginTop: 24 }}>
         {estado === 'cargando' && <p style={{ color: 'var(--muted)' }}>Procesando…</p>}
-        {estado === 'error' && <div className="alert alert-error">{error}</div>}
+        {estado === 'error' && <div className="alert alert-error" role="alert">{error}</div>}
         {estado === 'listo' && confirmando && (
-          <div className="alert alert-success">¡Gracias! Confirmamos que vas a venir a tu turno.</div>
+          <div className="alert alert-success" role="status">¡Gracias! Confirmamos que vas a venir a tu turno.</div>
         )}
         {estado === 'listo' && !confirmando && (
           <div className="alert" style={{ background: 'var(--red-tint)', color: 'var(--red)', border: '1px solid var(--red)' }}>

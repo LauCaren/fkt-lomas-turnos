@@ -163,6 +163,13 @@ Implementado y probado de punta a punta:
 - Historia clínica por paciente, visible solo para los médicos que lo atendieron — un médico no puede ver evoluciones cargadas por otro médico.
 - Saldo de caja acumulado, visible en su propio portal.
 
+**Accesibilidad**
+- Foco de teclado visible en todos los campos de formulario (`index.css`): antes, `.field input:focus` pisaba con `outline: none` la regla global `:focus-visible` sin dejar ningún reemplazo — el único indicador era un leve cambio de color de borde, por debajo del contraste mínimo de 3:1 para componentes de UI.
+- Los badges de estado de turno y los mensajes de alerta cumplen contraste AA (4.5:1) para texto normal — `.badge-cancelado` y `.alert-warning` no lo cumplían antes.
+- Los mensajes de error (`role="alert"`) y de éxito (`role="status"`) después de enviar un formulario se anuncian a lectores de pantalla — antes solo pasaba en la pantalla de login, en el resto de la app (~30 archivos) el mensaje aparecía en el DOM sin ningún anuncio.
+- Todos los campos de contraseña tienen su `<label>` correctamente asociado por `id`/`htmlFor` (varios formularios de cambio de contraseña no lo tenían).
+- El visor de fotos (`Lightbox`) mueve el foco al botón de cerrar al abrirse y lo devuelve a quien lo disparó al cerrarse, en vez de perderlo.
+
 **Auditoría**
 - Undo/redo de operaciones sobre turnos (reservar, cancelar, reasignar) con historial completo — pensado para revertir un error de carga de la secretaria sin tener que arreglarlo a mano en la base.
 - Además de turnos, queda registro de quién hizo qué en: altas/bajas de médicos y especialidades, anulaciones de ingresos/retiros/gastos de caja, y altas/bajas/activaciones de cuentas de staff. El admin lo navega con filtros (tipo de entidad, usuario, rango de fechas) desde la pestaña "Auditoría" del panel.
