@@ -87,6 +87,12 @@ app:
     account-sid: ${TWILIO_ACCOUNT_SID:}
     auth-token: ${TWILIO_AUTH_TOKEN:}
     numero-origen-whatsapp: ${TWILIO_NUMERO_ORIGEN_WHATSAPP:}
+    # URL pública (https) contra la que Twilio firmó el webhook entrante del bot — tiene que
+    # ser exactamente la URL configurada como "when a message comes in" en la consola de
+    # Twilio, sin barra final (ver TwilioSignatureVerifier). Vacío en dev: el bot rechaza todo
+    # mensaje entrante hasta configurarla, igual que MERCADOPAGO_WEBHOOK_SECRET vacío rechaza
+    # los webhooks de pago.
+    webhook-base-url: ${TWILIO_WEBHOOK_BASE_URL:}
   recordatorios:
     # Frecuencia del polling del scheduler (minutos) — a diferencia de la
     # plantilla del mensaje y las horas de anticipación, esto NO es editable

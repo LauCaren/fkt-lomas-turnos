@@ -1,0 +1,20 @@
+package com.fktlomas.turnos.domain;
+
+/** Pasos de la máquina de estados del bot de WhatsApp — ver WhatsAppBotService. */
+public enum EstadoConversacion {
+    INICIO,
+    ESPERANDO_DNI,
+    BLOQUEADO_TEMPORAL,
+    REGISTRANDO_NOMBRE,
+    REGISTRANDO_OBRA_SOCIAL,
+    MENU_PRINCIPAL,
+    ELIGIENDO_ESPECIALIDAD,
+    ELIGIENDO_MEDICO,
+    ELIGIENDO_FECHA,
+    ELIGIENDO_HORARIO,
+    CONFIRMANDO_RESERVA,
+    CANCELANDO,
+    ELIGIENDO_ESPECIALIDAD_LISTA_ESPERA,
+    ELIGIENDO_MEDICO_LISTA_ESPERA,
+    ELIGIENDO_FECHA_LISTA_ESPERA
+}

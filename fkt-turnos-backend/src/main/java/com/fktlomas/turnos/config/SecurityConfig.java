@@ -97,6 +97,10 @@ public class SecurityConfig {
                         // último es la validación de firma (ver MercadoPagoService.validarFirma), no el JWT.
                         .requestMatchers(HttpMethod.GET, "/api/pagos/mercadopago/estado").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/pagos/mercadopago/webhook").permitAll()
+                        // Al webhook de WhatsApp le pega Twilio, no un usuario con sesión — la
+                        // seguridad es la verificación de firma X-Twilio-Signature (ver
+                        // TwilioSignatureVerifier), no el JWT.
+                        .requestMatchers(HttpMethod.POST, "/api/whatsapp/webhook").permitAll()
                         // "/v3/api-docs" (sin barra final, el JSON del OpenAPI en sí) va aparte de
                         // "/v3/api-docs/**" para que quede explícito que hace falta cubrir ambos.
                         .requestMatchers("/docs/**", "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui/**").permitAll()

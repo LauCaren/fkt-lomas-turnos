@@ -34,7 +34,11 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             // al pegar el link/token alguna vez.
             new Regla("POST", "/api/auth/restablecer-password", 15, Duration.ofMinutes(10)),
             new Regla("POST", "/api/contacto", 5, Duration.ofMinutes(10)),
-            new Regla("POST", "/api/postulaciones", 5, Duration.ofMinutes(10))
+            new Regla("POST", "/api/postulaciones", 5, Duration.ofMinutes(10)),
+            // Segunda barrera detrás de la verificación de firma de Twilio (ver
+            // TwilioSignatureVerifier) — no es la defensa principal, solo evita que un
+            // remitente comprometido sature el endpoint antes de llegar a validar la firma.
+            new Regla("POST", "/api/whatsapp/webhook", 60, Duration.ofMinutes(5))
     );
 
     private final RateLimiterService rateLimiterService;
