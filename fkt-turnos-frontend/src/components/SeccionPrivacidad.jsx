@@ -34,7 +34,7 @@ function ExportarDatos() {
     <div className="card" style={{ marginBottom: 16 }}>
       <p style={{ fontSize: 14, marginBottom: 12 }}>
         Descargá un archivo con todos los datos que tenemos sobre tu cuenta: perfil, turnos, planes de
-        kinesiología e historia clínica.
+        kinesiología e historia clínica. Los comprobantes de pago se descargan aparte, desde "Mis pagos".
       </p>
       <button type="button" className="btn btn-outline" disabled={descargando} onClick={handleExportar}>
         {descargando ? 'Generando…' : 'Exportar mis datos'}
@@ -69,9 +69,9 @@ function SolicitarBaja() {
   return (
     <div className="card">
       <p style={{ fontSize: 14, marginBottom: 12 }}>
-        Al aprobarse, tus datos personales (nombre, email, teléfono, DNI) se eliminan de forma permanente.
-        Tus turnos y registros ya generados se conservan de forma anónima, como exige la normativa de
-        historia clínica — no vamos a poder identificarte en ellos.
+        Al aprobarse, tus datos personales (nombre, email, teléfono, DNI) se anonimizan de forma permanente
+        e irreversible — no se pueden recuperar. Tus turnos y registros ya generados se conservan, pero de
+        forma anónima, como exige la normativa de historia clínica — no vamos a poder identificarte en ellos.
       </p>
       {!confirmando ? (
         <button type="button" className="btn btn-outline" onClick={() => setConfirmando(true)}>Solicitar baja de mi cuenta</button>

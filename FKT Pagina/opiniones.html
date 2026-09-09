@@ -320,12 +320,21 @@
     return html;
   }
 
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   function tarjetaResena(r) {
     const texto = r.comentario || 'Calificó su atención en FKT Lomas con ' + r.puntaje + ' de 5 estrellas.';
     return '<div class="review-card">' +
       '<div class="stars-mini" aria-hidden="true">' + estrellasSvg(r.puntaje) + '</div>' +
-      '<p class="txt">' + texto.replace(/</g, '&lt;') + '</p>' +
-      '<div class="who"><span>' + r.pacienteNombreCorto.replace(/</g, '&lt;') + ' — ' + r.especialidadNombre.replace(/</g, '&lt;') + '</span><span class="src">Verificada</span></div>' +
+      '<p class="txt">' + escapeHtml(texto) + '</p>' +
+      '<div class="who"><span>' + escapeHtml(r.pacienteNombreCorto) + ' — ' + escapeHtml(r.especialidadNombre) + '</span><span class="src">Verificada</span></div>' +
       '</div>';
   }
 

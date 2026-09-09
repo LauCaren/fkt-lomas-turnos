@@ -170,7 +170,9 @@ export default function BookingWizard() {
         {puedePagarOnline && (
           <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid var(--line)' }}>
             <p style={{ fontSize: 14, color: 'var(--muted)', marginBottom: 12 }}>
-              También podés pagar la consulta ahora online. Si preferís, se puede pagar en el consultorio igual.
+              También podés pagar la consulta ahora online. Si preferís, se puede pagar en el consultorio igual —
+              el pago online es opcional y no es un requisito para conservar tu turno. Si necesitás cancelar
+              después de pagar, escribinos por WhatsApp o llamanos para coordinarlo.
             </p>
             {pagoOnlineError && <div className="alert alert-error" role="alert" style={{ marginBottom: 10 }}>{pagoOnlineError}</div>}
             <button className="btn btn-primary btn-block" onClick={handlePagarOnline} disabled={pagoOnlineCargando}>
