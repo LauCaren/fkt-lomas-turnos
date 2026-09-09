@@ -17,6 +17,9 @@ export default defineConfig({
     watch: {
       ignored: ['**/release/**'],
     },
+    // Túnel temporal de Cloudflare para compartir un link público de prueba (ver charla con
+    // el equipo) — no es necesario para desarrollo local normal.
+    allowedHosts: ['.trycloudflare.com'],
   },
   test: {
     environment: 'jsdom',
