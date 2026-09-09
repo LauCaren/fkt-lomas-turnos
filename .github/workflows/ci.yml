@@ -14,7 +14,7 @@ jobs:
         with:
           fetch-depth: 0 # gitleaks necesita todo el historial, no solo el último commit
       - name: Secret scan (gitleaks)
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Dependency vulnerability scan (Trivy)
