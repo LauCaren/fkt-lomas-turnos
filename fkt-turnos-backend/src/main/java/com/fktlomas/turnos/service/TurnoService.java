@@ -75,7 +75,19 @@ public class TurnoService {
     @Transactional(readOnly = true)
     public List<TurnoDto> disponiblesDeMedico(Long medicoId, LocalDate fecha) {
         return turnoRepository.findByMedicoIdAndFechaAndEstadoOrderByHoraInicioAsc(medicoId, fecha, EstadoTurno.DISPONIBLE)
-                .stream().map(TurnoDto::de).toList();
+                .stream()
+                .filter(t -> !yaPaso(t.getFecha(), t.getHoraInicio()))
+                .map(TurnoDto::de).toList();
+    }
+
+    /**
+     * Un turno de hoy generado a una hora que ya pasó (DisponibilidadService genera los del día
+     * entero sin importar qué hora es "ahora") sigue quedando DISPONIBLE en la base — hay que
+     * filtrarlo acá para no ofrecerlo ni dejar reservarlo, ver disponiblesDeMedico/reservar.
+     */
+    private static boolean yaPaso(LocalDate fecha, LocalTime horaInicio) {
+        LocalDate hoy = LocalDate.now();
+        return fecha.isBefore(hoy) || (fecha.isEqual(hoy) && horaInicio.isBefore(LocalTime.now()));
     }
 
     private static final int SUGERENCIAS_PROXIMA_DISPONIBILIDAD = 5;
@@ -90,6 +102,9 @@ public class TurnoService {
     public TurnoDto reservar(Long turnoId, Usuario paciente, ReservarTurnoRequest request) {
         Turno turno = turnoRepository.findById(turnoId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Turno no encontrado"));
+        if (yaPaso(turno.getFecha(), turno.getHoraInicio())) {
+            throw new TurnoNoDisponibleException("Este turno ya no está disponible, elegí otro horario");
+        }
         TurnoSnapshot antes = snapshotDe(turno);
 
         int filas = turnoRepository.reservarSiDisponible(turnoId, paciente, request.motivoConsulta());
@@ -245,6 +260,9 @@ public class TurnoService {
     public TurnoAdminDto reservarParaPaciente(Long turnoId, ReservarParaPacienteRequest request, Usuario actor) {
         Turno turnoPrevio = turnoRepository.findById(turnoId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Turno no encontrado"));
+        if (yaPaso(turnoPrevio.getFecha(), turnoPrevio.getHoraInicio())) {
+            throw new TurnoNoDisponibleException("Este turno ya no está disponible, elegí otro horario");
+        }
         TurnoSnapshot antes = snapshotDe(turnoPrevio);
 
         Usuario paciente = usuarioRepository.findByDni(request.dni())
