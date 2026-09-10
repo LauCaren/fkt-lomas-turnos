@@ -28,11 +28,20 @@
   --radius-m: 16px;
   --maxw: 1180px;
   --ease: cubic-bezier(.22, .68, .32, 1);
-  --shadow-sm: 0 2px 10px rgba(19, 35, 44, .06);
-  --shadow-md: 0 16px 40px rgba(19, 35, 44, .14);
+  /* Curva más marcada para feedback rápido (press states, entrada de modales) —
+     --ease ya funciona bien para transiciones de hover/scroll más largas, esta
+     es para interacciones cortas que necesitan sentirse instantáneas. */
+  --ease-out: cubic-bezier(.23, 1, .32, 1);
+  --shadow-sm: 0 1px 2px rgba(19, 35, 44, .04), 0 4px 14px rgba(19, 35, 44, .06);
+  --shadow-md: 0 4px 10px rgba(19, 35, 44, .06), 0 20px 48px rgba(19, 35, 44, .16);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
+
+/* El resaltado de selección y el caret quedaban con el azul por defecto del navegador — un
+   detalle chico, pero es lo primero que delata una página que no se terminó de pensar. */
+::selection { background: var(--teal-tint); color: var(--teal-dark); }
+:root { caret-color: var(--teal-dark); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .01ms !important;
@@ -61,6 +70,7 @@ button { font: inherit; background: none; border: none; cursor: pointer; color: 
 /* ---------- BUTTONS ---------- */
 .btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 26px; border-radius: var(--radius-s); font-weight: 600; font-size: 15px; border: 1.5px solid transparent; transition: transform .25s var(--ease), background .25s var(--ease), border-color .25s var(--ease), color .25s var(--ease), box-shadow .25s var(--ease); white-space: nowrap; }
 .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+.btn:active:not(:disabled) { transform: scale(.97); }
 .btn:disabled { opacity: .55; cursor: not-allowed; }
 .btn-primary { background: var(--teal); color: #fff; }
 .btn-primary:hover:not(:disabled) { background: var(--teal-dark); }
@@ -142,9 +152,10 @@ section.soft { background: var(--bg-soft); }
 
 /* ---------- GALLERY (fotos reales del espacio) ---------- */
 .gallery-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-.gallery-item { aspect-ratio: 4/3; border-radius: var(--radius-s); overflow: hidden; background: var(--bg-soft); }
+.gallery-item { aspect-ratio: 4/3; border-radius: var(--radius-s); overflow: hidden; background: var(--bg-soft); cursor: zoom-in; }
 .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s var(--ease); }
 .gallery-item:hover img { transform: scale(1.08); }
+.gallery-item:active img { transform: scale(1.02); transition-duration: .15s; }
 @media (max-width: 800px) { .gallery-grid { grid-template-columns: repeat(2, 1fr); } }
 
 /* ---------- EQUIPO (team banner + grid) ---------- */
@@ -170,11 +181,27 @@ section.soft { background: var(--bg-soft); }
 @media (max-width: 700px) { .team-grid { grid-template-columns: 1fr; } }
 
 /* ---------- FICHA DE PROFESIONAL (modal) ---------- */
-.ficha-overlay { position: fixed; inset: 0; background: rgba(19, 35, 44, 0.55); backdrop-filter: blur(2px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
-.ficha-overlay.open { display: flex; }
-.ficha-card { background: #fff; border-radius: var(--radius-m); max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 32px; position: relative; box-shadow: 0 20px 60px rgba(19, 35, 44, 0.3); }
-.ficha-cerrar { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 50%; background: var(--bg-soft); display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--ink-soft); line-height: 1; }
+/* display:none→flex de un salto instantáneo se veía como un pop seco; ahora el overlay
+   y la card entran con fade + scale (transform-origin: center porque es un modal, no un
+   popover anclado a un trigger) y display se retrasa con transition-behavior para poder
+   seguir animando la salida antes de sacarla del flujo. */
+.ficha-overlay {
+  position: fixed; inset: 0; background: rgba(19, 35, 44, 0.55); backdrop-filter: blur(2px);
+  z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px;
+  opacity: 0; visibility: hidden;
+  transition: opacity .2s var(--ease), visibility 0s linear .2s;
+}
+.ficha-overlay.open { opacity: 1; visibility: visible; transition: opacity .2s var(--ease), visibility 0s linear; }
+.ficha-card {
+  background: #fff; border-radius: var(--radius-m); max-width: 520px; width: 100%; max-height: 90vh;
+  overflow-y: auto; padding: 32px; position: relative; box-shadow: 0 20px 60px rgba(19, 35, 44, 0.3);
+  transform: scale(.95); transform-origin: center;
+  transition: transform .2s var(--ease-out);
+}
+.ficha-overlay.open .ficha-card { transform: scale(1); }
+.ficha-cerrar { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 50%; background: var(--bg-soft); display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--ink-soft); line-height: 1; transition: background .2s var(--ease), color .2s var(--ease), transform .15s var(--ease-out); }
 .ficha-cerrar:hover { background: var(--teal-tint); color: var(--teal-dark); }
+.ficha-cerrar:active { transform: scale(.9); }
 .ficha-top { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 4px; }
 .ficha-foto { width: 110px; height: 130px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: var(--bg-soft); border: 1px solid var(--line); cursor: zoom-in; }
 .ficha-nombre { font-size: 22px; margin-top: 2px; }
@@ -185,11 +212,21 @@ section.soft { background: var(--bg-soft); }
 .ficha-titulo-img { width: 100%; border-radius: 8px; border: 1px solid var(--line); display: block; cursor: zoom-in; }
 
 /* ---------- LIGHTBOX ---------- */
-.lightbox { position: fixed; inset: 0; background: rgba(19, 35, 44, 0.85); z-index: 1100; display: none; align-items: center; justify-content: center; padding: 24px; cursor: zoom-out; }
-.lightbox.open { display: flex; }
-.lightbox img { max-width: 100%; max-height: 90vh; border-radius: var(--radius-s); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4); cursor: default; }
-.lightbox-cerrar { position: absolute; top: 20px; right: 24px; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.12); color: #fff; font-size: 26px; line-height: 1; display: flex; align-items: center; justify-content: center; }
+.lightbox {
+  position: fixed; inset: 0; background: rgba(19, 35, 44, 0.85); z-index: 1100;
+  display: flex; align-items: center; justify-content: center; padding: 24px; cursor: zoom-out;
+  opacity: 0; visibility: hidden;
+  transition: opacity .2s var(--ease), visibility 0s linear .2s;
+}
+.lightbox.open { opacity: 1; visibility: visible; transition: opacity .2s var(--ease), visibility 0s linear; }
+.lightbox img {
+  max-width: 100%; max-height: 90vh; border-radius: var(--radius-s); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  cursor: default; transform: scale(.95); transition: transform .2s var(--ease-out);
+}
+.lightbox.open img { transform: scale(1); }
+.lightbox-cerrar { position: absolute; top: 20px; right: 24px; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.12); color: #fff; font-size: 26px; line-height: 1; display: flex; align-items: center; justify-content: center; transition: background .2s var(--ease), transform .15s var(--ease-out); }
 .lightbox-cerrar:hover { background: rgba(255, 255, 255, 0.22); }
+.lightbox-cerrar:active { transform: scale(.9); }
 
 /* ---------- SERVICE CARDS (index/servicios) ---------- */
 .cards-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius-m); overflow: hidden; }
@@ -236,5 +273,6 @@ footer { background: var(--black); color: rgba(255, 255, 255, 0.75); padding: 56
 /* ---------- WHATSAPP FLOTANTE ---------- */
 .wa-float { position: fixed; bottom: 24px; right: 24px; width: 58px; height: 58px; border-radius: 50%; background: #25D366; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28); z-index: 900; transition: transform .25s var(--ease), box-shadow .25s var(--ease); }
 .wa-float:hover { transform: scale(1.08); box-shadow: 0 10px 28px rgba(0, 0, 0, 0.32); }
+.wa-float:active { transform: scale(.96); }
 .wa-float svg { width: 30px; height: 30px; fill: #fff; }
 @media (max-width: 600px) { .wa-float { width: 52px; height: 52px; bottom: 18px; right: 18px; } .wa-float svg { width: 27px; height: 27px; } }

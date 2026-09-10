@@ -26,6 +26,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
+<style>
+  /* ---------- ITEMS CLICKEABLES (nombres que abren la ficha del profesional) ---------- */
+  /* .team-card li.clickable ya tiene hover de color+subrayado en site.css, pero como
+     lista funcionando de botón necesita también una señal de movimiento/press para
+     no pasar desapercibida como interactiva. */
+  .team-card li.clickable { transform-origin: left center; transition: color .2s var(--ease), transform .15s var(--ease-out); }
+  .team-card li.clickable:hover { transform: translateX(3px); }
+  .team-card li.clickable:active { transform: translateX(3px) scale(.97); }
+</style>
 </head>
 <body>
 

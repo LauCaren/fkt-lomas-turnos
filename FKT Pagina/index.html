@@ -67,12 +67,14 @@
   .trust-copy b{color:var(--ink);}
 
   .tag-row{display:flex; flex-wrap:wrap; gap:10px;}
-  .tag-pill{border:1px solid var(--line); border-radius:100px; padding:9px 18px; font-size:13.5px; font-weight:600; color:var(--ink-soft); transition:border-color .2s var(--ease), color .2s var(--ease), background .2s var(--ease);}
+  .tag-pill{border:1px solid var(--line); border-radius:100px; padding:9px 18px; font-size:13.5px; font-weight:600; color:var(--ink-soft); transition:border-color .2s var(--ease), color .2s var(--ease), background .2s var(--ease), transform .15s var(--ease-out);}
   .tag-pill:hover{border-color:var(--teal); color:var(--teal-dark); background:var(--teal-tint);}
+  .tag-pill:active{transform:scale(.96);}
 
   .promo-grid{display:grid; grid-template-columns:1fr 1fr; gap:24px;}
-  .promo-card{background:var(--white); border:1px solid var(--line); border-radius:var(--radius-m); padding:32px; display:flex; flex-direction:column; gap:14px; transition:border-color .25s var(--ease), background .25s var(--ease);}
+  .promo-card{background:var(--white); border:1px solid var(--line); border-radius:var(--radius-m); padding:32px; display:flex; flex-direction:column; gap:14px; transition:border-color .25s var(--ease), background .25s var(--ease), transform .15s var(--ease-out);}
   .promo-card:hover{border-color:var(--teal); background:var(--teal-tint);}
+  .promo-card:active{transform:scale(.98);}
   .promo-card .icn{width:34px; height:34px;}
   .promo-card h3{font-size:19px;}
   .promo-card p{color:var(--muted); font-size:15px; flex-grow:1;}

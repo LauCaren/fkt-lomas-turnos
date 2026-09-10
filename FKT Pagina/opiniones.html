@@ -38,13 +38,14 @@
   .rating-stars svg{width:26px; height:26px;}
   .rating-hero .cap{color:rgba(255,255,255,0.6); font-size:15px;}
   .rating-ctas{display:flex; justify-content:center; gap:14px; margin-top:32px; flex-wrap:wrap;}
-  .star-fill{clip-path:inset(0 100% 0 0); transition:clip-path 1.1s cubic-bezier(.22,.68,.32,1);}
+  .star-fill{clip-path:inset(0 100% 0 0); transition:clip-path 1.1s var(--ease);}
   .star-fill.filled{clip-path:inset(0 0 0 0);}
 
   /* ---------- REVIEWS GRID ---------- */
   .reviews-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:22px;}
   .review-card{border:1px solid var(--line); border-radius:var(--radius-m); padding:28px; background:var(--white); display:flex; flex-direction:column; gap:16px; transition:transform .25s var(--ease), border-color .25s var(--ease), box-shadow .25s var(--ease);}
   .review-card:hover{transform:translateY(-4px); border-color:var(--teal); box-shadow:var(--shadow-md);}
+  .review-card:active{transform:translateY(-4px) scale(.98); border-color:var(--teal); box-shadow:var(--shadow-md); transition:transform .15s var(--ease-out);}
   .review-card .stars-mini{display:flex; gap:2px; color:var(--teal);}
   .review-card .stars-mini svg{width:15px; height:15px;}
   .review-card p.txt{font-size:15px; color:var(--ink-soft); flex-grow:1;}
@@ -59,6 +60,7 @@
   .socials-row{display:flex; gap:12px; flex-wrap:wrap;}
   .social-chip{display:inline-flex; align-items:center; gap:10px; border:1px solid var(--line); border-radius:100px; padding:12px 22px; font-size:14.5px; font-weight:600; transition:border-color .2s var(--ease), background .2s var(--ease), transform .2s var(--ease);}
   .social-chip:hover{border-color:var(--teal); background:var(--teal-tint); transform:translateY(-2px);}
+  .social-chip:active{border-color:var(--teal); background:var(--teal-tint); transform:translateY(-2px) scale(.96); transition:transform .15s var(--ease-out);}
   .social-chip svg{width:18px; height:18px;}
 
   /* ---------- LEAVE REVIEW CARD ---------- */

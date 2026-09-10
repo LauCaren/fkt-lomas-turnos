@@ -30,6 +30,7 @@
   .spec-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:18px;}
   .spec-item{border:1px solid var(--line); border-radius:var(--radius-m); overflow:hidden; background:var(--white); transition:border-color .25s var(--ease), transform .25s var(--ease); position:relative;}
   .spec-item:hover{border-color:var(--teal); transform:translateY(-4px);}
+  .spec-item:active{transform:scale(.98); transition-duration:.15s; transition-timing-function:var(--ease-out);}
   .spec-img{position:relative; width:100%; aspect-ratio:4/3; background:var(--bg-soft); overflow:hidden;}
   .spec-img img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s var(--ease);}
   .spec-item:hover .spec-img img{transform:scale(1.07);}

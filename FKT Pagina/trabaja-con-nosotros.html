@@ -26,6 +26,19 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
+<style>
+  .field input[type="file"]::file-selector-button{
+    font: inherit; font-weight:600; font-size:14px; color:var(--ink);
+    background:var(--white); border:1.5px solid var(--line); border-radius:var(--radius-s);
+    padding:9px 16px; margin-right:12px; cursor:pointer;
+    transition:border-color .2s var(--ease), background .2s var(--ease), transform .15s var(--ease-out);
+  }
+  .field input[type="file"]::file-selector-button:hover{border-color:var(--ink); background:var(--bg-soft);}
+  .field input[type="file"]::file-selector-button:active{transform:scale(.96);}
+
+  .form-card p a{transition:color .2s var(--ease);}
+  .form-card p a:hover{color:var(--teal);}
+</style>
 </head>
 <body>
 
