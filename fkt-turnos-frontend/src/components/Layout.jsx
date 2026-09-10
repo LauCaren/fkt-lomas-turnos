@@ -18,11 +18,17 @@ function Marca() {
   );
 }
 
+const ROLES_PANEL_INTERNO = ['ADMIN', 'SECRETARIA', 'CONTADOR', 'MEDICO'];
+
 export default function Layout({ children }) {
   const usuario = useSelector((state) => state.auth.usuario);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+  // Los paneles internos usan un layout de sidebar + contenido (ver SidebarNav) que necesita
+  // más aire que las páginas del paciente — angostarlos al mismo --maxw de siempre apretaba
+  // demasiado la columna de contenido junto a la barra lateral.
+  const esPanelInterno = usuario && ROLES_PANEL_INTERNO.includes(usuario.role);
 
   function handleLogout() {
     dispatch(logout());
@@ -66,7 +72,7 @@ export default function Layout({ children }) {
         </div>
       </header>
       <main style={{ flex: 1, padding: '40px 0' }}>
-        <div className="wrap">
+        <div className="wrap" style={esPanelInterno ? { '--maxw': '1240px' } : undefined}>
           {usuario?.role === 'PACIENTE' && <InstalarAppBanner />}
           <div key={location.pathname} className="page-fade">
             {children}

@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import TabNav, { TabPanel } from '../../components/ui/TabNav';
+import {
+  CalendarDays, ClipboardList, Users, Search, BellRing, Building2, FileText, Star,
+  UserMinus, Settings,
+} from 'lucide-react';
+import SidebarNav from '../../components/ui/SidebarNav';
+import { TabPanel } from '../../components/ui/TabNav';
 import { limpiarMensajes } from '../admin/adminSlice';
 import { fetchMiPerfil } from '../cuenta/cuentaSlice';
 import CuentaSeguridadTab from '../../components/CuentaSeguridadTab';
@@ -20,17 +25,27 @@ import AdminCuentaTab from '../admin/AdminCuentaTab';
 // de tabs se muestra. Caja, médicos/especialidades, kinesiología clínica y reportes financieros
 // quedan afuera a propósito — no son tarea de secretaria, y el backend los bloquea igual aunque
 // alguien arme la URL a mano.
-const TABS = [
-  { id: 'agenda', label: 'Agenda' },
-  { id: 'turnos-agendados', label: 'Ver Turnos Agendados' },
-  { id: 'cola-espera', label: 'Cola de espera' },
-  { id: 'buscar-paciente', label: 'Buscar paciente' },
-  { id: 'recordatorios', label: 'Recordatorios' },
-  { id: 'mensajes', label: 'Alquiler de consultorios' },
-  { id: 'postulaciones', label: 'Postulaciones' },
-  { id: 'solicitudes-baja', label: 'Pedidos de baja' },
-  { id: 'resenas', label: 'Reseñas' },
-  { id: 'cuenta', label: 'Mi cuenta' },
+const GRUPOS_NAV = [
+  {
+    label: 'Turnos',
+    items: [
+      { id: 'agenda', label: 'Agenda', icon: CalendarDays },
+      { id: 'turnos-agendados', label: 'Ver turnos agendados', icon: ClipboardList },
+      { id: 'cola-espera', label: 'Cola de espera', icon: Users },
+      { id: 'buscar-paciente', label: 'Buscar paciente', icon: Search },
+    ],
+  },
+  {
+    label: 'Comunicación',
+    items: [
+      { id: 'recordatorios', label: 'Recordatorios', icon: BellRing },
+      { id: 'mensajes', label: 'Alquiler de consultorios', icon: Building2 },
+      { id: 'postulaciones', label: 'Postulaciones', icon: FileText },
+      { id: 'resenas', label: 'Reseñas', icon: Star },
+    ],
+  },
+  { label: 'Cuentas', items: [{ id: 'solicitudes-baja', label: 'Pedidos de baja', icon: UserMinus }] },
+  { items: [{ id: 'cuenta', label: 'Mi cuenta', icon: Settings }] },
 ];
 
 export default function SecretariaDashboardPage() {
@@ -64,22 +79,24 @@ export default function SecretariaDashboardPage() {
           </div>
         </>
       ) : (
-        <>
-          <TabNav tabs={TABS} active={tab} onChange={(id) => { setTab(id); dispatch(limpiarMensajes()); }} />
+        <div className="panel-shell">
+          <SidebarNav groups={GRUPOS_NAV} active={tab} onChange={(id) => { setTab(id); dispatch(limpiarMensajes()); }} />
 
-          <TabPanel tabKey={tab}>
-            {tab === 'agenda' && <AdminAgendaTab />}
-            {tab === 'turnos-agendados' && <AdminTurnosAgendadosTab />}
-            {tab === 'cola-espera' && <AdminColaEsperaTab />}
-            {tab === 'buscar-paciente' && <AdminBusquedaPacienteTab />}
-            {tab === 'recordatorios' && <AdminRecordatoriosTab />}
-            {tab === 'mensajes' && <AdminMensajesTab />}
-            {tab === 'postulaciones' && <AdminPostulacionesTab />}
-            {tab === 'solicitudes-baja' && <AdminSolicitudesBajaTab />}
-            {tab === 'resenas' && <AdminResenasTab />}
-            {tab === 'cuenta' && <AdminCuentaTab />}
-          </TabPanel>
-        </>
+          <div className="panel-content">
+            <TabPanel tabKey={tab}>
+              {tab === 'agenda' && <AdminAgendaTab />}
+              {tab === 'turnos-agendados' && <AdminTurnosAgendadosTab />}
+              {tab === 'cola-espera' && <AdminColaEsperaTab />}
+              {tab === 'buscar-paciente' && <AdminBusquedaPacienteTab />}
+              {tab === 'recordatorios' && <AdminRecordatoriosTab />}
+              {tab === 'mensajes' && <AdminMensajesTab />}
+              {tab === 'postulaciones' && <AdminPostulacionesTab />}
+              {tab === 'solicitudes-baja' && <AdminSolicitudesBajaTab />}
+              {tab === 'resenas' && <AdminResenasTab />}
+              {tab === 'cuenta' && <AdminCuentaTab />}
+            </TabPanel>
+          </div>
+        </div>
       )}
     </div>
   );

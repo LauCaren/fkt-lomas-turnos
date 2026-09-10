@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import TabNav, { TabPanel } from '../../components/ui/TabNav';
+import {
+  LayoutDashboard, CalendarDays, ClipboardList, Users, Search, Stethoscope, Activity,
+  Wallet, BarChart3, BellRing, Building2, FileText, UserCog, UserMinus, Star, History, Settings,
+} from 'lucide-react';
+import SidebarNav from '../../components/ui/SidebarNav';
+import { TabPanel } from '../../components/ui/TabNav';
 import { limpiarMensajes } from './adminSlice';
 import { fetchMiPerfil } from '../cuenta/cuentaSlice';
 import CuentaSeguridadTab from '../../components/CuentaSeguridadTab';
@@ -22,24 +27,49 @@ import AdminAuditoriaTab from './AdminAuditoriaTab';
 import AdminSolicitudesBajaTab from './AdminSolicitudesBajaTab';
 import AdminResenasTab from './AdminResenasTab';
 
-const TABS = [
-  { id: 'resumen', label: 'Resumen' },
-  { id: 'agenda', label: 'Agenda' },
-  { id: 'turnos-agendados', label: 'Ver Turnos Agendados' },
-  { id: 'cola-espera', label: 'Cola de espera' },
-  { id: 'buscar-paciente', label: 'Buscar paciente' },
-  { id: 'medicos', label: 'Médicos y horarios' },
-  { id: 'kinesiologia', label: 'Kinesiología' },
-  { id: 'caja', label: 'Caja' },
-  { id: 'reportes', label: 'Reportes' },
-  { id: 'recordatorios', label: 'Recordatorios' },
-  { id: 'mensajes', label: 'Alquiler de consultorios' },
-  { id: 'postulaciones', label: 'Postulaciones' },
-  { id: 'secretarias', label: 'Cuentas de secretaria' },
-  { id: 'solicitudes-baja', label: 'Pedidos de baja' },
-  { id: 'resenas', label: 'Reseñas' },
-  { id: 'auditoria', label: 'Auditoría' },
-  { id: 'cuenta', label: 'Mi cuenta' },
+const GRUPOS_NAV = [
+  { items: [{ id: 'resumen', label: 'Resumen', icon: LayoutDashboard }] },
+  {
+    label: 'Turnos',
+    items: [
+      { id: 'agenda', label: 'Agenda', icon: CalendarDays },
+      { id: 'turnos-agendados', label: 'Ver turnos agendados', icon: ClipboardList },
+      { id: 'cola-espera', label: 'Cola de espera', icon: Users },
+      { id: 'buscar-paciente', label: 'Buscar paciente', icon: Search },
+    ],
+  },
+  {
+    label: 'Clínica',
+    items: [
+      { id: 'medicos', label: 'Médicos y horarios', icon: Stethoscope },
+      { id: 'kinesiologia', label: 'Kinesiología', icon: Activity },
+    ],
+  },
+  {
+    label: 'Negocio',
+    items: [
+      { id: 'caja', label: 'Caja', icon: Wallet },
+      { id: 'reportes', label: 'Reportes', icon: BarChart3 },
+    ],
+  },
+  {
+    label: 'Comunicación',
+    items: [
+      { id: 'recordatorios', label: 'Recordatorios', icon: BellRing },
+      { id: 'mensajes', label: 'Alquiler de consultorios', icon: Building2 },
+      { id: 'postulaciones', label: 'Postulaciones', icon: FileText },
+      { id: 'resenas', label: 'Reseñas', icon: Star },
+    ],
+  },
+  {
+    label: 'Cuentas y seguridad',
+    items: [
+      { id: 'secretarias', label: 'Cuentas de secretaria', icon: UserCog },
+      { id: 'solicitudes-baja', label: 'Pedidos de baja', icon: UserMinus },
+      { id: 'auditoria', label: 'Auditoría', icon: History },
+    ],
+  },
+  { items: [{ id: 'cuenta', label: 'Mi cuenta', icon: Settings }] },
 ];
 
 export default function AdminDashboardPage() {
@@ -73,35 +103,37 @@ export default function AdminDashboardPage() {
           </div>
         </>
       ) : (
-        <>
-          <TabNav tabs={TABS} active={tab} onChange={(id) => { setTab(id); dispatch(limpiarMensajes()); }} />
+        <div className="panel-shell">
+          <SidebarNav groups={GRUPOS_NAV} active={tab} onChange={(id) => { setTab(id); dispatch(limpiarMensajes()); }} />
 
-          <TabPanel tabKey={tab}>
-            {tab === 'resumen' && (
-              <AdminResumenTab
-                irACola={() => setTab('cola-espera')}
-                irAKinesiologia={() => setTab('kinesiologia')}
-                irACaja={() => setTab('caja')}
-              />
-            )}
-            {tab === 'agenda' && <AdminAgendaTab />}
-            {tab === 'turnos-agendados' && <AdminTurnosAgendadosTab />}
-            {tab === 'cola-espera' && <AdminColaEsperaTab />}
-            {tab === 'buscar-paciente' && <AdminBusquedaPacienteTab />}
-            {tab === 'medicos' && <AdminMedicosTab />}
-            {tab === 'kinesiologia' && <AdminKinesiologiaTab />}
-            {tab === 'caja' && <AdminCajaTab />}
-            {tab === 'reportes' && <AdminReportesTab />}
-            {tab === 'recordatorios' && <AdminRecordatoriosTab />}
-            {tab === 'mensajes' && <AdminMensajesTab />}
-            {tab === 'postulaciones' && <AdminPostulacionesTab />}
-            {tab === 'secretarias' && <AdminSecretariasTab />}
-            {tab === 'solicitudes-baja' && <AdminSolicitudesBajaTab />}
-            {tab === 'resenas' && <AdminResenasTab />}
-            {tab === 'auditoria' && <AdminAuditoriaTab />}
-            {tab === 'cuenta' && <AdminCuentaTab />}
-          </TabPanel>
-        </>
+          <div className="panel-content">
+            <TabPanel tabKey={tab}>
+              {tab === 'resumen' && (
+                <AdminResumenTab
+                  irACola={() => setTab('cola-espera')}
+                  irAKinesiologia={() => setTab('kinesiologia')}
+                  irACaja={() => setTab('caja')}
+                />
+              )}
+              {tab === 'agenda' && <AdminAgendaTab />}
+              {tab === 'turnos-agendados' && <AdminTurnosAgendadosTab />}
+              {tab === 'cola-espera' && <AdminColaEsperaTab />}
+              {tab === 'buscar-paciente' && <AdminBusquedaPacienteTab />}
+              {tab === 'medicos' && <AdminMedicosTab />}
+              {tab === 'kinesiologia' && <AdminKinesiologiaTab />}
+              {tab === 'caja' && <AdminCajaTab />}
+              {tab === 'reportes' && <AdminReportesTab />}
+              {tab === 'recordatorios' && <AdminRecordatoriosTab />}
+              {tab === 'mensajes' && <AdminMensajesTab />}
+              {tab === 'postulaciones' && <AdminPostulacionesTab />}
+              {tab === 'secretarias' && <AdminSecretariasTab />}
+              {tab === 'solicitudes-baja' && <AdminSolicitudesBajaTab />}
+              {tab === 'resenas' && <AdminResenasTab />}
+              {tab === 'auditoria' && <AdminAuditoriaTab />}
+              {tab === 'cuenta' && <AdminCuentaTab />}
+            </TabPanel>
+          </div>
+        </div>
       )}
     </div>
   );

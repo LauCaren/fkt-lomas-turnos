@@ -1,16 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import TabNav, { TabPanel } from '../../components/ui/TabNav';
+import { CalendarDays, Users, Settings } from 'lucide-react';
+import SidebarNav from '../../components/ui/SidebarNav';
+import { TabPanel } from '../../components/ui/TabNav';
 import { fetchSaldoMedico, limpiarMensajesMedico } from './medicoSlice';
 import MedicoAgendaTab from './MedicoAgendaTab';
 import MedicoColaEsperaTab from './MedicoColaEsperaTab';
 import CuentaSeguridadTab from '../../components/CuentaSeguridadTab';
 import { formatMoneda } from '../../utils/formato';
 
-const TABS = [
-  { id: 'agenda', label: 'Mi agenda de hoy' },
-  { id: 'cola-espera', label: 'Cola de espera' },
-  { id: 'cuenta', label: 'Mi cuenta' },
+const GRUPOS_NAV = [
+  {
+    items: [
+      { id: 'agenda', label: 'Mi agenda de hoy', icon: CalendarDays },
+      { id: 'cola-espera', label: 'Cola de espera', icon: Users },
+    ],
+  },
+  { items: [{ id: 'cuenta', label: 'Mi cuenta', icon: Settings }] },
 ];
 
 export default function MedicoDashboardPage() {
@@ -39,13 +45,17 @@ export default function MedicoDashboardPage() {
       {error && <div className="alert alert-error" role="alert" style={{ marginTop: 20 }}>{error}</div>}
       {mensajeExito && <div className="alert alert-success" role="status" style={{ marginTop: 20 }}>{mensajeExito}</div>}
 
-      <TabNav tabs={TABS} active={tab} onChange={(id) => { setTab(id); dispatch(limpiarMensajesMedico()); }} />
+      <div className="panel-shell">
+        <SidebarNav groups={GRUPOS_NAV} active={tab} onChange={(id) => { setTab(id); dispatch(limpiarMensajesMedico()); }} />
 
-      <TabPanel tabKey={tab}>
-        {tab === 'agenda' && <MedicoAgendaTab />}
-        {tab === 'cola-espera' && <MedicoColaEsperaTab />}
-        {tab === 'cuenta' && <CuentaSeguridadTab />}
-      </TabPanel>
+        <div className="panel-content">
+          <TabPanel tabKey={tab}>
+            {tab === 'agenda' && <MedicoAgendaTab />}
+            {tab === 'cola-espera' && <MedicoColaEsperaTab />}
+            {tab === 'cuenta' && <CuentaSeguridadTab />}
+          </TabPanel>
+        </div>
+      </div>
     </div>
   );
 }

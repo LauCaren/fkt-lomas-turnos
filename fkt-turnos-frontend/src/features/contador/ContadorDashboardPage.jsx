@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import TabNav, { TabPanel } from '../../components/ui/TabNav';
+import { LayoutDashboard, ArrowDownToLine, ArrowUpFromLine, Receipt, Settings } from 'lucide-react';
+import SidebarNav from '../../components/ui/SidebarNav';
+import { TabPanel } from '../../components/ui/TabNav';
 import { fetchMiPerfil } from '../cuenta/cuentaSlice';
 import ContadorResumenTab from './ContadorResumenTab';
 import ContadorIngresosTab from './ContadorIngresosTab';
@@ -8,12 +10,17 @@ import ContadorRetirosTab from './ContadorRetirosTab';
 import ContadorGastosTab from './ContadorGastosTab';
 import CuentaSeguridadTab from '../../components/CuentaSeguridadTab';
 
-const TABS = [
-  { id: 'resumen', label: 'Resumen' },
-  { id: 'ingresos', label: 'Ingresos' },
-  { id: 'retiros', label: 'Retiros' },
-  { id: 'gastos', label: 'Gastos' },
-  { id: 'cuenta', label: 'Mi cuenta' },
+const GRUPOS_NAV = [
+  { items: [{ id: 'resumen', label: 'Resumen', icon: LayoutDashboard }] },
+  {
+    label: 'Caja',
+    items: [
+      { id: 'ingresos', label: 'Ingresos', icon: ArrowDownToLine },
+      { id: 'retiros', label: 'Retiros', icon: ArrowUpFromLine },
+      { id: 'gastos', label: 'Gastos', icon: Receipt },
+    ],
+  },
+  { items: [{ id: 'cuenta', label: 'Mi cuenta', icon: Settings }] },
 ];
 
 export default function ContadorDashboardPage() {
@@ -46,17 +53,19 @@ export default function ContadorDashboardPage() {
           </div>
         </>
       ) : (
-        <>
-          <TabNav tabs={TABS} active={tab} onChange={setTab} />
+        <div className="panel-shell">
+          <SidebarNav groups={GRUPOS_NAV} active={tab} onChange={setTab} />
 
-          <TabPanel tabKey={tab}>
-            {tab === 'resumen' && <ContadorResumenTab />}
-            {tab === 'ingresos' && <ContadorIngresosTab />}
-            {tab === 'retiros' && <ContadorRetirosTab />}
-            {tab === 'gastos' && <ContadorGastosTab />}
-            {tab === 'cuenta' && <CuentaSeguridadTab />}
-          </TabPanel>
-        </>
+          <div className="panel-content">
+            <TabPanel tabKey={tab}>
+              {tab === 'resumen' && <ContadorResumenTab />}
+              {tab === 'ingresos' && <ContadorIngresosTab />}
+              {tab === 'retiros' && <ContadorRetirosTab />}
+              {tab === 'gastos' && <ContadorGastosTab />}
+              {tab === 'cuenta' && <CuentaSeguridadTab />}
+            </TabPanel>
+          </div>
+        </div>
       )}
     </div>
   );

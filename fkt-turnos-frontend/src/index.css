@@ -280,6 +280,60 @@ input, select, textarea { font: inherit; }
 .tabnav-btn:hover { color: var(--ink-soft); background: var(--bg-soft); }
 .tabnav-btn.active { color: var(--ink); background: var(--teal-tint); border-bottom-color: var(--teal); }
 
+/* ---------- SIDEBAR NAV (paneles internos: admin/secretaría/contador/médico) ---------- */
+.panel-shell { display: flex; gap: 32px; align-items: flex-start; margin-top: 28px; }
+.sidebar-nav { flex: 0 0 224px; position: sticky; top: 24px; display: flex; flex-direction: column; gap: 22px; }
+.sidebar-group { display: flex; flex-direction: column; gap: 2px; }
+.sidebar-group-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 12px;
+  margin-bottom: 6px;
+}
+.sidebar-btn {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 9px 12px;
+  border: none;
+  border-left: 3px solid transparent;
+  border-radius: 0 var(--radius-s) var(--radius-s) 0;
+  background: none;
+  font-weight: 600;
+  font-size: 14.5px;
+  color: var(--ink-soft);
+  text-align: left;
+  transition: color .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease);
+}
+.sidebar-btn svg { flex-shrink: 0; width: 18px; height: 18px; color: var(--muted); transition: color .2s var(--ease); }
+.sidebar-btn:hover { color: var(--ink); background: var(--bg-soft); }
+.sidebar-btn:hover svg { color: var(--ink-soft); }
+.sidebar-btn.active { color: var(--teal-dark); background: var(--teal-tint); border-left-color: var(--teal); }
+.sidebar-btn.active svg { color: var(--teal-dark); }
+.panel-content { flex: 1 1 0; min-width: 0; }
+
+@media (max-width: 880px) {
+  .panel-shell { flex-direction: column; gap: 8px; }
+  .sidebar-nav {
+    position: static;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    width: 100%;
+    gap: 4px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  .sidebar-group { flex-direction: row; gap: 4px; flex-shrink: 0; }
+  .sidebar-group-label { display: none; }
+  .sidebar-btn { width: auto; white-space: nowrap; border-left: none; border-radius: var(--radius-s); }
+  .sidebar-btn.active { background: var(--teal-tint); }
+}
+
 /* ---------- HEADER DE LA APP (Layout) ---------- */
 .app-header { background: #fff; border-bottom: 1px solid var(--line); box-shadow: var(--shadow-sm); }
 .app-nav-links { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
