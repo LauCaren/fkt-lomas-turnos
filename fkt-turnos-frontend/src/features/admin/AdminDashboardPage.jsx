@@ -17,7 +17,6 @@ import AdminColaEsperaTab from './AdminColaEsperaTab';
 import AdminMensajesTab from './AdminMensajesTab';
 import AdminPostulacionesTab from './AdminPostulacionesTab';
 import AdminRecordatoriosTab from './AdminRecordatoriosTab';
-import AdminCuentaTab from './AdminCuentaTab';
 import AdminCajaTab from '../caja/AdminCajaTab';
 import AdminKinesiologiaTab from '../kinesiologia/AdminKinesiologiaTab';
 import AdminReportesTab from './AdminReportesTab';
@@ -82,8 +81,8 @@ export default function AdminDashboardPage() {
   // El backend ya bloquea /api/admin/** hasta que esta cuenta active el 2FA (escribe sobre
   // historia clínica y caja física, ya no es opcional para ADMIN/SECRETARIA) — este gate del
   // lado del cliente es solo para que la experiencia sea clara en vez de una pantalla llena
-  // de 403. Usa el /api/mi-cuenta genérico (CuentaSeguridadTab), no /api/admin/mfa/**: mientras
-  // el 2FA está pendiente esta cuenta tampoco tiene el rol para llegar a ese último endpoint.
+  // de 403. Usa el /api/mi-cuenta genérico (CuentaSeguridadTab): mientras el 2FA está
+  // pendiente esta cuenta tampoco tiene el rol para llegar a /api/admin/**.
   const mfaPendiente = perfil && !perfil.mfaHabilitado;
 
   return (
@@ -130,7 +129,7 @@ export default function AdminDashboardPage() {
               {tab === 'solicitudes-baja' && <AdminSolicitudesBajaTab />}
               {tab === 'resenas' && <AdminResenasTab />}
               {tab === 'auditoria' && <AdminAuditoriaTab />}
-              {tab === 'cuenta' && <AdminCuentaTab />}
+              {tab === 'cuenta' && <CuentaSeguridadTab />}
             </TabPanel>
           </div>
         </div>

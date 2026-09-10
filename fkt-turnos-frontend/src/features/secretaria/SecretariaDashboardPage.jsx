@@ -18,7 +18,6 @@ import AdminPostulacionesTab from '../admin/AdminPostulacionesTab';
 import AdminRecordatoriosTab from '../admin/AdminRecordatoriosTab';
 import AdminSolicitudesBajaTab from '../admin/AdminSolicitudesBajaTab';
 import AdminResenasTab from '../admin/AdminResenasTab';
-import AdminCuentaTab from '../admin/AdminCuentaTab';
 
 // Reusa los mismos componentes que el panel de admin (pegan a /api/admin/**, que esta cuenta
 // también puede usar — ver SecurityConfig) en vez de duplicarlos: solo cambia qué subconjunto
@@ -58,8 +57,8 @@ export default function SecretariaDashboardPage() {
 
   // Mismo gate que en AdminDashboardPage (esta cuenta pega a los mismos endpoints /api/admin/**):
   // el backend ya bloquea el acceso hasta activar el 2FA, esto es solo para que la experiencia
-  // sea clara. Usa el /api/mi-cuenta genérico (CuentaSeguridadTab), no AdminCuentaTab: mientras
-  // el 2FA está pendiente esta cuenta tampoco tiene el rol para llegar a /api/admin/mfa/**.
+  // sea clara. Usa el /api/mi-cuenta genérico (CuentaSeguridadTab): mientras el 2FA está
+  // pendiente esta cuenta tampoco tiene el rol para llegar a /api/admin/**.
   const mfaPendiente = perfil && !perfil.mfaHabilitado;
 
   return (
@@ -93,7 +92,7 @@ export default function SecretariaDashboardPage() {
               {tab === 'postulaciones' && <AdminPostulacionesTab />}
               {tab === 'solicitudes-baja' && <AdminSolicitudesBajaTab />}
               {tab === 'resenas' && <AdminResenasTab />}
-              {tab === 'cuenta' && <AdminCuentaTab />}
+              {tab === 'cuenta' && <CuentaSeguridadTab />}
             </TabPanel>
           </div>
         </div>

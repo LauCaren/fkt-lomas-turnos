@@ -181,9 +181,11 @@ export const reservarParaPaciente = createAsyncThunk('admin/reservarParaPaciente
   }
 });
 
-export const fetchMensajesContacto = createAsyncThunk('admin/fetchMensajes', async (_, { rejectWithValue }) => {
+// page=0 (default) trae la primera tanda y reemplaza la lista — usarlo también para "refrescar".
+// Pasar un page > 0 (ver AdminMensajesTab) agrega esa tanda al final en vez de reemplazar.
+export const fetchMensajesContacto = createAsyncThunk('admin/fetchMensajes', async (page = 0, { rejectWithValue }) => {
   try {
-    const { data } = await axiosClient.get('/api/admin/mensajes-contacto');
+    const { data } = await axiosClient.get('/api/admin/mensajes-contacto', { params: { page, size: 20 } });
     return data;
   } catch (error) {
     return rejectWithValue(mensajeDeError(error));
@@ -199,9 +201,10 @@ export const marcarMensajeLeido = createAsyncThunk('admin/marcarMensajeLeido', a
   }
 });
 
-export const fetchPostulaciones = createAsyncThunk('admin/fetchPostulaciones', async (_, { rejectWithValue }) => {
+// Misma lógica de paginado que fetchMensajesContacto (ver comentario arriba).
+export const fetchPostulaciones = createAsyncThunk('admin/fetchPostulaciones', async (page = 0, { rejectWithValue }) => {
   try {
-    const { data } = await axiosClient.get('/api/admin/postulaciones');
+    const { data } = await axiosClient.get('/api/admin/postulaciones', { params: { page, size: 20 } });
     return data;
   } catch (error) {
     return rejectWithValue(mensajeDeError(error));
@@ -214,42 +217,6 @@ export const marcarPostulacionRevisada = createAsyncThunk('admin/marcarPostulaci
     return data;
   } catch (error) {
     return rejectWithValue(mensajeDeError(error));
-  }
-});
-
-export const cambiarPasswordAdmin = createAsyncThunk('admin/cambiarPassword', async (payload, { rejectWithValue }) => {
-  try {
-    await axiosClient.put('/api/admin/password', payload);
-    return true;
-  } catch (error) {
-    return rejectWithValue(mensajeDeError(error, 'No se pudo cambiar la contraseña'));
-  }
-});
-
-export const iniciarMfa = createAsyncThunk('admin/iniciarMfa', async (_, { rejectWithValue }) => {
-  try {
-    const { data } = await axiosClient.post('/api/admin/mfa/iniciar');
-    return data;
-  } catch (error) {
-    return rejectWithValue(mensajeDeError(error, 'No se pudo iniciar la configuración'));
-  }
-});
-
-export const activarMfa = createAsyncThunk('admin/activarMfa', async (codigo, { rejectWithValue }) => {
-  try {
-    await axiosClient.post('/api/admin/mfa/activar', { codigo });
-    return true;
-  } catch (error) {
-    return rejectWithValue(mensajeDeError(error, 'El código no es correcto'));
-  }
-});
-
-export const desactivarMfa = createAsyncThunk('admin/desactivarMfa', async (codigo, { rejectWithValue }) => {
-  try {
-    await axiosClient.post('/api/admin/mfa/desactivar', { codigo });
-    return true;
-  } catch (error) {
-    return rejectWithValue(mensajeDeError(error, 'El código no es correcto'));
   }
 });
 
@@ -466,9 +433,12 @@ const adminSlice = createSlice({
     colaEspera: [],
     colaEsperaCargando: false,
     feriados: [],
-    mfaSetup: null,
     mensajesContacto: [],
+    mensajesContactoPagina: 0,
+    mensajesContactoHayMas: false,
     postulaciones: [],
+    postulacionesPagina: 0,
+    postulacionesHayMas: false,
     recordatorios: [],
     configuracionRecordatorios: null,
     resultadosBusquedaPacientes: [],
@@ -558,22 +528,24 @@ const adminSlice = createSlice({
       .addCase(reservarParaPaciente.rejected, (state, action) => { state.error = action.payload; })
       .addCase(fetchFeriados.fulfilled, (state, action) => { state.feriados = action.payload; })
       .addCase(fetchFeriados.rejected, (state, action) => { state.error = action.payload; })
-      .addCase(fetchMensajesContacto.fulfilled, (state, action) => { state.mensajesContacto = action.payload; })
+      .addCase(fetchMensajesContacto.fulfilled, (state, action) => {
+        const pagina = action.payload;
+        state.mensajesContacto = pagina.number === 0 ? pagina.content : [...state.mensajesContacto, ...pagina.content];
+        state.mensajesContactoPagina = pagina.number;
+        state.mensajesContactoHayMas = !pagina.last;
+      })
       .addCase(marcarMensajeLeido.fulfilled, (state, action) => {
         state.mensajesContacto = state.mensajesContacto.map((m) => m.id === action.payload.id ? action.payload : m);
       })
-      .addCase(fetchPostulaciones.fulfilled, (state, action) => { state.postulaciones = action.payload; })
+      .addCase(fetchPostulaciones.fulfilled, (state, action) => {
+        const pagina = action.payload;
+        state.postulaciones = pagina.number === 0 ? pagina.content : [...state.postulaciones, ...pagina.content];
+        state.postulacionesPagina = pagina.number;
+        state.postulacionesHayMas = !pagina.last;
+      })
       .addCase(marcarPostulacionRevisada.fulfilled, (state, action) => {
         state.postulaciones = state.postulaciones.map((p) => p.id === action.payload.id ? action.payload : p);
       })
-      .addCase(cambiarPasswordAdmin.fulfilled, (state) => { state.mensajeExito = 'Contraseña actualizada correctamente'; })
-      .addCase(cambiarPasswordAdmin.rejected, (state, action) => { state.error = action.payload; })
-      .addCase(iniciarMfa.fulfilled, (state, action) => { state.mfaSetup = action.payload; })
-      .addCase(iniciarMfa.rejected, (state, action) => { state.error = action.payload; })
-      .addCase(activarMfa.fulfilled, (state) => { state.mfaSetup = null; state.mensajeExito = 'Verificación en dos pasos activada'; })
-      .addCase(activarMfa.rejected, (state, action) => { state.error = action.payload; })
-      .addCase(desactivarMfa.fulfilled, (state) => { state.mensajeExito = 'Verificación en dos pasos desactivada'; })
-      .addCase(desactivarMfa.rejected, (state, action) => { state.error = action.payload; })
       .addCase(fetchRecordatorios.fulfilled, (state, action) => { state.recordatorios = action.payload; })
       .addCase(fetchRecordatorios.rejected, (state, action) => { state.error = action.payload; })
       .addCase(reenviarRecordatorio.fulfilled, (state, action) => {
