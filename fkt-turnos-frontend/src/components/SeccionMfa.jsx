@@ -70,7 +70,7 @@ export default function SeccionMfa({ perfil, mfaSetup, onIniciar, onActivar, onD
           />
         )}
         <details style={{ marginBottom: 16 }}>
-          <summary style={{ fontSize: 13.5, color: 'var(--muted)', cursor: 'pointer' }}>¿No podés escanear? Cargalo a mano</summary>
+          <summary className="mfa-toggle" style={{ fontSize: 13.5, color: 'var(--muted)', cursor: 'pointer' }}>¿No podés escanear? Cargalo a mano</summary>
           <code style={{ display: 'block', background: 'var(--bg-soft)', padding: '10px 14px', borderRadius: 6, fontSize: 15, letterSpacing: 1, marginTop: 10, wordBreak: 'break-all' }}>
             {mfaSetup.secreto}
           </code>

@@ -16,7 +16,16 @@ export default function ContadorResumenTab() {
   }, [dispatch]);
 
   if (error) return <div className="alert alert-error" role="alert">{error}</div>;
-  if (resumenCargando && !resumen) return <p style={{ color: 'var(--muted)' }}>Cargando…</p>;
+  if (resumenCargando && !resumen) {
+    return (
+      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <div className="skeleton" style={{ height: 78, minWidth: 180, flex: '1 1 180px' }} />
+        <div className="skeleton" style={{ height: 78, minWidth: 180, flex: '1 1 180px' }} />
+        <div className="skeleton" style={{ height: 78, minWidth: 180, flex: '1 1 180px' }} />
+        <div className="skeleton" style={{ height: 78, minWidth: 180, flex: '1 1 180px' }} />
+      </div>
+    );
+  }
   if (!resumen) return null;
 
   return (

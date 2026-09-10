@@ -4,6 +4,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { fetchMisTurnos, cancelarTurno } from './turnosSlice';
 import AgregarCalendario from '../../components/AgregarCalendario';
 import DejarResenaTurno from './DejarResenaTurno';
+import EstadoVacio from '../../components/EstadoVacio';
 
 // Mercado Pago vuelve acá con ?pago=exito|pendiente|fallo (ver MercadoPagoService.crearPreferenciaEnMercadoPago,
 // back_urls) — el pago en sí se confirma por webhook, esto es solo feedback inmediato al paciente.
@@ -52,8 +53,10 @@ export default function MisTurnosPage() {
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto' }}>
-      <span className="eyebrow">Mis turnos</span>
-      <h1 style={{ marginTop: 12, fontSize: 30 }}>Tus turnos reservados</h1>
+      <div className="page-head">
+        <span className="eyebrow">Mis turnos</span>
+        <h1>Tus turnos reservados</h1>
+      </div>
 
       {avisoPago && (
         <div className={`alert ${avisoPago.clase}`} role="status" style={{ marginTop: 20 }}>
@@ -61,6 +64,7 @@ export default function MisTurnosPage() {
           <button
             type="button"
             onClick={() => setSearchParams({}, { replace: true })}
+            className="link-btn"
             style={{ background: 'none', border: 'none', padding: 0, marginLeft: 10, color: 'inherit', textDecoration: 'underline', cursor: 'pointer', fontSize: 'inherit' }}
           >
             Cerrar
@@ -69,13 +73,16 @@ export default function MisTurnosPage() {
       )}
 
       {misTurnos.length === 0 && (
-        <div className="card" style={{ marginTop: 28, textAlign: 'center' }}>
-          <p style={{ color: 'var(--muted)' }}>Todavía no tenés turnos reservados.</p>
-          <Link to="/turnos" className="btn btn-primary" style={{ marginTop: 16 }}>Sacar un turno</Link>
+        <div style={{ marginTop: 28 }}>
+          <EstadoVacio
+            titulo="Todavía no tenés turnos reservados"
+            subtitulo="Cuando saques un turno, lo vas a ver acá."
+            accion={<Link to="/turnos" className="btn btn-primary">Sacar un turno</Link>}
+          />
         </div>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 28 }}>
+      <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 28 }}>
         {misTurnos.map((t) => (
           <div key={t.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
             <div>

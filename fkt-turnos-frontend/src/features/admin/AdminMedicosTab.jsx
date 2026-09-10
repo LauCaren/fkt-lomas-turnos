@@ -8,6 +8,7 @@ import {
 import { fetchEspecialidades } from '../turnos/turnosSlice';
 import Lightbox from '../../components/Lightbox';
 import { hoyISO } from '../../utils/formato';
+import EstadoVacio from '../../components/EstadoVacio';
 
 const DIAS = [
   { value: 'MONDAY', label: 'Lunes' },
@@ -182,7 +183,7 @@ function MedicoDetalle({ medico }) {
 
       <h4 style={{ fontSize: 15, marginBottom: 10 }}>Horarios semanales</h4>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 14 }}>
-        {reglas.length === 0 && <p style={{ fontSize: 13, color: 'var(--muted)' }}>Sin horarios cargados todavía.</p>}
+        {reglas.length === 0 && <EstadoVacio titulo="Sin horarios cargados todavía" />}
         {reglas.map((r) => (
           <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 14 }}>
             <span>{DIAS.find((d) => d.value === r.diaSemana)?.label} · {r.horaInicio.slice(0, 5)} a {r.horaFin.slice(0, 5)}</span>
@@ -316,7 +317,7 @@ export default function AdminMedicosTab() {
       </div>
 
       <h3 style={{ fontSize: 17, marginBottom: 14 }}>Médicos cargados</h3>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {medicos.map((m) => (
           <div key={m.id} className="card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>

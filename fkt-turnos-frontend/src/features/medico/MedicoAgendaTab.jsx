@@ -12,14 +12,22 @@ export default function MedicoAgendaTab() {
 
   const reservados = agendaHoy.filter((t) => t.estado === 'RESERVADO');
 
-  if (agendaCargando) return <p style={{ color: 'var(--muted)' }}>Cargando agenda…</p>;
+  if (agendaCargando) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div className="skeleton" style={{ height: 72 }} />
+        <div className="skeleton" style={{ height: 72 }} />
+        <div className="skeleton" style={{ height: 72 }} />
+      </div>
+    );
+  }
 
   if (reservados.length === 0) {
     return <EstadoVacio titulo="No tenés turnos reservados para hoy" subtitulo="Cuando un paciente reserve con vos, va a aparecer acá." />;
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {reservados.map((t) => (
         <MedicoTurnoCard key={t.id} turno={t} mostrarBotonAtender={false} mostrarEvolucion={t.estadoAsistencia === 'ATENDIDO' && !t.tieneEvolucion} />
       ))}

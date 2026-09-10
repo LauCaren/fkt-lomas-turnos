@@ -199,8 +199,10 @@ export default function BookingWizard() {
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto' }}>
-      <span className="eyebrow">{reprogramando ? 'Reprogramar turno' : 'Sacar turno'}</span>
-      <h1 style={{ marginTop: 12, fontSize: 30 }}>Elegí especialidad, médico y horario</h1>
+      <div className="page-head">
+        <span className="eyebrow">{reprogramando ? 'Reprogramar turno' : 'Sacar turno'}</span>
+        <h1>Elegí especialidad, médico y horario</h1>
+      </div>
 
       {reprogramando && (
         <div className="alert" style={{ marginTop: 16, background: 'var(--teal-tint)', color: 'var(--teal-dark)', border: '1px solid var(--teal)' }}>
@@ -210,6 +212,7 @@ export default function BookingWizard() {
           <button
             type="button"
             onClick={() => setReprogramando(null)}
+            className="link-btn"
             style={{ background: 'none', border: 'none', padding: 0, color: 'inherit', textDecoration: 'underline', cursor: 'pointer', fontSize: 'inherit' }}
           >
             Cancelar reprogramación
@@ -249,7 +252,13 @@ export default function BookingWizard() {
         {medicoId && (
           <div className="field">
             <label id="horariosDisponiblesLabel">Horarios disponibles</label>
-            {status === 'loading' && <p style={{ color: 'var(--muted)' }}>Buscando horarios…</p>}
+            {status === 'loading' && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <span key={i} className="skeleton" style={{ display: 'inline-block', width: 64, height: 38, borderRadius: 'var(--radius-s)' }} />
+                ))}
+              </div>
+            )}
             {status !== 'loading' && disponibles.length === 0 && (
               <>
                 <p style={{ color: 'var(--muted)' }}>No hay horarios disponibles para esa fecha. Probá con otro día.</p>
@@ -277,6 +286,7 @@ export default function BookingWizard() {
                     <button
                       type="button"
                       onClick={() => dispatch(darseDeBajaListaEspera(miAnotacionListaEspera.id))}
+                      className="link-btn"
                       style={{ background: 'none', border: 'none', padding: 0, color: 'inherit', textDecoration: 'underline', cursor: 'pointer', fontSize: 'inherit' }}
                     >
                       Darme de baja

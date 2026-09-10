@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAuditoria } from './adminSlice';
+import EstadoVacio from '../../components/EstadoVacio';
 
 const TIPOS = [
   { value: '', label: 'Todos' },
@@ -45,32 +46,32 @@ export default function AdminAuditoriaTab() {
         además de turnos. Los cambios de médicos/especialidades y las anulaciones de caja quedan acá.
       </p>
 
-      <form onSubmit={handleBuscar} style={{ display: 'flex', gap: 10, alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: 20 }}>
-        <div className="field" style={{ marginBottom: 0, minWidth: 180 }}>
+      <form onSubmit={handleBuscar} className="filter-bar">
+        <div className="field" style={{ minWidth: 180 }}>
           <label htmlFor="auditoriaTipo">Tipo</label>
           <select id="auditoriaTipo" value={filtros.tipoEntidad} onChange={(e) => setFiltros({ ...filtros, tipoEntidad: e.target.value })}>
             {TIPOS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
         </div>
-        <div className="field" style={{ marginBottom: 0 }}>
+        <div className="field">
           <label htmlFor="auditoriaDesde">Desde</label>
           <input id="auditoriaDesde" type="date" value={filtros.desde} onChange={(e) => setFiltros({ ...filtros, desde: e.target.value })} />
         </div>
-        <div className="field" style={{ marginBottom: 0 }}>
+        <div className="field">
           <label htmlFor="auditoriaHasta">Hasta</label>
           <input id="auditoriaHasta" type="date" value={filtros.hasta} onChange={(e) => setFiltros({ ...filtros, hasta: e.target.value })} />
         </div>
         <button type="submit" className="btn btn-outline">Buscar</button>
       </form>
 
-      {auditoria.content.length === 0 && <p style={{ color: 'var(--muted)' }}>No hay registros para estos filtros.</p>}
+      {auditoria.content.length === 0 && <EstadoVacio titulo="Sin registros" subtitulo="No hay registros de auditoría para estos filtros." />}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {auditoria.content.map((r) => (
           <div key={r.id} className="card">
             <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
               <div>
                 <strong>{r.operacion}</strong> · {r.tipoEntidad} #{r.entidadId}
-                {r.deshecho && <span className="badge" style={{ marginLeft: 8 }}>Deshecho</span>}
+                {r.deshecho && <span className="badge badge-cancelado" style={{ marginLeft: 8 }}>Deshecho</span>}
               </div>
               <div style={{ fontSize: 13, color: 'var(--muted)' }}>{formatoFecha(r.createdAt)}</div>
             </div>

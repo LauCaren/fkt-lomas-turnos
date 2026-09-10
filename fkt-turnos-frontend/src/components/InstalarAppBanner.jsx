@@ -66,6 +66,7 @@ export default function InstalarAppBanner() {
           type="button"
           onClick={handleCerrar}
           aria-label="Cerrar"
+          className="icon-btn-close"
           style={{ flexShrink: 0, width: 28, height: 28, borderRadius: '50%', border: 'none', background: 'rgba(255,255,255,0.6)', fontSize: 16, lineHeight: 1, cursor: 'pointer', color: 'var(--ink-soft)' }}
         >
           &times;

@@ -38,7 +38,7 @@ export default function SalaEsperaQr() {
             se marca "Llegó" automáticamente (salvo que tenga copago de IOMA, ahí le pide que pase por el mostrador).
           </p>
         </div>
-        <button type="button" className="btn btn-secondary" onClick={() => window.print()}>Imprimir cartel</button>
+        <button type="button" className="btn btn-outline" onClick={() => window.print()}>Imprimir cartel</button>
       </div>
 
       {error && <div className="alert alert-error" role="alert" style={{ marginTop: 12 }}>{error}</div>}

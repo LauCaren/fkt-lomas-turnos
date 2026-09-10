@@ -30,9 +30,11 @@ export default function LoginPage() {
 
   return (
     <div style={{ maxWidth: 420, margin: '0 auto' }}>
-      <span className="eyebrow">Ingresar</span>
-      <h1 style={{ marginTop: 12, fontSize: 30 }}>Accedé a tu cuenta</h1>
-      <p style={{ marginTop: 10, color: 'var(--muted)' }}>Ingresá con tu email y contraseña para sacar o revisar tus turnos.</p>
+      <div className="page-head">
+        <span className="eyebrow">Ingresar</span>
+        <h1>Accedé a tu cuenta</h1>
+        <p>Ingresá con tu email y contraseña para sacar o revisar tus turnos.</p>
+      </div>
 
       <form onSubmit={handleSubmit} className="card" style={{ marginTop: 28 }}>
         {error && <div className="alert alert-error" role="alert">{error}</div>}

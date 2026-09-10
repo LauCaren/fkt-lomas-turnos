@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchColaEsperaAdmin, fetchMedicosAdmin } from './adminSlice';
 import { hoyISO } from '../../utils/formato';
 import SalaEsperaQr from './SalaEsperaQr';
+import EstadoVacio from '../../components/EstadoVacio';
 
 export default function AdminColaEsperaTab() {
   const dispatch = useDispatch();
@@ -29,18 +30,29 @@ export default function AdminColaEsperaTab() {
         horario de su turno.
       </p>
 
-      <div className="field" style={{ maxWidth: 280, marginBottom: 20 }}>
-        <label htmlFor="colaEsperaMedico">Médico</label>
-        <select id="colaEsperaMedico" value={medicoId} onChange={(e) => setMedicoId(e.target.value)}>
-          <option value="">Todos los médicos</option>
-          {medicos.map((m) => <option key={m.id} value={m.id}>{m.nombreCompleto}</option>)}
-        </select>
+      <div className="filter-bar">
+        <div className="field" style={{ maxWidth: 280 }}>
+          <label htmlFor="colaEsperaMedico">Médico</label>
+          <select id="colaEsperaMedico" value={medicoId} onChange={(e) => setMedicoId(e.target.value)}>
+            <option value="">Todos los médicos</option>
+            {medicos.map((m) => <option key={m.id} value={m.id}>{m.nombreCompleto}</option>)}
+          </select>
+        </div>
       </div>
 
-      {colaEsperaCargando && <p style={{ color: 'var(--muted)' }}>Cargando…</p>}
-      {!colaEsperaCargando && colaEspera.length === 0 && <p style={{ color: 'var(--muted)' }}>No hay pacientes esperando en este momento.</p>}
+      {colaEsperaCargando && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {[0, 1].map((i) => (
+            <div key={i} className="card" style={{ padding: '14px 20px' }}>
+              <span className="skeleton skeleton-line" style={{ width: '30%' }} />
+              <span className="skeleton skeleton-line" style={{ width: '55%' }} />
+            </div>
+          ))}
+        </div>
+      )}
+      {!colaEsperaCargando && colaEspera.length === 0 && <EstadoVacio titulo="Sin pacientes esperando" subtitulo="No hay pacientes esperando en este momento." />}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {colaEspera.map((t, i) => (
           <div key={t.id} className="card" style={{ padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>

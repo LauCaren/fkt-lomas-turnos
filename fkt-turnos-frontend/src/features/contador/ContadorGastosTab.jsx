@@ -11,14 +11,22 @@ export default function ContadorGastosTab() {
   useEffect(() => { dispatch(fetchGastosContador()); }, [dispatch]);
 
   if (error) return <div className="alert alert-error" role="alert">{error}</div>;
-  if (gastosCargando && gastos.length === 0) return <p style={{ color: 'var(--muted)' }}>Cargando gastos…</p>;
+  if (gastosCargando && gastos.length === 0) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className="skeleton" style={{ height: 52 }} />
+        <div className="skeleton" style={{ height: 52 }} />
+        <div className="skeleton" style={{ height: 52 }} />
+      </div>
+    );
+  }
 
   if (gastos.length === 0) {
     return <EstadoVacio titulo="Sin gastos cargados" subtitulo="Los gastos operativos del consultorio van a aparecer acá." />;
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       {gastos.map((g) => (
         <div key={g.id} className="card" style={{ padding: '12px 18px', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, opacity: g.anulado ? 0.55 : 1 }}>
           <span>

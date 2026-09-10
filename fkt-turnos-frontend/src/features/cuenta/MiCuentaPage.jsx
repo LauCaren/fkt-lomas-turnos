@@ -136,7 +136,7 @@ function MiHistoriaClinica() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {evoluciones.map((e) => (
         <div key={e.id} className="card">
           <div style={{ fontWeight: 600 }}>{e.medicoNombre} · {e.especialidadNombre}</div>
@@ -161,18 +161,18 @@ function MisPagos() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {pagos.map((p) => (
         <div key={p.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
           <div>
             <strong>{formatMoneda(p.monto)}</strong>
             <span style={{ color: 'var(--muted)', fontSize: 13.5 }}> · {p.medicoNombre} · {new Date(p.fecha).toLocaleDateString('es-AR', { timeZone: 'UTC' })}</span>
-            {p.anulado && <span className="badge" style={{ marginLeft: 8 }}>Anulado</span>}
+            {p.anulado && <span className="badge badge-cancelado" style={{ marginLeft: 8 }}>Anulado</span>}
           </div>
           {!p.anulado && (
             <button
               type="button"
-              className="btn btn-secondary"
+              className="btn btn-outline"
               onClick={() => descargarArchivo(`/api/mi-cuenta/pagos/${p.id}/comprobante`, null, `comprobante_${p.id}.pdf`)}
             >
               Descargar comprobante
@@ -204,13 +204,27 @@ export default function MiCuentaPage() {
 
   return (
     <div>
-      <span className="eyebrow">Mi cuenta</span>
-      <h1 style={{ marginTop: 12, fontSize: 30 }}>Tus datos</h1>
+      <div className="page-head">
+        <span className="eyebrow">Mi cuenta</span>
+        <h1>Tus datos</h1>
+      </div>
 
       {error && <div className="alert alert-error" role="alert" style={{ marginTop: 20 }}>{error}</div>}
       {mensajeExito && <div className="alert alert-success" role="status" style={{ marginTop: 20 }}>{mensajeExito}</div>}
 
-      {!perfil && <p style={{ color: 'var(--muted)', marginTop: 20 }}>Cargando…</p>}
+      {!perfil && (
+        <div className="cuenta-grid" style={{ marginTop: 24 }}>
+          <div className="card">
+            <span className="skeleton skeleton-line" style={{ width: '40%' }} />
+            <span className="skeleton skeleton-line" />
+            <span className="skeleton skeleton-line" />
+          </div>
+          <div className="card">
+            <span className="skeleton skeleton-line" style={{ width: '55%' }} />
+            <span className="skeleton skeleton-line" />
+          </div>
+        </div>
+      )}
 
       {perfil && (
         <div className="cuenta-grid" style={{ marginTop: 24 }}>

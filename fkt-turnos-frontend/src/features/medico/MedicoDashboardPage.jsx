@@ -30,9 +30,9 @@ export default function MedicoDashboardPage() {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12 }}>
-        <div>
+        <div className="page-head">
           <span className="eyebrow">Panel del médico</span>
-          <h1 style={{ marginTop: 12, fontSize: 30 }}>Hola, {usuario?.nombreCompleto}</h1>
+          <h1>Hola, {usuario?.nombreCompleto}</h1>
         </div>
         {saldo && (
           <div className="card" style={{ padding: '10px 18px', textAlign: 'right' }}>

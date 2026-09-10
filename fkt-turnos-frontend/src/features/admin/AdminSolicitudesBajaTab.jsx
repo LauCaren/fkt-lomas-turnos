@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchSolicitudesBaja, aprobarSolicitudBaja, rechazarSolicitudBaja } from './adminSlice';
+import EstadoVacio from '../../components/EstadoVacio';
 
 const ESTADOS = [
   { value: 'PENDIENTE', label: 'Pendientes' },
@@ -8,6 +9,8 @@ const ESTADOS = [
   { value: 'APROBADA', label: 'Aprobados' },
   { value: 'RECHAZADA', label: 'Rechazados' },
 ];
+
+const BADGE_ESTADO = { PENDIENTE: 'badge-pendiente', APROBADA: 'badge-disponible', RECHAZADA: 'badge-reservado' };
 
 function FilaSolicitud({ solicitud }) {
   const dispatch = useDispatch();
@@ -22,7 +25,7 @@ function FilaSolicitud({ solicitud }) {
           <div style={{ fontSize: 13, color: 'var(--muted)' }}>{solicitud.usuarioEmail}</div>
           {solicitud.motivo && <div style={{ fontSize: 13.5, marginTop: 6 }}>Motivo: {solicitud.motivo}</div>}
         </div>
-        <span className="badge">{solicitud.estado}</span>
+        <span className={`badge ${BADGE_ESTADO[solicitud.estado] || 'badge-cancelado'}`}>{solicitud.estado}</span>
       </div>
 
       {solicitud.estado === 'PENDIENTE' && (
@@ -73,15 +76,19 @@ export default function AdminSolicitudesBajaTab() {
         personales se anonimizan de forma permanente — los turnos y registros ya generados se conservan.
       </p>
 
-      <div className="field" style={{ maxWidth: 220, marginBottom: 20 }}>
-        <label htmlFor="solicitudesBajaFiltroEstado">Estado</label>
-        <select id="solicitudesBajaFiltroEstado" value={estado} onChange={(e) => setEstado(e.target.value)}>
-          {ESTADOS.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
-        </select>
+      <div className="filter-bar">
+        <div className="field" style={{ maxWidth: 220 }}>
+          <label htmlFor="solicitudesBajaFiltroEstado">Estado</label>
+          <select id="solicitudesBajaFiltroEstado" value={estado} onChange={(e) => setEstado(e.target.value)}>
+            {ESTADOS.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
+          </select>
+        </div>
       </div>
 
-      {solicitudesBaja.length === 0 && <p style={{ color: 'var(--muted)' }}>No hay pedidos en este estado.</p>}
-      {solicitudesBaja.map((s) => <FilaSolicitud key={s.id} solicitud={s} />)}
+      {solicitudesBaja.length === 0 && <EstadoVacio titulo="Sin pedidos" subtitulo="No hay pedidos en este estado." />}
+      <div className="stagger">
+        {solicitudesBaja.map((s) => <FilaSolicitud key={s.id} solicitud={s} />)}
+      </div>
     </div>
   );
 }

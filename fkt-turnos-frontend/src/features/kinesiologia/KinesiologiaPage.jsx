@@ -30,6 +30,14 @@ const ESTADO_LABEL = {
   CANCELADO: 'Cancelado',
 };
 
+const BADGE_ESTADO = {
+  PENDIENTE_VALIDACION: 'badge-pendiente',
+  VALIDADO: 'badge-disponible',
+  RECHAZADO: 'badge-reservado',
+  PAUSADO: 'badge-cancelado',
+  CANCELADO: 'badge-cancelado',
+};
+
 function NuevoPlanForm({ medicoKinesiologiaId, medicos }) {
   const dispatch = useDispatch();
   const horariosDisponibles = useSelector((state) => state.kinesiologia.horariosDisponibles);
@@ -166,7 +174,11 @@ function NuevoPlanForm({ medicoKinesiologiaId, medicos }) {
             <p style={{ fontSize: 13, color: 'var(--muted)' }}>Elegí primero un kinesiólogo para ver sus horarios disponibles.</p>
           )}
           {(modoIndiferente || medicoId) && cargandoHorarios && (
-            <p style={{ fontSize: 13, color: 'var(--muted)' }}>Buscando horarios disponibles…</p>
+            <div style={{ marginTop: 6 }}>
+              <div className="skeleton skeleton-line" style={{ width: '65%' }} />
+              <div className="skeleton skeleton-line" style={{ width: '50%' }} />
+              <div className="skeleton skeleton-line" style={{ width: '58%' }} />
+            </div>
           )}
           {(modoIndiferente || medicoId) && !cargandoHorarios && horariosOrdenados.length === 0 && (
             <p style={{ fontSize: 13, color: 'var(--muted)' }}>No hay horarios cargados por ahora.</p>
@@ -218,7 +230,7 @@ function PlanCard({ plan }) {
             {plan.sesionesGeneradas} de {plan.cantidadSesiones} sesiones generadas · desde {plan.fechaInicio}
           </div>
         </div>
-        <span className="badge">{ESTADO_LABEL[plan.estado]}</span>
+        <span className={`badge ${BADGE_ESTADO[plan.estado] || 'badge-cancelado'}`}>{ESTADO_LABEL[plan.estado]}</span>
       </div>
 
       {plan.estado === 'RECHAZADO' && plan.motivoRechazo && (
@@ -282,8 +294,10 @@ export default function KinesiologiaPage() {
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto' }}>
-      <span className="eyebrow">Kinesiología</span>
-      <h1 style={{ marginTop: 12, fontSize: 30 }}>Plan de sesiones</h1>
+      <div className="page-head">
+        <span className="eyebrow">Kinesiología</span>
+        <h1>Plan de sesiones</h1>
+      </div>
 
       {error && <div className="alert alert-error" role="alert" style={{ marginTop: 16 }}>{error}</div>}
       {mensajeExito && <div className="alert alert-success" role="status" style={{ marginTop: 16 }}>{mensajeExito}</div>}
@@ -295,7 +309,9 @@ export default function KinesiologiaPage() {
       {misPlanes.length > 0 && (
         <>
           <h2 style={{ fontSize: 20, marginTop: 32, marginBottom: 16 }}>Mis planes</h2>
-          {misPlanes.map((p) => <PlanCard key={p.id} plan={p} />)}
+          <div className="stagger">
+            {misPlanes.map((p) => <PlanCard key={p.id} plan={p} />)}
+          </div>
         </>
       )}
     </div>

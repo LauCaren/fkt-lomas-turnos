@@ -8,6 +8,7 @@ import { fetchMedicosAdmin } from '../admin/adminSlice';
 import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../../constants/obrasSociales';
 import { verArchivo } from '../../api/descargas';
 import { hoyISO } from '../../utils/formato';
+import EstadoVacio from '../../components/EstadoVacio';
 
 function verOrdenMedica(planId) {
   return verArchivo(`/api/admin/kinesiologia/planes/${planId}/orden-medica`);
@@ -224,8 +225,10 @@ export default function AdminKinesiologiaTab() {
         <NuevoPlanTelefonico medicosKinesiologia={medicosKinesiologia} />
       </div>
 
-      {planesAdmin.length === 0 && <p style={{ color: 'var(--muted)' }}>No hay planes en este estado.</p>}
-      {planesAdmin.map((p) => <PlanRow key={p.id} plan={p} />)}
+      {planesAdmin.length === 0 && <EstadoVacio titulo="No hay planes en este estado" subtitulo="Probá con otro filtro o cargá un plan por teléfono." />}
+      <div className="stagger">
+        {planesAdmin.map((p) => <PlanRow key={p.id} plan={p} />)}
+      </div>
     </div>
   );
 }

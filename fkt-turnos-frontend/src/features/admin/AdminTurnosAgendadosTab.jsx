@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchTurnosOcupados, fetchMedicosAdmin } from './adminSlice';
 import { fetchEspecialidades } from '../turnos/turnosSlice';
 import { hoyISO } from '../../utils/formato';
+import EstadoVacio from '../../components/EstadoVacio';
 
 function etiquetaFecha(fechaISO) {
   const [y, m, d] = fechaISO.split('-').map(Number);
@@ -53,34 +54,43 @@ export default function AdminTurnosAgendadosTab() {
         Solo turnos ya reservados. Filtrá por profesional para ver únicamente su agenda ocupada.
       </p>
 
-      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: 20 }}>
-        <div className="field" style={{ marginBottom: 0 }}>
+      <div className="filter-bar">
+        <div className="field">
           <label htmlFor="turnosAgendadosEspecialidad">Especialidad</label>
           <select id="turnosAgendadosEspecialidad" value={especialidadId} onChange={(e) => handleEspecialidadChange(e.target.value)}>
             <option value="">Todas las especialidades</option>
             {especialidades.map((esp) => <option key={esp.id} value={esp.id}>{esp.nombre}</option>)}
           </select>
         </div>
-        <div className="field" style={{ marginBottom: 0 }}>
+        <div className="field">
           <label htmlFor="turnosAgendadosProfesional">Profesional</label>
           <select id="turnosAgendadosProfesional" value={medicoId} onChange={(e) => setMedicoId(e.target.value)}>
             <option value="">Todos los profesionales</option>
             {medicosFiltrados.map((m) => <option key={m.id} value={m.id}>{m.nombreCompleto}</option>)}
           </select>
         </div>
-        <div className="field" style={{ marginBottom: 0 }}>
+        <div className="field">
           <label htmlFor="turnosAgendadosDesde">Desde</label>
           <input id="turnosAgendadosDesde" type="date" value={desde} onChange={(e) => setDesde(e.target.value)} />
         </div>
-        <div className="field" style={{ marginBottom: 0 }}>
+        <div className="field">
           <label htmlFor="turnosAgendadosHasta">Hasta (opcional)</label>
           <input id="turnosAgendadosHasta" type="date" value={hasta} min={desde || undefined} onChange={(e) => setHasta(e.target.value)} />
         </div>
       </div>
 
-      {turnosOcupadosCargando && <p style={{ color: 'var(--muted)' }}>Buscando turnos…</p>}
+      {turnosOcupadosCargando && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="card" style={{ padding: '16px 20px' }}>
+              <span className="skeleton skeleton-line" style={{ width: '45%' }} />
+              <span className="skeleton skeleton-line" style={{ width: '65%' }} />
+            </div>
+          ))}
+        </div>
+      )}
       {!turnosOcupadosCargando && turnosOcupados.length === 0 && (
-        <p style={{ color: 'var(--muted)' }}>No hay turnos ocupados con esos filtros.</p>
+        <EstadoVacio titulo="Sin turnos ocupados" subtitulo="No hay turnos ocupados con esos filtros." />
       )}
       {!turnosOcupadosCargando && turnosOcupados.length > 0 && (
         <p style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 12 }}>

@@ -15,9 +15,11 @@ export default function OlvidePasswordPage() {
 
   return (
     <div style={{ maxWidth: 420, margin: '0 auto' }}>
-      <span className="eyebrow">Recuperar acceso</span>
-      <h1 style={{ marginTop: 12, fontSize: 30 }}>¿Olvidaste tu contraseña?</h1>
-      <p style={{ marginTop: 10, color: 'var(--muted)' }}>Ingresá tu email y te mandamos un link para elegir una nueva contraseña.</p>
+      <div className="page-head">
+        <span className="eyebrow">Recuperar acceso</span>
+        <h1>¿Olvidaste tu contraseña?</h1>
+        <p>Ingresá tu email y te mandamos un link para elegir una nueva contraseña.</p>
+      </div>
 
       <form onSubmit={handleSubmit} className="card" style={{ marginTop: 28 }}>
         {error && <div className="alert alert-error" role="alert">{error}</div>}

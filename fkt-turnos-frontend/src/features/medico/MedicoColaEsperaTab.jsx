@@ -14,10 +14,18 @@ export default function MedicoColaEsperaTab() {
     return () => clearInterval(intervalo);
   }, [dispatch]);
 
-  if (colaEsperaCargando && colaEspera.length === 0 && !turnoParaEvolucion) return <p style={{ color: 'var(--muted)' }}>Cargando cola de espera…</p>;
+  if (colaEsperaCargando && colaEspera.length === 0 && !turnoParaEvolucion) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div className="skeleton" style={{ height: 72 }} />
+        <div className="skeleton" style={{ height: 72 }} />
+        <div className="skeleton" style={{ height: 72 }} />
+      </div>
+    );
+  }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {turnoParaEvolucion && (
         <div>
           <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 6 }}>Acabás de atender a este paciente — cargá la evolución:</p>

@@ -48,6 +48,7 @@ export default function DejarResenaTurno({ turnoId }) {
             onClick={() => setPuntaje(n)}
             onMouseEnter={() => setHover(n)}
             onMouseLeave={() => setHover(0)}
+            className="estrella-btn"
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, fontSize: 24, lineHeight: 1, color: (hover || puntaje) >= n ? 'var(--amber, #B4740E)' : 'var(--line)' }}
           >
             ★

@@ -54,7 +54,19 @@ export default function CuentaSeguridadTab() {
       {error && <div className="alert alert-error" role="alert" style={{ marginBottom: 20 }}>{error}</div>}
       {mensajeExito && <div className="alert alert-success" role="status" style={{ marginBottom: 20 }}>{mensajeExito}</div>}
 
-      {!perfil && <p style={{ color: 'var(--muted)' }}>Cargando…</p>}
+      {!perfil && (
+        <div className="cuenta-grid">
+          <div className="card">
+            <span className="skeleton skeleton-line" style={{ width: '40%' }} />
+            <span className="skeleton skeleton-line" />
+            <span className="skeleton skeleton-line" />
+          </div>
+          <div className="card">
+            <span className="skeleton skeleton-line" style={{ width: '55%' }} />
+            <span className="skeleton skeleton-line" />
+          </div>
+        </div>
+      )}
 
       {perfil && (
         <div className="cuenta-grid">

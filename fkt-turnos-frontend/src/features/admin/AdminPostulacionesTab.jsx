@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchPostulaciones, marcarPostulacionRevisada } from './adminSlice';
 import { descargarArchivo } from '../../api/descargas';
+import EstadoVacio from '../../components/EstadoVacio';
 
 function descargarCv(id, nombreArchivo) {
   return descargarArchivo(`/api/admin/postulaciones/${id}/cv`, undefined, nombreArchivo);
@@ -18,11 +19,11 @@ export default function AdminPostulacionesTab() {
   }, [dispatch]);
 
   if (postulaciones.length === 0) {
-    return <p style={{ color: 'var(--muted)' }}>Todavía no llegaron postulaciones.</p>;
+    return <EstadoVacio titulo="Sin postulaciones" subtitulo="Todavía no llegaron postulaciones." />;
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {postulaciones.map((p) => (
         <div key={p.id} className="card" style={{ opacity: p.revisado ? 0.65 : 1 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>

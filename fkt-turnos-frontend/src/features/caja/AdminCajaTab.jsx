@@ -9,6 +9,7 @@ import {
 import { fetchMedicosAdmin } from '../admin/adminSlice';
 import { verArchivo } from '../../api/descargas';
 import { formatMoneda } from '../../utils/formato';
+import EstadoVacio from '../../components/EstadoVacio';
 
 function verComprobante(gastoId) {
   return verArchivo(`/api/admin/caja/gastos/${gastoId}/comprobante`);
@@ -48,11 +49,20 @@ function ResumenTab() {
 
   useEffect(() => { dispatch(fetchResumenCaja()); }, [dispatch]);
 
-  if (!resumen) return <p style={{ color: 'var(--muted)' }}>Cargando…</p>;
+  if (!resumen) {
+    return (
+      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <div className="skeleton" style={{ height: 66, minWidth: 180, flex: '1 1 180px' }} />
+        <div className="skeleton" style={{ height: 66, minWidth: 180, flex: '1 1 180px' }} />
+        <div className="skeleton" style={{ height: 66, minWidth: 180, flex: '1 1 180px' }} />
+        <div className="skeleton" style={{ height: 66, minWidth: 180, flex: '1 1 180px' }} />
+      </div>
+    );
+  }
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 24 }}>
+      <div className="stagger" style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 24 }}>
         <div className="card" style={{ minWidth: 180 }}>
           <div style={{ fontSize: 13, color: 'var(--muted)' }}>Caja física</div>
           <div style={{ fontSize: 22, fontWeight: 700 }}>{formatMoneda(resumen.cajaFisica)}</div>
@@ -72,8 +82,8 @@ function ResumenTab() {
       </div>
 
       <h3 style={{ fontSize: 16, marginBottom: 12 }}>Saldo a favor por médico</h3>
-      {resumen.saldosPorMedico.length === 0 && <p style={{ color: 'var(--muted)' }}>Todavía no hay movimientos.</p>}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {resumen.saldosPorMedico.length === 0 && <EstadoVacio titulo="Todavía no hay movimientos" subtitulo="Cuando se registre un ingreso o retiro, va a aparecer acá el saldo de cada médico." />}
+      <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {resumen.saldosPorMedico.map((s) => (
           <div key={s.medicoId} className="card" style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 18px' }}>
             <span>{s.medicoNombre}</span>
@@ -146,7 +156,7 @@ function IngresosTab() {
         </form>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {ingresos.map((i) => (
           <div key={i.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 18px', opacity: i.anulado ? 0.55 : 1 }}>
             <div>
@@ -201,7 +211,7 @@ function RetirosTab() {
         </form>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {retiros.map((r) => (
           <div key={r.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 18px', opacity: r.anulado ? 0.55 : 1 }}>
             <div>
@@ -260,7 +270,7 @@ function GastosTab() {
           <button type="submit" className="btn btn-outline">Agregar</button>
         </form>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {categorias.map((c) => <span key={c.id} className="badge">{c.nombre}</span>)}
+          {categorias.map((c) => <span key={c.id} className="badge badge-cancelado">{c.nombre}</span>)}
         </div>
       </div>
 
@@ -294,7 +304,7 @@ function GastosTab() {
         </form>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {gastos.map((g) => (
           <div key={g.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 18px', opacity: g.anulado ? 0.55 : 1 }}>
             <div>

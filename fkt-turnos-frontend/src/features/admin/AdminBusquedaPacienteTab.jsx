@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axiosClient, { mensajeDeError } from '../../api/axiosClient';
 import { formatMoneda } from '../../utils/formato';
+import EstadoVacio from '../../components/EstadoVacio';
 
 const ESTADO_KINESIOLOGIA = {
   PENDIENTE_VALIDACION: 'Pendiente de revisión',
@@ -8,6 +9,14 @@ const ESTADO_KINESIOLOGIA = {
   RECHAZADO: 'Rechazado',
   PAUSADO: 'Pausado',
   CANCELADO: 'Cancelado',
+};
+
+const BADGE_KINESIOLOGIA = {
+  PENDIENTE_VALIDACION: 'badge-pendiente',
+  VALIDADO: 'badge-disponible',
+  RECHAZADO: 'badge-reservado',
+  PAUSADO: 'badge-cancelado',
+  CANCELADO: 'badge-cancelado',
 };
 
 function Ficha({ ficha }) {
@@ -31,7 +40,7 @@ function Ficha({ ficha }) {
 
       <h3 style={{ fontSize: 16, marginBottom: 10 }}>Turnos ({ficha.turnos.length})</h3>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 24 }}>
-        {ficha.turnos.length === 0 && <p style={{ color: 'var(--muted)', fontSize: 13.5 }}>Sin turnos.</p>}
+        {ficha.turnos.length === 0 && <EstadoVacio titulo="Sin turnos" />}
         {ficha.turnos.slice(0, 30).map((t) => (
           <div key={t.id} className="card" style={{ padding: '10px 16px', display: 'flex', justifyContent: 'space-between', fontSize: 13.5 }}>
             <span>{t.fecha} {t.horaInicio.slice(0, 5)} · {t.medicoNombre} ({t.especialidadNombre})</span>
@@ -42,18 +51,18 @@ function Ficha({ ficha }) {
 
       <h3 style={{ fontSize: 16, marginBottom: 10 }}>Planes de kinesiología ({ficha.planesKinesiologia.length})</h3>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 24 }}>
-        {ficha.planesKinesiologia.length === 0 && <p style={{ color: 'var(--muted)', fontSize: 13.5 }}>Sin planes.</p>}
+        {ficha.planesKinesiologia.length === 0 && <EstadoVacio titulo="Sin planes" />}
         {ficha.planesKinesiologia.map((p) => (
           <div key={p.id} className="card" style={{ padding: '10px 16px', display: 'flex', justifyContent: 'space-between', fontSize: 13.5 }}>
             <span>{p.medicoNombre} · {p.sesionesGeneradas} de {p.cantidadSesiones} sesiones</span>
-            <span className="badge">{ESTADO_KINESIOLOGIA[p.estado] || p.estado}</span>
+            <span className={`badge ${BADGE_KINESIOLOGIA[p.estado] || 'badge-cancelado'}`}>{ESTADO_KINESIOLOGIA[p.estado] || p.estado}</span>
           </div>
         ))}
       </div>
 
       <h3 style={{ fontSize: 16, marginBottom: 10 }}>Cobros asociados ({ficha.ingresos.length})</h3>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {ficha.ingresos.length === 0 && <p style={{ color: 'var(--muted)', fontSize: 13.5 }}>Sin cobros asociados a un turno de este paciente.</p>}
+        {ficha.ingresos.length === 0 && <EstadoVacio titulo="Sin cobros asociados" subtitulo="No hay cobros asociados a un turno de este paciente." />}
         {ficha.ingresos.map((i) => (
           <div key={i.id} className="card" style={{ padding: '10px 16px', display: 'flex', justifyContent: 'space-between', fontSize: 13.5, opacity: i.anulado ? 0.55 : 1 }}>
             <span>{i.fecha} · {i.medicoNombre} · {i.metodoPago}</span>
@@ -112,13 +121,13 @@ export default function AdminBusquedaPacienteTab() {
       {error && <div className="alert alert-error" role="alert">{error}</div>}
 
       {!ficha && resultados.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {resultados.map((p) => (
             <button
               key={p.id}
-              className="card"
+              className="card card-hover"
               onClick={() => verFicha(p.id)}
-              style={{ textAlign: 'left', padding: '12px 18px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', border: 'none' }}
+              style={{ textAlign: 'left', padding: '12px 18px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', border: 'none', width: '100%' }}
             >
               <span><strong>{p.nombreCompleto}</strong> · DNI {p.dni}</span>
               <span style={{ color: 'var(--muted)' }}>{p.telefono}</span>

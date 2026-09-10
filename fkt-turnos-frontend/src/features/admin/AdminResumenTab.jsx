@@ -17,7 +17,18 @@ export default function AdminResumenTab({ irACola, irAKinesiologia, irACaja }) {
   }, [dispatch]);
 
   if (error) return <div className="alert alert-error" role="alert">{error}</div>;
-  if (!resumen) return <p style={{ color: 'var(--muted)' }}>Cargando…</p>;
+  if (!resumen) {
+    return (
+      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="stat-card">
+            <span className="skeleton skeleton-line" style={{ width: '60%' }} />
+            <span className="skeleton skeleton-line" style={{ width: '35%', height: 22 }} />
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div>

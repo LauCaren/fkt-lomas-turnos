@@ -5,6 +5,7 @@ import {
 } from './adminSlice';
 import PasswordInput from '../../components/PasswordInput';
 import { PATRON_PASSWORD, TITULO_PASSWORD, AYUDA_PASSWORD } from '../../constants/validacion';
+import EstadoVacio from '../../components/EstadoVacio';
 
 const VACIO = { nombreCompleto: '', email: '', password: '' };
 
@@ -59,7 +60,7 @@ function FilaSecretaria({ cuenta }) {
         <div style={{ fontSize: 13, color: 'var(--muted)' }}>{cuenta.email}</div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: cuenta.activo ? 'var(--teal-dark, #12766b)' : 'var(--danger, #c0392b)' }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: cuenta.activo ? 'var(--teal-dark)' : 'var(--red)' }}>
           {cuenta.activo ? 'Activa' : 'Desactivada'}
         </span>
         {cuenta.activo ? (
@@ -104,8 +105,10 @@ export default function AdminSecretariasTab() {
         <NuevaSecretaria />
       </div>
 
-      {secretarias.length === 0 && <p style={{ color: 'var(--muted)' }}>Todavía no hay cuentas de secretaria creadas.</p>}
-      {secretarias.map((s) => <FilaSecretaria key={s.id} cuenta={s} />)}
+      {secretarias.length === 0 && <EstadoVacio titulo="Sin cuentas de secretaria" subtitulo="Todavía no hay cuentas de secretaria creadas." />}
+      <div className="stagger">
+        {secretarias.map((s) => <FilaSecretaria key={s.id} cuenta={s} />)}
+      </div>
     </div>
   );
 }

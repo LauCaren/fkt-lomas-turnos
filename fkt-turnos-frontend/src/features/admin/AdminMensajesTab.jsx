@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMensajesContacto, marcarMensajeLeido } from './adminSlice';
+import EstadoVacio from '../../components/EstadoVacio';
 
 export default function AdminMensajesTab() {
   const dispatch = useDispatch();
@@ -13,11 +14,11 @@ export default function AdminMensajesTab() {
   }, [dispatch]);
 
   if (mensajes.length === 0) {
-    return <p style={{ color: 'var(--muted)' }}>Todavía no llegaron consultas por alquiler de consultorios.</p>;
+    return <EstadoVacio titulo="Sin consultas" subtitulo="Todavía no llegaron consultas por alquiler de consultorios." />;
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {mensajes.map((m) => (
         <div key={m.id} className="card" style={{ opacity: m.leido ? 0.65 : 1 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>

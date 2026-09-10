@@ -11,14 +11,22 @@ export default function ContadorRetirosTab() {
   useEffect(() => { dispatch(fetchRetirosContador()); }, [dispatch]);
 
   if (error) return <div className="alert alert-error" role="alert">{error}</div>;
-  if (retirosCargando && retiros.length === 0) return <p style={{ color: 'var(--muted)' }}>Cargando retiros…</p>;
+  if (retirosCargando && retiros.length === 0) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className="skeleton" style={{ height: 52 }} />
+        <div className="skeleton" style={{ height: 52 }} />
+        <div className="skeleton" style={{ height: 52 }} />
+      </div>
+    );
+  }
 
   if (retiros.length === 0) {
     return <EstadoVacio titulo="Sin retiros cargados" subtitulo="Cuando un médico retire su saldo acumulado, va a aparecer acá." />;
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       {retiros.map((r) => (
         <div key={r.id} className="card" style={{ padding: '12px 18px', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, opacity: r.anulado ? 0.55 : 1 }}>
           <span>

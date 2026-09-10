@@ -33,8 +33,10 @@ export default function RestablecerPasswordPage() {
 
   return (
     <div style={{ maxWidth: 420, margin: '0 auto' }}>
-      <span className="eyebrow">Recuperar acceso</span>
-      <h1 style={{ marginTop: 12, fontSize: 30 }}>Elegí una nueva contraseña</h1>
+      <div className="page-head">
+        <span className="eyebrow">Recuperar acceso</span>
+        <h1>Elegí una nueva contraseña</h1>
+      </div>
 
       <form onSubmit={handleSubmit} className="card" style={{ marginTop: 28 }}>
         {error && <div className="alert alert-error" role="alert">{error}</div>}

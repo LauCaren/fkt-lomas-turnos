@@ -63,11 +63,16 @@ export default function SecretariaDashboardPage() {
 
   return (
     <div>
-      <span className="eyebrow">Panel de secretaría</span>
-      <h1 style={{ marginTop: 12, fontSize: 30 }}>Hola, {usuario?.nombreCompleto || ''}</h1>
+      <div className="page-head">
+        <span className="eyebrow">Panel de secretaría</span>
+        <h1>Hola, {usuario?.nombreCompleto || ''}</h1>
+      </div>
 
       {perfil === null ? (
-        <p style={{ color: 'var(--muted)', marginTop: 24 }}>Cargando…</p>
+        <div style={{ marginTop: 24, maxWidth: 320 }}>
+          <div className="skeleton skeleton-line" style={{ width: '50%' }} />
+          <div className="skeleton skeleton-line" />
+        </div>
       ) : mfaPendiente ? (
         <>
           <div className="alert alert-error" role="alert" style={{ marginTop: 24 }}>

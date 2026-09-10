@@ -21,6 +21,8 @@ export default function TrendChart({ titulo, datos, valorDe, formatValor, color 
           return (
             <rect
               key={d.fecha}
+              className="trend-bar"
+              style={{ animationDelay: `${Math.min(i * 15, 450)}ms` }}
               x={i * anchoBarra + anchoBarra * 0.15}
               y={36 - altura}
               width={anchoBarra * 0.7}

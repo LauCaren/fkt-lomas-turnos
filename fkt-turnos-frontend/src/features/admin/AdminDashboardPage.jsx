@@ -87,11 +87,16 @@ export default function AdminDashboardPage() {
 
   return (
     <div>
-      <span className="eyebrow">Panel de administración</span>
-      <h1 style={{ marginTop: 12, fontSize: 30 }}>Hola, Fernando</h1>
+      <div className="page-head">
+        <span className="eyebrow">Panel de administración</span>
+        <h1>Hola, Fernando</h1>
+      </div>
 
       {perfil === null ? (
-        <p style={{ color: 'var(--muted)', marginTop: 24 }}>Cargando…</p>
+        <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div className="card"><span className="skeleton skeleton-line" style={{ width: '40%' }} /></div>
+          <div className="card"><span className="skeleton skeleton-line" style={{ width: '60%' }} /></div>
+        </div>
       ) : mfaPendiente ? (
         <>
           <div className="alert alert-error" role="alert" style={{ marginTop: 24 }}>

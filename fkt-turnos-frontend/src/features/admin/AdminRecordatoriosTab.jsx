@@ -6,6 +6,7 @@ import {
   fetchMedicosAdmin, fetchPacientesEnRango, enviarMensajeMasivo,
 } from './adminSlice';
 import { hoyISO } from '../../utils/formato';
+import EstadoVacio from '../../components/EstadoVacio';
 
 function nombreCanal(valor) {
   return CANALES.find((c) => c.value === valor)?.label || valor;
@@ -244,7 +245,7 @@ function MensajeMasivo() {
 
       {vistoPrevia && (
         pacientesEnRango.length === 0 ? (
-          <p style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 14 }}>No hay pacientes con turno reservado en ese rango.</p>
+          <EstadoVacio titulo="Sin destinatarios" subtitulo="No hay pacientes con turno reservado en ese rango." />
         ) : (
           <>
             <p style={{ fontSize: 13.5, marginBottom: 10 }}>
@@ -296,8 +297,8 @@ export default function AdminRecordatoriosTab() {
       <MensajeMasivo />
 
       <h3 style={{ fontSize: 17, marginBottom: 14 }}>Recordatorios</h3>
-      {recordatorios.length === 0 && <p style={{ fontSize: 14, color: 'var(--muted)' }}>No hay recordatorios para mostrar todavía.</p>}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {recordatorios.length === 0 && <EstadoVacio titulo="Sin recordatorios" subtitulo="No hay recordatorios para mostrar todavía." />}
+      <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {recordatorios.map((r) => (
           <div key={r.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
             <div>
@@ -306,7 +307,7 @@ export default function AdminRecordatoriosTab() {
                 {r.fecha} {r.horaInicio?.slice(0, 5)} hs · {r.medicoNombre} ({r.especialidadNombre}) · {nombreCanal(r.canal)}
               </div>
               {r.errorMensaje && r.estado !== 'ENVIADO' && (
-                <div style={{ fontSize: 12.5, color: 'var(--danger, #c0392b)', marginTop: 4 }}>{r.errorMensaje}</div>
+                <div style={{ fontSize: 12.5, color: 'var(--red)', marginTop: 4 }}>{r.errorMensaje}</div>
               )}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>

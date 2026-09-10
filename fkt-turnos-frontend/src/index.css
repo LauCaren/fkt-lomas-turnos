@@ -28,11 +28,23 @@
   --radius-m: 16px;
   --maxw: 960px;
   --ease: cubic-bezier(.22, .68, .32, 1);
-  --shadow-sm: 0 2px 10px rgba(19, 35, 44, .06);
-  --shadow-md: 0 16px 40px rgba(19, 35, 44, .14);
+  /* Curva más marcada para feedback rápido (press states, skeletons) — --ease ya
+     funciona bien para transiciones de hover/entrada más largas, esta es para
+     interacciones cortas (100-200ms) que necesitan sentirse instantáneas. */
+  --ease-out: cubic-bezier(.23, 1, .32, 1);
+  /* Sombras en dos capas (contacto + ambiente) en vez de una sola — misma tinta
+     (rgba de --ink) que antes, solo con más profundidad real. */
+  --shadow-sm: 0 1px 2px rgba(19, 35, 44, .04), 0 4px 14px rgba(19, 35, 44, .06);
+  --shadow-md: 0 4px 10px rgba(19, 35, 44, .06), 0 20px 48px rgba(19, 35, 44, .16);
+  --shadow-lg: 0 12px 24px rgba(19, 35, 44, .10), 0 32px 80px rgba(19, 35, 44, .26);
 }
 
 * , *::before, *::after { box-sizing: border-box; }
+
+/* El resaltado de selección y el caret quedaban con el azul por defecto del navegador — un
+   detalle chico, pero es lo primero que delata una página que no se terminó de pensar. */
+::selection { background: var(--teal-tint); color: var(--teal-dark); }
+:root { caret-color: var(--teal-dark); }
 
 @media (prefers-reduced-motion: reduce) {
   * , *::before, *::after {
@@ -98,6 +110,10 @@ input, select, textarea { font: inherit; }
   white-space: nowrap;
 }
 .btn:hover:not(:disabled) { transform: translateY(-2px); }
+/* Feedback de presión: sin esto el botón no daba ninguna señal de haber
+   registrado el click hasta que cambiaba de pantalla — el active pisa el
+   translateY del hover con un scale sutil, confirmando el toque al instante. */
+.btn:active:not(:disabled) { transform: scale(.97); }
 .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 .btn-primary { background: var(--teal); color: #fff; }
 .btn-primary:hover:not(:disabled) { background: var(--teal-dark); }
@@ -119,6 +135,7 @@ input, select, textarea { font: inherit; }
   transform: translateY(-3px);
   border-color: var(--teal);
 }
+.card-hover:active { transform: scale(.98); box-shadow: var(--shadow-sm); }
 
 .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
 .field label { font-size: 13.5px; font-weight: 600; color: var(--ink-soft); }
@@ -143,6 +160,37 @@ input, select, textarea { font: inherit; }
   outline-offset: 2px;
 }
 .field-error { color: var(--red); font-size: 12.5px; }
+
+/* ---------- ENCABEZADO DE PÁGINA (eyebrow + h1 + bajada opcional) ---------- */
+.page-head h1 { margin-top: 12px; font-size: 30px; }
+.page-head p { margin-top: 10px; color: var(--muted); }
+
+/* ---------- BARRA DE FILTROS (paneles admin/secretaría/contador) ---------- */
+.filter-bar { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 20px; }
+.filter-bar .field { margin-bottom: 0; }
+
+/* ---------- ESTADO VACÍO (ver src/components/EstadoVacio.jsx) ---------- */
+.estado-vacio { text-align: center; padding: 40px 20px; border: 1px dashed var(--line); border-radius: var(--radius-m); }
+.estado-vacio-titulo { font-size: 16px; font-weight: 600; }
+.estado-vacio-titulo + .estado-vacio-subtitulo { margin-top: 4px; }
+.estado-vacio-subtitulo { font-size: 13.5px; color: var(--muted); }
+.estado-vacio .btn { margin-top: 16px; }
+
+/* ---------- SKELETON (reemplaza el texto plano "Cargando…") ---------- */
+.skeleton { position: relative; overflow: hidden; background: var(--line); border-radius: var(--radius-s); }
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .55), transparent);
+  animation: skeletonSweep 1.5s ease-in-out infinite;
+}
+@keyframes skeletonSweep {
+  to { transform: translateX(100%); }
+}
+.skeleton-line { display: block; height: 14px; margin-bottom: 8px; }
+.skeleton-line:last-child { margin-bottom: 0; width: 70%; }
 
 /**
  * Grillas de "Mi cuenta" (paciente/admin/secretaria/médico/contador): cada sección (datos,
@@ -178,9 +226,32 @@ input, select, textarea { font: inherit; }
   color: var(--muted);
   cursor: pointer;
   border-radius: var(--radius-s);
+  transition: color .2s var(--ease), transform .15s var(--ease-out);
 }
 .password-toggle:hover { color: var(--ink); }
+.password-toggle:active { transform: scale(.92); }
 .password-toggle:focus-visible { outline: 2px solid var(--teal); outline-offset: 1px; }
+
+/* Lightbox.jsx monta el overlay ya con la clase puesta (no hay un estado "cerrado" que
+   togglear) — por eso la entrada usa animation, que corre sola al montar, y no transition,
+   que necesita un cambio de estado del que partir. */
+@keyframes lightboxFadeIn { from { opacity: 0; } }
+@keyframes lightboxScaleIn { from { transform: scale(.95); } }
+/* ---------- MICRO-BOTONES SIN ESTILO .btn (acciones de texto/ícono sueltas) ---------- */
+.link-btn { transition: opacity .2s var(--ease); }
+.link-btn:hover { opacity: .7; }
+.link-btn:active { transform: scale(.96); transition: transform .15s var(--ease-out); }
+
+.icon-btn-close { transition: opacity .2s var(--ease), transform .15s var(--ease-out); }
+.icon-btn-close:hover { opacity: .8; }
+.icon-btn-close:active { transform: scale(.9); }
+
+.estrella-btn { transition: transform .15s var(--ease-out), color .2s var(--ease); }
+.estrella-btn:hover { transform: scale(1.15); }
+.estrella-btn:active { transform: scale(.9); }
+
+.mfa-toggle { transition: color .2s var(--ease); }
+.mfa-toggle:hover { color: var(--ink-soft); }
 
 .lightbox {
   position: fixed;
@@ -192,8 +263,16 @@ input, select, textarea { font: inherit; }
   justify-content: center;
   padding: 24px;
   cursor: zoom-out;
+  animation: lightboxFadeIn .2s var(--ease);
 }
-.lightbox img { max-width: 100%; max-height: 90vh; border-radius: var(--radius-s); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4); cursor: default; }
+.lightbox img {
+  max-width: 100%;
+  max-height: 90vh;
+  border-radius: var(--radius-s);
+  box-shadow: var(--shadow-lg);
+  cursor: default;
+  animation: lightboxScaleIn .2s var(--ease-out);
+}
 .lightbox-cerrar {
   position: absolute;
   top: 20px;
@@ -209,8 +288,10 @@ input, select, textarea { font: inherit; }
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition: background .2s var(--ease), transform .15s var(--ease-out);
 }
 .lightbox-cerrar:hover { background: rgba(255, 255, 255, 0.22); }
+.lightbox-cerrar:active { transform: scale(.9); }
 
 .alert {
   padding: 12px 16px;
@@ -227,6 +308,10 @@ input, select, textarea { font: inherit; }
 .badge-reservado { background: var(--red-tint); color: var(--red); }
 /* --muted acá daba 3.35:1 sobre --line, no alcanza AA — --ink-soft es un tono que ya existe en la paleta, no uno nuevo. */
 .badge-cancelado { background: var(--line); color: var(--ink-soft); }
+/* Mismo par que .alert-warning (ya validado para AA) — variante de badge que faltaba para los
+   varios estados "pendiente de revisión" repartidos por auditoría/reseñas/bajas/kinesiología,
+   que hasta ahora quedaban con className="badge" sin ningún modificador de color. */
+.badge-pendiente { background: var(--amber-tint); color: var(--amber-dark); }
 
 :focus-visible { outline: 2px solid var(--teal-dark); outline-offset: 2px; }
 
@@ -259,9 +344,21 @@ input, select, textarea { font: inherit; }
 }
 .stat-card-btn { cursor: pointer; }
 .stat-card-btn:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); border-color: var(--teal); }
+.stat-card-btn:active { transform: scale(.97); box-shadow: var(--shadow-sm); }
 .stat-card-label { font-size: 13px; color: var(--muted); }
-.stat-card-value { font-size: 26px; font-weight: 700; margin-top: 4px; }
+/* tabular-nums: sin esto, un valor cambiando de "9" a "10" corría el ancho de la cifra y
+   el resto de la fila temblaba — los dígitos numéricos pasan a ocupar todos el mismo ancho. */
+.stat-card-value { font-size: 26px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.tabular-nums { font-variant-numeric: tabular-nums; }
 .stat-card-value.destacado { color: var(--teal-dark); }
+
+/* ---------- TREND CHART (ver src/components/ui/TrendChart.jsx) ---------- */
+/* Las barras crecen desde la base al montar en vez de aparecer ya dibujadas —
+   fill-box hace que transform-origin en % se calcule sobre el propio <rect>,
+   no sobre el viewBox del <svg>, así cada barra escala desde su propia base
+   sin importar su altura individual. */
+@keyframes trendBarGrow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+.trend-bar { transform-box: fill-box; transform-origin: 50% 100%; animation: trendBarGrow .5s var(--ease-out) backwards; }
 
 /* ---------- TAB NAV ---------- */
 .tabnav { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 24px; margin-bottom: 28px; border-bottom: 1px solid var(--line); }
@@ -275,9 +372,10 @@ input, select, textarea { font: inherit; }
   color: var(--muted);
   border-radius: var(--radius-s) var(--radius-s) 0 0;
   border-bottom: 2px solid transparent;
-  transition: color .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease);
+  transition: color .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease), transform .15s var(--ease-out);
 }
 .tabnav-btn:hover { color: var(--ink-soft); background: var(--bg-soft); }
+.tabnav-btn:active { transform: scale(.96); }
 .tabnav-btn.active { color: var(--ink); background: var(--teal-tint); border-bottom-color: var(--teal); }
 
 /* ---------- SIDEBAR NAV (paneles internos: admin/secretaría/contador/médico) ---------- */
@@ -307,11 +405,12 @@ input, select, textarea { font: inherit; }
   font-size: 14.5px;
   color: var(--ink-soft);
   text-align: left;
-  transition: color .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease);
+  transition: color .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease), transform .15s var(--ease-out);
 }
 .sidebar-btn svg { flex-shrink: 0; width: 18px; height: 18px; color: var(--muted); transition: color .2s var(--ease); }
 .sidebar-btn:hover { color: var(--ink); background: var(--bg-soft); }
 .sidebar-btn:hover svg { color: var(--ink-soft); }
+.sidebar-btn:active { transform: scale(.97); }
 .sidebar-btn.active { color: var(--teal-dark); background: var(--teal-tint); border-left-color: var(--teal); }
 .sidebar-btn.active svg { color: var(--teal-dark); }
 .panel-content { flex: 1 1 0; min-width: 0; }
@@ -335,7 +434,22 @@ input, select, textarea { font: inherit; }
 }
 
 /* ---------- HEADER DE LA APP (Layout) ---------- */
-.app-header { background: #fff; border-bottom: 1px solid var(--line); box-shadow: var(--shadow-sm); }
+/* Sticky + blur en vez de fijo al tope del documento — en paneles internos con
+   contenido largo (admin/secretaría/etc.) el nav y el botón de salir quedan
+   siempre a mano en vez de perderse scrolleando. Mismo tratamiento que el
+   header del sitio público (assets/css/site.css), solo que ahí no hace falta
+   togglear una clase "scrolled": la sombra ya está siempre presente porque acá
+   el contenido debajo casi nunca es un hero a pantalla completa. */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+}
 .app-nav-links { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
 .app-nav-links a { font-size: 14px; font-weight: 600; position: relative; padding: 4px 0; color: var(--ink-soft); transition: color .2s var(--ease); }
 .app-nav-links a::after { content: ""; position: absolute; left: 0; bottom: 0; width: 0; height: 2px; background: var(--teal); transition: width .25s var(--ease); }

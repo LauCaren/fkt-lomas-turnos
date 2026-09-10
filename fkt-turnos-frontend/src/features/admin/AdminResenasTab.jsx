@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchResenas, aprobarResena, rechazarResena } from './adminSlice';
+import EstadoVacio from '../../components/EstadoVacio';
 
 const ESTADOS = [
   { value: 'PENDIENTE', label: 'Pendientes' },
@@ -9,8 +10,10 @@ const ESTADOS = [
   { value: 'RECHAZADA', label: 'Rechazadas' },
 ];
 
+const BADGE_ESTADO = { PENDIENTE: 'badge-pendiente', APROBADA: 'badge-disponible', RECHAZADA: 'badge-reservado' };
+
 function Estrellas({ puntaje }) {
-  return <span aria-label={`${puntaje} de 5 estrellas`} style={{ color: 'var(--amber, #B4740E)', letterSpacing: 1 }}>{'★'.repeat(puntaje)}{'☆'.repeat(5 - puntaje)}</span>;
+  return <span aria-label={`${puntaje} de 5 estrellas`} style={{ color: 'var(--amber)', letterSpacing: 1 }}>{'★'.repeat(puntaje)}{'☆'.repeat(5 - puntaje)}</span>;
 }
 
 function FilaResena({ resena }) {
@@ -26,7 +29,7 @@ function FilaResena({ resena }) {
           <div style={{ marginTop: 4 }}><Estrellas puntaje={resena.puntaje} /></div>
           {resena.comentario && <div style={{ fontSize: 13.5, marginTop: 6 }}>{resena.comentario}</div>}
         </div>
-        <span className="badge">{resena.estado}</span>
+        <span className={`badge ${BADGE_ESTADO[resena.estado] || 'badge-cancelado'}`}>{resena.estado}</span>
       </div>
 
       {resena.estado === 'PENDIENTE' && (
@@ -76,15 +79,19 @@ export default function AdminResenasTab() {
         muestran en el sitio y en la ficha del médico — nada se publica automáticamente.
       </p>
 
-      <div className="field" style={{ maxWidth: 220, marginBottom: 20 }}>
-        <label htmlFor="resenasFiltroEstado">Estado</label>
-        <select id="resenasFiltroEstado" value={estado} onChange={(e) => setEstado(e.target.value)}>
-          {ESTADOS.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
-        </select>
+      <div className="filter-bar">
+        <div className="field" style={{ maxWidth: 220 }}>
+          <label htmlFor="resenasFiltroEstado">Estado</label>
+          <select id="resenasFiltroEstado" value={estado} onChange={(e) => setEstado(e.target.value)}>
+            {ESTADOS.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
+          </select>
+        </div>
       </div>
 
-      {resenas.length === 0 && <p style={{ color: 'var(--muted)' }}>No hay reseñas en este estado.</p>}
-      {resenas.map((r) => <FilaResena key={r.id} resena={r} />)}
+      {resenas.length === 0 && <EstadoVacio titulo="Sin reseñas" subtitulo="No hay reseñas en este estado." />}
+      <div className="stagger">
+        {resenas.map((r) => <FilaResena key={r.id} resena={r} />)}
+      </div>
     </div>
   );
 }

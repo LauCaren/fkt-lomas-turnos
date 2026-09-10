@@ -40,9 +40,11 @@ export default function RegisterPage() {
 
   return (
     <div style={{ maxWidth: 480, margin: '0 auto' }}>
-      <span className="eyebrow">Crear cuenta</span>
-      <h1 style={{ marginTop: 12, fontSize: 30 }}>Registrate para sacar tu turno</h1>
-      <p style={{ marginTop: 10, color: 'var(--muted)' }}>Necesitamos estos datos para gestionar tu atención en el centro.</p>
+      <div className="page-head">
+        <span className="eyebrow">Crear cuenta</span>
+        <h1>Registrate para sacar tu turno</h1>
+        <p>Necesitamos estos datos para gestionar tu atención en el centro.</p>
+      </div>
 
       <form onSubmit={handleSubmit} className="card" style={{ marginTop: 28 }}>
         {error && <div className="alert alert-error" role="alert">{error}</div>}

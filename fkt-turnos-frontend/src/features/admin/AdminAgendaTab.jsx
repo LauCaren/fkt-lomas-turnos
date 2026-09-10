@@ -4,6 +4,7 @@ import { fetchAgenda, fetchFeriados, fetchMedicosAdmin, reservarParaPaciente, ac
 import { fetchEspecialidades } from '../turnos/turnosSlice';
 import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../../constants/obrasSociales';
 import { hoyISO } from '../../utils/formato';
+import EstadoVacio from '../../components/EstadoVacio';
 
 function parseISO(fechaISO) {
   const [y, m, d] = fechaISO.split('-').map(Number);
@@ -177,11 +178,20 @@ function BotonDeshacer({ turno }) {
 function VistaLista({ agenda, agendaCargando, medicoId, reservandoId, setReservandoId }) {
   return (
     <>
-      {agendaCargando && <p style={{ color: 'var(--muted)' }}>Cargando agenda…</p>}
-      {!agendaCargando && agenda.length === 0 && (
-        <p style={{ color: 'var(--muted)' }}>No hay turnos generados para ese día{medicoId ? ' con ese médico' : ''}.</p>
+      {agendaCargando && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="card" style={{ padding: '16px 20px' }}>
+              <span className="skeleton skeleton-line" style={{ width: '40%' }} />
+              <span className="skeleton skeleton-line" style={{ width: '65%' }} />
+            </div>
+          ))}
+        </div>
       )}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {!agendaCargando && agenda.length === 0 && (
+        <EstadoVacio titulo="Sin turnos generados" subtitulo={`No hay turnos generados para ese día${medicoId ? ' con ese médico' : ''}.`} />
+      )}
+      <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {agenda.map((t) => (
           <div key={t.id} className="card" style={{ padding: '16px 20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
@@ -258,11 +268,11 @@ function VistaSemana({ agenda, agendaCargando, feriados, medicoId, medicos, fech
   }, [agenda]);
 
   if (!medicoId) {
-    return <p style={{ color: 'var(--muted)' }}>Elegí un médico arriba para ver la vista semanal en detalle.</p>;
+    return <EstadoVacio titulo="Elegí un médico" subtitulo="Seleccioná un médico arriba para ver la vista semanal en detalle." />;
   }
 
   if (!agendaCargando && horarios.length === 0) {
-    return <p style={{ color: 'var(--muted)' }}>No hay turnos generados para {medicos.find((m) => String(m.id) === String(medicoId))?.nombreCompleto} en esta semana.</p>;
+    return <EstadoVacio titulo="Sin turnos generados" subtitulo={`No hay turnos generados para ${medicos.find((m) => String(m.id) === String(medicoId))?.nombreCompleto} en esta semana.`} />;
   }
 
   return (
@@ -301,10 +311,11 @@ function VistaSemana({ agenda, agendaCargando, feriados, medicoId, medicos, fech
                 return (
                   <button
                     key={`${dia}-${hora}`}
+                    className="btn"
                     onClick={() => setSeleccionado(turno)}
                     style={{
                       borderTop: '1px solid var(--line)', borderLeft: '1px solid var(--line)', border: 'none',
-                      borderTopColor: 'var(--line)', minHeight: 40, cursor: 'pointer',
+                      borderTopColor: 'var(--line)', borderRadius: 0, minHeight: 40, cursor: 'pointer',
                       background: disponible ? 'var(--teal-tint)' : 'var(--teal)',
                       color: disponible ? 'var(--teal-dark)' : '#fff',
                       fontSize: 11.5, fontWeight: 600, padding: '4px',
@@ -419,19 +430,19 @@ export default function AdminAgendaTab() {
         <button className={`btn ${vista === 'semana' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '7px 16px', fontSize: 13.5 }} onClick={() => setVista('semana')}>Semana</button>
       </div>
 
-      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: 20 }}>
-        <div className="field" style={{ marginBottom: 0 }}>
+      <div className="filter-bar">
+        <div className="field">
           <label htmlFor="agendaFecha">{vista === 'semana' ? 'Semana de' : 'Día'}</label>
           <input id="agendaFecha" type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
         </div>
-        <div className="field" style={{ marginBottom: 0 }}>
+        <div className="field">
           <label htmlFor="agendaEspecialidad">Especialidad</label>
           <select id="agendaEspecialidad" value={especialidadId} onChange={(e) => handleEspecialidadChange(e.target.value)}>
             <option value="">Todas las especialidades</option>
             {especialidades.map((esp) => <option key={esp.id} value={esp.id}>{esp.nombre}</option>)}
           </select>
         </div>
-        <div className="field" style={{ marginBottom: 0 }}>
+        <div className="field">
           <label htmlFor="agendaMedico">Médico</label>
           <select id="agendaMedico" value={medicoId} onChange={(e) => setMedicoId(e.target.value)}>
             <option value="">Todos los médicos</option>
