@@ -4,7 +4,7 @@
 function imgFallback(img) {
   img.onerror = null;
   img.style.objectFit = 'cover';
-  img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="%23F3F9F9"/><path d="M150 190 A50 50 0 0 1 250 190" fill="none" stroke="%23DFEAEA" stroke-width="4"/><circle cx="200" cy="190" r="4" fill="%23239A96"/></svg>');
+  img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="#F3F9F9"/><path d="M150 190 A50 50 0 0 1 250 190" fill="none" stroke="#DFEAEA" stroke-width="4"/><circle cx="200" cy="190" r="4" fill="#239A96"/></svg>');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
