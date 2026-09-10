@@ -14,6 +14,11 @@ export default defineConfig({
   // choca con sus archivos temporales/bloqueados mientras arma el instalador y puede
   // tirar abajo el dev server entero (EBUSY en Windows).
   server: {
+    // Sin esto, Vite a veces solo abre el socket en el loopback IPv6 (::1) y no en el IPv4
+    // (127.0.0.1) — según cómo resuelva "localhost" cada navegador, el otro te tira
+    // ERR_CONNECTION_REFUSED aunque el servidor esté corriendo. host:true fuerza a escuchar
+    // en todas las interfaces IPv4 (0.0.0.0), así que "localhost" resuelva como resuelva.
+    host: true,
     watch: {
       ignored: ['**/release/**'],
     },
