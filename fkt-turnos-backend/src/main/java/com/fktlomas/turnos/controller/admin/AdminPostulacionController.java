@@ -5,6 +5,9 @@ import com.fktlomas.turnos.dto.PostulacionDto;
 import com.fktlomas.turnos.service.PostulacionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -12,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/postulaciones")
@@ -22,8 +24,8 @@ public class AdminPostulacionController {
     private final PostulacionService postulacionService;
 
     @GetMapping
-    public List<PostulacionDto> listar() {
-        return postulacionService.listar();
+    public Page<PostulacionDto> listar(@PageableDefault(size = 20) Pageable pageable) {
+        return postulacionService.listar(pageable);
     }
 
     @PatchMapping("/{id}/revisado")

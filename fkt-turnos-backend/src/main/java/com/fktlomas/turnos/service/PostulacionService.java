@@ -8,6 +8,10 @@ import com.fktlomas.turnos.repository.PostulacionRepository;
 import com.fktlomas.turnos.storage.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -81,10 +84,13 @@ public class PostulacionService {
         }
     }
 
-    public List<PostulacionDto> listar() {
-        return postulacionRepository.findAll().stream()
-                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
-                .map(PostulacionDto::de).toList();
+    // Paginado (no findAll() completo): igual que ContactoService, esta bandeja crece con
+    // los años y no tiene por qué traerse entera en cada carga del panel.
+    public Page<PostulacionDto> listar(Pageable pageable) {
+        Pageable ordenado = pageable.getSort().isSorted()
+                ? pageable
+                : PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("createdAt").descending());
+        return postulacionRepository.findAll(ordenado).map(PostulacionDto::de);
     }
 
     public PostulacionDto marcarRevisado(Long id) {

@@ -10,6 +10,8 @@ function descargarCv(id, nombreArchivo) {
 export default function AdminPostulacionesTab() {
   const dispatch = useDispatch();
   const postulaciones = useSelector((state) => state.admin.postulaciones);
+  const pagina = useSelector((state) => state.admin.postulacionesPagina);
+  const hayMas = useSelector((state) => state.admin.postulacionesHayMas);
 
   useEffect(() => {
     dispatch(fetchPostulaciones());
@@ -39,6 +41,12 @@ export default function AdminPostulacionesTab() {
           </div>
         </div>
       ))}
+      {hayMas && (
+        <button className="btn btn-outline" style={{ alignSelf: 'center' }}
+          onClick={() => dispatch(fetchPostulaciones(pagina + 1))}>
+          Cargar más
+        </button>
+      )}
     </div>
   );
 }

@@ -6,9 +6,11 @@ import com.fktlomas.turnos.dto.MensajeContactoDto;
 import com.fktlomas.turnos.exception.RecursoNoEncontradoException;
 import com.fktlomas.turnos.repository.MensajeContactoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -27,10 +29,13 @@ public class ContactoService {
         emailService.notificarNuevoMensajeContacto(mensaje);
     }
 
-    public List<MensajeContactoDto> listar() {
-        return mensajeContactoRepository.findAll().stream()
-                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
-                .map(MensajeContactoDto::de).toList();
+    // Paginado (no findAll() completo): esta bandeja crece indefinidamente con los años de
+    // uso del centro, a diferencia de tablas chicas como especialidades/médicos.
+    public Page<MensajeContactoDto> listar(Pageable pageable) {
+        Pageable ordenado = pageable.getSort().isSorted()
+                ? pageable
+                : PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("createdAt").descending());
+        return mensajeContactoRepository.findAll(ordenado).map(MensajeContactoDto::de);
     }
 
     public MensajeContactoDto marcarLeido(Long id) {

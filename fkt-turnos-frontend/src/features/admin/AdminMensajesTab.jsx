@@ -5,6 +5,8 @@ import { fetchMensajesContacto, marcarMensajeLeido } from './adminSlice';
 export default function AdminMensajesTab() {
   const dispatch = useDispatch();
   const mensajes = useSelector((state) => state.admin.mensajesContacto);
+  const pagina = useSelector((state) => state.admin.mensajesContactoPagina);
+  const hayMas = useSelector((state) => state.admin.mensajesContactoHayMas);
 
   useEffect(() => {
     dispatch(fetchMensajesContacto());
@@ -30,6 +32,12 @@ export default function AdminMensajesTab() {
           )}
         </div>
       ))}
+      {hayMas && (
+        <button className="btn btn-outline" style={{ alignSelf: 'center' }}
+          onClick={() => dispatch(fetchMensajesContacto(pagina + 1))}>
+          Cargar más
+        </button>
+      )}
     </div>
   );
 }
