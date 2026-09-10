@@ -196,6 +196,22 @@
           <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
         </configuration>
       </plugin>
+      <!-- El agente (prepare-agent) sí se ata a "test" — instrumenta el bytecode para poder medir
+           cobertura, pero no hace nada visible ni agrega tiempo relevante. El reporte HTML en sí
+           queda fuera del ciclo normal, igual que SpotBugs arriba: correrlo a mano con
+           "mvnw jacoco:report" y abrir target/site/jacoco/index.html cuando se lo necesite. -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.12</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 </project>
