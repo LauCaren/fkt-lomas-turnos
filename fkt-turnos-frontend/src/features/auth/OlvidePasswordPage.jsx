@@ -29,6 +29,7 @@ export default function OlvidePasswordPage() {
           <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
         <button type="submit" className="btn btn-primary btn-block" disabled={status === 'loading'}>
+          {status === 'loading' && <span className="spinner" aria-hidden="true" />}
           {status === 'loading' ? 'Enviando…' : 'Enviar link de recuperación'}
         </button>
       </form>

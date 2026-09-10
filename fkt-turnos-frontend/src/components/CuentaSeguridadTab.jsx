@@ -12,13 +12,15 @@ import { PATRON_PASSWORD, TITULO_PASSWORD, AYUDA_PASSWORD } from '../constants/v
 function CambiarPassword() {
   const dispatch = useDispatch();
   const [form, setForm] = useState({ passwordActual: '', passwordNueva: '' });
+  const [actualizando, setActualizando] = useState(false);
 
   function handleSubmit(e) {
     e.preventDefault();
     dispatch(limpiarMensajesCuenta());
+    setActualizando(true);
     dispatch(cambiarPasswordCuenta(form)).unwrap().then(() => {
       setForm({ passwordActual: '', passwordNueva: '' });
-    }).catch(() => {});
+    }).catch(() => {}).finally(() => setActualizando(false));
   }
 
   return (
@@ -32,7 +34,10 @@ function CambiarPassword() {
         <PasswordInput id="passwordNueva" required minLength={8} pattern={PATRON_PASSWORD} title={TITULO_PASSWORD} value={form.passwordNueva} onChange={(e) => setForm({ ...form, passwordNueva: e.target.value })} />
         <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{AYUDA_PASSWORD}</p>
       </div>
-      <button type="submit" className="btn btn-primary">Actualizar contraseña</button>
+      <button type="submit" className="btn btn-primary" disabled={actualizando}>
+        {actualizando && <span className="spinner" aria-hidden="true" />}
+        {actualizando ? 'Actualizando…' : 'Actualizar contraseña'}
+      </button>
     </form>
   );
 }

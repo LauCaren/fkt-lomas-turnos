@@ -104,6 +104,7 @@ export default function RegisterPage() {
         </div>
 
         <button type="submit" className="btn btn-primary btn-block" disabled={status === 'loading'}>
+          {status === 'loading' && <span className="spinner" aria-hidden="true" />}
           {status === 'loading' ? 'Creando cuenta…' : 'Crear cuenta'}
         </button>
       </form>

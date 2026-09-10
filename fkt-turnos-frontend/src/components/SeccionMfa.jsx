@@ -5,6 +5,8 @@ import { ROLES_MFA_OBLIGATORIO } from '../config';
 export default function SeccionMfa({ perfil, mfaSetup, onIniciar, onActivar, onDesactivar }) {
   const [codigo, setCodigo] = useState('');
   const [qrDataUrl, setQrDataUrl] = useState(null);
+  const [activando, setActivando] = useState(false);
+  const [desactivando, setDesactivando] = useState(false);
 
   // El QR se genera en el navegador a partir del otpAuthUri que ya manda el backend —
   // nunca sale de acá (ni el secreto ni el QR pegan a ningún servicio de terceros para
@@ -20,12 +22,14 @@ export default function SeccionMfa({ perfil, mfaSetup, onIniciar, onActivar, onD
 
   function handleActivar(e) {
     e.preventDefault();
-    onActivar(codigo).then(() => setCodigo('')).catch(() => {});
+    setActivando(true);
+    onActivar(codigo).then(() => setCodigo('')).catch(() => {}).finally(() => setActivando(false));
   }
 
   function handleDesactivar(e) {
     e.preventDefault();
-    onDesactivar(codigo).then(() => setCodigo('')).catch(() => {});
+    setDesactivando(true);
+    onDesactivar(codigo).then(() => setCodigo('')).catch(() => {}).finally(() => setDesactivando(false));
   }
 
   if (!perfil) return null;
@@ -47,7 +51,10 @@ export default function SeccionMfa({ perfil, mfaSetup, onIniciar, onActivar, onD
               <label htmlFor="mfaCodigoDesactivar">Código de tu app de autenticación (para desactivar)</label>
               <input id="mfaCodigoDesactivar" inputMode="numeric" pattern="\d{6}" maxLength={6} required value={codigo} onChange={(e) => setCodigo(e.target.value)} placeholder="123456" />
             </div>
-            <button type="submit" className="btn btn-outline">Desactivar verificación en dos pasos</button>
+            <button type="submit" className="btn btn-outline" disabled={desactivando}>
+              {desactivando && <span className="spinner" aria-hidden="true" />}
+              {desactivando ? 'Desactivando…' : 'Desactivar verificación en dos pasos'}
+            </button>
           </form>
         )}
       </div>
@@ -80,7 +87,10 @@ export default function SeccionMfa({ perfil, mfaSetup, onIniciar, onActivar, onD
           <label htmlFor="mfaCodigoActivar">Código</label>
           <input id="mfaCodigoActivar" inputMode="numeric" pattern="\d{6}" maxLength={6} required autoFocus value={codigo} onChange={(e) => setCodigo(e.target.value)} placeholder="123456" />
         </div>
-        <button type="submit" className="btn btn-primary">Confirmar y activar</button>
+        <button type="submit" className="btn btn-primary" disabled={activando}>
+          {activando && <span className="spinner" aria-hidden="true" />}
+          {activando ? 'Activando…' : 'Confirmar y activar'}
+        </button>
       </form>
     );
   }

@@ -122,6 +122,22 @@ input, select, textarea { font: inherit; }
 .btn-outline:hover:not(:disabled) { border-color: var(--ink); background: var(--bg-soft); }
 .btn-block { width: 100%; }
 
+/* Un spinner que gira rápido se percibe como una carga más rápida que uno lento, aunque el
+   tiempo real de espera sea el mismo — currentColor para que herede el color del botón
+   (blanco en .btn-primary, oscuro en .btn-outline) sin pedir una variante por caso. */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+  opacity: .85;
+  flex-shrink: 0;
+}
+
 .card {
   background: var(--white);
   border: 1px solid var(--line);
@@ -252,6 +268,11 @@ input, select, textarea { font: inherit; }
 
 .mfa-toggle { transition: color .2s var(--ease); }
 .mfa-toggle:hover { color: var(--ink-soft); }
+/* El navegador ya anima el ícono de flecha del <summary>, pero el contenido que revela
+   (el secreto para cargar a mano) aparecía de golpe — un fade+subida corta lo acompaña
+   sin animar height/display, que ningún navegador hace de forma pareja todavía. */
+@keyframes detailsContentIn { from { opacity: 0; transform: translateY(-4px); } }
+details[open] > :not(summary) { animation: detailsContentIn .25s var(--ease-out); }
 
 .lightbox {
   position: fixed;
@@ -293,11 +314,15 @@ input, select, textarea { font: inherit; }
 .lightbox-cerrar:hover { background: rgba(255, 255, 255, 0.22); }
 .lightbox-cerrar:active { transform: scale(.9); }
 
+/* Antes aparecía/desaparecía de golpe con el condicional de React (mount/unmount instantáneo,
+   sin nada que transicionar) — como con el lightbox, entra por animation, no transition. */
+@keyframes alertIn { from { opacity: 0; transform: translateY(-6px); } }
 .alert {
   padding: 12px 16px;
   border-radius: var(--radius-s);
   font-size: 14px;
   margin-bottom: 16px;
+  animation: alertIn .3s var(--ease-out);
 }
 .alert-error { background: var(--red-tint); color: var(--red); border: 1px solid var(--red); }
 .alert-success { background: #E8F5E9; color: var(--green); border: 1px solid var(--green); }
@@ -392,6 +417,8 @@ input, select, textarea { font: inherit; }
   margin-bottom: 6px;
 }
 .sidebar-btn {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 11px;
@@ -405,15 +432,34 @@ input, select, textarea { font: inherit; }
   font-size: 14.5px;
   color: var(--ink-soft);
   text-align: left;
-  transition: color .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease), transform .15s var(--ease-out);
+  transition: color .2s var(--ease), border-color .2s var(--ease), transform .15s var(--ease-out);
 }
 .sidebar-btn svg { flex-shrink: 0; width: 18px; height: 18px; color: var(--muted); transition: color .2s var(--ease); }
 .sidebar-btn:hover { color: var(--ink); background: var(--bg-soft); }
 .sidebar-btn:hover svg { color: var(--ink-soft); }
 .sidebar-btn:active { transform: scale(.97); }
-.sidebar-btn.active { color: var(--teal-dark); background: var(--teal-tint); border-left-color: var(--teal); }
+/* El fondo del activo ya no lo pinta esta regla — lo da .sidebar-indicator, que desliza de
+   un botón al siguiente en vez de que cada uno se prenda/apague por su cuenta. border-left
+   se deja igual: es instantáneo y gratis, buen respaldo mientras el indicador todavía no
+   midió nada (primer render) o si JS llega a fallar. */
+.sidebar-btn.active { color: var(--teal-dark); border-left-color: var(--teal); }
 .sidebar-btn.active svg { color: var(--teal-dark); }
 .panel-content { flex: 1 1 0; min-width: 0; }
+
+/* Un solo bloque de fondo que se desliza y cambia de tamaño hacia el botón activo, en vez
+   de que el viejo se apague y el nuevo se prenda al mismo tiempo — eso es lo que de verdad
+   se percibe como movimiento con dirección. Solo en el layout de columna: en mobile
+   (media query de abajo) esto se oculta y el activo vuelve a resolverse con CSS puro. */
+.sidebar-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  background: var(--teal-tint);
+  border-radius: 0 var(--radius-s) var(--radius-s) 0;
+  transition: transform .3s var(--ease-out), width .3s var(--ease-out), height .3s var(--ease-out);
+  pointer-events: none;
+}
 
 @media (max-width: 880px) {
   .panel-shell { flex-direction: column; gap: 8px; }
@@ -431,6 +477,7 @@ input, select, textarea { font: inherit; }
   .sidebar-group-label { display: none; }
   .sidebar-btn { width: auto; white-space: nowrap; border-left: none; border-radius: var(--radius-s); }
   .sidebar-btn.active { background: var(--teal-tint); }
+  .sidebar-indicator { display: none; }
 }
 
 /* ---------- HEADER DE LA APP (Layout) ---------- */

@@ -37,6 +37,7 @@ function ExportarDatos() {
         kinesiología e historia clínica. Los comprobantes de pago se descargan aparte, desde "Mis pagos".
       </p>
       <button type="button" className="btn btn-outline" disabled={descargando} onClick={handleExportar}>
+        {descargando && <span className="spinner" aria-hidden="true" />}
         {descargando ? 'Generando…' : 'Exportar mis datos'}
       </button>
     </div>

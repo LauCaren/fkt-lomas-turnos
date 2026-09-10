@@ -55,6 +55,7 @@ export default function LoginPage() {
           </div>
         )}
         <button type="submit" className="btn btn-primary btn-block" disabled={status === 'loading'}>
+          {status === 'loading' && <span className="spinner" aria-hidden="true" />}
           {status === 'loading' ? 'Ingresando…' : 'Ingresar'}
         </button>
       </form>

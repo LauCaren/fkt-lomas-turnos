@@ -329,6 +329,7 @@ export default function BookingWizard() {
               <textarea id="motivo" rows={3} value={motivoConsulta} onChange={(e) => setMotivoConsulta(e.target.value)} />
             </div>
             <button className="btn btn-primary btn-block" onClick={handleReservar} disabled={status === 'loading'}>
+              {status === 'loading' && <span className="spinner" aria-hidden="true" />}
               {status === 'loading' ? 'Guardando…' : reprogramando ? `Confirmar nuevo horario de ${turnoSeleccionado.horaInicio.slice(0, 5)}` : `Confirmar turno de ${turnoSeleccionado.horaInicio.slice(0, 5)}`}
             </button>
           </>

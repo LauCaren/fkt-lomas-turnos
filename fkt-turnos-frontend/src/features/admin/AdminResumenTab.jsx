@@ -38,8 +38,8 @@ export default function AdminResumenTab({ irACola, irAKinesiologia, irACaja }) {
         <StatCard etiqueta="Turnos disponibles hoy" valor={resumen.turnosDisponiblesHoy} />
         <StatCard etiqueta="Pacientes esperando" valor={resumen.pacientesEnEspera} destacado={resumen.pacientesEnEspera > 0} onClick={irACola} />
         <StatCard etiqueta="Planes de kinesiología por validar" valor={resumen.planesKinesiologiaPendientes} destacado={resumen.planesKinesiologiaPendientes > 0} onClick={irAKinesiologia} />
-        <StatCard etiqueta="Ingresos de hoy" valor={formatMoneda(resumen.ingresosHoy)} onClick={irACaja} />
-        <StatCard etiqueta="Caja física" valor={formatMoneda(resumen.cajaFisica)} onClick={irACaja} />
+        <StatCard etiqueta="Ingresos de hoy" valorNumerico={resumen.ingresosHoy} formatValor={formatMoneda} onClick={irACaja} />
+        <StatCard etiqueta="Caja física" valorNumerico={resumen.cajaFisica} formatValor={formatMoneda} onClick={irACaja} />
       </div>
       <p style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 28 }}>Se actualiza solo cada 30 segundos. Hacé clic en una tarjeta para ir directo a esa sección.</p>
 

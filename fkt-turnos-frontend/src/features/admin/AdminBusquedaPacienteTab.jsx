@@ -115,7 +115,10 @@ export default function AdminBusquedaPacienteTab() {
           onChange={(e) => setBusqueda(e.target.value)}
           style={{ flex: 1, maxWidth: 360, padding: '10px 14px', border: '1.5px solid var(--line)', borderRadius: 6 }}
         />
-        <button type="submit" className="btn btn-primary" disabled={cargando}>Buscar</button>
+        <button type="submit" className="btn btn-primary" disabled={cargando}>
+          {cargando && <span className="spinner" aria-hidden="true" />}
+          Buscar
+        </button>
       </form>
 
       {error && <div className="alert alert-error" role="alert">{error}</div>}

@@ -239,6 +239,7 @@ function MensajeMasivo() {
           </select>
         </div>
         <button type="submit" className="btn btn-outline" disabled={pacientesEnRangoCargando}>
+          {pacientesEnRangoCargando && <span className="spinner" aria-hidden="true" />}
           {pacientesEnRangoCargando ? 'Buscando…' : 'Ver destinatarios'}
         </button>
       </form>

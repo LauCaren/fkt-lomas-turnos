@@ -37,9 +37,11 @@ function ExportarSeccion({ titulo, descripcion, endpoint, prefijoArchivo }) {
           <input id={`reporteHasta-${prefijoArchivo}`} type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} />
         </div>
         <button className="btn btn-outline" disabled={!!descargando} onClick={() => handleExportar('excel')}>
+          {descargando === 'excel' && <span className="spinner" aria-hidden="true" />}
           {descargando === 'excel' ? 'Generando…' : 'Descargar Excel'}
         </button>
         <button className="btn btn-outline" disabled={!!descargando} onClick={() => handleExportar('pdf')}>
+          {descargando === 'pdf' && <span className="spinner" aria-hidden="true" />}
           {descargando === 'pdf' ? 'Generando…' : 'Descargar PDF'}
         </button>
       </div>
@@ -84,7 +86,10 @@ function ConfiguracionReporteMensual() {
           <label htmlFor="reporteEmailDestino">Email de destino</label>
           <input id="reporteEmailDestino" type="email" placeholder="contador@ejemplo.com" value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
-        <button type="submit" className="btn btn-primary" disabled={guardando}>{guardando ? 'Guardando…' : 'Guardar'}</button>
+        <button type="submit" className="btn btn-primary" disabled={guardando}>
+          {guardando && <span className="spinner" aria-hidden="true" />}
+          {guardando ? 'Guardando…' : 'Guardar'}
+        </button>
       </form>
     </div>
   );

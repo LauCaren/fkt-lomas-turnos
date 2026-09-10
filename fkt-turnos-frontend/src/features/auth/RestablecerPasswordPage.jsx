@@ -47,6 +47,7 @@ export default function RestablecerPasswordPage() {
           <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{AYUDA_PASSWORD}</p>
         </div>
         <button type="submit" className="btn btn-primary btn-block" disabled={status === 'loading'}>
+          {status === 'loading' && <span className="spinner" aria-hidden="true" />}
           {status === 'loading' ? 'Guardando…' : 'Guardar contraseña'}
         </button>
       </form>

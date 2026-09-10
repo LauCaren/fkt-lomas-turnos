@@ -209,7 +209,10 @@ function NuevoPlanForm({ medicoKinesiologiaId, medicos }) {
           <label htmlFor="kineOrdenMedica">Orden médica (foto o PDF)</label>
           <input id="kineOrdenMedica" type="file" required accept="image/jpeg,image/png,application/pdf" onChange={(e) => setOrdenMedica(e.target.files[0] || null)} />
         </div>
-        <button type="submit" className="btn btn-primary" disabled={enviando || seleccionados.length === 0}>{enviando ? 'Enviando…' : 'Enviar plan'}</button>
+        <button type="submit" className="btn btn-primary" disabled={enviando || seleccionados.length === 0}>
+          {enviando && <span className="spinner" aria-hidden="true" />}
+          {enviando ? 'Enviando…' : 'Enviar plan'}
+        </button>
         <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 8 }}>
           Un admin va a revisar la orden médica antes de habilitar los turnos.
         </p>

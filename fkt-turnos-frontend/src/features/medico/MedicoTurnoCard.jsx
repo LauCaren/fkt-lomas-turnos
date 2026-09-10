@@ -26,6 +26,7 @@ function FormularioEvolucion({ turno, onListo }) {
         required
       />
       <button type="submit" className="btn btn-outline" style={{ alignSelf: 'flex-start' }} disabled={enviando}>
+        {enviando && <span className="spinner" aria-hidden="true" />}
         {enviando ? 'Guardando…' : 'Guardar evolución'}
       </button>
     </form>
@@ -95,6 +96,7 @@ function BotonAtender({ turnoId }) {
       disabled={cargando}
       onClick={() => { setCargando(true); dispatch(marcarAtendido(turnoId)).finally(() => setCargando(false)); }}
     >
+      {cargando && <span className="spinner" aria-hidden="true" />}
       Atender
     </button>
   );

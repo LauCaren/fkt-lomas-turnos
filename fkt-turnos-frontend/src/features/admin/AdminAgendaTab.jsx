@@ -81,7 +81,10 @@ function FormularioReserva({ turno, onCancelar }) {
       </div>
       <p style={{ fontSize: 12.5, color: 'var(--muted)' }}>Si el DNI ya está registrado, se usa esa cuenta y se ignoran los demás datos.</p>
       <div style={{ display: 'flex', gap: 8 }}>
-        <button type="submit" className="btn btn-primary" disabled={enviando}>{enviando ? 'Reservando…' : 'Confirmar reserva'}</button>
+        <button type="submit" className="btn btn-primary" disabled={enviando}>
+          {enviando && <span className="spinner" aria-hidden="true" />}
+          {enviando ? 'Reservando…' : 'Confirmar reserva'}
+        </button>
         <button type="button" className="btn btn-outline" onClick={onCancelar}>Cancelar</button>
       </div>
     </form>

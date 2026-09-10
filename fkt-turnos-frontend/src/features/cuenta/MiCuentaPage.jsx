@@ -37,6 +37,9 @@ function DatosPersonales({ perfil }) {
     obraSocial: perfil.obraSocial || '',
     canalNotificacionPreferido: perfil.canalNotificacionPreferido || 'EMAIL',
   });
+  // Local, no en el slice: esta pantalla no necesita que ningún otro componente sepa que el
+  // guardado está en curso, solo el propio botón.
+  const [guardando, setGuardando] = useState(false);
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -46,9 +49,10 @@ function DatosPersonales({ perfil }) {
   function handleSubmit(e) {
     e.preventDefault();
     dispatch(limpiarMensajesCuenta());
+    setGuardando(true);
     dispatch(actualizarPerfil(form)).unwrap().then((actualizado) => {
       dispatch(actualizarUsuarioLocal({ nombreCompleto: actualizado.nombreCompleto, email: actualizado.email }));
-    }).catch(() => {});
+    }).catch(() => {}).finally(() => setGuardando(false));
   }
 
   return (
@@ -90,7 +94,10 @@ function DatosPersonales({ perfil }) {
           {CANALES_NOTIFICACION.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
         </select>
       </div>
-      <button type="submit" className="btn btn-primary">Guardar cambios</button>
+      <button type="submit" className="btn btn-primary" disabled={guardando}>
+        {guardando && <span className="spinner" aria-hidden="true" />}
+        {guardando ? 'Guardando…' : 'Guardar cambios'}
+      </button>
     </form>
   );
 }
@@ -98,13 +105,15 @@ function DatosPersonales({ perfil }) {
 function CambiarPassword() {
   const dispatch = useDispatch();
   const [form, setForm] = useState({ passwordActual: '', passwordNueva: '' });
+  const [actualizando, setActualizando] = useState(false);
 
   function handleSubmit(e) {
     e.preventDefault();
     dispatch(limpiarMensajesCuenta());
+    setActualizando(true);
     dispatch(cambiarPasswordCuenta(form)).unwrap().then(() => {
       setForm({ passwordActual: '', passwordNueva: '' });
-    }).catch(() => {});
+    }).catch(() => {}).finally(() => setActualizando(false));
   }
 
   return (
@@ -118,7 +127,10 @@ function CambiarPassword() {
         <PasswordInput id="passwordNueva" required minLength={8} pattern={PATRON_PASSWORD} title={TITULO_PASSWORD} value={form.passwordNueva} onChange={(e) => setForm({ ...form, passwordNueva: e.target.value })} />
         <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{AYUDA_PASSWORD}</p>
       </div>
-      <button type="submit" className="btn btn-primary">Actualizar contraseña</button>
+      <button type="submit" className="btn btn-primary" disabled={actualizando}>
+        {actualizando && <span className="spinner" aria-hidden="true" />}
+        {actualizando ? 'Actualizando…' : 'Actualizar contraseña'}
+      </button>
     </form>
   );
 }

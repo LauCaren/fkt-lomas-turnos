@@ -31,10 +31,10 @@ export default function ContadorResumenTab() {
   return (
     <div>
       <div className="stagger" style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 28 }}>
-        <StatCard etiqueta="Caja física" valor={formatMoneda(resumen.cajaFisica)} />
-        <StatCard etiqueta="Ingresos totales" valor={formatMoneda(resumen.ingresosTotal)} />
-        <StatCard etiqueta="Retiros totales" valor={formatMoneda(resumen.retirosTotal)} />
-        <StatCard etiqueta="Gastos totales" valor={formatMoneda(resumen.gastosTotal)} />
+        <StatCard etiqueta="Caja física" valorNumerico={resumen.cajaFisica} formatValor={formatMoneda} />
+        <StatCard etiqueta="Ingresos totales" valorNumerico={resumen.ingresosTotal} formatValor={formatMoneda} />
+        <StatCard etiqueta="Retiros totales" valorNumerico={resumen.retirosTotal} formatValor={formatMoneda} />
+        <StatCard etiqueta="Gastos totales" valorNumerico={resumen.gastosTotal} formatValor={formatMoneda} />
       </div>
 
       <h3 style={{ fontSize: 16, marginBottom: 12 }}>Saldo a favor por médico</h3>

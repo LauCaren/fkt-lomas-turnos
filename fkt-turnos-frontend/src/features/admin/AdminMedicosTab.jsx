@@ -48,7 +48,10 @@ function CredencialesMedico({ medico }) {
           <label htmlFor={`medicoCredencialesPassword-${medico.id}`}>{medico.usuarioEmail ? 'Nueva contraseña' : 'Contraseña inicial'}</label>
           <input id={`medicoCredencialesPassword-${medico.id}`} type="password" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
         </div>
-        <button type="submit" className="btn btn-outline" disabled={enviando}>{enviando ? 'Guardando…' : 'Guardar credenciales'}</button>
+        <button type="submit" className="btn btn-outline" disabled={enviando}>
+          {enviando && <span className="spinner" aria-hidden="true" />}
+          {enviando ? 'Guardando…' : 'Guardar credenciales'}
+        </button>
       </form>
     </div>
   );
