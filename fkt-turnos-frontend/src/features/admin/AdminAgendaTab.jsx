@@ -5,6 +5,7 @@ import { fetchEspecialidades } from '../turnos/turnosSlice';
 import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../../constants/obrasSociales';
 import { hoyISO } from '../../utils/formato';
 import EstadoVacio from '../../components/EstadoVacio';
+import { useConfirm } from '../../components/ui/useConfirm';
 
 function parseISO(fechaISO) {
   const [y, m, d] = fechaISO.split('-').map(Number);
@@ -115,11 +116,35 @@ function DetalleTurno({ turno, onCerrar }) {
             <div><strong>{turno.pacienteNombre}</strong> · DNI {turno.pacienteDni}</div>
             <div style={{ color: 'var(--muted)' }}>{turno.pacienteTelefono} · {turno.pacienteObraSocial}</div>
             {turno.motivoConsulta && <div style={{ color: 'var(--muted)', marginTop: 2 }}>Motivo: {turno.motivoConsulta}</div>}
+            {turno.confirmacionPrevia === 'CONFIRMADO' && (
+              <div style={{ fontSize: 12.5, color: 'var(--teal-dark)', marginTop: 4 }}>Confirmó que viene</div>
+            )}
           </div>
+          <CheckInBotones turno={turno} />
         </div>
-        <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={onCerrar}>Cerrar</button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
+          <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={onCerrar}>Cerrar</button>
+          <BotonDeshacer turno={turno} />
+        </div>
       </div>
     </div>
+  );
+}
+
+function CeldaAgenda({ turno, feriado, onSeleccionar }) {
+  if (feriado) return <div className="agenda-celda agenda-celda-feriado" />;
+  if (!turno) return <div className="agenda-celda" />;
+  const disponible = turno.estado === 'DISPONIBLE';
+  const confirmado = turno.confirmacionPrevia === 'CONFIRMADO';
+  return (
+    <button
+      type="button"
+      className={`agenda-celda-btn ${disponible ? 'agenda-celda-disponible' : 'agenda-celda-reservado'}${confirmado ? ' agenda-celda-confirmado' : ''}`}
+      onClick={() => onSeleccionar(turno.id)}
+      title={disponible ? 'Disponible' : `${turno.pacienteNombre} (${turno.pacienteDni})${confirmado ? ' · confirmó que viene' : ''}`}
+    >
+      {disponible ? 'Libre' : (turno.pacienteNombre || '').split(' ')[0]}
+    </button>
   );
 }
 
@@ -166,12 +191,23 @@ function CheckInBotones({ turno }) {
 
 function BotonDeshacer({ turno }) {
   const dispatch = useDispatch();
+  const confirmar = useConfirm();
+
+  async function handleClick() {
+    const ok = await confirmar({
+      titulo: 'Deshacer última acción',
+      detalle: 'Deshace la última reserva o cancelación registrada en este turno.',
+      confirmarTexto: 'Deshacer',
+    });
+    if (ok) dispatch(deshacerTurno(turno.id));
+  }
+
   return (
     <button
       className="btn btn-outline"
       style={{ padding: '6px 14px', fontSize: 13 }}
       title="Deshace la última reserva/cancelación registrada en este turno"
-      onClick={() => window.confirm('¿Deshacer la última acción sobre este turno?') && dispatch(deshacerTurno(turno.id))}
+      onClick={handleClick}
     >
       Deshacer
     </button>
@@ -246,7 +282,11 @@ function VistaLista({ agenda, agendaCargando, medicoId, reservandoId, setReserva
 }
 
 function VistaSemana({ agenda, agendaCargando, feriados, medicoId, medicos, fecha }) {
-  const [seleccionado, setSeleccionado] = useState(null);
+  const [seleccionadoId, setSeleccionadoId] = useState(null);
+  // Deriva del array vivo (no guarda una copia del turno al clickear la celda) — así
+  // el panel de detalle refleja al toque los cambios de check-in/deshacer, en vez de
+  // quedarse con una foto vieja hasta que se cierra y se vuelve a abrir.
+  const seleccionado = agenda.find((t) => t.id === seleccionadoId) || null;
 
   const dias = useMemo(() => {
     const lunes = inicioSemana(fecha);
@@ -301,40 +341,90 @@ function VistaSemana({ agenda, agendaCargando, feriados, medicoId, medicos, fech
               <div style={{ padding: '8px 6px', fontSize: 12, color: 'var(--muted)', borderTop: '1px solid var(--line)', textAlign: 'right' }}>
                 {hora}
               </div>
-              {dias.map((dia) => {
-                const feriado = feriadosPorDia[dia];
-                const turno = porDiaYHora[`${dia}_${hora}`];
-                if (feriado) {
-                  return <div key={`${dia}-${hora}`} style={{ borderTop: '1px solid var(--line)', borderLeft: '1px solid var(--line)', background: 'repeating-linear-gradient(45deg, var(--bg-soft), var(--bg-soft) 6px, var(--line) 6px, var(--line) 7px)' }} />;
-                }
-                if (!turno) {
-                  return <div key={`${dia}-${hora}`} style={{ borderTop: '1px solid var(--line)', borderLeft: '1px solid var(--line)' }} />;
-                }
-                const disponible = turno.estado === 'DISPONIBLE';
-                return (
-                  <button
-                    key={`${dia}-${hora}`}
-                    className="btn"
-                    onClick={() => setSeleccionado(turno)}
-                    style={{
-                      borderTop: '1px solid var(--line)', borderLeft: '1px solid var(--line)', border: 'none',
-                      borderTopColor: 'var(--line)', borderRadius: 0, minHeight: 40, cursor: 'pointer',
-                      background: disponible ? 'var(--teal-tint)' : 'var(--teal)',
-                      color: disponible ? 'var(--teal-dark)' : '#fff',
-                      fontSize: 11.5, fontWeight: 600, padding: '4px',
-                    }}
-                    title={disponible ? 'Disponible' : `${turno.pacienteNombre} (${turno.pacienteDni})`}
-                  >
-                    {disponible ? 'Libre' : (turno.pacienteNombre || '').split(' ')[0]}
-                  </button>
-                );
-              })}
+              {dias.map((dia) => (
+                <CeldaAgenda
+                  key={`${dia}-${hora}`}
+                  turno={porDiaYHora[`${dia}_${hora}`]}
+                  feriado={feriadosPorDia[dia]}
+                  onSeleccionar={setSeleccionadoId}
+                />
+              ))}
             </Fragment>
           ))}
         </div>
       </div>
 
-      {seleccionado && <DetalleTurno turno={seleccionado} onCerrar={() => setSeleccionado(null)} />}
+      {seleccionado && <DetalleTurno turno={seleccionado} onCerrar={() => setSeleccionadoId(null)} />}
+    </div>
+  );
+}
+
+function VistaDia({ agenda, agendaCargando, feriados, medicos, medicoId, fecha }) {
+  const [seleccionadoId, setSeleccionadoId] = useState(null);
+  const seleccionado = agenda.find((t) => t.id === seleccionadoId) || null;
+
+  const medicosColumna = useMemo(() => {
+    if (medicoId) return medicos.filter((m) => String(m.id) === medicoId);
+    const idsConTurno = new Set(agenda.map((t) => t.medicoId));
+    return medicos.filter((m) => idsConTurno.has(m.id));
+  }, [medicos, medicoId, agenda]);
+
+  const horarios = useMemo(() => {
+    const set = new Set(agenda.map((t) => t.horaInicio.slice(0, 5)));
+    return Array.from(set).sort();
+  }, [agenda]);
+
+  const porMedicoYHora = useMemo(() => {
+    const mapa = {};
+    agenda.forEach((t) => { mapa[`${t.medicoId}_${t.horaInicio.slice(0, 5)}`] = t; });
+    return mapa;
+  }, [agenda]);
+
+  const feriadoDelDia = feriados.find((f) => f.fecha === fecha);
+
+  if (!agendaCargando && (horarios.length === 0 || medicosColumna.length === 0)) {
+    return <EstadoVacio titulo="Sin turnos generados" subtitulo="No hay turnos generados para este día." />;
+  }
+
+  return (
+    <div>
+      <div style={{ overflowX: 'auto' }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: `64px repeat(${medicosColumna.length}, minmax(120px, 1fr))`,
+          minWidth: 120 * medicosColumna.length + 64,
+          border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden',
+        }}>
+          <div style={{ background: 'var(--bg-soft)', borderBottom: '1px solid var(--line)' }} />
+          {medicosColumna.map((m) => (
+            <div key={m.id} style={{
+              padding: '10px 6px', textAlign: 'center', fontSize: 12.5, fontWeight: 600,
+              background: feriadoDelDia ? 'var(--red-tint)' : 'var(--bg-soft)',
+              borderBottom: '1px solid var(--line)', borderLeft: '1px solid var(--line)',
+            }}>
+              {m.nombreCompleto}
+            </div>
+          ))}
+
+          {horarios.map((hora) => (
+            <Fragment key={hora}>
+              <div style={{ padding: '8px 6px', fontSize: 12, color: 'var(--muted)', borderTop: '1px solid var(--line)', textAlign: 'right' }}>
+                {hora}
+              </div>
+              {medicosColumna.map((m) => (
+                <CeldaAgenda
+                  key={`${m.id}-${hora}`}
+                  turno={porMedicoYHora[`${m.id}_${hora}`]}
+                  feriado={feriadoDelDia}
+                  onSeleccionar={setSeleccionadoId}
+                />
+              ))}
+            </Fragment>
+          ))}
+        </div>
+      </div>
+
+      {seleccionado && <DetalleTurno turno={seleccionado} onCerrar={() => setSeleccionadoId(null)} />}
     </div>
   );
 }
@@ -385,7 +475,7 @@ export default function AdminAgendaTab() {
   const feriadoDelDia = feriados.find((f) => f.fecha === fecha);
 
   const resumenDia = useMemo(() => {
-    if (vista !== 'lista') return null;
+    if (vista === 'semana') return null;
     const reservados = agenda.filter((t) => t.estado === 'RESERVADO');
     const disponibles = agenda.filter((t) => t.estado === 'DISPONIBLE').length;
     const esHoy = fecha === hoyISO();
@@ -430,6 +520,7 @@ export default function AdminAgendaTab() {
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
         <button className={`btn ${vista === 'lista' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '7px 16px', fontSize: 13.5 }} onClick={() => setVista('lista')}>Lista</button>
+        <button className={`btn ${vista === 'dia' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '7px 16px', fontSize: 13.5 }} onClick={() => setVista('dia')}>Día</button>
         <button className={`btn ${vista === 'semana' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '7px 16px', fontSize: 13.5 }} onClick={() => setVista('semana')}>Semana</button>
       </div>
 
@@ -454,15 +545,19 @@ export default function AdminAgendaTab() {
         </div>
       </div>
 
-      {vista === 'lista' && feriadoDelDia && (
+      {vista !== 'semana' && feriadoDelDia && (
         <div className="alert" style={{ background: 'var(--red-tint)', color: 'var(--red)', border: '1px solid var(--red)' }}>
           Feriado: {feriadoDelDia.nombre}
         </div>
       )}
 
-      {vista === 'lista' ? (
+      {vista === 'lista' && (
         <VistaLista agenda={agenda} agendaCargando={agendaCargando} medicoId={medicoId} reservandoId={reservandoId} setReservandoId={setReservandoId} />
-      ) : (
+      )}
+      {vista === 'dia' && (
+        <VistaDia agenda={agenda} agendaCargando={agendaCargando} feriados={feriados} medicos={medicos} medicoId={medicoId} fecha={fecha} />
+      )}
+      {vista === 'semana' && (
         <VistaSemana agenda={agenda} agendaCargando={agendaCargando} feriados={feriados} medicoId={medicoId} medicos={medicos} fecha={fecha} />
       )}
     </div>
