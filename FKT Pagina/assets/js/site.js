@@ -21,9 +21,18 @@ document.addEventListener('DOMContentLoaded', () => {
         burger.setAttribute('aria-expanded', false);
       });
     });
-    window.addEventListener('scroll', () => {
+    const progressBar = document.createElement('div');
+    progressBar.id = 'scroll-progress';
+    progressBar.setAttribute('aria-hidden', 'true');
+    header.appendChild(progressBar);
+
+    function onScroll() {
       header.classList.toggle('scrolled', window.scrollY > 8);
-    }, { passive: true });
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      progressBar.style.width = (scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0) + '%';
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
   }
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -40,24 +49,5 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }, { threshold: 0.15 });
     revealEls.forEach((el) => io.observe(el));
-  }
-
-  const counterEl = document.getElementById('rangoCounter');
-  if (counterEl) {
-    const TARGET = 87, DURATION = 1400, DELAY = 200;
-    if (reduceMotion) {
-      counterEl.textContent = TARGET;
-    } else {
-      const start = performance.now() + DELAY;
-      const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
-      const tick = (now) => {
-        const elapsed = now - start;
-        if (elapsed < 0) { requestAnimationFrame(tick); return; }
-        const t = Math.min(elapsed / DURATION, 1);
-        counterEl.textContent = Math.round(easeOutCubic(t) * TARGET);
-        if (t < 1) requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
-    }
   }
 });

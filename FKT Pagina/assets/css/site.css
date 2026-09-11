@@ -82,8 +82,15 @@ button { font: inherit; background: none; border: none; cursor: pointer; color: 
 .btn-outline-light:hover:not(:disabled) { border-color: #fff; background: rgba(255, 255, 255, 0.08); }
 
 /* ---------- HEADER / NAV ---------- */
-header { position: sticky; top: 0; z-index: 100; background: rgba(255, 255, 255, 0.86); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); transition: box-shadow .25s var(--ease); }
-header.scrolled { box-shadow: var(--shadow-sm); }
+/* Más traslúcido en reposo (deja pasar el color de lo que hay debajo, como vidrio real)
+   y se vuelve más opaco al scrollear para no perder legibilidad sobre contenido denso. */
+header { position: sticky; top: 0; z-index: 100; background: rgba(255, 255, 255, 0.72); backdrop-filter: blur(18px) saturate(180%); -webkit-backdrop-filter: blur(18px) saturate(180%); border-bottom: 1px solid var(--line); transition: box-shadow .25s var(--ease), background .3s var(--ease); }
+header.scrolled { background: rgba(255, 255, 255, 0.88); box-shadow: var(--shadow-sm); }
+
+/* Barra de progreso de lectura — inyectada por site.js, vive pegada al borde
+   inferior del header para que se note sin competir con la nav. */
+#scroll-progress { position: absolute; left: 0; bottom: -1px; height: 2px; width: 0%; background: var(--teal); transform-origin: left; transition: width .1s linear; }
+@media (prefers-reduced-motion: reduce) { #scroll-progress { transition: none; } }
 .nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; }
 .logo { display: flex; align-items: center; gap: 10px; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 20px; }
 .logo-mark { width: 34px; height: 34px; flex-shrink: 0; object-fit: contain; }
@@ -277,3 +284,13 @@ footer { background: var(--black); color: rgba(255, 255, 255, 0.75); padding: 56
 .wa-float:active { transform: scale(.96); }
 .wa-float svg { width: 30px; height: 30px; fill: #fff; }
 @media (max-width: 600px) { .wa-float { width: 52px; height: 52px; bottom: 18px; right: 18px; } .wa-float svg { width: 27px; height: 27px; } }
+
+/* ---------- TRATAMIENTO DE FOTOGRAFÍA ---------- */
+/* Mismo balance de color en toda la fotografía real del sitio (sesiones, equipo,
+   especialidades) para que se lean como una sola colección y no como fotos sueltas
+   de distinta cámara/luz. .ficha-titulo-img queda afuera a propósito: es el escaneo
+   de un título habilitante, no fotografía editorial — ahí importa la fidelidad. */
+.hero-photo img, .photo-band img, .scard-img img, .spec-img img,
+.team-banner img, .bg-photo img, .detail-photo img {
+  filter: saturate(.94) contrast(1.03) brightness(1.01);
+}
