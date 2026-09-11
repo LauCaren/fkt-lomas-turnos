@@ -131,6 +131,25 @@ function DetalleTurno({ turno, onCerrar }) {
   );
 }
 
+function LeyendaAgenda() {
+  return (
+    <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 12, color: 'var(--muted)', marginTop: 10 }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span style={{ width: 12, height: 12, borderRadius: 3, background: 'var(--teal-tint)', display: 'inline-block' }} />
+        Libre
+      </span>
+      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span style={{ width: 12, height: 12, borderRadius: 3, background: 'var(--teal)', display: 'inline-block' }} />
+        Reservado
+      </span>
+      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span style={{ width: 12, height: 12, borderRadius: 3, background: 'var(--teal)', boxShadow: 'inset 0 0 0 2px var(--green)', display: 'inline-block' }} />
+        Confirmó que viene
+      </span>
+    </div>
+  );
+}
+
 function CeldaAgenda({ turno, feriado, onSeleccionar }) {
   if (feriado) return <div className="agenda-celda agenda-celda-feriado" />;
   if (!turno) return <div className="agenda-celda" />;
@@ -281,7 +300,7 @@ function VistaLista({ agenda, agendaCargando, medicoId, reservandoId, setReserva
   );
 }
 
-function VistaSemana({ agenda, agendaCargando, feriados, medicoId, medicos, fecha }) {
+function VistaSemana({ agenda, agendaCargando, feriados, medicoId, medicos, fecha, denso }) {
   const [seleccionadoId, setSeleccionadoId] = useState(null);
   // Deriva del array vivo (no guarda una copia del turno al clickear la celda) — así
   // el panel de detalle refleja al toque los cambios de check-in/deshacer, en vez de
@@ -321,7 +340,7 @@ function VistaSemana({ agenda, agendaCargando, feriados, medicoId, medicos, fech
   return (
     <div>
       <div style={{ overflowX: 'auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '64px repeat(7, minmax(96px, 1fr))', minWidth: 760, border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden' }}>
+        <div className={denso ? 'agenda-densa' : undefined} style={{ display: 'grid', gridTemplateColumns: '64px repeat(7, minmax(96px, 1fr))', minWidth: 760, border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden' }}>
           <div style={{ background: 'var(--bg-soft)', borderBottom: '1px solid var(--line)' }} />
           {dias.map((dia) => (
             <div key={dia} style={{
@@ -353,13 +372,14 @@ function VistaSemana({ agenda, agendaCargando, feriados, medicoId, medicos, fech
           ))}
         </div>
       </div>
+      <LeyendaAgenda />
 
       {seleccionado && <DetalleTurno turno={seleccionado} onCerrar={() => setSeleccionadoId(null)} />}
     </div>
   );
 }
 
-function VistaDia({ agenda, agendaCargando, feriados, medicos, medicoId, fecha }) {
+function VistaDia({ agenda, agendaCargando, feriados, medicos, medicoId, fecha, denso }) {
   const [seleccionadoId, setSeleccionadoId] = useState(null);
   const seleccionado = agenda.find((t) => t.id === seleccionadoId) || null;
 
@@ -389,7 +409,7 @@ function VistaDia({ agenda, agendaCargando, feriados, medicos, medicoId, fecha }
   return (
     <div>
       <div style={{ overflowX: 'auto' }}>
-        <div style={{
+        <div className={denso ? 'agenda-densa' : undefined} style={{
           display: 'grid',
           gridTemplateColumns: `64px repeat(${medicosColumna.length}, minmax(120px, 1fr))`,
           minWidth: 120 * medicosColumna.length + 64,
@@ -423,6 +443,7 @@ function VistaDia({ agenda, agendaCargando, feriados, medicos, medicoId, fecha }
           ))}
         </div>
       </div>
+      <LeyendaAgenda />
 
       {seleccionado && <DetalleTurno turno={seleccionado} onCerrar={() => setSeleccionadoId(null)} />}
     </div>
@@ -438,6 +459,7 @@ export default function AdminAgendaTab() {
   const [medicoId, setMedicoId] = useState('');
   const [reservandoId, setReservandoId] = useState(null);
   const [vista, setVista] = useState('lista');
+  const [denso, setDenso] = useState(false);
 
   const medicosFiltrados = useMemo(() => {
     if (!especialidadId) return medicos;
@@ -461,6 +483,25 @@ export default function AdminAgendaTab() {
     dispatch(fetchAgenda({ desde: rango.desde, hasta: rango.hasta, medicoId, especialidadId }));
     dispatch(fetchFeriados({ desde: rango.desde, hasta: rango.hasta }));
   }, [rango.desde, rango.hasta, medicoId, especialidadId, dispatch]);
+
+  // Flechas para moverse de día (o de semana, en vista Semana) sin tocar el mouse — pensado
+  // para secretaría que pasa horas mirando esta pantalla. Se ignora si el foco está en un
+  // campo de texto/select para no interferir con el tipeo normal.
+  useEffect(() => {
+    function handleKeyDown(e) {
+      const tag = document.activeElement?.tagName;
+      if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+      if (e.key === 'ArrowLeft') {
+        setFecha((f) => sumarDias(f, vista === 'semana' ? -7 : -1));
+      } else if (e.key === 'ArrowRight') {
+        setFecha((f) => sumarDias(f, vista === 'semana' ? 7 : 1));
+      } else if (e.key.toLowerCase() === 't') {
+        setFecha(hoyISO());
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [vista]);
 
   function handleEspecialidadChange(nuevaEspecialidadId) {
     setEspecialidadId(nuevaEspecialidadId);
@@ -518,11 +559,23 @@ export default function AdminAgendaTab() {
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 8, flexWrap: 'wrap', alignItems: 'center' }}>
         <button className={`btn ${vista === 'lista' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '7px 16px', fontSize: 13.5 }} onClick={() => setVista('lista')}>Lista</button>
         <button className={`btn ${vista === 'dia' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '7px 16px', fontSize: 13.5 }} onClick={() => setVista('dia')}>Día</button>
         <button className={`btn ${vista === 'semana' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '7px 16px', fontSize: 13.5 }} onClick={() => setVista('semana')}>Semana</button>
+        {(vista === 'dia' || vista === 'semana') && (
+          <button
+            type="button"
+            className={`btn ${denso ? 'btn-primary' : 'btn-outline'}`}
+            style={{ padding: '7px 16px', fontSize: 13.5 }}
+            onClick={() => setDenso((d) => !d)}
+            title="Filas más chicas para ver más turnos sin scrollear"
+          >
+            Vista compacta
+          </button>
+        )}
       </div>
+      <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 16 }}>← → para cambiar de {vista === 'semana' ? 'semana' : 'día'} · T para volver a hoy</p>
 
       <div className="filter-bar">
         <div className="field">
@@ -555,10 +608,10 @@ export default function AdminAgendaTab() {
         <VistaLista agenda={agenda} agendaCargando={agendaCargando} medicoId={medicoId} reservandoId={reservandoId} setReservandoId={setReservandoId} />
       )}
       {vista === 'dia' && (
-        <VistaDia agenda={agenda} agendaCargando={agendaCargando} feriados={feriados} medicos={medicos} medicoId={medicoId} fecha={fecha} />
+        <VistaDia agenda={agenda} agendaCargando={agendaCargando} feriados={feriados} medicos={medicos} medicoId={medicoId} fecha={fecha} denso={denso} />
       )}
       {vista === 'semana' && (
-        <VistaSemana agenda={agenda} agendaCargando={agendaCargando} feriados={feriados} medicoId={medicoId} medicos={medicos} fecha={fecha} />
+        <VistaSemana agenda={agenda} agendaCargando={agendaCargando} feriados={feriados} medicoId={medicoId} medicos={medicos} fecha={fecha} denso={denso} />
       )}
     </div>
   );
