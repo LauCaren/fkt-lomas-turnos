@@ -1,5 +1,6 @@
 package com.fktlomas.turnos.service;
 
+import com.fktlomas.turnos.domain.OrigenConsentimiento;
 import com.fktlomas.turnos.domain.Role;
 import com.fktlomas.turnos.domain.Usuario;
 import com.fktlomas.turnos.dto.admin.CambiarPasswordRequest;
@@ -105,6 +106,7 @@ public class AuthService {
         usuario.setPasswordHash(passwordEncoder.encode(request.password()));
         usuario.setRole(Role.PACIENTE);
         usuario.setAceptaPoliticaPrivacidad(request.aceptaPoliticaPrivacidad());
+        usuario.setOrigenConsentimiento(OrigenConsentimiento.WEB);
         usuarioRepository.save(usuario);
 
         return new AuthResponse(jwtService.generarToken(usuario), usuario.getNombreCompleto(), usuario.getEmail(), usuario.getRole().name(), false);

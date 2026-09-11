@@ -3,6 +3,7 @@ package com.fktlomas.turnos.service;
 import com.fktlomas.turnos.domain.ConfirmacionPrevia;
 import com.fktlomas.turnos.domain.EstadoAsistencia;
 import com.fktlomas.turnos.domain.EstadoTurno;
+import com.fktlomas.turnos.domain.OrigenConsentimiento;
 import com.fktlomas.turnos.domain.Role;
 import com.fktlomas.turnos.domain.Turno;
 import com.fktlomas.turnos.domain.Usuario;
@@ -199,6 +200,13 @@ public class TurnoService {
         return turnoRepository.colaEspera(fecha, medicoId).stream().map(TurnoAdminDto::de).toList();
     }
 
+    /** Para el panel "requiere atención" del resumen admin (ver AdminResumenService). */
+    @Transactional(readOnly = true)
+    public int turnosSinConfirmarHoy(LocalDate fecha) {
+        return (int) turnoRepository.countByFechaAndEstadoAndConfirmacionPrevia(
+                fecha, EstadoTurno.RESERVADO, ConfirmacionPrevia.SIN_RESPUESTA);
+    }
+
     /** Check-in de sala de espera — lo marca la secretaria/admin (llegó / ausente / lo vuelve a pendiente). */
     @Transactional
     public TurnoAdminDto actualizarAsistencia(Long turnoId, ActualizarAsistenciaRequest request) {
@@ -266,7 +274,7 @@ public class TurnoService {
         TurnoSnapshot antes = snapshotDe(turnoPrevio);
 
         Usuario paciente = usuarioRepository.findByDni(request.dni())
-                .orElseGet(() -> crearPacienteTelefonico(request));
+                .orElseGet(() -> crearPacienteTelefonico(request, actor));
 
         int filas = turnoRepository.reservarSiDisponible(turnoId, paciente, request.motivoConsulta());
         if (filas == 0) {
@@ -305,7 +313,15 @@ public class TurnoService {
         return TurnoAdminDto.de(restaurado);
     }
 
-    private Usuario crearPacienteTelefonico(ReservarParaPacienteRequest request) {
+    /**
+     * A diferencia del registro web (checkbox obligatorio + validado en el backend, ver
+     * AuthService.registrarPaciente), acá nadie tipeó "acepto" en ningún lado — por eso
+     * acepta_politica_privacidad queda en false en vez del `true` ciego que había antes.
+     * origen_consentimiento sí distingue los dos casos reales que existen: el bot de WhatsApp
+     * manda un aviso pasivo al arrancar la conversación (no es un opt-in, pero es más que nada),
+     * y una carga telefónica por secretaria/admin no tiene ningún aviso del sistema en absoluto.
+     */
+    private Usuario crearPacienteTelefonico(ReservarParaPacienteRequest request, Usuario actor) {
         String email = (request.email() != null && !request.email().isBlank())
                 ? request.email()
                 : request.dni() + Usuario.DOMINIO_EMAIL_SINTETICO;
@@ -314,6 +330,8 @@ public class TurnoService {
             throw new ConflictoDeDatosException("Ya existe un paciente registrado con ese email");
         }
 
+        boolean esBot = WhatsAppBotAccountInitializer.EMAIL_BOT.equals(actor.getEmail());
+
         Usuario paciente = new Usuario();
         paciente.setDni(request.dni());
         paciente.setNombreCompleto(request.nombreCompleto());
@@ -321,7 +339,8 @@ public class TurnoService {
         paciente.setTelefono(request.telefono());
         paciente.setObraSocial(request.obraSocial());
         paciente.setPasswordHash(passwordEncoder.encode(UUID.randomUUID().toString()));
-        paciente.setAceptaPoliticaPrivacidad(true);
+        paciente.setAceptaPoliticaPrivacidad(false);
+        paciente.setOrigenConsentimiento(esBot ? OrigenConsentimiento.WHATSAPP : OrigenConsentimiento.TELEFONICA);
         paciente.setRole(Role.PACIENTE);
         return usuarioRepository.save(paciente);
     }

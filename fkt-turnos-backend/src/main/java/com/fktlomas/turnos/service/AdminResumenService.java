@@ -1,10 +1,14 @@
 package com.fktlomas.turnos.service;
 
 import com.fktlomas.turnos.domain.EstadoPlanKinesiologia;
+import com.fktlomas.turnos.domain.EstadoSolicitudBaja;
 import com.fktlomas.turnos.dto.TurnoAdminDto;
 import com.fktlomas.turnos.dto.admin.AdminResumenDto;
 import com.fktlomas.turnos.dto.admin.TendenciaDiaDto;
 import com.fktlomas.turnos.dto.caja.IngresoDto;
+import com.fktlomas.turnos.repository.MensajeContactoRepository;
+import com.fktlomas.turnos.repository.PostulacionRepository;
+import com.fktlomas.turnos.repository.SolicitudBajaCuentaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +27,9 @@ public class AdminResumenService {
     private final TurnoService turnoService;
     private final KinesiologiaService kinesiologiaService;
     private final CajaService cajaService;
+    private final MensajeContactoRepository mensajeContactoRepository;
+    private final PostulacionRepository postulacionRepository;
+    private final SolicitudBajaCuentaRepository solicitudBajaCuentaRepository;
 
     @Transactional(readOnly = true)
     public AdminResumenDto resumen() {
@@ -38,7 +45,11 @@ public class AdminResumenService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal cajaFisica = cajaService.resumen().cajaFisica();
 
-        return new AdminResumenDto(hoy, (int) reservados, (int) disponibles, enEspera, planesPendientes, ingresosHoy, cajaFisica);
+        return new AdminResumenDto(hoy, (int) reservados, (int) disponibles, enEspera, planesPendientes, ingresosHoy, cajaFisica,
+                turnoService.turnosSinConfirmarHoy(hoy),
+                (int) mensajeContactoRepository.countByLeidoFalse(),
+                (int) postulacionRepository.countByRevisadoFalse(),
+                (int) solicitudBajaCuentaRepository.countByEstado(EstadoSolicitudBaja.PENDIENTE));
     }
 
     private static final int TENDENCIA_DIAS_MAXIMO = 90;

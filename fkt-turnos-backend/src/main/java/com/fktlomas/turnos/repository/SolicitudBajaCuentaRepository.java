@@ -11,6 +11,8 @@ public interface SolicitudBajaCuentaRepository extends JpaRepository<SolicitudBa
 
     boolean existsByUsuarioIdAndEstado(Long usuarioId, EstadoSolicitudBaja estado);
 
+    long countByEstado(EstadoSolicitudBaja estado);
+
     @Query("""
             select s from SolicitudBajaCuenta s
             join fetch s.usuario

@@ -46,6 +46,11 @@ public class Usuario {
     @Column(name = "acepta_politica_privacidad", nullable = false)
     private boolean aceptaPoliticaPrivacidad;
 
+    /** Ver {@link OrigenConsentimiento} — nullable a propósito, ver el comentario de la migración V26. */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "origen_consentimiento", length = 20)
+    private OrigenConsentimiento origenConsentimiento;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Role role;

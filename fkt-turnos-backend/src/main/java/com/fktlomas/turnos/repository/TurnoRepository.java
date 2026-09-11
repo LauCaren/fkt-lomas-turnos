@@ -1,5 +1,6 @@
 package com.fktlomas.turnos.repository;
 
+import com.fktlomas.turnos.domain.ConfirmacionPrevia;
 import com.fktlomas.turnos.domain.EstadoAsistencia;
 import com.fktlomas.turnos.domain.EstadoTurno;
 import com.fktlomas.turnos.domain.Turno;
@@ -17,6 +18,10 @@ import java.util.List;
 public interface TurnoRepository extends JpaRepository<Turno, Long> {
 
     List<Turno> findByMedicoIdAndFechaAndEstadoOrderByHoraInicioAsc(Long medicoId, LocalDate fecha, EstadoTurno estado);
+
+    /** Para el panel "requiere atención" del resumen admin — turnos de hoy que todavía no
+     * respondieron al recordatorio de confirmación previa. */
+    long countByFechaAndEstadoAndConfirmacionPrevia(LocalDate fecha, EstadoTurno estado, ConfirmacionPrevia confirmacionPrevia);
 
     /** Turnos reservados de hoy de un paciente — para el check-in por QR de la sala de espera. */
     @Query("""
