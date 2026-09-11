@@ -8,7 +8,7 @@ import {
 } from './turnosSlice';
 import { fetchMiPerfil } from '../cuenta/cuentaSlice';
 import AgregarCalendario from '../../components/AgregarCalendario';
-import { hoyISO, formatFechaCorta } from '../../utils/formato';
+import { hoyISO, formatFechaCorta, formatMoneda } from '../../utils/formato';
 
 const WHATSAPP_CONSULTORIO = { numero: '5491123515402', texto: 'Hola, quiero confirmar mi turno con copago IOMA.' };
 
@@ -239,6 +239,15 @@ export default function BookingWizard() {
               {medicos.map((m) => <option key={m.id} value={m.id}>{m.nombreCompleto}</option>)}
             </select>
             {medicos.length === 0 && <p style={{ fontSize: 13, color: 'var(--muted)', marginTop: 4 }}>No hay médicos cargados para esta especialidad todavía.</p>}
+            {medicoId && (() => {
+              const medico = medicos.find((m) => String(m.id) === medicoId);
+              return medico?.tarifaConsulta ? (
+                <p style={{ fontSize: 13, color: 'var(--muted)', marginTop: 4 }}>
+                  Valor de la consulta: <strong style={{ color: 'var(--ink)' }}>{formatMoneda(medico.tarifaConsulta)}</strong>
+                  {medico.cobraCopagoIoma && ' (copago IOMA)'}
+                </p>
+              ) : null;
+            })()}
           </div>
         )}
 
