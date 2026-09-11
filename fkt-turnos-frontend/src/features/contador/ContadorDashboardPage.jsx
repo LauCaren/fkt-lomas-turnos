@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { LayoutDashboard, ArrowDownToLine, ArrowUpFromLine, Receipt, Settings } from 'lucide-react';
 import SidebarNav from '../../components/ui/SidebarNav';
+import CommandPalette from '../../components/ui/CommandPalette';
 import { TabPanel } from '../../components/ui/TabNav';
 import { fetchMiPerfil } from '../cuenta/cuentaSlice';
 import ContadorResumenTab from './ContadorResumenTab';
@@ -58,6 +59,8 @@ export default function ContadorDashboardPage() {
           </div>
         </>
       ) : (
+        <>
+        <CommandPalette groups={GRUPOS_NAV} onNavigate={setTab} />
         <div className="panel-shell">
           <SidebarNav groups={GRUPOS_NAV} active={tab} onChange={setTab} />
 
@@ -71,6 +74,7 @@ export default function ContadorDashboardPage() {
             </TabPanel>
           </div>
         </div>
+        </>
       )}
     </div>
   );

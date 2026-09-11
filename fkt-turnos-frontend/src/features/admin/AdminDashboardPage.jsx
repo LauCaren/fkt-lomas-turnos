@@ -5,6 +5,7 @@ import {
   Wallet, BarChart3, BellRing, Building2, FileText, UserCog, UserMinus, Star, History, Settings,
 } from 'lucide-react';
 import SidebarNav from '../../components/ui/SidebarNav';
+import CommandPalette from '../../components/ui/CommandPalette';
 import { TabPanel } from '../../components/ui/TabNav';
 import { limpiarMensajes } from './adminSlice';
 import { fetchMiPerfil } from '../cuenta/cuentaSlice';
@@ -107,6 +108,8 @@ export default function AdminDashboardPage() {
           </div>
         </>
       ) : (
+        <>
+        <CommandPalette groups={GRUPOS_NAV} onNavigate={(id) => { setTab(id); dispatch(limpiarMensajes()); }} />
         <div className="panel-shell">
           <SidebarNav groups={GRUPOS_NAV} active={tab} onChange={(id) => { setTab(id); dispatch(limpiarMensajes()); }} />
 
@@ -144,6 +147,7 @@ export default function AdminDashboardPage() {
             </TabPanel>
           </div>
         </div>
+        </>
       )}
     </div>
   );

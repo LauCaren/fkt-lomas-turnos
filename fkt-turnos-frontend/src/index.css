@@ -311,6 +311,42 @@ details[open] > :not(summary) { animation: detailsContentIn .25s var(--ease-out)
 .modal-detail { font-size: 14px; color: var(--ink-soft); line-height: 1.55; margin-bottom: 22px; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
 
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+/* ---------- COMMAND PALETTE (Ctrl+K, saltar a una sección sin el mouse) ---------- */
+.command-palette-trigger {
+  display: inline-flex; align-items: center; gap: 8px; min-width: 220px;
+  padding: 8px 12px; margin-bottom: 20px;
+  border: 1px solid var(--line); border-radius: var(--radius-s); background: var(--white);
+  color: var(--muted); font-size: 13px; cursor: pointer;
+  transition: border-color .2s var(--ease), color .2s var(--ease);
+}
+.command-palette-trigger:hover { border-color: var(--teal); color: var(--ink-soft); }
+.command-palette-trigger:active { transform: scale(.98); }
+.command-palette-trigger svg { width: 15px; height: 15px; flex-shrink: 0; }
+.command-palette-trigger span { flex: 1; text-align: left; }
+.command-palette-trigger kbd {
+  font-family: inherit; font-size: 11px; color: var(--muted); background: var(--bg-soft);
+  border: 1px solid var(--line); border-radius: 4px; padding: 2px 6px;
+}
+.modal-card.command-palette { max-width: 560px; padding: 0; overflow: hidden; }
+.command-palette-input { display: flex; align-items: center; gap: 10px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+.command-palette-input svg { width: 17px; height: 17px; color: var(--muted); flex-shrink: 0; }
+.command-palette-input input { flex: 1; border: none; outline: none; font-size: 15px; background: transparent; color: var(--ink); }
+.command-palette-results { max-height: 360px; overflow-y: auto; padding: 8px; }
+.command-palette-empty { padding: 20px; text-align: center; color: var(--muted); font-size: 13.5px; }
+.command-palette-item {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 10px 12px; border: none; background: none; border-radius: var(--radius-s);
+  font-size: 14px; color: var(--ink); text-align: left; cursor: pointer;
+  transition: background .12s var(--ease-out);
+}
+.command-palette-item svg { width: 16px; height: 16px; color: var(--muted); flex-shrink: 0; }
+.command-palette-item.active { background: var(--teal-tint); }
+.command-palette-item.active svg { color: var(--teal-dark); }
+.command-palette-item-label { flex: 1; }
+.command-palette-item-group { font-size: 11.5px; color: var(--muted); }
+
 .lightbox {
   position: fixed;
   inset: 0;
@@ -481,6 +517,11 @@ details[open] > :not(summary) { animation: detailsContentIn .25s var(--ease-out)
    "confirmó" en el resto de la agenda (ver .badge-disponible), para no sumar un
    tercer significado de color a la grilla. */
 .agenda-celda-confirmado { box-shadow: inset 0 0 0 2px var(--green); }
+
+/* Vista compacta: filas más chicas para ver más turnos sin scrollear en días muy cargados. */
+.agenda-densa .agenda-celda,
+.agenda-densa .agenda-celda-btn { min-height: 24px; }
+.agenda-densa .agenda-celda-btn { font-size: 9.5px; padding: 2px; }
 
 /* ---------- TIMELINE DE EVOLUCIONES (historial clínico del médico) ---------- */
 .evolucion-timeline { position: relative; padding-left: 20px; }
@@ -696,8 +737,16 @@ details[open] > :not(summary) { animation: detailsContentIn .25s var(--ease-out)
 .app-nav-links a:hover::after { width: 100%; }
 
 /* ---------- IMPRESIÓN DEL CARTEL QR (SalaEsperaQr) ---------- */
+/* Encabezado que solo aparece en la hoja impresa — en pantalla no hace falta, ya
+   se sabe qué se está mirando por el resto de la interfaz alrededor. */
+.ficha-print-header { display: none; }
+
 @media print {
   body * { visibility: hidden; }
-  #cartel-qr-imprimir, #cartel-qr-imprimir * { visibility: visible; }
+  #cartel-qr-imprimir, #cartel-qr-imprimir *,
+  #ficha-imprimir, #ficha-imprimir *,
+  #ingresos-imprimir, #ingresos-imprimir * { visibility: visible; }
   #cartel-qr-imprimir { position: absolute; inset: 0; border: none !important; }
+  #ficha-imprimir, #ingresos-imprimir { position: absolute; inset: 0; padding: 24px; }
+  .ficha-print-header { display: block; font-size: 13px; color: var(--muted); margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
 }
