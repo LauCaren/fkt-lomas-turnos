@@ -117,6 +117,12 @@ export default function AdminDashboardPage() {
                   irACola={() => setTab('cola-espera')}
                   irAKinesiologia={() => setTab('kinesiologia')}
                   irACaja={() => setTab('caja')}
+                  irATurnosAgendados={() => setTab('turnos-agendados')}
+                  irAMensajes={() => setTab('mensajes')}
+                  irAPostulaciones={() => setTab('postulaciones')}
+                  irASolicitudesBaja={() => setTab('solicitudes-baja')}
+                  irAAgenda={() => setTab('agenda')}
+                  irABuscarPaciente={() => setTab('buscar-paciente')}
                 />
               )}
               {tab === 'agenda' && <AdminAgendaTab />}

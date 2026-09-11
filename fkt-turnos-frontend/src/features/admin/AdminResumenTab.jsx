@@ -1,11 +1,15 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { CalendarClock, MessageSquare, FileText, UserMinus } from 'lucide-react';
 import StatCard from '../../components/ui/StatCard';
 import TrendChart from '../../components/ui/TrendChart';
 import { fetchResumenAdmin, fetchTendenciaAdmin } from './adminSlice';
 import { formatMoneda } from '../../utils/formato';
 
-export default function AdminResumenTab({ irACola, irAKinesiologia, irACaja }) {
+export default function AdminResumenTab({
+  irACola, irAKinesiologia, irACaja, irATurnosAgendados, irAMensajes, irAPostulaciones, irASolicitudesBaja,
+  irAAgenda, irABuscarPaciente,
+}) {
   const dispatch = useDispatch();
   const { resumen, tendencia, error } = useSelector((state) => state.admin);
 
@@ -30,9 +34,22 @@ export default function AdminResumenTab({ irACola, irAKinesiologia, irACaja }) {
     );
   }
 
+  const itemsAtencion = [
+    { id: 'sin-confirmar', label: 'Turnos de hoy sin confirmar', count: resumen.turnosSinConfirmarHoy, icon: CalendarClock, onClick: irATurnosAgendados },
+    { id: 'mensajes', label: 'Mensajes sin leer', count: resumen.mensajesSinLeer, icon: MessageSquare, onClick: irAMensajes },
+    { id: 'postulaciones', label: 'Postulaciones sin revisar', count: resumen.postulacionesSinRevisar, icon: FileText, onClick: irAPostulaciones },
+    { id: 'bajas', label: 'Pedidos de baja pendientes', count: resumen.solicitudesBajaPendientes, icon: UserMinus, onClick: irASolicitudesBaja },
+  ].filter((item) => item.count > 0);
+
   return (
     <div>
-      <p style={{ color: 'var(--muted)', marginBottom: 20 }}>Hoy, {resumen.fecha}</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
+        <p style={{ color: 'var(--muted)' }}>Hoy, {resumen.fecha}</p>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button type="button" className="btn btn-outline" style={{ padding: '9px 16px', fontSize: 13.5 }} onClick={irAAgenda}>Nuevo turno</button>
+          <button type="button" className="btn btn-outline" style={{ padding: '9px 16px', fontSize: 13.5 }} onClick={irABuscarPaciente}>Buscar paciente</button>
+        </div>
+      </div>
       <div className="stagger" style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 12 }}>
         <StatCard etiqueta="Turnos reservados hoy" valor={resumen.turnosReservadosHoy} />
         <StatCard etiqueta="Turnos disponibles hoy" valor={resumen.turnosDisponiblesHoy} />
@@ -42,6 +59,24 @@ export default function AdminResumenTab({ irACola, irAKinesiologia, irACaja }) {
         <StatCard etiqueta="Caja física" valorNumerico={resumen.cajaFisica} formatValor={formatMoneda} onClick={irACaja} />
       </div>
       <p style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 28 }}>Se actualiza solo cada 30 segundos. Hacé clic en una tarjeta para ir directo a esa sección.</p>
+
+      {itemsAtencion.length > 0 && (
+        <div className="card" style={{ marginBottom: 28 }}>
+          <h2 style={{ fontSize: 15, marginBottom: 12 }}>Requiere atención</h2>
+          <div className="attention-list stagger">
+            {itemsAtencion.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button key={item.id} type="button" className="attention-item" onClick={item.onClick}>
+                  <Icon aria-hidden="true" />
+                  <span className="attention-item-label">{item.label}</span>
+                  <span className="badge badge-pendiente">{item.count}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {tendencia.length > 0 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
