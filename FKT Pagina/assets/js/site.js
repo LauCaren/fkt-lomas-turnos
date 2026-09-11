@@ -42,11 +42,11 @@ document.addEventListener('DOMContentLoaded', () => {
     revealEls.forEach((el) => io.observe(el));
   }
 
-  const counterEl = document.getElementById('degCounter');
+  const counterEl = document.getElementById('rangoCounter');
   if (counterEl) {
-    const TARGET = 132, DURATION = 1700, DELAY = 300;
+    const TARGET = 87, DURATION = 1400, DELAY = 200;
     if (reduceMotion) {
-      counterEl.textContent = TARGET + '°';
+      counterEl.textContent = TARGET;
     } else {
       const start = performance.now() + DELAY;
       const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const elapsed = now - start;
         if (elapsed < 0) { requestAnimationFrame(tick); return; }
         const t = Math.min(elapsed / DURATION, 1);
-        counterEl.textContent = Math.round(easeOutCubic(t) * TARGET) + '°';
+        counterEl.textContent = Math.round(easeOutCubic(t) * TARGET);
         if (t < 1) requestAnimationFrame(tick);
       };
       requestAnimationFrame(tick);
