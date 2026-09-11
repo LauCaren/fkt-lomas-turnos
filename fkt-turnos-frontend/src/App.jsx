@@ -2,6 +2,8 @@ import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Layout from './components/Layout';
+import { ConfirmProvider } from './components/ui/ConfirmDialog';
+import { ToastProvider } from './components/ui/ToastProvider';
 import { RutaPaciente, RutaAdmin, RutaSecretaria, RutaMedico, RutaContador } from './components/RutaProtegida';
 import LoginPage from './features/auth/LoginPage';
 import RegisterPage from './features/auth/RegisterPage';
@@ -39,27 +41,31 @@ function CargandoPagina() {
 
 export default function App() {
   return (
-    <Layout>
-      <Suspense fallback={<CargandoPagina />}>
-        <Routes>
-          <Route path="/" element={<InicioRedirect />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/registro" element={<RegisterPage />} />
-          <Route path="/olvide-password" element={<OlvidePasswordPage />} />
-          <Route path="/restablecer-password" element={<RestablecerPasswordPage />} />
-          <Route path="/confirmar-turno" element={<ConfirmarTurnoPage />} />
-          <Route path="/turnos" element={<RutaPaciente><BookingWizard /></RutaPaciente>} />
-          <Route path="/turnos/kinesiologia" element={<RutaPaciente><KinesiologiaPage /></RutaPaciente>} />
-          <Route path="/turnos/mis-turnos" element={<RutaPaciente><MisTurnosPage /></RutaPaciente>} />
-          <Route path="/turnos/mi-cuenta" element={<RutaPaciente><MiCuentaPage /></RutaPaciente>} />
-          <Route path="/checkin" element={<RutaPaciente><CheckInPage /></RutaPaciente>} />
-          <Route path="/admin" element={<RutaAdmin><AdminDashboardPage /></RutaAdmin>} />
-          <Route path="/secretaria" element={<RutaSecretaria><SecretariaDashboardPage /></RutaSecretaria>} />
-          <Route path="/medico" element={<RutaMedico><MedicoDashboardPage /></RutaMedico>} />
-          <Route path="/contador" element={<RutaContador><ContadorDashboardPage /></RutaContador>} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Suspense>
-    </Layout>
+    <ToastProvider>
+      <ConfirmProvider>
+        <Layout>
+          <Suspense fallback={<CargandoPagina />}>
+            <Routes>
+              <Route path="/" element={<InicioRedirect />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/registro" element={<RegisterPage />} />
+              <Route path="/olvide-password" element={<OlvidePasswordPage />} />
+              <Route path="/restablecer-password" element={<RestablecerPasswordPage />} />
+              <Route path="/confirmar-turno" element={<ConfirmarTurnoPage />} />
+              <Route path="/turnos" element={<RutaPaciente><BookingWizard /></RutaPaciente>} />
+              <Route path="/turnos/kinesiologia" element={<RutaPaciente><KinesiologiaPage /></RutaPaciente>} />
+              <Route path="/turnos/mis-turnos" element={<RutaPaciente><MisTurnosPage /></RutaPaciente>} />
+              <Route path="/turnos/mi-cuenta" element={<RutaPaciente><MiCuentaPage /></RutaPaciente>} />
+              <Route path="/checkin" element={<RutaPaciente><CheckInPage /></RutaPaciente>} />
+              <Route path="/admin" element={<RutaAdmin><AdminDashboardPage /></RutaAdmin>} />
+              <Route path="/secretaria" element={<RutaSecretaria><SecretariaDashboardPage /></RutaSecretaria>} />
+              <Route path="/medico" element={<RutaMedico><MedicoDashboardPage /></RutaMedico>} />
+              <Route path="/contador" element={<RutaContador><ContadorDashboardPage /></RutaContador>} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
+        </Layout>
+      </ConfirmProvider>
+    </ToastProvider>
   );
 }

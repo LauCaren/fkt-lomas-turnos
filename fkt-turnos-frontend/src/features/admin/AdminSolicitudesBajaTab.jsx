@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchSolicitudesBaja, aprobarSolicitudBaja, rechazarSolicitudBaja } from './adminSlice';
 import EstadoVacio from '../../components/EstadoVacio';
+import { useConfirm } from '../../components/ui/useConfirm';
 
 const ESTADOS = [
   { value: 'PENDIENTE', label: 'Pendientes' },
@@ -14,8 +15,28 @@ const BADGE_ESTADO = { PENDIENTE: 'badge-pendiente', APROBADA: 'badge-disponible
 
 function FilaSolicitud({ solicitud }) {
   const dispatch = useDispatch();
+  const confirmar = useConfirm();
   const [rechazando, setRechazando] = useState(false);
   const [motivo, setMotivo] = useState('');
+
+  async function handleAprobar() {
+    const ok = await confirmar({
+      titulo: 'Aprobar baja de cuenta',
+      detalle: (
+        <>
+          <p><strong>{solicitud.usuarioNombre}</strong> · {solicitud.usuarioEmail}</p>
+          <p style={{ marginTop: 12 }}>
+            Sus datos personales (nombre, email, teléfono, DNI) se anonimizan de forma
+            <strong> permanente e irreversible</strong>. Los turnos y registros ya generados se
+            conservan de forma anónima, como exige la normativa de historia clínica.
+          </p>
+        </>
+      ),
+      confirmarTexto: 'Aprobar baja',
+      peligroso: true,
+    });
+    if (ok) dispatch(aprobarSolicitudBaja(solicitud.id));
+  }
 
   return (
     <div className="card" style={{ marginBottom: 12 }}>
@@ -32,8 +53,7 @@ function FilaSolicitud({ solicitud }) {
         <div style={{ marginTop: 12 }}>
           {!rechazando ? (
             <div style={{ display: 'flex', gap: 8 }}>
-              <button className="btn btn-primary" style={{ padding: '6px 14px', fontSize: 13 }}
-                onClick={() => window.confirm(`¿Aprobar la baja de ${solicitud.usuarioNombre}? Sus datos personales se van a anonimizar de forma permanente.`) && dispatch(aprobarSolicitudBaja(solicitud.id))}>
+              <button className="btn btn-primary" style={{ padding: '6px 14px', fontSize: 13 }} onClick={handleAprobar}>
                 Aprobar baja
               </button>
               <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => setRechazando(true)}>

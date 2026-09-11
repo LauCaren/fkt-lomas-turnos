@@ -9,6 +9,7 @@ import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../../
 import { verArchivo } from '../../api/descargas';
 import { hoyISO } from '../../utils/formato';
 import EstadoVacio from '../../components/EstadoVacio';
+import { useConfirm } from '../../components/ui/useConfirm';
 
 function verOrdenMedica(planId) {
   return verArchivo(`/api/admin/kinesiologia/planes/${planId}/orden-medica`);
@@ -141,8 +142,19 @@ function NuevoPlanTelefonico({ medicosKinesiologia }) {
 
 function PlanRow({ plan }) {
   const dispatch = useDispatch();
+  const confirmar = useConfirm();
   const [rechazando, setRechazando] = useState(false);
   const [motivo, setMotivo] = useState('');
+
+  async function handleCancelarPlan() {
+    const ok = await confirmar({
+      titulo: 'Cancelar plan de kinesiología',
+      detalle: `${plan.pacienteNombre} · ${plan.medicoNombre} · ${plan.sesionesGeneradas} de ${plan.cantidadSesiones} sesiones generadas.`,
+      confirmarTexto: 'Cancelar plan',
+      peligroso: true,
+    });
+    if (ok) dispatch(cancelarPlanKinesiologiaAdmin(plan.id));
+  }
 
   return (
     <div className="card" style={{ marginBottom: 12 }}>
@@ -184,8 +196,7 @@ function PlanRow({ plan }) {
 
       {(plan.estado === 'VALIDADO' || plan.estado === 'PAUSADO') && (
         <div style={{ marginTop: 12 }}>
-          <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }}
-            onClick={() => window.confirm('¿Cancelar este plan?') && dispatch(cancelarPlanKinesiologiaAdmin(plan.id))}>
+          <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={handleCancelarPlan}>
             Cancelar plan
           </button>
         </div>

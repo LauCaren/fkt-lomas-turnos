@@ -6,6 +6,7 @@ import {
 } from './kinesiologiaSlice';
 import { fetchEspecialidades, fetchMedicos } from '../turnos/turnosSlice';
 import { hoyISO } from '../../utils/formato';
+import { useConfirm } from '../../components/ui/useConfirm';
 
 const DIA_LABEL = {
   MONDAY: 'Lunes',
@@ -223,6 +224,26 @@ function NuevoPlanForm({ medicoKinesiologiaId, medicos }) {
 
 function PlanCard({ plan }) {
   const dispatch = useDispatch();
+  const confirmar = useConfirm();
+
+  async function handlePausar() {
+    const ok = await confirmar({
+      titulo: 'Pausar plan',
+      detalle: 'Se liberan las sesiones futuras ya generadas. Podés reanudarlo después.',
+      confirmarTexto: 'Pausar',
+    });
+    if (ok) dispatch(pausarPlanKinesiologia(plan.id));
+  }
+
+  async function handleCancelar() {
+    const ok = await confirmar({
+      titulo: 'Cancelar plan',
+      detalle: 'Se liberan las sesiones futuras y no se puede deshacer.',
+      confirmarTexto: 'Cancelar plan',
+      peligroso: true,
+    });
+    if (ok) dispatch(cancelarPlanKinesiologia(plan.id));
+  }
 
   return (
     <div className="card" style={{ marginBottom: 12 }}>
@@ -252,12 +273,10 @@ function PlanCard({ plan }) {
 
       {(plan.estado === 'VALIDADO' || plan.estado === 'PENDIENTE_VALIDACION') && (
         <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-          <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }}
-            onClick={() => window.confirm('¿Pausar el plan? Se liberan las sesiones futuras.') && dispatch(pausarPlanKinesiologia(plan.id))}>
+          <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={handlePausar}>
             Pausar
           </button>
-          <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }}
-            onClick={() => window.confirm('¿Cancelar el plan? Se liberan las sesiones futuras y no se puede deshacer.') && dispatch(cancelarPlanKinesiologia(plan.id))}>
+          <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={handleCancelar}>
             Cancelar
           </button>
         </div>

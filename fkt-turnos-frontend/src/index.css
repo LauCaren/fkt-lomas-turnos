@@ -226,11 +226,15 @@ input, select, textarea { font: inherit; }
 
 .password-field { position: relative; }
 .password-field input { width: 100%; padding-right: 42px; }
-.password-toggle {
+/* El botón vive dentro de .tooltip-wrap ahora (ver PasswordInput.jsx) — el posicionamiento
+   absoluto que antes tenía .password-toggle directamente se mueve un nivel afuera. */
+.password-field .tooltip-wrap {
   position: absolute;
   top: 50%;
   right: 6px;
   transform: translateY(-50%);
+}
+.password-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -274,6 +278,39 @@ input, select, textarea { font: inherit; }
 @keyframes detailsContentIn { from { opacity: 0; transform: translateY(-4px); } }
 details[open] > :not(summary) { animation: detailsContentIn .25s var(--ease-out); }
 
+/* ---------- MODAL GENÉRICO (ver src/components/ui/Modal.jsx, ConfirmDialog.jsx) ---------- */
+/* Mismo criterio que el lightbox de acá abajo: mount/unmount vía condicional de React, no
+   toggle de clase — por eso entra con animation, no transition (no hay un estado "cerrado"
+   previo del que partir). transform-origin queda en el centro a propósito: son modales, no
+   popovers anclados a un trigger — ver la nota de emil-design-eng sobre esa distinción. */
+@keyframes modalOverlayIn { from { opacity: 0; } }
+@keyframes modalCardIn { from { transform: scale(.95); opacity: 0; } }
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(19, 35, 44, 0.55);
+  backdrop-filter: blur(2px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: modalOverlayIn .2s var(--ease);
+}
+.modal-card {
+  background: var(--white);
+  border-radius: var(--radius-m);
+  max-width: 440px;
+  width: 100%;
+  padding: 28px;
+  box-shadow: var(--shadow-lg);
+  animation: modalCardIn .2s var(--ease-out);
+}
+.modal-card:focus { outline: none; }
+.modal-title { font-size: 19px; margin-bottom: 10px; }
+.modal-detail { font-size: 14px; color: var(--ink-soft); line-height: 1.55; margin-bottom: 22px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+
 .lightbox {
   position: fixed;
   inset: 0;
@@ -314,6 +351,84 @@ details[open] > :not(summary) { animation: detailsContentIn .25s var(--ease-out)
 .lightbox-cerrar:hover { background: rgba(255, 255, 255, 0.22); }
 .lightbox-cerrar:active { transform: scale(.9); }
 
+/* Toasts: siempre entran/salen desde abajo (misma dirección en las dos puntas), así el
+   apilado se lee como una cola en vez de saltos — la misma regla de "spatial consistency"
+   que ya se aplicó en los demás overlays de esta sesión. */
+@keyframes toastIn { from { opacity: 0; transform: translateY(100%) scale(.95); } }
+.toast-viewport {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
+  max-width: min(360px, calc(100vw - 40px));
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 14px 13px 16px;
+  border-radius: var(--radius-s);
+  background: var(--white);
+  box-shadow: var(--shadow-lg);
+  font-size: 13.5px;
+  line-height: 1.4;
+  border-left: 3px solid var(--teal);
+  animation: toastIn .25s var(--ease-out);
+  transition: opacity .2s var(--ease), transform .2s var(--ease);
+}
+.toast span { flex: 1; }
+.toast-success { border-left-color: var(--green); }
+.toast-error { border-left-color: var(--red); }
+.toast-saliendo { opacity: 0; transform: translateY(6px) scale(.97); }
+.toast-cerrar {
+  flex-shrink: 0;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px;
+  transition: color .2s var(--ease);
+}
+.toast-cerrar:hover { color: var(--ink); }
+
+/* Tooltip: pensado para botones solo-ícono (ej. mostrar/ocultar contraseña) donde el
+   aria-label ya existe para lectores de pantalla pero no hay pista visual para el resto.
+   Delay antes de aparecer (evita activarse en un pasada casual del mouse), sin delay al
+   cerrar — ver la nota de emil-design-eng sobre tooltips consecutivos, aunque acá al ser
+   casos aislados no hace falta el estado "instantáneo" entre varios. */
+@keyframes tooltipIn { from { opacity: 0; transform: translate(-50%, 2px) scale(.97); } }
+.tooltip-wrap { position: relative; display: inline-flex; }
+.tooltip-bubble {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 9px;
+  border-radius: 5px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1200;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .15s var(--ease-out), visibility 0s linear .15s;
+}
+.tooltip-wrap:hover .tooltip-bubble,
+.tooltip-wrap:focus-within .tooltip-bubble {
+  opacity: 1;
+  visibility: visible;
+  animation: tooltipIn .15s var(--ease-out) .35s backwards;
+  transition: opacity .15s var(--ease-out) .35s, visibility 0s linear;
+}
+
 /* Antes aparecía/desaparecía de golpe con el condicional de React (mount/unmount instantáneo,
    sin nada que transicionar) — como con el lightbox, entra por animation, no transition. */
 @keyframes alertIn { from { opacity: 0; transform: translateY(-6px); } }
@@ -337,6 +452,61 @@ details[open] > :not(summary) { animation: detailsContentIn .25s var(--ease-out)
    varios estados "pendiente de revisión" repartidos por auditoría/reseñas/bajas/kinesiología,
    que hasta ahora quedaban con className="badge" sin ningún modificador de color. */
 .badge-pendiente { background: var(--amber-tint); color: var(--amber-dark); }
+
+/* ---------- GRILLA DE AGENDA (vistas semana / día) ---------- */
+.agenda-celda { border-top: 1px solid var(--line); border-left: 1px solid var(--line); min-height: 40px; }
+.agenda-celda-feriado {
+  background: repeating-linear-gradient(45deg, var(--bg-soft), var(--bg-soft) 6px, var(--line) 6px, var(--line) 7px);
+}
+.agenda-celda-btn {
+  width: 100%;
+  min-height: 40px;
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+  border-right: none;
+  border-bottom: none;
+  border-radius: 0;
+  padding: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: filter .15s var(--ease-out), transform .1s var(--ease-out);
+}
+.agenda-celda-btn:hover { filter: brightness(.96); }
+.agenda-celda-btn:active { transform: scale(.95); }
+.agenda-celda-disponible { background: var(--teal-tint); color: var(--teal-dark); }
+.agenda-celda-reservado { background: var(--teal); color: #fff; }
+/* Anillo interno en vez de otro color nuevo — reutiliza --green, ya el color de
+   "confirmó" en el resto de la agenda (ver .badge-disponible), para no sumar un
+   tercer significado de color a la grilla. */
+.agenda-celda-confirmado { box-shadow: inset 0 0 0 2px var(--green); }
+
+/* ---------- TIMELINE DE EVOLUCIONES (historial clínico del médico) ---------- */
+.evolucion-timeline { position: relative; padding-left: 20px; }
+.evolucion-timeline::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 6px;
+  bottom: 6px;
+  width: 1.5px;
+  background: var(--line);
+}
+.evolucion-item { position: relative; padding-bottom: 16px; }
+.evolucion-item:last-child { padding-bottom: 0; }
+.evolucion-dot {
+  position: absolute;
+  left: -20px;
+  top: 4px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 0 3px var(--white);
+}
+.evolucion-fecha { font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 3px; }
+.evolucion-texto { font-size: 13.5px; line-height: 1.5; white-space: pre-wrap; }
 
 :focus-visible { outline: 2px solid var(--teal-dark); outline-offset: 2px; }
 
@@ -376,6 +546,28 @@ details[open] > :not(summary) { animation: detailsContentIn .25s var(--ease-out)
 .stat-card-value { font-size: 26px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
 .tabular-nums { font-variant-numeric: tabular-nums; }
 .stat-card-value.destacado { color: var(--teal-dark); }
+
+/* ---------- REQUIERE ATENCIÓN (ver AdminResumenTab.jsx) ---------- */
+.attention-list { display: flex; flex-direction: column; gap: 2px; }
+.attention-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: var(--radius-s);
+  background: none;
+  text-align: left;
+  font-weight: 600;
+  font-size: 14.5px;
+  color: var(--ink);
+  transition: background .2s var(--ease), transform .15s var(--ease-out);
+}
+.attention-item svg { flex-shrink: 0; width: 18px; height: 18px; color: var(--amber-dark); }
+.attention-item:hover { background: var(--bg-soft); }
+.attention-item:active { transform: scale(.98); }
+.attention-item-label { flex: 1; }
 
 /* ---------- TREND CHART (ver src/components/ui/TrendChart.jsx) ---------- */
 /* Las barras crecen desde la base al montar en vez de aparecer ya dibujadas —

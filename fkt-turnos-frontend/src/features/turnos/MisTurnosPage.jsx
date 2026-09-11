@@ -5,6 +5,7 @@ import { fetchMisTurnos, cancelarTurno } from './turnosSlice';
 import AgregarCalendario from '../../components/AgregarCalendario';
 import DejarResenaTurno from './DejarResenaTurno';
 import EstadoVacio from '../../components/EstadoVacio';
+import { useConfirm } from '../../components/ui/useConfirm';
 
 // Mercado Pago vuelve acá con ?pago=exito|pendiente|fallo (ver MercadoPagoService.crearPreferenciaEnMercadoPago,
 // back_urls) — el pago en sí se confirma por webhook, esto es solo feedback inmediato al paciente.
@@ -29,6 +30,7 @@ const BADGE_LABEL = {
 export default function MisTurnosPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const confirmar = useConfirm();
   const { misTurnos } = useSelector((state) => state.turnos);
   const [searchParams, setSearchParams] = useSearchParams();
   const avisoPago = AVISO_PAGO[searchParams.get('pago')];
@@ -41,10 +43,20 @@ export default function MisTurnosPage() {
     return new Date(`${turno.fecha}T${turno.horaInicio}`) >= new Date();
   }
 
-  function handleCancelar(id) {
-    if (window.confirm('¿Cancelar este turno? El horario quedará disponible para otro paciente.')) {
-      dispatch(cancelarTurno(id));
-    }
+  async function handleCancelar(turno) {
+    const ok = await confirmar({
+      titulo: 'Cancelar turno',
+      detalle: (
+        <>
+          <p style={{ marginBottom: 4 }}><strong>{turno.especialidadNombre}</strong> con {turno.medicoNombre}</p>
+          <p style={{ color: 'var(--muted)', fontSize: 13.5 }}>{turno.fecha} · {turno.horaInicio.slice(0, 5)} a {turno.horaFin.slice(0, 5)}</p>
+          <p style={{ marginTop: 12 }}>El horario queda disponible para otro paciente.</p>
+        </>
+      ),
+      confirmarTexto: 'Cancelar turno',
+      peligroso: true,
+    });
+    if (ok) dispatch(cancelarTurno(turno.id));
   }
 
   function handleReprogramar(turno) {
@@ -107,7 +119,7 @@ export default function MisTurnosPage() {
                   <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => handleReprogramar(t)}>
                     Reprogramar
                   </button>
-                  <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => handleCancelar(t.id)}>
+                  <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => handleCancelar(t)}>
                     Cancelar
                   </button>
                 </div>

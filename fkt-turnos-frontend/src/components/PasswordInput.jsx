@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Tooltip from './ui/Tooltip';
 
 function IconOjo({ oculto }) {
   if (oculto) {
@@ -43,14 +44,16 @@ export default function PasswordInput({ id, name, value, onChange, required, min
         value={value}
         onChange={onChange}
       />
-      <button
-        type="button"
-        className="password-toggle"
-        onClick={() => setVisible((v) => !v)}
-        aria-label={visible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-      >
-        <IconOjo oculto={visible} />
-      </button>
+      <Tooltip texto={visible ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
+        <button
+          type="button"
+          className="password-toggle"
+          onClick={() => setVisible((v) => !v)}
+          aria-label={visible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+        >
+          <IconOjo oculto={visible} />
+        </button>
+      </Tooltip>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { revocarMisSesiones } from '../features/cuenta/cuentaSlice';
 import { logout } from '../features/auth/authSlice';
+import { useConfirm } from './ui/useConfirm';
 
 /**
  * "Cerrar todas mis sesiones" — invalida cualquier token emitido hasta ahora, incluida la
@@ -13,9 +14,16 @@ import { logout } from '../features/auth/authSlice';
 export default function SeccionRevocarSesiones() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const confirmar = useConfirm();
 
-  function handleClick() {
-    if (!window.confirm('Esto va a cerrar tu sesión actual también — vas a tener que volver a ingresar. ¿Continuar?')) return;
+  async function handleClick() {
+    const ok = await confirmar({
+      titulo: 'Cerrar todas mis sesiones',
+      detalle: 'Esto va a cerrar tu sesión actual también — vas a tener que volver a ingresar.',
+      confirmarTexto: 'Cerrar sesiones',
+      peligroso: true,
+    });
+    if (!ok) return;
     dispatch(revocarMisSesiones()).unwrap().then(() => {
       dispatch(logout());
       navigate('/login', { replace: true });

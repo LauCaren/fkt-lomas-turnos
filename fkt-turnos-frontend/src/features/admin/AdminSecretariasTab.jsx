@@ -6,6 +6,7 @@ import {
 import PasswordInput from '../../components/PasswordInput';
 import { PATRON_PASSWORD, TITULO_PASSWORD, AYUDA_PASSWORD } from '../../constants/validacion';
 import EstadoVacio from '../../components/EstadoVacio';
+import { useConfirm } from '../../components/ui/useConfirm';
 
 const VACIO = { nombreCompleto: '', email: '', password: '' };
 
@@ -52,6 +53,26 @@ function NuevaSecretaria() {
 
 function FilaSecretaria({ cuenta }) {
   const dispatch = useDispatch();
+  const confirmar = useConfirm();
+
+  async function handleDesactivar() {
+    const ok = await confirmar({
+      titulo: 'Desactivar cuenta',
+      detalle: `Se desactiva la cuenta de ${cuenta.nombreCompleto} y se cierran sus sesiones activas.`,
+      confirmarTexto: 'Desactivar',
+      peligroso: true,
+    });
+    if (ok) dispatch(desactivarCuentaStaff(cuenta.id));
+  }
+
+  async function handleRevocarSesiones() {
+    const ok = await confirmar({
+      titulo: 'Cerrar sesiones',
+      detalle: `Cierra todas las sesiones activas de ${cuenta.nombreCompleto}.`,
+      confirmarTexto: 'Cerrar sesiones',
+    });
+    if (ok) dispatch(revocarSesionesCuentaStaff(cuenta.id));
+  }
 
   return (
     <div className="card" style={{ marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
@@ -64,8 +85,7 @@ function FilaSecretaria({ cuenta }) {
           {cuenta.activo ? 'Activa' : 'Desactivada'}
         </span>
         {cuenta.activo ? (
-          <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }}
-            onClick={() => window.confirm(`¿Desactivar la cuenta de ${cuenta.nombreCompleto}? Se cierran sus sesiones activas.`) && dispatch(desactivarCuentaStaff(cuenta.id))}>
+          <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={handleDesactivar}>
             Desactivar
           </button>
         ) : (
@@ -73,8 +93,7 @@ function FilaSecretaria({ cuenta }) {
             Reactivar
           </button>
         )}
-        <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }}
-          onClick={() => window.confirm(`¿Cerrar todas las sesiones activas de ${cuenta.nombreCompleto}?`) && dispatch(revocarSesionesCuentaStaff(cuenta.id))}>
+        <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={handleRevocarSesiones}>
           Cerrar sesiones
         </button>
       </div>
