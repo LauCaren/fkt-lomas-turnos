@@ -74,12 +74,17 @@ export default function MedicoTurnoCard({ turno, mostrarBotonAtender, mostrarEvo
       {verHistorial && (
         <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--line)' }}>
           {evoluciones.length === 0 && <p style={{ fontSize: 13, color: 'var(--muted)' }}>No cargaste evoluciones para este paciente todavía.</p>}
-          {evoluciones.map((e) => (
-            <div key={e.id} style={{ fontSize: 13.5, marginBottom: 8 }}>
-              <div style={{ color: 'var(--muted)' }}>{new Date(e.createdAt).toLocaleString('es-AR')}</div>
-              <div>{e.texto}</div>
+          {evoluciones.length > 0 && (
+            <div className="evolucion-timeline">
+              {evoluciones.map((e) => (
+                <div key={e.id} className="evolucion-item">
+                  <span className="evolucion-dot" aria-hidden="true" />
+                  <div className="evolucion-fecha">{new Date(e.createdAt).toLocaleString('es-AR')}</div>
+                  <div className="evolucion-texto">{e.texto}</div>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
       )}
     </div>
