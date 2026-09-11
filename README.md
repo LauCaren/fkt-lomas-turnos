@@ -217,7 +217,15 @@ Implementado y probado de punta a punta:
 
 ## Backups
 
-`scripts/backup-db.sh` hace un dump de Postgres y lo sube al mismo bucket S3/R2 que ya usa el sistema para archivos, bajo el prefijo `backups/`. Corre automáticamente todos los días vía `.github/workflows/backup.yml` (cron diario + disparo manual desde la pestaña Actions) — **queda inactivo hasta que se carguen los secrets** `DATABASE_URL`, `STORAGE_S3_BUCKET`, `STORAGE_S3_ACCESS_KEY`, `STORAGE_S3_SECRET_KEY`, `STORAGE_S3_ENDPOINT` y `STORAGE_S3_REGION` en Settings → Secrets and variables → Actions del repo (recién tiene sentido activarlo una vez que haya una base de producción real). El bucket necesita una regla de expiración/lifecycle propia para borrar backups viejos — a propósito no lo hace el script (ver comentario ahí).
+`scripts/backup-db.sh` hace un dump de Postgres, lo comprime y lo **cifra con [age](https://github.com/FiloSottile/age)** antes de subirlo al mismo bucket S3/R2 que ya usa el sistema para archivos, bajo el prefijo `backups/` (como `fkt_turnos_<fecha>.sql.gz.age`). El dump es la base completa en texto plano (nombres, DNI, teléfonos, historia clínica), así que el archivo va cifrado — quien consiga solo la credencial del bucket no puede leer el contenido, hace falta además la clave privada age, que nunca vive en este repo ni en los secrets de CI. Corre automáticamente todos los días vía `.github/workflows/backup.yml` (cron diario + disparo manual desde la pestaña Actions) — **queda inactivo hasta que se carguen los secrets** `DATABASE_URL`, `STORAGE_S3_BUCKET`, `STORAGE_S3_ACCESS_KEY`, `STORAGE_S3_SECRET_KEY`, `STORAGE_S3_ENDPOINT`, `STORAGE_S3_REGION` y `BACKUP_AGE_PUBLIC_KEY` en Settings → Secrets and variables → Actions del repo (recién tiene sentido activarlo una vez que haya una base de producción real). El bucket necesita una regla de expiración/lifecycle propia para borrar backups viejos — a propósito no lo hace el script (ver comentario ahí).
+
+**Generar el par de claves** (una sola vez, no lo hace ningún script automáticamente):
+
+```bash
+age-keygen -o fkt-backups.key
+```
+
+Esto imprime la clave pública (`age1...`) — esa es la que va en el secret `BACKUP_AGE_PUBLIC_KEY` de GitHub Actions, es segura de tener ahí porque no sirve para descifrar nada. El archivo `fkt-backups.key` con la clave **privada** es lo único que puede abrir un backup — guardalo fuera de GitHub (un gestor de contraseñas, un lugar físico seguro) y hacé una copia; si se pierde, los backups viejos quedan irrecuperables para siempre, y si se filtra, hay que rotar la clave (generar una nueva y volver a cifrar los backups futuros con esa). Para restaurar un backup cifrado, ver `scripts/restore-db-local.sh` (acepta `.sql.gz.age` con `AGE_IDENTITY_FILE=fkt-backups.key`).
 
 ## Despliegue
 

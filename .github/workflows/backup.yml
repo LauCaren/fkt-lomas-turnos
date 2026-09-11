@@ -15,10 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Instalar cliente de Postgres y aws-cli
+      - name: Instalar cliente de Postgres, aws-cli y age
         run: |
           sudo apt-get update
-          sudo apt-get install -y postgresql-client awscli
+          sudo apt-get install -y postgresql-client awscli age
       - name: Correr backup
         run: bash scripts/backup-db.sh
         env:
@@ -28,3 +28,7 @@ jobs:
           STORAGE_S3_SECRET_KEY: ${{ secrets.STORAGE_S3_SECRET_KEY }}
           STORAGE_S3_ENDPOINT: ${{ secrets.STORAGE_S3_ENDPOINT }}
           STORAGE_S3_REGION: ${{ secrets.STORAGE_S3_REGION }}
+          # Clave PÚBLICA age (empieza con "age1...") — no descifra nada, es seguro que viva
+          # en un secret de CI. La clave privada para restaurar (age-keygen) se guarda aparte,
+          # fuera de GitHub, ver README.md de la raíz del repo.
+          BACKUP_AGE_PUBLIC_KEY: ${{ secrets.BACKUP_AGE_PUBLIC_KEY }}

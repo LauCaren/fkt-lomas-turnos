@@ -1,5 +1,15 @@
 server:
   port: ${SERVER_PORT:8080}
+  # "none" (default) = comportamiento de siempre, correcto para correr el backend expuesto
+  # directamente (como en dev). Si en producción hay un proxy/CDN delante (load balancer,
+  # nginx, Cloudflare, etc.) terminando TLS, poner FORWARDED_HEADERS_STRATEGY=native: Tomcat
+  # empieza a confiar en X-Forwarded-For para request.getRemoteAddr() — de donde
+  # RateLimitingFilter saca la IP para limitar login/registro/etc. Sin esto detrás de un
+  # proxy real, TODO el tráfico externo se ve con la misma IP (la del proxy) y el límite por
+  # IP deja de servir. "native" solo confía en el header cuando la conexión entrante viene de
+  # un rango de IP privado (default de Spring Boot para server.tomcat.remoteip.internal-proxies)
+  # — no alcanza con que cualquiera mande el header a mano desde afuera.
+  forward-headers-strategy: ${FORWARDED_HEADERS_STRATEGY:none}
 
 spring:
   application:
@@ -121,7 +131,14 @@ app:
     webhook-secret: ${MERCADOPAGO_WEBHOOK_SECRET:}
 
 springdoc:
+  # Apagado en producción por defecto (SWAGGER_ENABLED=false) — no hay perfiles de Spring en
+  # este proyecto, así que se resuelve igual que el resto de la config, con una env var. Cuando
+  # está en false, springdoc no registra ni el JSON de /v3/api-docs ni la UI de /docs: no hace
+  # falta bloquearlo aparte en SecurityConfig, esas rutas simplemente no existen.
+  api-docs:
+    enabled: ${SWAGGER_ENABLED:true}
   swagger-ui:
+    enabled: ${SWAGGER_ENABLED:true}
     path: /docs
 
 management:

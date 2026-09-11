@@ -13,6 +13,8 @@ API REST en Spring Boot 3 (Java 17) para el sistema de turnos, contacto y postul
 | Variable | Default (dev) | Descripción |
 |---|---|---|
 | `DB_URL` | `jdbc:postgresql://localhost:5433/fkt_turnos` | Conexión a Postgres. Se usa el puerto 5433 (no el 5432 estándar) para no pisarse con un Postgres nativo que puedas tener instalado en la máquina |
+| `SWAGGER_ENABLED` | `true` | Poner en `false` en producción — apaga tanto la UI de Swagger (`/docs`) como el JSON de OpenAPI (`/v3/api-docs`). No hay necesidad de exponer la estructura completa de la API públicamente en un ambiente real |
+| `FORWARDED_HEADERS_STRATEGY` | `none` | Poner en `native` si en producción hay un proxy/CDN delante terminando TLS (load balancer, nginx, Cloudflare). Sin esto, el rate limiting por IP (`RateLimitingFilter`) ve la IP del proxy en vez de la del cliente real, y termina limitando a todo el tráfico como si fuera una sola persona |
 | `DB_USERNAME` / `DB_PASSWORD` | `fkt` / `fkt` | Credenciales de la base |
 | `JWT_SECRET` | valor de desarrollo | **Cambiar en producción.** Secreto para firmar los JWT |
 | `JWT_EXPIRATION_MINUTES` | `10080` (7 días) | Duración del token |
