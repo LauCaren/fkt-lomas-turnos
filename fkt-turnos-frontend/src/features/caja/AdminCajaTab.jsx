@@ -156,19 +156,27 @@ function IngresosTab() {
         </form>
       </div>
 
-      <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {ingresos.map((i) => (
-          <div key={i.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 18px', opacity: i.anulado ? 0.55 : 1 }}>
-            <div>
-              <div style={{ fontWeight: 600 }}>{i.medicoNombre} · {formatMoneda(i.monto)}</div>
-              <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>
-                {i.fecha} · {METODOS_PAGO.find((m) => m.value === i.metodoPago)?.label} · registrado por {i.registradoPorNombre}
-                {i.anulado && ` · ANULADO (${i.motivoAnulacion})`}
+      {ingresos.length > 0 && (
+        <button type="button" className="btn btn-outline" style={{ marginBottom: 12 }} onClick={() => window.print()}>Imprimir listado</button>
+      )}
+      <div id="ingresos-imprimir">
+        <div className="ficha-print-header">
+          <strong>FKT Lomas</strong> · Listado de cobros · Impreso el {new Date().toLocaleDateString('es-AR')}
+        </div>
+        <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {ingresos.map((i) => (
+            <div key={i.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 18px', opacity: i.anulado ? 0.55 : 1 }}>
+              <div>
+                <div style={{ fontWeight: 600 }}>{i.medicoNombre} · {formatMoneda(i.monto)}</div>
+                <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>
+                  {i.fecha} · {METODOS_PAGO.find((m) => m.value === i.metodoPago)?.label} · registrado por {i.registradoPorNombre}
+                  {i.anulado && ` · ANULADO (${i.motivoAnulacion})`}
+                </div>
               </div>
+              {!i.anulado && <AnularBoton onAnular={(motivo) => dispatch(anularIngreso({ id: i.id, motivo }))} />}
             </div>
-            {!i.anulado && <AnularBoton onAnular={(motivo) => dispatch(anularIngreso({ id: i.id, motivo }))} />}
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

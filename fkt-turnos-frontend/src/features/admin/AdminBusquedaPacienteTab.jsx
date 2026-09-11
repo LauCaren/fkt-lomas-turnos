@@ -22,6 +22,9 @@ const BADGE_KINESIOLOGIA = {
 function Ficha({ ficha }) {
   return (
     <div style={{ marginTop: 24 }}>
+      <div className="ficha-print-header">
+        <strong>FKT Lomas</strong> · Ficha de paciente · Impreso el {new Date().toLocaleDateString('es-AR')}
+      </div>
       <div className="card" style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
           <div>
@@ -141,8 +144,13 @@ export default function AdminBusquedaPacienteTab() {
 
       {ficha && (
         <>
-          <button className="btn btn-outline" style={{ marginBottom: 8 }} onClick={() => setFicha(null)}>← Volver a resultados</button>
-          <Ficha ficha={ficha} />
+          <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+            <button className="btn btn-outline" onClick={() => setFicha(null)}>← Volver a resultados</button>
+            <button className="btn btn-outline" onClick={() => window.print()}>Imprimir ficha</button>
+          </div>
+          <div id="ficha-imprimir">
+            <Ficha ficha={ficha} />
+          </div>
         </>
       )}
     </div>
