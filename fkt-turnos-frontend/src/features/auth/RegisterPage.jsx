@@ -99,7 +99,7 @@ export default function RegisterPage() {
         <div className="field" style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
           <input id="aceptaPoliticaPrivacidad" name="aceptaPoliticaPrivacidad" type="checkbox" required style={{ marginTop: 3 }} checked={form.aceptaPoliticaPrivacidad} onChange={handleChange} />
           <label htmlFor="aceptaPoliticaPrivacidad" style={{ fontWeight: 400 }}>
-            Acepto la <a href={`${SITE_URL}/politica-de-privacidad.html`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal-dark)', fontWeight: 600 }}>política de privacidad</a>
+            Acepto la <a href={`${SITE_URL}/politica-de-privacidad.html`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal-dark)', fontWeight: 600 }}>política de privacidad</a> y los <a href={`${SITE_URL}/terminos-y-condiciones.html`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal-dark)', fontWeight: 600 }}>términos y condiciones</a>
           </label>
         </div>
 
