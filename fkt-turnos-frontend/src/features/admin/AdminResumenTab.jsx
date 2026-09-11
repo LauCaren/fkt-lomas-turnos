@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { CalendarClock, MessageSquare, FileText, UserMinus } from 'lucide-react';
 import StatCard from '../../components/ui/StatCard';
@@ -12,13 +12,24 @@ export default function AdminResumenTab({
 }) {
   const dispatch = useDispatch();
   const { resumen, tendencia, error } = useSelector((state) => state.admin);
+  const [ultimaActualizacion, setUltimaActualizacion] = useState(null);
+  const [ahora, setAhora] = useState(() => Date.now());
 
   useEffect(() => {
-    dispatch(fetchResumenAdmin());
+    function cargar() {
+      dispatch(fetchResumenAdmin()).unwrap().then(() => setUltimaActualizacion(Date.now())).catch(() => {});
+    }
+    cargar();
     dispatch(fetchTendenciaAdmin(14));
-    const intervalo = setInterval(() => dispatch(fetchResumenAdmin()), 30000);
-    return () => clearInterval(intervalo);
+    const intervaloFetch = setInterval(cargar, 30000);
+    return () => clearInterval(intervaloFetch);
   }, [dispatch]);
+
+  // Solo para el texto "actualizado hace Xs" — un reloj de 1s, no dispara ningún fetch.
+  useEffect(() => {
+    const intervaloReloj = setInterval(() => setAhora(Date.now()), 1000);
+    return () => clearInterval(intervaloReloj);
+  }, []);
 
   if (error) return <div className="alert alert-error" role="alert">{error}</div>;
   if (!resumen) {
@@ -33,6 +44,11 @@ export default function AdminResumenTab({
       </div>
     );
   }
+
+  const segundosDesdeActualizacion = ultimaActualizacion ? Math.floor((ahora - ultimaActualizacion) / 1000) : null;
+  const textoActualizacion = segundosDesdeActualizacion === null ? 'Actualizando…'
+    : segundosDesdeActualizacion < 2 ? 'Actualizado ahora'
+    : `Actualizado hace ${segundosDesdeActualizacion}s`;
 
   const itemsAtencion = [
     { id: 'sin-confirmar', label: 'Turnos de hoy sin confirmar', count: resumen.turnosSinConfirmarHoy, icon: CalendarClock, onClick: irATurnosAgendados },
@@ -58,7 +74,7 @@ export default function AdminResumenTab({
         <StatCard etiqueta="Ingresos de hoy" valorNumerico={resumen.ingresosHoy} formatValor={formatMoneda} onClick={irACaja} />
         <StatCard etiqueta="Caja física" valorNumerico={resumen.cajaFisica} formatValor={formatMoneda} onClick={irACaja} />
       </div>
-      <p style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 28 }}>Se actualiza solo cada 30 segundos. Hacé clic en una tarjeta para ir directo a esa sección.</p>
+      <p style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 28 }}>{textoActualizacion} · se actualiza solo cada 30 segundos. Hacé clic en una tarjeta para ir directo a esa sección.</p>
 
       {itemsAtencion.length > 0 && (
         <div className="card" style={{ marginBottom: 28 }}>
