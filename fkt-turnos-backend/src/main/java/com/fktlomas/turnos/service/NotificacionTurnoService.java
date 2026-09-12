@@ -56,6 +56,17 @@ public class NotificacionTurnoService {
     }
 
     @Async
+    public void avisarReprogramacion(Usuario paciente, String medicoNombre, String especialidadNombre,
+                                      LocalDate fechaNueva, LocalTime horaInicioNueva, LocalTime horaFinNueva) {
+        enviarConFallback(paciente, canal -> {
+            switch (canal) {
+                case EMAIL -> emailService.enviarReprogramacionTurnoHtmlSync(paciente, medicoNombre, especialidadNombre, fechaNueva, horaInicioNueva, horaFinNueva);
+                case WHATSAPP -> whatsAppService.enviar(paciente.getTelefono(), textoReprogramacion(paciente, medicoNombre, especialidadNombre, fechaNueva, horaInicioNueva, horaFinNueva));
+            }
+        });
+    }
+
+    @Async
     public void avisarPlanKinesiologiaValidado(Usuario paciente, int sesionesGeneradas, int cantidadSesiones) {
         enviarConFallback(paciente, canal -> {
             switch (canal) {
@@ -126,6 +137,21 @@ public class NotificacionTurnoService {
 
                 FKT Lomas
                 """.formatted(paciente.getNombreCompleto(), medicoNombre, especialidadNombre, fecha, horaInicio, horaFin);
+    }
+
+    private String textoReprogramacion(Usuario paciente, String medicoNombre, String especialidadNombre,
+                                        LocalDate fechaNueva, LocalTime horaInicioNueva, LocalTime horaFinNueva) {
+        return """
+                Hola %s,
+
+                Tu turno fue reprogramado:
+                Médico: %s
+                Especialidad: %s
+                Nueva fecha: %s
+                Nuevo horario: %s a %s
+
+                FKT Lomas
+                """.formatted(paciente.getNombreCompleto(), medicoNombre, especialidadNombre, fechaNueva, horaInicioNueva, horaFinNueva);
     }
 
     private String textoPlanValidado(Usuario paciente, int sesionesGeneradas, int cantidadSesiones) {

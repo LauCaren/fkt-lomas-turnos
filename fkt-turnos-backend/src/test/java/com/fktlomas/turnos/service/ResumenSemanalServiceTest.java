@@ -68,7 +68,7 @@ class ResumenSemanalServiceTest {
 
     private TurnoAdminDto turno(String estado) {
         return new TurnoAdminDto(1L, 1L, "Dr. Test", "Kinesiología", LocalDate.now(), LocalTime.of(10, 0), LocalTime.of(10, 30),
-                estado, null, null, null, null, null, null, "PENDIENTE", false, "SIN_RESPUESTA");
+                estado, null, null, null, null, null, null, "PENDIENTE", false, "SIN_RESPUESTA", null);
     }
 
     private IngresoDto ingreso(BigDecimal monto, boolean anulado) {

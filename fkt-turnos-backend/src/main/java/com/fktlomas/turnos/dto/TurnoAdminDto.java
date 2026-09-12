@@ -23,10 +23,11 @@ public record TurnoAdminDto(
         String pacienteObraSocial,
         String estadoAsistencia,
         boolean tieneEvolucion,
-        String confirmacionPrevia
+        String confirmacionPrevia,
+        String estadoRecordatorio
 ) {
     public static TurnoAdminDto de(Turno t) {
-        return de(t, false);
+        return de(t, false, null);
     }
 
     /**
@@ -34,6 +35,11 @@ public record TurnoAdminDto(
      *                        nunca el contenido, que es privado del profesional (ver EvolucionClinica).
      */
     public static TurnoAdminDto de(Turno t, boolean tieneEvolucion) {
+        return de(t, tieneEvolucion, null);
+    }
+
+    /** @param estadoRecordatorio PENDIENTE/ENVIADO/FALLIDO, o null si todavía no se generó ninguno para este turno. */
+    public static TurnoAdminDto de(Turno t, boolean tieneEvolucion, String estadoRecordatorio) {
         Usuario p = t.getPaciente();
         return new TurnoAdminDto(
                 t.getId(),
@@ -52,7 +58,8 @@ public record TurnoAdminDto(
                 p != null ? p.getObraSocial() : null,
                 t.getEstadoAsistencia().name(),
                 tieneEvolucion,
-                t.getConfirmacionPrevia().name()
+                t.getConfirmacionPrevia().name(),
+                estadoRecordatorio
         );
     }
 }

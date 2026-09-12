@@ -1,12 +1,17 @@
 package com.fktlomas.turnos.controller.admin;
 
 import com.fktlomas.turnos.domain.EstadoTurno;
+import com.fktlomas.turnos.dto.RecordatorioDto;
 import com.fktlomas.turnos.dto.TurnoAdminDto;
 import com.fktlomas.turnos.dto.admin.ActualizarAsistenciaRequest;
+import com.fktlomas.turnos.dto.admin.AsignarPacienteRequest;
+import com.fktlomas.turnos.dto.admin.ReprogramarTurnoRequest;
+import com.fktlomas.turnos.dto.admin.ReprogramarTurnoResponse;
 import com.fktlomas.turnos.dto.admin.ReservarParaPacienteRequest;
 import com.fktlomas.turnos.dto.auditoria.RegistroAuditoriaDto;
 import com.fktlomas.turnos.security.AppUserDetails;
 import com.fktlomas.turnos.service.AuditoriaService;
+import com.fktlomas.turnos.service.RecordatorioService;
 import com.fktlomas.turnos.service.TurnoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +33,7 @@ public class AdminTurnoController {
 
     private final TurnoService turnoService;
     private final AuditoriaService auditoriaService;
+    private final RecordatorioService recordatorioService;
 
     @GetMapping
     public List<TurnoAdminDto> agenda(
@@ -80,5 +86,27 @@ public class AdminTurnoController {
     @PutMapping("/{id}/deshacer")
     public TurnoAdminDto deshacer(@AuthenticationPrincipal AppUserDetails principal, @PathVariable Long id) {
         return turnoService.deshacerUltimaOperacion(id, principal.getUsuario());
+    }
+
+    @PutMapping("/{id}/cancelar")
+    public TurnoAdminDto cancelar(@AuthenticationPrincipal AppUserDetails principal, @PathVariable Long id) {
+        return turnoService.cancelarComoStaff(id, principal.getUsuario());
+    }
+
+    @PutMapping("/{id}/reprogramar")
+    public ReprogramarTurnoResponse reprogramar(@AuthenticationPrincipal AppUserDetails principal, @PathVariable Long id,
+                                                 @Valid @RequestBody ReprogramarTurnoRequest request) {
+        return turnoService.reprogramar(id, request.turnoDestinoId(), principal.getUsuario());
+    }
+
+    @PostMapping("/{id}/asignar-paciente")
+    public TurnoAdminDto asignarPaciente(@AuthenticationPrincipal AppUserDetails principal, @PathVariable Long id,
+                                          @Valid @RequestBody AsignarPacienteRequest request) {
+        return turnoService.asignarTurnoAPaciente(id, request.pacienteId(), principal.getUsuario());
+    }
+
+    @PostMapping("/{id}/recordatorio/enviar")
+    public RecordatorioDto enviarRecordatorioAhora(@PathVariable Long id) {
+        return recordatorioService.enviarAhora(id);
     }
 }

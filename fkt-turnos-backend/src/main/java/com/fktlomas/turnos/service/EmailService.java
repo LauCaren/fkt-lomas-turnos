@@ -103,6 +103,19 @@ public class EmailService {
         enviarHtmlSync(paciente.getEmail(), "Turno cancelado — FKT Lomas", html);
     }
 
+    public void enviarReprogramacionTurnoHtmlSync(Usuario paciente, String medicoNombre, String especialidadNombre,
+                                                   LocalDate fechaNueva, LocalTime horaInicioNueva, LocalTime horaFinNueva) {
+        String nombrePaciente = escapeHtml(paciente.getNombreCompleto());
+        String cuerpo = "Tu turno de %s con %s fue reprogramado. Nueva fecha: %s de %s a %s hs."
+                .formatted(escapeHtml(especialidadNombre), escapeHtml(medicoNombre),
+                        fechaNueva.format(FORMATO_FECHA), horaInicioNueva.format(FORMATO_HORA), horaFinNueva.format(FORMATO_HORA));
+        String html = renderizarAvisoHtml("Turno reprogramado", "Listo, %s. Tu turno tiene nueva fecha.".formatted(nombrePaciente), cuerpo,
+                COLOR_TEAL, "Ver mis turnos", frontendUrl + "/turnos",
+                "Tu turno fue reprogramado para el %s.".formatted(fechaNueva.format(FORMATO_FECHA)),
+                "Recibís este correo porque tu turno en FKT Lomas fue reprogramado.");
+        enviarHtmlSync(paciente.getEmail(), "Turno reprogramado — FKT Lomas", html);
+    }
+
     public void enviarPlanValidadoHtmlSync(Usuario paciente, int sesionesGeneradas, int cantidadSesiones) {
         String nombrePaciente = escapeHtml(paciente.getNombreCompleto());
         String cuerpo = "Tu plan de kinesiología fue aprobado y ya se generaron %d de %d sesiones. Podés ver los días y horarios desde tu cuenta."

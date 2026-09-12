@@ -207,7 +207,7 @@ class WhatsAppBotServiceTest {
         return new TurnoAdminDto(999L, medicoId, "Dra. Gómez", "Traumatología", LocalDate.now().plusDays(1),
                 LocalTime.of(10, 0), LocalTime.of(10, 30), "RESERVADO", null,
                 pacienteId, "Juana Pérez", "30111222", TELEFONO, cobraCopago ? "IOMA" : "OSDE",
-                "PENDIENTE", false, "SIN_CONFIRMAR");
+                "PENDIENTE", false, "SIN_CONFIRMAR", null);
     }
 
     private static Medico medicoDe(Long id, boolean cobraCopagoIoma) {

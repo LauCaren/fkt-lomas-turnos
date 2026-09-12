@@ -123,6 +123,26 @@ public class RecordatorioService {
         return RecordatorioDto.de(recordatorio);
     }
 
+    /**
+     * "Enviar recordatorio" manual desde la agenda (punto 12 del pedido de UX): salta la
+     * ventana de anticipación del job automático — el turno puede estar todavía lejos en el
+     * tiempo, no importa. Get-or-create el Recordatorio del turno (mismo patrón que usa
+     * procesarPendientes) y lo manda ya.
+     */
+    @Transactional
+    public RecordatorioDto enviarAhora(Long turnoId) {
+        Turno turno = turnoRepository.findById(turnoId)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Turno no encontrado"));
+        if (turno.getEstado() != EstadoTurno.RESERVADO) {
+            throw new IllegalArgumentException("Este turno no está reservado");
+        }
+        Recordatorio recordatorio = recordatorioRepository.findByTurnoId(turnoId)
+                .orElseGet(() -> recordatorioRepository.save(
+                        new Recordatorio(turno, turno.getPaciente().getCanalNotificacionPreferido())));
+        intentarEnvio(recordatorio, obtenerConfiguracionEntidad().getPlantillaMensaje());
+        return RecordatorioDto.de(recordatorio);
+    }
+
     @Transactional(readOnly = true)
     public List<RecordatorioDto> listar() {
         return recordatorioRepository.listarConDetalle().stream().map(RecordatorioDto::de).toList();

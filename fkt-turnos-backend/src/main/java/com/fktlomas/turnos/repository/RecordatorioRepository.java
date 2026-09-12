@@ -5,10 +5,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 public interface RecordatorioRepository extends JpaRepository<Recordatorio, Long> {
+
+    /** Para pintar el estado del recordatorio en la agenda (ver TurnoService.agenda) — no
+     * necesita join fetch, solo se lee turno.getId() y estado, igual que EvolucionClinicaRepository. */
+    List<Recordatorio> findByTurnoIdIn(Collection<Long> turnoIds);
 
     /**
      * Con join fetch a propósito: RecordatorioService.procesarPendientes() usa esto

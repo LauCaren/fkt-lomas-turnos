@@ -12,6 +12,9 @@ public interface ListaEsperaRepository extends JpaRepository<ListaEspera, Long> 
 
     List<ListaEspera> findByMedicoIdAndFechaAndEstado(Long medicoId, LocalDate fecha, EstadoListaEspera estado);
 
+    /** Orden de espera = quién se anotó primero — no hay campo de prioridad en el dominio, y no se inventa uno. */
+    List<ListaEspera> findByMedicoIdAndFechaAndEstadoOrderByCreatedAtAsc(Long medicoId, LocalDate fecha, EstadoListaEspera estado);
+
     Optional<ListaEspera> findByPacienteIdAndMedicoIdAndFechaAndEstado(
             Long pacienteId, Long medicoId, LocalDate fecha, EstadoListaEspera estado);
 }

@@ -28,7 +28,7 @@ class ReporteServiceTest {
     void generaExcelYPdfDeAgendaConDatosYSinDatos() {
         LocalDate hoy = LocalDate.now();
         TurnoAdminDto turno = new TurnoAdminDto(1L, 1L, "Dr. Test", "Kinesiología", hoy, LocalTime.of(10, 0), LocalTime.of(10, 30),
-                "RESERVADO", "Control", 1L, "Paciente Test", "30111111", "1122334455", "Particular", "PENDIENTE", false, "SIN_RESPUESTA");
+                "RESERVADO", "Control", 1L, "Paciente Test", "30111111", "1122334455", "Particular", "PENDIENTE", false, "SIN_RESPUESTA", null);
 
         assertThat(reporteService.excelAgenda(List.of(turno), hoy, hoy)).isNotEmpty();
         assertThat(reporteService.excelAgenda(List.of(), hoy, hoy)).isNotEmpty();

@@ -37,6 +37,8 @@ public class AdminResumenService {
         List<TurnoAdminDto> agendaHoy = turnoService.agenda(hoy, hoy, null, null);
         long reservados = agendaHoy.stream().filter(t -> "RESERVADO".equals(t.estado())).count();
         long disponibles = agendaHoy.stream().filter(t -> "DISPONIBLE".equals(t.estado())).count();
+        long llegaron = agendaHoy.stream().filter(t -> "LLEGO".equals(t.estadoAsistencia())).count();
+        long ausentes = agendaHoy.stream().filter(t -> "AUSENTE".equals(t.estadoAsistencia())).count();
         int enEspera = turnoService.colaEspera(hoy, null).size();
         int planesPendientes = kinesiologiaService.buscarAdmin(EstadoPlanKinesiologia.PENDIENTE_VALIDACION).size();
         BigDecimal ingresosHoy = cajaService.listarIngresos(null, hoy, hoy).stream()
@@ -49,7 +51,8 @@ public class AdminResumenService {
                 turnoService.turnosSinConfirmarHoy(hoy),
                 (int) mensajeContactoRepository.countByLeidoFalse(),
                 (int) postulacionRepository.countByRevisadoFalse(),
-                (int) solicitudBajaCuentaRepository.countByEstado(EstadoSolicitudBaja.PENDIENTE));
+                (int) solicitudBajaCuentaRepository.countByEstado(EstadoSolicitudBaja.PENDIENTE),
+                (int) llegaron, (int) ausentes);
     }
 
     private static final int TENDENCIA_DIAS_MAXIMO = 90;

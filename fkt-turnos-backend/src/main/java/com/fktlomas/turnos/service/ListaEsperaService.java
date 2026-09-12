@@ -5,6 +5,7 @@ import com.fktlomas.turnos.domain.ListaEspera;
 import com.fktlomas.turnos.domain.Medico;
 import com.fktlomas.turnos.domain.Usuario;
 import com.fktlomas.turnos.dto.ListaEsperaDto;
+import com.fktlomas.turnos.dto.admin.ListaEsperaAdminDto;
 import com.fktlomas.turnos.exception.ConflictoDeDatosException;
 import com.fktlomas.turnos.exception.RecursoNoEncontradoException;
 import com.fktlomas.turnos.repository.ListaEsperaRepository;
@@ -56,6 +57,17 @@ public class ListaEsperaService {
         return listaEsperaRepository
                 .findByPacienteIdAndMedicoIdAndFechaAndEstado(pacienteId, medicoId, fecha, EstadoListaEspera.ACTIVA)
                 .map(ListaEsperaDto::de);
+    }
+
+    /**
+     * Pacientes anotados para este médico/día, del más antiguo al más nuevo — se llama cuando
+     * un turno de ese médico/día queda DISPONIBLE, para que la secretaria vea de una a quién
+     * ofrecerle el horario en vez de una lista estática sin acción (punto 11 del pedido de UX).
+     */
+    @Transactional(readOnly = true)
+    public List<ListaEsperaAdminDto> compatiblesParaSlot(Long medicoId, LocalDate fecha) {
+        return listaEsperaRepository.findByMedicoIdAndFechaAndEstadoOrderByCreatedAtAsc(medicoId, fecha, EstadoListaEspera.ACTIVA)
+                .stream().map(ListaEsperaAdminDto::de).toList();
     }
 
     @Transactional

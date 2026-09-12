@@ -12,12 +12,14 @@ import com.fktlomas.turnos.dto.ReservarTurnoRequest;
 import com.fktlomas.turnos.dto.TurnoAdminDto;
 import com.fktlomas.turnos.dto.TurnoDto;
 import com.fktlomas.turnos.dto.admin.ActualizarAsistenciaRequest;
+import com.fktlomas.turnos.dto.admin.ReprogramarTurnoResponse;
 import com.fktlomas.turnos.dto.admin.ReservarParaPacienteRequest;
 import com.fktlomas.turnos.dto.auditoria.TurnoSnapshot;
 import com.fktlomas.turnos.exception.ConflictoDeDatosException;
 import com.fktlomas.turnos.exception.RecursoNoEncontradoException;
 import com.fktlomas.turnos.exception.TurnoNoDisponibleException;
 import com.fktlomas.turnos.repository.EvolucionClinicaRepository;
+import com.fktlomas.turnos.repository.RecordatorioRepository;
 import com.fktlomas.turnos.repository.ResenaRepository;
 import com.fktlomas.turnos.repository.TurnoRepository;
 import com.fktlomas.turnos.repository.UsuarioRepository;
@@ -32,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -51,6 +54,7 @@ public class TurnoService {
     private final AuditoriaService auditoriaService;
     private final EvolucionClinicaRepository evolucionClinicaRepository;
     private final ResenaRepository resenaRepository;
+    private final RecordatorioRepository recordatorioRepository;
 
     /**
      * Marca en cada turno si el médico ya cargó una evolución — nunca el contenido, que es
@@ -62,6 +66,18 @@ public class TurnoService {
         Set<Long> conEvolucion = turnoIds.isEmpty() ? Set.of() : evolucionClinicaRepository.findByTurnoIdIn(turnoIds)
                 .stream().map(e -> e.getTurno().getId()).collect(Collectors.toSet());
         return turnos.stream().map(t -> TurnoAdminDto.de(t, conEvolucion.contains(t.getId()))).toList();
+    }
+
+    /** Mismo patrón que conEvolucion, más el estado del recordatorio para pintarlo inline en la agenda operativa. */
+    private List<TurnoAdminDto> conEvolucionYRecordatorio(List<Turno> turnos) {
+        Set<Long> turnoIds = turnos.stream().map(Turno::getId).collect(Collectors.toSet());
+        Set<Long> conEvolucion = turnoIds.isEmpty() ? Set.of() : evolucionClinicaRepository.findByTurnoIdIn(turnoIds)
+                .stream().map(e -> e.getTurno().getId()).collect(Collectors.toSet());
+        Map<Long, String> estadoRecordatorioPorTurno = turnoIds.isEmpty() ? Map.of() : recordatorioRepository.findByTurnoIdIn(turnoIds)
+                .stream().collect(Collectors.toMap(r -> r.getTurno().getId(), r -> r.getEstado().name()));
+        return turnos.stream()
+                .map(t -> TurnoAdminDto.de(t, conEvolucion.contains(t.getId()), estadoRecordatorioPorTurno.get(t.getId())))
+                .toList();
     }
 
     private static TurnoSnapshot snapshotDe(Turno t) {
@@ -192,7 +208,7 @@ public class TurnoService {
 
     @Transactional(readOnly = true)
     public List<TurnoAdminDto> agenda(LocalDate desde, LocalDate hasta, Long medicoId, Long especialidadId) {
-        return conEvolucion(turnoRepository.findAgenda(desde, hasta, medicoId, especialidadId));
+        return conEvolucionYRecordatorio(turnoRepository.findAgenda(desde, hasta, medicoId, especialidadId));
     }
 
     @Transactional(readOnly = true)
@@ -264,6 +280,38 @@ public class TurnoService {
         return new org.springframework.data.domain.PageImpl<>(conEvolucion(pagina.getContent()), pageable, pagina.getTotalElements());
     }
 
+    /**
+     * Asignar un turno DISPONIBLE directo a un paciente ya registrado — pensado para la lista
+     * de espera (punto 11 del pedido de UX): la secretaria ve quién está anotado para ese
+     * médico/día y lo asigna con un clic, sin repetir el alta/lookup por DNI que sí necesita
+     * un walk-in nuevo (ver reservarParaPaciente).
+     */
+    @Transactional
+    public TurnoAdminDto asignarTurnoAPaciente(Long turnoId, Long pacienteId, Usuario actor) {
+        Turno turnoPrevio = turnoRepository.findById(turnoId)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Turno no encontrado"));
+        if (yaPaso(turnoPrevio.getFecha(), turnoPrevio.getHoraInicio())) {
+            throw new TurnoNoDisponibleException("Este turno ya no está disponible, elegí otro horario");
+        }
+        TurnoSnapshot antes = snapshotDe(turnoPrevio);
+        Usuario paciente = usuarioRepository.findById(pacienteId)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Paciente no encontrado"));
+
+        int filas = turnoRepository.reservarSiDisponible(turnoId, paciente, null);
+        if (filas == 0) {
+            throw new TurnoNoDisponibleException("Este turno ya no está disponible, elegí otro horario");
+        }
+
+        Turno actualizado = turnoRepository.findById(turnoId).orElseThrow();
+        auditoriaService.registrar(actor, AUDITORIA_TIPO_TURNO, turnoId, "ASIGNAR_DESDE_LISTA_ESPERA", antes, snapshotDe(actualizado));
+        if (paciente.tieneEmailReal()) {
+            emailService.enviarConfirmacionTurno(paciente, actualizado.getMedico().getNombreCompleto(),
+                    actualizado.getMedico().getEspecialidad().getNombre(), actualizado.getFecha(),
+                    actualizado.getHoraInicio(), actualizado.getHoraFin());
+        }
+        return TurnoAdminDto.de(actualizado);
+    }
+
     @Transactional
     public TurnoAdminDto reservarParaPaciente(Long turnoId, ReservarParaPacienteRequest request, Usuario actor) {
         Turno turnoPrevio = turnoRepository.findById(turnoId)
@@ -311,6 +359,86 @@ public class TurnoService {
 
         auditoriaService.registrar(actor, AUDITORIA_TIPO_TURNO, turnoId, "DESHACER", snapshotActual, snapshotAntes);
         return TurnoAdminDto.de(restaurado);
+    }
+
+    /**
+     * Cancelar un turno reservado desde secretaría/admin (ej. el paciente avisó por teléfono) —
+     * hoy solo existía la cancelación que hace el propio paciente logueado (cancelar()) y el
+     * "deshacer" acotado a la última operación; esto cubre el caso de "cancelar cualquier turno
+     * reservado" que pide la agenda operativa. Reusa cancelarInterno tal cual (mismo aviso al
+     * paciente, misma auditoría, mismo aviso a la lista de espera).
+     */
+    @Transactional
+    public TurnoAdminDto cancelarComoStaff(Long turnoId, Usuario actor) {
+        Turno turno = turnoRepository.findById(turnoId)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Turno no encontrado"));
+        if (turno.getEstado() != EstadoTurno.RESERVADO) {
+            throw new TurnoNoDisponibleException("Este turno no está reservado");
+        }
+        // Cargado de nuevo por la misma razón que en reprogramar: turno.getPaciente() es un
+        // proxy lazy y cancelarInterno se lo pasa tal cual al aviso @Async.
+        Usuario paciente = usuarioRepository.findById(turno.getPaciente().getId())
+                .orElseThrow(() -> new RecursoNoEncontradoException("Paciente no encontrado"));
+        cancelarInterno(turno, paciente, "CANCELAR_STAFF");
+        return TurnoAdminDto.de(turnoRepository.findById(turnoId).orElseThrow());
+    }
+
+    /**
+     * Reprograma un turno reservado a otro horario en un solo paso (en vez de cancelar y volver
+     * a reservar a mano): toma el destino de forma atómica con el mismo reservarSiDisponible que
+     * usan reservar/reservarParaPaciente, libera el origen sin avisarle al paciente que se
+     * "canceló" (no es una cancelación real), y borra el recordatorio del origen si existía —
+     * ahora apunta a un horario vacío. Queda auditado como dos operaciones separadas
+     * (REPROGRAMAR_ORIGEN/REPROGRAMAR_DESTINO) para que "deshacer" sobre cualquiera de los dos
+     * turnos revierta esa mitad con el mecanismo genérico que ya existe, sin código nuevo.
+     */
+    @Transactional
+    public ReprogramarTurnoResponse reprogramar(Long origenId, Long destinoId, Usuario actor) {
+        Turno origen = turnoRepository.findById(origenId)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Turno no encontrado"));
+        if (origen.getEstado() != EstadoTurno.RESERVADO) {
+            throw new TurnoNoDisponibleException("Este turno no está reservado, no se puede reprogramar");
+        }
+        Turno destino = turnoRepository.findById(destinoId)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Turno no encontrado"));
+        if (yaPaso(destino.getFecha(), destino.getHoraInicio())) {
+            throw new TurnoNoDisponibleException("Ese horario ya no está disponible, elegí otro");
+        }
+
+        TurnoSnapshot antesOrigen = snapshotDe(origen);
+        TurnoSnapshot antesDestino = snapshotDe(destino);
+        // Cargado de nuevo (no origen.getPaciente() directo): esa asociación es lazy, y el
+        // proxy sin inicializar revienta con LazyInitializationException al llegar al aviso
+        // @Async, que corre después de que esta transacción ya cerró la sesión.
+        Usuario paciente = usuarioRepository.findById(origen.getPaciente().getId())
+                .orElseThrow(() -> new RecursoNoEncontradoException("Paciente no encontrado"));
+        String medicoNombre = origen.getMedico().getNombreCompleto();
+        String especialidadNombre = origen.getMedico().getEspecialidad().getNombre();
+        Long medicoIdOrigen = origen.getMedico().getId();
+        LocalDate fechaOrigen = origen.getFecha();
+
+        int filas = turnoRepository.reservarSiDisponible(destinoId, paciente, origen.getMotivoConsulta());
+        if (filas == 0) {
+            throw new TurnoNoDisponibleException("Ese horario ya no está disponible, elegí otro");
+        }
+
+        origen.setEstado(EstadoTurno.DISPONIBLE);
+        origen.setPaciente(null);
+        origen.setMotivoConsulta(null);
+        Turno origenLibre = turnoRepository.save(origen);
+
+        recordatorioRepository.findByTurnoId(origenId).ifPresent(recordatorioRepository::delete);
+
+        Turno destinoActualizado = turnoRepository.findById(destinoId).orElseThrow();
+
+        auditoriaService.registrar(actor, AUDITORIA_TIPO_TURNO, origenId, "REPROGRAMAR_ORIGEN", antesOrigen, snapshotDe(origenLibre));
+        auditoriaService.registrar(actor, AUDITORIA_TIPO_TURNO, destinoId, "REPROGRAMAR_DESTINO", antesDestino, snapshotDe(destinoActualizado));
+
+        listaEsperaService.notificarLiberacion(medicoIdOrigen, fechaOrigen);
+        notificacionTurnoService.avisarReprogramacion(paciente, medicoNombre, especialidadNombre,
+                destinoActualizado.getFecha(), destinoActualizado.getHoraInicio(), destinoActualizado.getHoraFin());
+
+        return new ReprogramarTurnoResponse(TurnoAdminDto.de(origenLibre), TurnoAdminDto.de(destinoActualizado));
     }
 
     /**

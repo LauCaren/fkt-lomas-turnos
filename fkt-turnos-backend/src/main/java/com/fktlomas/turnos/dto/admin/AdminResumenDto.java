@@ -19,6 +19,8 @@ public record AdminResumenDto(
         int turnosSinConfirmarHoy,
         int mensajesSinLeer,
         int postulacionesSinRevisar,
-        int solicitudesBajaPendientes
+        int solicitudesBajaPendientes,
+        int turnosLlegaronHoy,
+        int turnosAusentesHoy
 ) {
 }
