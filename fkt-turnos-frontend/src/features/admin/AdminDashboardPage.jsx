@@ -1,13 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  LayoutDashboard, CalendarDays, ClipboardList, Users, Search, Stethoscope, Activity,
+  LayoutDashboard, CalendarDays, CalendarPlus, ClipboardList, Users, Search, Stethoscope, Activity,
   Wallet, BarChart3, BellRing, Building2, FileText, UserCog, UserMinus, Star, History, Settings,
 } from 'lucide-react';
 import SidebarNav from '../../components/ui/SidebarNav';
 import CommandPalette from '../../components/ui/CommandPalette';
 import { TabPanel } from '../../components/ui/TabNav';
-import { limpiarMensajes } from './adminSlice';
+import { limpiarMensajes, setPacienteAAbrir } from './adminSlice';
+import axiosClient from '../../api/axiosClient';
 import { fetchMiPerfil } from '../cuenta/cuentaSlice';
 import CuentaSeguridadTab from '../../components/CuentaSeguridadTab';
 import AdminResumenTab from './AdminResumenTab';
@@ -33,9 +34,9 @@ const GRUPOS_NAV = [
     label: 'Turnos',
     items: [
       { id: 'agenda', label: 'Agenda', icon: CalendarDays },
-      { id: 'turnos-agendados', label: 'Ver turnos agendados', icon: ClipboardList },
-      { id: 'cola-espera', label: 'Cola de espera', icon: Users },
       { id: 'buscar-paciente', label: 'Buscar paciente', icon: Search },
+      { id: 'cola-espera', label: 'Cola de espera', icon: Users },
+      { id: 'turnos-agendados', label: 'Buscar turnos por rango', icon: ClipboardList },
     ],
   },
   {
@@ -72,10 +73,33 @@ const GRUPOS_NAV = [
   { items: [{ id: 'cuenta', label: 'Mi cuenta', icon: Settings }] },
 ];
 
+// Qué campo del resumen (ya polleado cada 30s por AdminResumenTab) alimenta el numerito de
+// cada sección del sidebar — sin pollear nada nuevo, solo reutilizando ese mismo dato.
+const CAMPO_RESUMEN_POR_ITEM = {
+  agenda: 'turnosSinConfirmarHoy',
+  'cola-espera': 'pacientesEnEspera',
+  mensajes: 'mensajesSinLeer',
+  postulaciones: 'postulacionesSinRevisar',
+  'solicitudes-baja': 'solicitudesBajaPendientes',
+};
+
+function conBadges(groups, resumen) {
+  if (!resumen) return groups;
+  return groups.map((g) => ({
+    ...g,
+    items: g.items.map((item) => {
+      const campo = CAMPO_RESUMEN_POR_ITEM[item.id];
+      return campo ? { ...item, badge: resumen[campo] } : item;
+    }),
+  }));
+}
+
 export default function AdminDashboardPage() {
   const dispatch = useDispatch();
   const perfil = useSelector((state) => state.cuenta.perfil);
+  const resumen = useSelector((state) => state.admin.resumen);
   const [tab, setTab] = useState('resumen');
+  const gruposNav = useMemo(() => conBadges(GRUPOS_NAV, resumen), [resumen]);
 
   useEffect(() => { dispatch(fetchMiPerfil()); }, [dispatch]);
 
@@ -85,6 +109,40 @@ export default function AdminDashboardPage() {
   // de 403. Usa el /api/mi-cuenta genérico (CuentaSeguridadTab): mientras el 2FA está
   // pendiente esta cuenta tampoco tiene el rol para llegar a /api/admin/**.
   const mfaPendiente = perfil && !perfil.mfaHabilitado;
+
+  const irATab = useCallback((id) => {
+    setTab(id);
+    dispatch(limpiarMensajes());
+  }, [dispatch]);
+
+  function buscarPacientesGlobal(q) {
+    return axiosClient.get('/api/admin/pacientes/buscar', { params: { q } }).then((r) => r.data);
+  }
+
+  function abrirPaciente(paciente) {
+    dispatch(setPacienteAAbrir(paciente.id));
+    irATab('buscar-paciente');
+  }
+
+  const comandosPalette = [
+    { id: 'cmd-nuevo-turno', label: 'Nuevo turno', icon: CalendarPlus, run: () => irATab('agenda') },
+  ];
+
+  // Atajos de teclado a nivel de todo el panel (punto 10): se ignoran si el foco está en un
+  // campo de texto/select, igual que las flechas de la agenda, para no interferir con el tipeo.
+  // Ninguno ataca algo destructivo — solo navegan.
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (mfaPendiente || perfil === null) return;
+      const tag = document.activeElement?.tagName;
+      if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+      const key = e.key.toLowerCase();
+      if (key === 'n' || key === 'a') irATab('agenda');
+      else if (key === 'p') irATab('buscar-paciente');
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mfaPendiente, perfil, irATab]);
 
   return (
     <div>
@@ -109,9 +167,15 @@ export default function AdminDashboardPage() {
         </>
       ) : (
         <>
-        <CommandPalette groups={GRUPOS_NAV} onNavigate={(id) => { setTab(id); dispatch(limpiarMensajes()); }} />
+        <CommandPalette
+          groups={GRUPOS_NAV}
+          onNavigate={irATab}
+          comandos={comandosPalette}
+          onBuscarPacientes={buscarPacientesGlobal}
+          onSeleccionarPaciente={abrirPaciente}
+        />
         <div className="panel-shell">
-          <SidebarNav groups={GRUPOS_NAV} active={tab} onChange={(id) => { setTab(id); dispatch(limpiarMensajes()); }} />
+          <SidebarNav groups={gruposNav} active={tab} onChange={irATab} />
 
           <div className="panel-content">
             <TabPanel tabKey={tab}>
@@ -131,7 +195,7 @@ export default function AdminDashboardPage() {
               {tab === 'agenda' && <AdminAgendaTab />}
               {tab === 'turnos-agendados' && <AdminTurnosAgendadosTab />}
               {tab === 'cola-espera' && <AdminColaEsperaTab />}
-              {tab === 'buscar-paciente' && <AdminBusquedaPacienteTab />}
+              {tab === 'buscar-paciente' && <AdminBusquedaPacienteTab irAAgenda={() => setTab('agenda')} />}
               {tab === 'medicos' && <AdminMedicosTab />}
               {tab === 'kinesiologia' && <AdminKinesiologiaTab />}
               {tab === 'caja' && <AdminCajaTab />}

@@ -163,6 +163,51 @@ export const deshacerTurno = createAsyncThunk('admin/deshacerTurno', async (turn
   }
 });
 
+export const fetchListaEsperaCompatibles = createAsyncThunk('admin/fetchListaEsperaCompatibles', async ({ medicoId, fecha }, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/admin/lista-espera', { params: { medicoId, fecha } });
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
+export const asignarTurnoAPaciente = createAsyncThunk('admin/asignarTurnoAPaciente', async ({ turnoId, pacienteId }, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.post(`/api/admin/turnos/${turnoId}/asignar-paciente`, { pacienteId });
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudo asignar el turno'));
+  }
+});
+
+export const enviarRecordatorioAhora = createAsyncThunk('admin/enviarRecordatorioAhora', async (turnoId, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.post(`/api/admin/turnos/${turnoId}/recordatorio/enviar`);
+    return { turnoId, recordatorio: data };
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudo enviar el recordatorio'));
+  }
+});
+
+export const cancelarTurnoStaff = createAsyncThunk('admin/cancelarTurnoStaff', async (turnoId, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.put(`/api/admin/turnos/${turnoId}/cancelar`);
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudo cancelar el turno'));
+  }
+});
+
+export const reprogramarTurno = createAsyncThunk('admin/reprogramarTurno', async ({ turnoOrigenId, turnoDestinoId }, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.put(`/api/admin/turnos/${turnoOrigenId}/reprogramar`, { turnoDestinoId });
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudo reprogramar el turno'));
+  }
+});
+
 export const fetchFeriados = createAsyncThunk('admin/fetchFeriados', async ({ desde, hasta }, { rejectWithValue }) => {
   try {
     const { data } = await axiosClient.get('/api/admin/feriados', { params: { desde, hasta } });
@@ -451,11 +496,32 @@ const adminSlice = createSlice({
     auditoria: { content: [], totalPages: 0, number: 0 },
     error: null,
     mensajeExito: null,
+    dniPrellenado: null,
+    objetivoReprogramar: null,
+    pacienteAAbrir: null,
   },
   reducers: {
     limpiarMensajes(state) {
       state.error = null;
       state.mensajeExito = null;
+    },
+    // "Nuevo turno" desde la ficha de un paciente (AdminBusquedaPacienteTab): deja el DNI acá
+    // para que la Agenda lo tome al abrir el formulario de reserva por teléfono, en vez de que
+    // la secretaria tenga que volver a escribirlo — se limpia apenas se usa una vez.
+    setDniPrellenado(state, action) {
+      state.dniPrellenado = action.payload;
+    },
+    // "Reprogramar" desde la ficha: la Agenda no tiene cargado el turno puntual del paciente
+    // (solo lo que esté en el rango/médico visible), así que en vez de intentar abrir el panel
+    // de detalle de memoria, se preselecciona médico + fecha y se guía a la secretaria con un
+    // aviso a que busque ese turno puntual y toque "Reprogramar" ahí.
+    setObjetivoReprogramar(state, action) {
+      state.objetivoReprogramar = action.payload;
+    },
+    // Resultado de paciente elegido en la búsqueda global (Ctrl+K): id de paciente a abrir de
+    // una en la pestaña "Buscar paciente" en vez de forzar a repetir la búsqueda ahí.
+    setPacienteAAbrir(state, action) {
+      state.pacienteAAbrir = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -526,6 +592,29 @@ const adminSlice = createSlice({
         state.mensajeExito = 'Turno reservado correctamente';
       })
       .addCase(reservarParaPaciente.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(reprogramarTurno.fulfilled, (state, action) => {
+        const { origen, destino } = action.payload;
+        state.agenda = state.agenda.map((t) => {
+          if (t.id === origen.id) return origen;
+          if (t.id === destino.id) return destino;
+          return t;
+        });
+      })
+      .addCase(reprogramarTurno.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(cancelarTurnoStaff.fulfilled, (state, action) => {
+        state.agenda = state.agenda.map((t) => t.id === action.payload.id ? action.payload : t);
+      })
+      .addCase(cancelarTurnoStaff.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(asignarTurnoAPaciente.fulfilled, (state, action) => {
+        state.agenda = state.agenda.map((t) => t.id === action.payload.id ? action.payload : t);
+      })
+      .addCase(asignarTurnoAPaciente.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(enviarRecordatorioAhora.fulfilled, (state, action) => {
+        state.agenda = state.agenda.map((t) => t.id === action.payload.turnoId
+          ? { ...t, estadoRecordatorio: action.payload.recordatorio.estado }
+          : t);
+      })
+      .addCase(enviarRecordatorioAhora.rejected, (state, action) => { state.error = action.payload; })
       .addCase(fetchFeriados.fulfilled, (state, action) => { state.feriados = action.payload; })
       .addCase(fetchFeriados.rejected, (state, action) => { state.error = action.payload; })
       .addCase(fetchMensajesContacto.fulfilled, (state, action) => {
@@ -629,5 +718,5 @@ const adminSlice = createSlice({
   },
 });
 
-export const { limpiarMensajes } = adminSlice.actions;
+export const { limpiarMensajes, setDniPrellenado, setObjetivoReprogramar, setPacienteAAbrir } = adminSlice.actions;
 export default adminSlice.reducer;

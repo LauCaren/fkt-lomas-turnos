@@ -69,6 +69,8 @@ export default function AdminResumenTab({
       <div className="stagger" style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 12 }}>
         <StatCard etiqueta="Turnos reservados hoy" valor={resumen.turnosReservadosHoy} />
         <StatCard etiqueta="Turnos disponibles hoy" valor={resumen.turnosDisponiblesHoy} />
+        <StatCard etiqueta="Llegaron hoy" valor={resumen.turnosLlegaronHoy} onClick={irAAgenda} />
+        <StatCard etiqueta="Ausentes hoy" valor={resumen.turnosAusentesHoy} destacado={resumen.turnosAusentesHoy > 0} onClick={irAAgenda} />
         <StatCard etiqueta="Pacientes esperando" valor={resumen.pacientesEnEspera} destacado={resumen.pacientesEnEspera > 0} onClick={irACola} />
         <StatCard etiqueta="Planes de kinesiología por validar" valor={resumen.planesKinesiologiaPendientes} destacado={resumen.planesKinesiologiaPendientes > 0} onClick={irAKinesiologia} />
         <StatCard etiqueta="Ingresos de hoy" valorNumerico={resumen.ingresosHoy} formatValor={formatMoneda} onClick={irACaja} />

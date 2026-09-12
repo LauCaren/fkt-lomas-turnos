@@ -1,7 +1,16 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import axiosClient, { mensajeDeError } from '../../api/axiosClient';
-import { formatMoneda } from '../../utils/formato';
+import { formatMoneda, hoyISO } from '../../utils/formato';
 import EstadoVacio from '../../components/EstadoVacio';
+import { setDniPrellenado, setObjetivoReprogramar, setPacienteAAbrir, cancelarTurnoStaff, enviarMensajeManual } from './adminSlice';
+import { useConfirm } from '../../components/ui/useConfirm';
+import { useToast } from '../../components/ui/useToast';
+
+const CANALES = [
+  { value: 'EMAIL', label: 'Email' },
+  { value: 'WHATSAPP', label: 'WhatsApp' },
+];
 
 const ESTADO_KINESIOLOGIA = {
   PENDIENTE_VALIDACION: 'Pendiente de revisión',
@@ -19,7 +28,120 @@ const BADGE_KINESIOLOGIA = {
   CANCELADO: 'badge-cancelado',
 };
 
-function Ficha({ ficha }) {
+function PanelContactar({ paciente, onCerrar }) {
+  const dispatch = useDispatch();
+  const toast = useToast();
+  const [canal, setCanal] = useState(paciente.canalNotificacionPreferido || 'EMAIL');
+  const [mensaje, setMensaje] = useState('');
+  const [enviando, setEnviando] = useState(false);
+
+  function handleEnviar(e) {
+    e.preventDefault();
+    if (!mensaje.trim()) return;
+    setEnviando(true);
+    dispatch(enviarMensajeManual({ pacienteId: paciente.id, canal, mensaje: mensaje.trim() })).unwrap()
+      .then(() => {
+        toast('Mensaje enviado correctamente');
+        onCerrar();
+      })
+      .catch(() => setEnviando(false));
+  }
+
+  return (
+    <form onSubmit={handleEnviar} className="card" style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div className="field" style={{ marginBottom: 0 }}>
+        <label htmlFor="fichaContactarCanal">Canal</label>
+        <select id="fichaContactarCanal" value={canal} onChange={(e) => setCanal(e.target.value)}>
+          {CANALES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+        </select>
+      </div>
+      <div className="field" style={{ marginBottom: 0 }}>
+        <label htmlFor="fichaContactarMensaje">Mensaje</label>
+        <textarea
+          id="fichaContactarMensaje"
+          rows={3}
+          maxLength={1600}
+          value={mensaje}
+          onChange={(e) => setMensaje(e.target.value)}
+          style={{ width: '100%', padding: '10px 14px', border: '1.5px solid var(--line)', borderRadius: 6, fontFamily: 'inherit' }}
+        />
+      </div>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button type="submit" className="btn btn-primary" disabled={enviando}>
+          {enviando && <span className="spinner" aria-hidden="true" />}
+          {enviando ? 'Enviando…' : 'Enviar mensaje'}
+        </button>
+        <button type="button" className="btn btn-outline" onClick={onCerrar}>Cancelar</button>
+      </div>
+    </form>
+  );
+}
+
+function AccionesRapidasFicha({ ficha, irAAgenda, onRecargar }) {
+  const dispatch = useDispatch();
+  const confirmar = useConfirm();
+  const toast = useToast();
+  const [contactando, setContactando] = useState(false);
+
+  const proximoTurno = ficha.turnos
+    .filter((t) => t.estado === 'RESERVADO' && t.fecha >= hoyISO())
+    .sort((a, b) => (a.fecha + a.horaInicio).localeCompare(b.fecha + b.horaInicio))[0];
+
+  function handleNuevoTurno() {
+    dispatch(setDniPrellenado(ficha.paciente.dni));
+    irAAgenda?.();
+  }
+
+  function handleReprogramar() {
+    dispatch(setObjetivoReprogramar({
+      turnoId: proximoTurno.id,
+      medicoId: proximoTurno.medicoId,
+      fecha: proximoTurno.fecha,
+      horaInicio: proximoTurno.horaInicio,
+      pacienteNombre: ficha.paciente.nombreCompleto,
+    }));
+    irAAgenda?.();
+  }
+
+  async function handleCancelar() {
+    const ok = await confirmar({
+      titulo: 'Cancelar turno',
+      detalle: `Vas a cancelar el turno de ${ficha.paciente.nombreCompleto} del ${proximoTurno.fecha} a las ${proximoTurno.horaInicio.slice(0, 5)}. Se le va a avisar por su canal preferido.`,
+      confirmarTexto: 'Cancelar turno',
+      peligroso: true,
+    });
+    if (!ok) return;
+    dispatch(cancelarTurnoStaff(proximoTurno.id)).unwrap()
+      .then(() => {
+        toast('Turno cancelado correctamente');
+        onRecargar?.();
+      })
+      .catch(() => {});
+  }
+
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <button type="button" className="btn btn-outline" onClick={handleNuevoTurno}>Nuevo turno</button>
+        {proximoTurno && (
+          <>
+            <button type="button" className="btn btn-outline" onClick={handleReprogramar}>Reprogramar</button>
+            <button type="button" className="btn btn-outline" onClick={handleCancelar}>Cancelar turno</button>
+          </>
+        )}
+        <button type="button" className="btn btn-outline" onClick={() => setContactando((v) => !v)}>Contactar</button>
+      </div>
+      {proximoTurno && (
+        <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 6 }}>
+          Próximo turno: {proximoTurno.fecha} {proximoTurno.horaInicio.slice(0, 5)} hs con {proximoTurno.medicoNombre}
+        </p>
+      )}
+      {contactando && <PanelContactar paciente={ficha.paciente} onCerrar={() => setContactando(false)} />}
+    </div>
+  );
+}
+
+function Ficha({ ficha, irAAgenda, onRecargar }) {
   return (
     <div style={{ marginTop: 24 }}>
       <div className="ficha-print-header">
@@ -40,6 +162,8 @@ function Ficha({ ficha }) {
           )}
         </div>
       </div>
+
+      <AccionesRapidasFicha ficha={ficha} irAAgenda={irAAgenda} onRecargar={onRecargar} />
 
       <h3 style={{ fontSize: 16, marginBottom: 10 }}>Turnos ({ficha.turnos.length})</h3>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 24 }}>
@@ -77,12 +201,23 @@ function Ficha({ ficha }) {
   );
 }
 
-export default function AdminBusquedaPacienteTab() {
+export default function AdminBusquedaPacienteTab({ irAAgenda }) {
+  const dispatch = useDispatch();
+  const pacienteAAbrir = useSelector((state) => state.admin.pacienteAAbrir);
   const [busqueda, setBusqueda] = useState('');
   const [resultados, setResultados] = useState([]);
   const [ficha, setFicha] = useState(null);
   const [error, setError] = useState(null);
   const [cargando, setCargando] = useState(false);
+
+  // Paciente elegido desde la búsqueda global (Ctrl+K): abrir su ficha directo, sin obligar
+  // a repetir la búsqueda acá.
+  useEffect(() => {
+    if (pacienteAAbrir) {
+      verFicha(pacienteAAbrir);
+      dispatch(setPacienteAAbrir(null));
+    }
+  }, [pacienteAAbrir, dispatch]);
 
   function handleBuscar(e) {
     e.preventDefault();
@@ -149,7 +284,7 @@ export default function AdminBusquedaPacienteTab() {
             <button className="btn btn-outline" onClick={() => window.print()}>Imprimir ficha</button>
           </div>
           <div id="ficha-imprimir">
-            <Ficha ficha={ficha} />
+            <Ficha ficha={ficha} irAAgenda={irAAgenda} onRecargar={() => verFicha(ficha.paciente.id)} />
           </div>
         </>
       )}

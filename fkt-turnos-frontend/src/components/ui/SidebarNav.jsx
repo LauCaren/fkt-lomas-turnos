@@ -65,6 +65,7 @@ export default function SidebarNav({ groups, active, onChange }) {
               >
                 {Icon && <Icon aria-hidden="true" />}
                 {item.label}
+                {item.badge > 0 && <span className="sidebar-badge">{item.badge}</span>}
               </button>
             );
           })}

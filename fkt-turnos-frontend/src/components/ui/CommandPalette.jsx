@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, User } from 'lucide-react';
 import Modal from './Modal';
 
 // Aplana los grupos {label?, items:[{id,label,icon}]} que cada panel ya arma para su
@@ -8,23 +8,46 @@ import Modal from './Modal';
 function aplanarItems(groups) {
   const items = [];
   groups.forEach((g) => {
-    g.items.forEach((item) => items.push({ ...item, grupo: g.label }));
+    g.items.forEach((item) => items.push({ ...item, grupo: g.label, tipo: 'nav' }));
   });
   return items;
 }
 
-export default function CommandPalette({ groups, onNavigate }) {
+/**
+ * `comandos`: acciones ejecutables además de navegar (ej. "Nuevo turno"), shape
+ * `{id, label, icon, run}`. `onBuscarPacientes`: si viene, además de secciones/comandos
+ * busca pacientes en vivo por nombre/DNI/teléfono (reusa el mismo endpoint que ya usa
+ * AdminBusquedaPacienteTab) y `onSeleccionarPaciente(paciente)` decide qué hacer con el
+ * resultado elegido — ninguno de los dos es obligatorio (ej. contador no tiene acceso
+ * clínico a pacientes, así que no los recibe).
+ */
+export default function CommandPalette({ groups, onNavigate, comandos = [], onBuscarPacientes, onSeleccionarPaciente }) {
   const [abierto, setAbierto] = useState(false);
   const [query, setQuery] = useState('');
   const [indiceActivo, setIndiceActivo] = useState(0);
+  const [pacientes, setPacientes] = useState([]);
+  const [buscandoPacientes, setBuscandoPacientes] = useState(false);
   const inputRef = useRef(null);
 
-  const items = useMemo(() => aplanarItems(groups), [groups]);
-  const resultados = useMemo(() => {
+  const itemsNav = useMemo(() => aplanarItems(groups), [groups]);
+  const itemsComando = useMemo(() => comandos.map((c) => ({ ...c, tipo: 'comando' })), [comandos]);
+
+  const resultadosLocales = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return items;
-    return items.filter((item) => item.label.toLowerCase().includes(q) || (item.grupo || '').toLowerCase().includes(q));
-  }, [items, query]);
+    const todos = [...itemsComando, ...itemsNav];
+    if (!q) return todos;
+    return todos.filter((item) => item.label.toLowerCase().includes(q) || (item.grupo || '').toLowerCase().includes(q));
+  }, [itemsNav, itemsComando, query]);
+
+  const resultadosPacientes = useMemo(() => pacientes.map((p) => ({
+    id: `paciente-${p.id}`,
+    tipo: 'paciente',
+    label: p.nombreCompleto,
+    grupo: `DNI ${p.dni} · ${p.telefono}`,
+    paciente: p,
+  })), [pacientes]);
+
+  const resultados = useMemo(() => [...resultadosLocales, ...resultadosPacientes], [resultadosLocales, resultadosPacientes]);
 
   useEffect(() => {
     function handleKeyDown(e) {
@@ -41,13 +64,38 @@ export default function CommandPalette({ groups, onNavigate }) {
     if (abierto) {
       setQuery('');
       setIndiceActivo(0);
+      setPacientes([]);
     }
   }, [abierto]);
 
   useEffect(() => { setIndiceActivo(0); }, [query]);
 
+  // Búsqueda en vivo de pacientes: debounced, y solo con texto suficiente para no pegarle
+  // a la API en cada tecla ni con una query vacía.
+  useEffect(() => {
+    const q = query.trim();
+    if (!onBuscarPacientes || q.length < 2) {
+      setPacientes([]);
+      return undefined;
+    }
+    setBuscandoPacientes(true);
+    const timer = setTimeout(() => {
+      onBuscarPacientes(q)
+        .then((data) => setPacientes(data || []))
+        .catch(() => setPacientes([]))
+        .finally(() => setBuscandoPacientes(false));
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [query, onBuscarPacientes]);
+
   function seleccionar(item) {
-    onNavigate(item.id);
+    if (item.tipo === 'comando') {
+      item.run();
+    } else if (item.tipo === 'paciente') {
+      onSeleccionarPaciente?.(item.paciente);
+    } else {
+      onNavigate(item.id);
+    }
     setAbierto(false);
   }
 
@@ -70,31 +118,32 @@ export default function CommandPalette({ groups, onNavigate }) {
         type="button"
         className="command-palette-trigger"
         onClick={() => setAbierto(true)}
-        title="Buscar una sección (Ctrl+K)"
+        title="Buscar (Ctrl+K)"
       >
         <Search aria-hidden="true" />
-        <span>Buscar sección…</span>
+        <span>Buscar{onBuscarPacientes ? ' paciente o sección' : ' sección'}…</span>
         <kbd>Ctrl K</kbd>
       </button>
 
       {abierto && (
         <Modal onCerrar={() => setAbierto(false)} labelledBy="paletaComandosTitulo" className="command-palette" initialFocusRef={inputRef}>
-          <h2 id="paletaComandosTitulo" className="sr-only">Buscar una sección del panel</h2>
+          <h2 id="paletaComandosTitulo" className="sr-only">Buscar una sección, un paciente o una acción</h2>
           <div className="command-palette-input">
             <Search aria-hidden="true" />
             <input
               ref={inputRef}
               type="text"
-              placeholder="Agenda, Caja, Reseñas…"
+              placeholder={onBuscarPacientes ? 'Paciente por nombre o DNI, o una sección…' : 'Agenda, Caja, Reseñas…'}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleInputKeyDown}
             />
           </div>
           <div className="command-palette-results">
-            {resultados.length === 0 && <p className="command-palette-empty">Sin resultados</p>}
+            {resultados.length === 0 && !buscandoPacientes && <p className="command-palette-empty">Sin resultados</p>}
+            {buscandoPacientes && resultadosPacientes.length === 0 && <p className="command-palette-empty">Buscando pacientes…</p>}
             {resultados.map((item, i) => {
-              const Icon = item.icon;
+              const Icon = item.tipo === 'paciente' ? User : item.icon;
               return (
                 <button
                   key={item.id}

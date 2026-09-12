@@ -15,9 +15,11 @@ export function ToastProvider({ children }) {
     }, SALIDA_MS);
   }, []);
 
-  const toast = useCallback((mensaje, { tipo = 'success' } = {}) => {
+  // `accion` (opcional): { texto, onClick } — para el patrón "Turno cancelado · Deshacer" en vez
+  // de un modal de confirmación aparte. Clickearla cierra el toast antes de ejecutar el callback.
+  const toast = useCallback((mensaje, { tipo = 'success', accion } = {}) => {
     const id = crypto.randomUUID();
-    setToasts((prev) => [...prev, { id, mensaje, tipo, saliendo: false }]);
+    setToasts((prev) => [...prev, { id, mensaje, tipo, accion, saliendo: false }]);
     const timer = setTimeout(() => {
       cerrar(id);
       timersRef.current.delete(id);
@@ -39,6 +41,15 @@ export function ToastProvider({ children }) {
           {toasts.map((t) => (
             <div key={t.id} className={`toast toast-${t.tipo}${t.saliendo ? ' toast-saliendo' : ''}`}>
               <span>{t.mensaje}</span>
+              {t.accion && (
+                <button
+                  type="button"
+                  className="toast-accion"
+                  onClick={() => { handleCerrarManual(t.id); t.accion.onClick(); }}
+                >
+                  {t.accion.texto}
+                </button>
+              )}
               <button type="button" className="toast-cerrar" aria-label="Cerrar aviso" onClick={() => handleCerrarManual(t.id)}>
                 &times;
               </button>

@@ -1,11 +1,18 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchAgenda, fetchFeriados, fetchMedicosAdmin, reservarParaPaciente, actualizarAsistencia, deshacerTurno } from './adminSlice';
+import {
+  fetchAgenda, fetchFeriados, fetchMedicosAdmin, reservarParaPaciente, actualizarAsistencia, deshacerTurno,
+  reprogramarTurno, cancelarTurnoStaff, setDniPrellenado, setObjetivoReprogramar,
+  fetchListaEsperaCompatibles, asignarTurnoAPaciente, enviarRecordatorioAhora,
+} from './adminSlice';
 import { fetchEspecialidades } from '../turnos/turnosSlice';
 import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../../constants/obrasSociales';
 import { hoyISO } from '../../utils/formato';
 import EstadoVacio from '../../components/EstadoVacio';
 import { useConfirm } from '../../components/ui/useConfirm';
+import { useToast } from '../../components/ui/useToast';
+import axiosClient from '../../api/axiosClient';
+import { leerPref, guardarPref } from '../../utils/uiPrefs';
 
 function parseISO(fechaISO) {
   const [y, m, d] = fechaISO.split('-').map(Number);
@@ -32,10 +39,84 @@ function etiquetaDia(fechaISO) {
 
 const PACIENTE_VACIO = { dni: '', nombreCompleto: '', telefono: '', obraSocial: '', email: '', motivoConsulta: '' };
 
-function FormularioReserva({ turno, onCancelar }) {
+const CONSULTA_MOBILE = '(max-width: 880px)';
+
+// Punto 23 del pedido de UX: en mobile, las grillas de Día/Semana dejan de ser legibles con
+// scroll horizontal — hay que pasar a una lista de tarjetas de verdad, no solo comprimir la
+// grilla de escritorio. Mismo breakpoint que ya usa .sidebar-nav en index.css.
+function useEsMobile() {
+  const [esMobile, setEsMobile] = useState(() => window.matchMedia(CONSULTA_MOBILE).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(CONSULTA_MOBILE);
+    function handler(e) { setEsMobile(e.matches); }
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return esMobile;
+}
+
+function TarjetaAgendaMobile({ turno, etiqueta, onSeleccionar, activo }) {
+  const disponible = turno.estado === 'DISPONIBLE';
+  const confirmado = turno.confirmacionPrevia === 'CONFIRMADO';
+  const ausente = turno.estadoAsistencia === 'AUSENTE';
+  const estadoBadge = disponible ? 'disponible' : ausente ? 'ausente' : confirmado ? 'confirmado' : 'reservado';
+  const estadoTexto = disponible ? 'Libre' : ausente ? 'Ausente' : confirmado ? 'Confirmado' : 'Reservado';
+  return (
+    <button
+      type="button"
+      className="card"
+      style={{
+        width: '100%', textAlign: 'left', padding: '12px 16px', display: 'flex',
+        justifyContent: 'space-between', alignItems: 'center', gap: 10,
+        border: activo ? '1.5px solid var(--teal)' : '1px solid var(--line)',
+      }}
+      onClick={() => onSeleccionar(turno.id)}
+    >
+      <span style={{ fontSize: 13.5 }}>{etiqueta} · {disponible ? 'Libre' : (turno.pacienteNombre || '').split(' ')[0]}</span>
+      <span className={`badge badge-${estadoBadge}`}>{estadoTexto}</span>
+    </button>
+  );
+}
+
+function FormularioReserva({ turno, onCancelar, dniInicial }) {
   const dispatch = useDispatch();
-  const [datos, setDatos] = useState(PACIENTE_VACIO);
+  const [datos, setDatos] = useState(() => (dniInicial ? { ...PACIENTE_VACIO, dni: dniInicial } : PACIENTE_VACIO));
   const [enviando, setEnviando] = useState(false);
+  const [pacienteEncontrado, setPacienteEncontrado] = useState(null);
+  const [buscandoDni, setBuscandoDni] = useState(false);
+
+  // Se consume una sola vez: si el DNI llegó prellenado desde "Nuevo turno" en la ficha del
+  // paciente, no debe quedar pegado para la próxima reserva por teléfono que abra cualquier
+  // secretaria en esta pantalla.
+  useEffect(() => {
+    if (dniInicial) dispatch(setDniPrellenado(null));
+  }, [dniInicial, dispatch]);
+
+  // Autocompletar por DNI (punto 7 del pedido): evita que la secretaria tenga que volver a
+  // preguntar nombre/teléfono si el paciente ya está registrado. Solo dispara con un DNI
+  // completo (7 u 8 dígitos, mismo patrón que valida el backend) y con un debounce para no
+  // pegarle a la API en cada tecla.
+  useEffect(() => {
+    const dni = datos.dni.trim();
+    if (!/^\d{7,8}$/.test(dni)) {
+      setPacienteEncontrado(null);
+      return undefined;
+    }
+    setBuscandoDni(true);
+    const timer = setTimeout(() => {
+      axiosClient.get('/api/admin/pacientes/buscar', { params: { q: dni } })
+        .then(({ data }) => {
+          const match = data.find((p) => p.dni === dni);
+          setPacienteEncontrado(match || null);
+          if (match) {
+            setDatos((prev) => ({ ...prev, nombreCompleto: match.nombreCompleto, telefono: match.telefono }));
+          }
+        })
+        .catch(() => setPacienteEncontrado(null))
+        .finally(() => setBuscandoDni(false));
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [datos.dni]);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -57,6 +138,12 @@ function FormularioReserva({ turno, onCancelar }) {
           <input id="agendaReservaNombre" required value={datos.nombreCompleto} onChange={(e) => setDatos({ ...datos, nombreCompleto: e.target.value })} />
         </div>
       </div>
+      {buscandoDni && <p style={{ fontSize: 12.5, color: 'var(--muted)', margin: 0 }}>Buscando paciente…</p>}
+      {!buscandoDni && pacienteEncontrado && (
+        <p style={{ fontSize: 12.5, color: 'var(--teal-dark)', margin: 0 }}>
+          Paciente existente encontrado — se completaron sus datos automáticamente.
+        </p>
+      )}
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
         <div className="field" style={{ marginBottom: 0, flex: '1 1 160px' }}>
           <label htmlFor="agendaReservaTelefono">Teléfono</label>
@@ -92,7 +179,7 @@ function FormularioReserva({ turno, onCancelar }) {
   );
 }
 
-function DetalleTurno({ turno, onCerrar }) {
+function DetalleTurno({ turno, onCerrar, agendaCompleta, dniPrellenado }) {
   if (turno.estado === 'DISPONIBLE') {
     return (
       <div className="card" style={{ marginTop: 16 }}>
@@ -100,7 +187,8 @@ function DetalleTurno({ turno, onCerrar }) {
           {etiquetaDia(turno.fecha)} · {turno.horaInicio.slice(0, 5)} a {turno.horaFin.slice(0, 5)} · {turno.medicoNombre}
         </div>
         <span className="badge badge-disponible">Disponible</span>
-        <FormularioReserva turno={turno} onCancelar={onCerrar} />
+        <ListaEsperaParaSlot turno={turno} />
+        <FormularioReserva turno={turno} onCancelar={onCerrar} dniInicial={dniPrellenado} />
       </div>
     );
   }
@@ -121,9 +209,12 @@ function DetalleTurno({ turno, onCerrar }) {
             )}
           </div>
           <CheckInBotones turno={turno} />
+          <RecordatorioEnAgenda turno={turno} />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
           <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={onCerrar}>Cerrar</button>
+          <BotonReprogramar turno={turno} agendaCompleta={agendaCompleta} />
+          <BotonCancelarTurno turno={turno} />
           <BotonDeshacer turno={turno} />
         </div>
       </div>
@@ -146,6 +237,10 @@ function LeyendaAgenda() {
         <span style={{ width: 12, height: 12, borderRadius: 3, background: 'var(--teal)', boxShadow: 'inset 0 0 0 2px var(--green)', display: 'inline-block' }} />
         Confirmó que viene
       </span>
+      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span style={{ width: 12, height: 12, borderRadius: 3, background: 'var(--teal)', boxShadow: 'inset 0 0 0 2px var(--red)', display: 'inline-block' }} />
+        Ausente
+      </span>
     </div>
   );
 }
@@ -155,12 +250,13 @@ function CeldaAgenda({ turno, feriado, onSeleccionar }) {
   if (!turno) return <div className="agenda-celda" />;
   const disponible = turno.estado === 'DISPONIBLE';
   const confirmado = turno.confirmacionPrevia === 'CONFIRMADO';
+  const ausente = turno.estadoAsistencia === 'AUSENTE';
   return (
     <button
       type="button"
-      className={`agenda-celda-btn ${disponible ? 'agenda-celda-disponible' : 'agenda-celda-reservado'}${confirmado ? ' agenda-celda-confirmado' : ''}`}
+      className={`agenda-celda-btn ${disponible ? 'agenda-celda-disponible' : 'agenda-celda-reservado'}${confirmado ? ' agenda-celda-confirmado' : ''}${ausente ? ' agenda-celda-ausente' : ''}`}
       onClick={() => onSeleccionar(turno.id)}
-      title={disponible ? 'Disponible' : `${turno.pacienteNombre} (${turno.pacienteDni})${confirmado ? ' · confirmó que viene' : ''}`}
+      title={disponible ? 'Disponible' : `${turno.pacienteNombre} (${turno.pacienteDni})${confirmado ? ' · confirmó que viene' : ''}${ausente ? ' · ausente' : ''}`}
     >
       {disponible ? 'Libre' : (turno.pacienteNombre || '').split(' ')[0]}
     </button>
@@ -233,7 +329,200 @@ function BotonDeshacer({ turno }) {
   );
 }
 
-function VistaLista({ agenda, agendaCargando, medicoId, reservandoId, setReservandoId }) {
+function BotonCancelarTurno({ turno }) {
+  const dispatch = useDispatch();
+  const confirmar = useConfirm();
+  const toast = useToast();
+
+  async function handleClick() {
+    const ok = await confirmar({
+      titulo: 'Cancelar turno',
+      detalle: `Vas a cancelar el turno de ${turno.pacienteNombre} del ${etiquetaDia(turno.fecha)} a las ${turno.horaInicio.slice(0, 5)}. Se le va a avisar por su canal preferido.`,
+      confirmarTexto: 'Cancelar turno',
+      peligroso: true,
+    });
+    if (!ok) return;
+    dispatch(cancelarTurnoStaff(turno.id)).unwrap()
+      .then(() => {
+        toast('Turno cancelado', {
+          accion: { texto: 'Deshacer', onClick: () => dispatch(deshacerTurno(turno.id)) },
+        });
+      })
+      .catch(() => {});
+  }
+
+  return (
+    <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={handleClick}>
+      Cancelar turno
+    </button>
+  );
+}
+
+function ListaEsperaParaSlot({ turno }) {
+  const dispatch = useDispatch();
+  const toast = useToast();
+  const [abierto, setAbierto] = useState(false);
+  const [cargando, setCargando] = useState(false);
+  const [compatibles, setCompatibles] = useState(null);
+  const [asignandoId, setAsignandoId] = useState(null);
+
+  function handleAbrir() {
+    setAbierto(true);
+    if (compatibles !== null) return;
+    setCargando(true);
+    dispatch(fetchListaEsperaCompatibles({ medicoId: turno.medicoId, fecha: turno.fecha })).unwrap()
+      .then((data) => setCompatibles(data))
+      .catch(() => setCompatibles([]))
+      .finally(() => setCargando(false));
+  }
+
+  function handleAsignar(pacienteId) {
+    setAsignandoId(pacienteId);
+    dispatch(asignarTurnoAPaciente({ turnoId: turno.id, pacienteId })).unwrap()
+      .then(() => toast('Turno asignado correctamente'))
+      .catch(() => setAsignandoId(null));
+  }
+
+  if (!abierto) {
+    return (
+      <button type="button" className="btn btn-outline" style={{ padding: '5px 12px', fontSize: 12.5, marginTop: 6 }} onClick={handleAbrir}>
+        ¿Hay alguien esperando este horario?
+      </button>
+    );
+  }
+
+  return (
+    <div style={{ marginTop: 6 }}>
+      {cargando && <p style={{ fontSize: 12.5, color: 'var(--muted)' }}>Buscando en la lista de espera…</p>}
+      {!cargando && compatibles?.length === 0 && (
+        <p style={{ fontSize: 12.5, color: 'var(--muted)' }}>Nadie anotado en la lista de espera para este médico este día.</p>
+      )}
+      {!cargando && compatibles?.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <p style={{ fontSize: 12.5, color: 'var(--teal-dark)', fontWeight: 600 }}>
+            Hay {compatibles.length} paciente{compatibles.length === 1 ? '' : 's'} esperando este horario
+          </p>
+          {compatibles.map((p) => (
+            <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, fontSize: 13 }}>
+              <span>{p.pacienteNombre} · {p.pacienteTelefono}</span>
+              <button
+                type="button"
+                className="btn btn-outline"
+                style={{ padding: '4px 10px', fontSize: 12 }}
+                disabled={asignandoId === p.pacienteId}
+                onClick={() => handleAsignar(p.pacienteId)}
+              >
+                Asignar
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RecordatorioEnAgenda({ turno }) {
+  const dispatch = useDispatch();
+  const toast = useToast();
+  const [enviando, setEnviando] = useState(false);
+
+  if (turno.estadoRecordatorio === 'ENVIADO') {
+    return <span className="badge badge-confirmado" style={{ marginTop: 6, display: 'inline-block' }}>Recordatorio enviado</span>;
+  }
+
+  function handleEnviar() {
+    setEnviando(true);
+    dispatch(enviarRecordatorioAhora(turno.id)).unwrap()
+      .then((r) => toast(r.recordatorio.estado === 'ENVIADO' ? 'Recordatorio enviado' : 'No se pudo enviar por ningún canal', { tipo: r.recordatorio.estado === 'ENVIADO' ? 'success' : 'error' }))
+      .catch(() => {})
+      .finally(() => setEnviando(false));
+  }
+
+  return (
+    <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
+      {turno.estadoRecordatorio === 'FALLIDO' && <span className="badge badge-ausente">Recordatorio falló</span>}
+      <button type="button" className="btn btn-outline" style={{ padding: '4px 10px', fontSize: 12 }} disabled={enviando} onClick={handleEnviar}>
+        {enviando && <span className="spinner" aria-hidden="true" />}
+        {enviando ? 'Enviando…' : 'Enviar recordatorio'}
+      </button>
+    </div>
+  );
+}
+
+function BotonReprogramar({ turno, agendaCompleta }) {
+  const dispatch = useDispatch();
+  const toast = useToast();
+  const [abierto, setAbierto] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+
+  const destinosDisponibles = useMemo(() => {
+    if (!abierto) return [];
+    return agendaCompleta
+      .filter((t) => t.estado === 'DISPONIBLE' && t.medicoId === turno.medicoId && t.id !== turno.id)
+      .sort((a, b) => (a.fecha + a.horaInicio).localeCompare(b.fecha + b.horaInicio));
+  }, [abierto, agendaCompleta, turno.medicoId, turno.id]);
+
+  function elegirDestino(destino) {
+    setEnviando(true);
+    dispatch(reprogramarTurno({ turnoOrigenId: turno.id, turnoDestinoId: destino.id })).unwrap()
+      .then(() => {
+        setAbierto(false);
+        setEnviando(false);
+        toast('Turno reprogramado correctamente', {
+          accion: {
+            texto: 'Deshacer',
+            onClick: () => {
+              dispatch(deshacerTurno(turno.id));
+              dispatch(deshacerTurno(destino.id));
+            },
+          },
+        });
+      })
+      .catch(() => setEnviando(false));
+  }
+
+  if (!abierto) {
+    return (
+      <button type="button" className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => setAbierto(true)}>
+        Reprogramar
+      </button>
+    );
+  }
+
+  return (
+    <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--line)', flex: '1 1 100%' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <strong style={{ fontSize: 13.5 }}>Elegí el horario nuevo</strong>
+        <button type="button" className="btn btn-outline" style={{ padding: '4px 10px', fontSize: 12.5 }} onClick={() => setAbierto(false)} disabled={enviando}>
+          Cancelar
+        </button>
+      </div>
+      {destinosDisponibles.length === 0 ? (
+        <p style={{ fontSize: 13, color: 'var(--muted)' }}>
+          No hay otros horarios libres de este médico cargados en este rango. Cambiá de día o semana para ver más opciones.
+        </p>
+      ) : (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {destinosDisponibles.map((d) => (
+            <button
+              key={d.id}
+              type="button"
+              className="btn btn-outline"
+              style={{ padding: '6px 12px', fontSize: 12.5 }}
+              disabled={enviando}
+              onClick={() => elegirDestino(d)}
+            >
+              {etiquetaDia(d.fecha)} · {d.horaInicio.slice(0, 5)}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function VistaLista({ agenda, agendaCompleta, agendaCargando, medicoId, reservandoId, setReservandoId, dniPrellenado }) {
   return (
     <>
       {agendaCargando && (
@@ -263,6 +552,7 @@ function VistaLista({ agenda, agendaCargando, medicoId, reservandoId, setReserva
                     El paciente anterior avisó que no venía — horario libre otra vez
                   </div>
                 )}
+                {t.estado === 'DISPONIBLE' && <ListaEsperaParaSlot turno={t} />}
                 {t.estado === 'RESERVADO' && (
                   <div style={{ marginTop: 8, fontSize: 14 }}>
                     <div><strong>{t.pacienteNombre}</strong> · DNI {t.pacienteDni}</div>
@@ -277,6 +567,7 @@ function VistaLista({ agenda, agendaCargando, medicoId, reservandoId, setReserva
                       </div>
                     )}
                     <CheckInBotones turno={t} />
+                    <RecordatorioEnAgenda turno={t} />
                   </div>
                 )}
               </div>
@@ -289,10 +580,12 @@ function VistaLista({ agenda, agendaCargando, medicoId, reservandoId, setReserva
                     Reservar por teléfono
                   </button>
                 )}
+                {t.estado === 'RESERVADO' && <BotonReprogramar turno={t} agendaCompleta={agendaCompleta} />}
+                {t.estado === 'RESERVADO' && <BotonCancelarTurno turno={t} />}
                 <BotonDeshacer turno={t} />
               </div>
             </div>
-            {reservandoId === t.id && <FormularioReserva turno={t} onCancelar={() => setReservandoId(null)} />}
+            {reservandoId === t.id && <FormularioReserva turno={t} onCancelar={() => setReservandoId(null)} dniInicial={dniPrellenado} />}
           </div>
         ))}
       </div>
@@ -300,7 +593,8 @@ function VistaLista({ agenda, agendaCargando, medicoId, reservandoId, setReserva
   );
 }
 
-function VistaSemana({ agenda, agendaCargando, feriados, medicoId, medicos, fecha, denso }) {
+function VistaSemana({ agenda, agendaCompleta, agendaCargando, feriados, medicoId, medicos, fecha, denso, dniPrellenado }) {
+  const esMobile = useEsMobile();
   const [seleccionadoId, setSeleccionadoId] = useState(null);
   // Deriva del array vivo (no guarda una copia del turno al clickear la celda) — así
   // el panel de detalle refleja al toque los cambios de check-in/deshacer, en vez de
@@ -329,6 +623,10 @@ function VistaSemana({ agenda, agendaCargando, feriados, medicoId, medicos, fech
     return mapa;
   }, [agenda]);
 
+  const turnosOrdenados = useMemo(() => (
+    [...agenda].sort((a, b) => (a.fecha + a.horaInicio).localeCompare(b.fecha + b.horaInicio))
+  ), [agenda]);
+
   if (!medicoId) {
     return <EstadoVacio titulo="Elegí un médico" subtitulo="Seleccioná un médico arriba para ver la vista semanal en detalle." />;
   }
@@ -339,47 +637,62 @@ function VistaSemana({ agenda, agendaCargando, feriados, medicoId, medicos, fech
 
   return (
     <div>
-      <div style={{ overflowX: 'auto' }}>
-        <div className={denso ? 'agenda-densa' : undefined} style={{ display: 'grid', gridTemplateColumns: '64px repeat(7, minmax(96px, 1fr))', minWidth: 760, border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden' }}>
-          <div style={{ background: 'var(--bg-soft)', borderBottom: '1px solid var(--line)' }} />
-          {dias.map((dia) => (
-            <div key={dia} style={{
-              padding: '10px 6px', textAlign: 'center', fontSize: 12.5, fontWeight: 600,
-              background: feriadosPorDia[dia] ? 'var(--red-tint)' : 'var(--bg-soft)',
-              borderBottom: '1px solid var(--line)', borderLeft: '1px solid var(--line)',
-            }}>
-              {etiquetaDia(dia)}
-              {feriadosPorDia[dia] && (
-                <div style={{ fontSize: 10.5, fontWeight: 500, color: 'var(--red)', marginTop: 2 }}>{feriadosPorDia[dia].nombre}</div>
-              )}
-            </div>
-          ))}
-
-          {horarios.map((hora) => (
-            <Fragment key={hora}>
-              <div style={{ padding: '8px 6px', fontSize: 12, color: 'var(--muted)', borderTop: '1px solid var(--line)', textAlign: 'right' }}>
-                {hora}
-              </div>
-              {dias.map((dia) => (
-                <CeldaAgenda
-                  key={`${dia}-${hora}`}
-                  turno={porDiaYHora[`${dia}_${hora}`]}
-                  feriado={feriadosPorDia[dia]}
-                  onSeleccionar={setSeleccionadoId}
-                />
-              ))}
-            </Fragment>
+      {esMobile ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {turnosOrdenados.map((t) => (
+            <TarjetaAgendaMobile
+              key={t.id}
+              turno={t}
+              etiqueta={`${etiquetaDia(t.fecha)} ${t.horaInicio.slice(0, 5)}`}
+              activo={t.id === seleccionadoId}
+              onSeleccionar={setSeleccionadoId}
+            />
           ))}
         </div>
-      </div>
-      <LeyendaAgenda />
+      ) : (
+        <div style={{ overflowX: 'auto' }}>
+          <div className={denso ? 'agenda-densa' : undefined} style={{ display: 'grid', gridTemplateColumns: '64px repeat(7, minmax(96px, 1fr))', minWidth: 760, border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden' }}>
+            <div style={{ background: 'var(--bg-soft)', borderBottom: '1px solid var(--line)' }} />
+            {dias.map((dia) => (
+              <div key={dia} style={{
+                padding: '10px 6px', textAlign: 'center', fontSize: 12.5, fontWeight: 600,
+                background: feriadosPorDia[dia] ? 'var(--red-tint)' : 'var(--bg-soft)',
+                borderBottom: '1px solid var(--line)', borderLeft: '1px solid var(--line)',
+              }}>
+                {etiquetaDia(dia)}
+                {feriadosPorDia[dia] && (
+                  <div style={{ fontSize: 10.5, fontWeight: 500, color: 'var(--red)', marginTop: 2 }}>{feriadosPorDia[dia].nombre}</div>
+                )}
+              </div>
+            ))}
 
-      {seleccionado && <DetalleTurno turno={seleccionado} onCerrar={() => setSeleccionadoId(null)} />}
+            {horarios.map((hora) => (
+              <Fragment key={hora}>
+                <div style={{ padding: '8px 6px', fontSize: 12, color: 'var(--muted)', borderTop: '1px solid var(--line)', textAlign: 'right' }}>
+                  {hora}
+                </div>
+                {dias.map((dia) => (
+                  <CeldaAgenda
+                    key={`${dia}-${hora}`}
+                    turno={porDiaYHora[`${dia}_${hora}`]}
+                    feriado={feriadosPorDia[dia]}
+                    onSeleccionar={setSeleccionadoId}
+                  />
+                ))}
+              </Fragment>
+            ))}
+          </div>
+        </div>
+      )}
+      {!esMobile && <LeyendaAgenda />}
+
+      {seleccionado && <DetalleTurno turno={seleccionado} onCerrar={() => setSeleccionadoId(null)} agendaCompleta={agendaCompleta} dniPrellenado={dniPrellenado} />}
     </div>
   );
 }
 
-function VistaDia({ agenda, agendaCargando, feriados, medicos, medicoId, fecha, denso }) {
+function VistaDia({ agenda, agendaCompleta, agendaCargando, feriados, medicos, medicoId, fecha, denso, dniPrellenado }) {
+  const esMobile = useEsMobile();
   const [seleccionadoId, setSeleccionadoId] = useState(null);
   const seleccionado = agenda.find((t) => t.id === seleccionadoId) || null;
 
@@ -402,64 +715,85 @@ function VistaDia({ agenda, agendaCargando, feriados, medicos, medicoId, fecha, 
 
   const feriadoDelDia = feriados.find((f) => f.fecha === fecha);
 
+  const turnosOrdenados = useMemo(() => (
+    [...agenda].sort((a, b) => (a.horaInicio + a.medicoNombre).localeCompare(b.horaInicio + b.medicoNombre))
+  ), [agenda]);
+
   if (!agendaCargando && (horarios.length === 0 || medicosColumna.length === 0)) {
     return <EstadoVacio titulo="Sin turnos generados" subtitulo="No hay turnos generados para este día." />;
   }
 
   return (
     <div>
-      <div style={{ overflowX: 'auto' }}>
-        <div className={denso ? 'agenda-densa' : undefined} style={{
-          display: 'grid',
-          gridTemplateColumns: `64px repeat(${medicosColumna.length}, minmax(120px, 1fr))`,
-          minWidth: 120 * medicosColumna.length + 64,
-          border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden',
-        }}>
-          <div style={{ background: 'var(--bg-soft)', borderBottom: '1px solid var(--line)' }} />
-          {medicosColumna.map((m) => (
-            <div key={m.id} style={{
-              padding: '10px 6px', textAlign: 'center', fontSize: 12.5, fontWeight: 600,
-              background: feriadoDelDia ? 'var(--red-tint)' : 'var(--bg-soft)',
-              borderBottom: '1px solid var(--line)', borderLeft: '1px solid var(--line)',
-            }}>
-              {m.nombreCompleto}
-            </div>
-          ))}
-
-          {horarios.map((hora) => (
-            <Fragment key={hora}>
-              <div style={{ padding: '8px 6px', fontSize: 12, color: 'var(--muted)', borderTop: '1px solid var(--line)', textAlign: 'right' }}>
-                {hora}
-              </div>
-              {medicosColumna.map((m) => (
-                <CeldaAgenda
-                  key={`${m.id}-${hora}`}
-                  turno={porMedicoYHora[`${m.id}_${hora}`]}
-                  feriado={feriadoDelDia}
-                  onSeleccionar={setSeleccionadoId}
-                />
-              ))}
-            </Fragment>
+      {esMobile ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {turnosOrdenados.map((t) => (
+            <TarjetaAgendaMobile
+              key={t.id}
+              turno={t}
+              etiqueta={`${t.horaInicio.slice(0, 5)} · ${t.medicoNombre}`}
+              activo={t.id === seleccionadoId}
+              onSeleccionar={setSeleccionadoId}
+            />
           ))}
         </div>
-      </div>
-      <LeyendaAgenda />
+      ) : (
+        <div style={{ overflowX: 'auto' }}>
+          <div className={denso ? 'agenda-densa' : undefined} style={{
+            display: 'grid',
+            gridTemplateColumns: `64px repeat(${medicosColumna.length}, minmax(120px, 1fr))`,
+            minWidth: 120 * medicosColumna.length + 64,
+            border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden',
+          }}>
+            <div style={{ background: 'var(--bg-soft)', borderBottom: '1px solid var(--line)' }} />
+            {medicosColumna.map((m) => (
+              <div key={m.id} style={{
+                padding: '10px 6px', textAlign: 'center', fontSize: 12.5, fontWeight: 600,
+                background: feriadoDelDia ? 'var(--red-tint)' : 'var(--bg-soft)',
+                borderBottom: '1px solid var(--line)', borderLeft: '1px solid var(--line)',
+              }}>
+                {m.nombreCompleto}
+              </div>
+            ))}
 
-      {seleccionado && <DetalleTurno turno={seleccionado} onCerrar={() => setSeleccionadoId(null)} />}
+            {horarios.map((hora) => (
+              <Fragment key={hora}>
+                <div style={{ padding: '8px 6px', fontSize: 12, color: 'var(--muted)', borderTop: '1px solid var(--line)', textAlign: 'right' }}>
+                  {hora}
+                </div>
+                {medicosColumna.map((m) => (
+                  <CeldaAgenda
+                    key={`${m.id}-${hora}`}
+                    turno={porMedicoYHora[`${m.id}_${hora}`]}
+                    feriado={feriadoDelDia}
+                    onSeleccionar={setSeleccionadoId}
+                  />
+                ))}
+              </Fragment>
+            ))}
+          </div>
+        </div>
+      )}
+      {!esMobile && <LeyendaAgenda />}
+
+      {seleccionado && <DetalleTurno turno={seleccionado} onCerrar={() => setSeleccionadoId(null)} agendaCompleta={agendaCompleta} dniPrellenado={dniPrellenado} />}
     </div>
   );
 }
 
 export default function AdminAgendaTab() {
   const dispatch = useDispatch();
-  const { medicos, agenda, agendaCargando, feriados, error, mensajeExito } = useSelector((state) => state.admin);
+  const { medicos, agenda, agendaCargando, feriados, error, mensajeExito, dniPrellenado, objetivoReprogramar } = useSelector((state) => state.admin);
   const especialidades = useSelector((state) => state.turnos.especialidades);
-  const [fecha, setFecha] = useState(hoyISO());
-  const [especialidadId, setEspecialidadId] = useState('');
-  const [medicoId, setMedicoId] = useState('');
+  const [fecha, setFecha] = useState(() => objetivoReprogramar?.fecha || hoyISO());
+  const [especialidadId, setEspecialidadId] = useState(() => leerPref('agenda.especialidadId', ''));
+  const [medicoId, setMedicoId] = useState(() => (
+    objetivoReprogramar ? String(objetivoReprogramar.medicoId) : leerPref('agenda.medicoId', '')
+  ));
   const [reservandoId, setReservandoId] = useState(null);
-  const [vista, setVista] = useState('lista');
-  const [denso, setDenso] = useState(false);
+  const [vista, setVista] = useState(() => leerPref('agenda.vista', 'lista'));
+  const [denso, setDenso] = useState(() => leerPref('agenda.denso', false));
+  const [filtroEstado, setFiltroEstado] = useState('todos');
 
   const medicosFiltrados = useMemo(() => {
     if (!especialidadId) return medicos;
@@ -483,6 +817,13 @@ export default function AdminAgendaTab() {
     dispatch(fetchAgenda({ desde: rango.desde, hasta: rango.hasta, medicoId, especialidadId }));
     dispatch(fetchFeriados({ desde: rango.desde, hasta: rango.hasta }));
   }, [rango.desde, rango.hasta, medicoId, especialidadId, dispatch]);
+
+  // Preferencias de pantalla (punto 22 del pedido de UX) — todo menos la fecha, que siempre
+  // arranca en hoy: la secretaria no debería tener que reconfigurar vista/médico cada vez.
+  useEffect(() => { guardarPref('agenda.vista', vista); }, [vista]);
+  useEffect(() => { guardarPref('agenda.denso', denso); }, [denso]);
+  useEffect(() => { guardarPref('agenda.medicoId', medicoId); }, [medicoId]);
+  useEffect(() => { guardarPref('agenda.especialidadId', especialidadId); }, [especialidadId]);
 
   // Flechas para moverse de día (o de semana, en vista Semana) sin tocar el mouse — pensado
   // para secretaría que pasa horas mirando esta pantalla. Se ignora si el foco está en un
@@ -515,6 +856,49 @@ export default function AdminAgendaTab() {
 
   const feriadoDelDia = feriados.find((f) => f.fecha === fecha);
 
+  // Indicadores accionables arriba de la agenda: cuentan sobre TODO lo cargado (el rango
+  // completo, día o semana), independiente del filtro elegido, para que el contador de cada
+  // chip no cambie cuando se clickea otro.
+  const contadores = useMemo(() => {
+    const reservados = agenda.filter((t) => t.estado === 'RESERVADO');
+    return {
+      total: agenda.length,
+      disponibles: agenda.filter((t) => t.estado === 'DISPONIBLE').length,
+      reservados: reservados.length,
+      confirmados: reservados.filter((t) => t.confirmacionPrevia === 'CONFIRMADO').length,
+      pendientesConfirmacion: reservados.filter((t) => t.confirmacionPrevia === 'SIN_RESPUESTA').length,
+      llegaron: agenda.filter((t) => t.estadoAsistencia === 'LLEGO').length,
+      ausentes: agenda.filter((t) => t.estadoAsistencia === 'AUSENTE').length,
+    };
+  }, [agenda]);
+
+  const agendaFiltrada = useMemo(() => {
+    switch (filtroEstado) {
+      case 'disponible': return agenda.filter((t) => t.estado === 'DISPONIBLE');
+      case 'reservado': return agenda.filter((t) => t.estado === 'RESERVADO');
+      case 'confirmado': return agenda.filter((t) => t.estado === 'RESERVADO' && t.confirmacionPrevia === 'CONFIRMADO');
+      case 'pendiente_confirmacion': return agenda.filter((t) => t.estado === 'RESERVADO' && t.confirmacionPrevia === 'SIN_RESPUESTA');
+      case 'llego': return agenda.filter((t) => t.estadoAsistencia === 'LLEGO');
+      case 'ausente': return agenda.filter((t) => t.estadoAsistencia === 'AUSENTE');
+      default: return agenda;
+    }
+  }, [agenda, filtroEstado]);
+
+  const chipsEstado = [
+    { key: 'todos', label: 'Turnos', count: contadores.total, colorClass: '' },
+    { key: 'disponible', label: 'Libres', count: contadores.disponibles, colorClass: 'badge-disponible' },
+    { key: 'reservado', label: 'Reservados', count: contadores.reservados, colorClass: 'badge-reservado' },
+    { key: 'confirmado', label: 'Confirmados', count: contadores.confirmados, colorClass: 'badge-confirmado' },
+    { key: 'pendiente_confirmacion', label: 'Pend. confirmación', count: contadores.pendientesConfirmacion, colorClass: 'badge-pendiente' },
+    { key: 'llego', label: 'Llegaron', count: contadores.llegaron, colorClass: 'badge-llego' },
+    { key: 'ausente', label: 'Ausentes', count: contadores.ausentes, colorClass: 'badge-ausente' },
+  ].filter((chip) => chip.key === 'todos' || chip.count > 0);
+
+  const tiraFechas = useMemo(() => {
+    if (vista === 'semana') return [];
+    return Array.from({ length: 7 }, (_, i) => sumarDias(fecha, i - 3));
+  }, [fecha, vista]);
+
   const resumenDia = useMemo(() => {
     if (vista === 'semana') return null;
     const reservados = agenda.filter((t) => t.estado === 'RESERVADO');
@@ -532,6 +916,21 @@ export default function AdminAgendaTab() {
     <div>
       {error && <div className="alert alert-error" role="alert">{error}</div>}
       {mensajeExito && <div className="alert alert-success" role="status">{mensajeExito}</div>}
+      {dniPrellenado && (
+        <div className="alert" style={{ background: 'var(--teal-tint)', color: 'var(--teal-dark)', border: '1px solid var(--teal)' }}>
+          Elegí un horario libre para reservarle un turno al paciente con DNI {dniPrellenado} — sus datos se van a completar solos.
+        </div>
+      )}
+      {objetivoReprogramar && (
+        <div className="alert" style={{ background: 'var(--teal-tint)', color: 'var(--teal-dark)', border: '1px solid var(--teal)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+          <span>
+            Buscá el turno de <strong>{objetivoReprogramar.pacienteNombre}</strong> del {etiquetaDia(objetivoReprogramar.fecha)} a las {objetivoReprogramar.horaInicio.slice(0, 5)} y tocá "Reprogramar".
+          </span>
+          <button type="button" className="btn btn-outline" style={{ padding: '4px 10px', fontSize: 12.5, flexShrink: 0 }} onClick={() => dispatch(setObjetivoReprogramar(null))}>
+            Entendido
+          </button>
+        </div>
+      )}
 
       {resumenDia && !agendaCargando && (
         <div className="card" style={{ marginBottom: 20, display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
@@ -574,8 +973,58 @@ export default function AdminAgendaTab() {
             Vista compacta
           </button>
         )}
+        <button
+          type="button"
+          className="btn btn-outline"
+          style={{ padding: '7px 16px', fontSize: 13.5, fontWeight: 700, marginLeft: 'auto' }}
+          onClick={() => setFecha(hoyISO())}
+          title="Volver a hoy (tecla T)"
+        >
+          Hoy
+        </button>
       </div>
       <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 16 }}>← → para cambiar de {vista === 'semana' ? 'semana' : 'día'} · T para volver a hoy</p>
+
+      {tiraFechas.length > 0 && (
+        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', marginBottom: 16, paddingBottom: 2 }}>
+          {tiraFechas.map((d) => {
+            const esSeleccionado = d === fecha;
+            const esHoy = d === hoyISO();
+            return (
+              <button
+                key={d}
+                type="button"
+                className={`btn ${esSeleccionado ? 'btn-primary' : 'btn-outline'}`}
+                style={{ padding: '6px 12px', fontSize: 12.5, flex: '0 0 auto', fontWeight: esHoy ? 700 : 500 }}
+                onClick={() => setFecha(d)}
+              >
+                {etiquetaDia(d)}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      <div className="stagger" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+        {chipsEstado.map((chip) => (
+          <button
+            key={chip.key}
+            type="button"
+            className={`badge ${chip.colorClass}`}
+            style={{
+              cursor: 'pointer',
+              fontSize: 13,
+              padding: '6px 14px',
+              border: filtroEstado === chip.key ? '1.5px solid currentColor' : '1.5px solid transparent',
+              background: chip.colorClass ? undefined : 'var(--bg-soft)',
+              color: chip.colorClass ? undefined : 'var(--ink)',
+            }}
+            onClick={() => setFiltroEstado(chip.key)}
+          >
+            {chip.label} · {chip.count}
+          </button>
+        ))}
+      </div>
 
       <div className="filter-bar">
         <div className="field">
@@ -604,14 +1053,25 @@ export default function AdminAgendaTab() {
         </div>
       )}
 
-      {vista === 'lista' && (
-        <VistaLista agenda={agenda} agendaCargando={agendaCargando} medicoId={medicoId} reservandoId={reservandoId} setReservandoId={setReservandoId} />
+      {filtroEstado !== 'todos' && !agendaCargando && agendaFiltrada.length === 0 && (
+        <EstadoVacio
+          titulo="Ningún turno coincide con este filtro"
+          subtitulo="Probá con otro estado o volvé a ver todos los turnos."
+          accion={<button type="button" className="btn btn-outline" onClick={() => setFiltroEstado('todos')}>Ver todos</button>}
+        />
       )}
-      {vista === 'dia' && (
-        <VistaDia agenda={agenda} agendaCargando={agendaCargando} feriados={feriados} medicos={medicos} medicoId={medicoId} fecha={fecha} denso={denso} />
-      )}
-      {vista === 'semana' && (
-        <VistaSemana agenda={agenda} agendaCargando={agendaCargando} feriados={feriados} medicoId={medicoId} medicos={medicos} fecha={fecha} denso={denso} />
+      {(filtroEstado === 'todos' || agendaFiltrada.length > 0) && (
+        <>
+          {vista === 'lista' && (
+            <VistaLista agenda={agendaFiltrada} agendaCompleta={agenda} agendaCargando={agendaCargando} medicoId={medicoId} reservandoId={reservandoId} setReservandoId={setReservandoId} dniPrellenado={dniPrellenado} />
+          )}
+          {vista === 'dia' && (
+            <VistaDia agenda={agendaFiltrada} agendaCompleta={agenda} agendaCargando={agendaCargando} feriados={feriados} medicos={medicos} medicoId={medicoId} fecha={fecha} denso={denso} dniPrellenado={dniPrellenado} />
+          )}
+          {vista === 'semana' && (
+            <VistaSemana agenda={agendaFiltrada} agendaCompleta={agenda} agendaCargando={agendaCargando} feriados={feriados} medicoId={medicoId} medicos={medicos} fecha={fecha} denso={denso} dniPrellenado={dniPrellenado} />
+          )}
+        </>
       )}
     </div>
   );
