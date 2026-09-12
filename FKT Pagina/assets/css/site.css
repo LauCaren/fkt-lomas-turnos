@@ -38,6 +38,10 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+/* El header queda sticky (position:sticky) — sin esto, saltar a un ancla (#rpd,
+   #preguntas-frecuentes) deja el título tapado detrás de la barra. */
+html { scroll-padding-top: 96px; }
+
 /* El resaltado de selección y el caret quedaban con el azul por defecto del navegador — un
    detalle chico, pero es lo primero que delata una página que no se terminó de pensar. */
 ::selection { background: var(--teal-tint); color: var(--teal-dark); }
@@ -248,6 +252,86 @@ section.soft { background: var(--bg-soft); }
 .service-card p { font-size: 14.5px; color: var(--muted); }
 @media (max-width: 960px) { .cards-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 600px) { .cards-grid { grid-template-columns: 1fr; } }
+
+/* ---------- PASOS NUMERADOS (proceso clínico en servicios.html, "cómo funciona" en index.html) ---------- */
+.process { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; position: relative; }
+.process::before { content: ""; position: absolute; top: 26px; left: 0; right: 0; height: 1px; background: var(--line); }
+.step { padding-right: 36px; position: relative; }
+.step-deg { font-family: 'JetBrains Mono', monospace; font-size: 15px; color: var(--teal-dark); font-weight: 500; background: var(--bg); display: inline-block; padding-right: 14px; position: relative; z-index: 2; }
+section.soft .step-deg { background: var(--bg-soft); }
+.step h3 { margin-top: 22px; font-size: 20px; }
+.step p { margin-top: 12px; color: var(--muted); font-size: 15px; }
+@media (max-width: 800px) { .process { grid-template-columns: 1fr; gap: 40px; } .process::before { display: none; } .step { padding-right: 0; border-left: 2px solid var(--line); padding-left: 20px; } }
+
+/* ---------- RESEÑAS (reviews-grid: opiniones.html y el teaser de index.html) ---------- */
+.reviews-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.review-card { border: 1px solid var(--line); border-radius: var(--radius-m); padding: 28px; background: var(--white); display: flex; flex-direction: column; gap: 16px; transition: transform .25s var(--ease), border-color .25s var(--ease), box-shadow .25s var(--ease); }
+.review-card:hover { transform: translateY(-4px); border-color: var(--teal); box-shadow: var(--shadow-md); }
+.review-card:active { transform: translateY(-4px) scale(.98); border-color: var(--teal); box-shadow: var(--shadow-md); transition: transform .15s var(--ease-out); }
+.review-card .stars-mini { display: flex; gap: 2px; color: var(--teal); }
+.review-card .stars-mini svg { width: 15px; height: 15px; }
+.review-card p.txt { font-size: 15px; color: var(--ink-soft); flex-grow: 1; }
+.review-card .who { display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
+.who .src { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+.who .src svg { width: 14px; height: 14px; }
+.reviews-note { margin-top: 28px; font-size: 13.5px; color: var(--muted); max-width: 680px; line-height: 1.6; }
+@media (max-width: 900px) { .reviews-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .reviews-grid { grid-template-columns: 1fr; } }
+
+/* ---------- FAQ (acordeón nativo <details>/<summary>: contacto.html e index.html) ---------- */
+.faq-list { max-width: 760px; display: flex; flex-direction: column; gap: 0; }
+.faq-item { border-top: 1px solid var(--line); }
+.faq-item:last-child { border-bottom: 1px solid var(--line); }
+.faq-item summary { list-style: none; cursor: pointer; padding: 20px 4px; display: flex; align-items: center; justify-content: space-between; gap: 20px; font-weight: 600; font-size: 16px; color: var(--ink); }
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary .faq-icon { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--line); display: flex; align-items: center; justify-content: center; position: relative; transition: transform .25s var(--ease), border-color .25s var(--ease); }
+.faq-item summary .faq-icon::before, .faq-item summary .faq-icon::after { content: ""; position: absolute; background: var(--teal-dark); transition: opacity .2s var(--ease); }
+.faq-item summary .faq-icon::before { width: 10px; height: 1.6px; }
+.faq-item summary .faq-icon::after { width: 1.6px; height: 10px; }
+.faq-item[open] summary .faq-icon { transform: rotate(180deg); border-color: var(--teal); }
+.faq-item[open] summary .faq-icon::after { opacity: 0; }
+.faq-item p { margin: 0 0 20px; padding-right: 44px; font-size: 14.5px; color: var(--muted); line-height: 1.65; }
+
+/* ---------- CONTACTO / UBICACIÓN (contact-grid: contacto.html y el teaser de index.html) ---------- */
+.contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+.info-list { display: flex; flex-direction: column; gap: 22px; margin-top: 8px; }
+.info-row { display: flex; gap: 16px; align-items: flex-start; }
+.info-row .icn { width: 22px; height: 22px; color: var(--teal-dark); flex-shrink: 0; margin-top: 2px; }
+.info-row .k { font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+.info-row .v { font-size: 16px; margin-top: 3px; font-weight: 600; }
+.info-row .v a { display: inline-block; transition: color .2s var(--ease), transform .15s var(--ease-out); }
+.info-row .v a:hover { color: var(--teal-dark); }
+.info-row .v a:active { transform: scale(.97); }
+.map-frame { border: 1px solid var(--line); border-radius: var(--radius-m); overflow: hidden; height: 100%; min-height: 340px; }
+.map-frame iframe { width: 100%; height: 100%; min-height: 340px; border: 0; }
+.contact-ctas { display: flex; gap: 12px; margin-top: 30px; flex-wrap: wrap; }
+@media (max-width: 860px) { .contact-grid { grid-template-columns: 1fr; } .map-frame { min-height: 280px; } .map-frame iframe { min-height: 280px; } }
+
+/* ---------- FOTO CONTENIDA (detail-row de servicios.html, teasers de index.html) ---------- */
+.detail-photo { width: 100%; aspect-ratio: 4/3; border-radius: var(--radius-m); overflow: hidden; background: var(--bg-soft); }
+.detail-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.detail-photo video { width: 100%; height: 100%; object-fit: contain; display: block; background: var(--bg-soft); }
+
+/* ---------- TEASERS ASIMÉTRICOS DE LA HOME (Conocé FKT / Nuestra filosofía) ---------- */
+/* La foto de estos dos usa la misma caja que .detail-photo (mismo radio/objeto/tratamiento
+   de color ya definido arriba) — acá solo se define la grilla que la acompaña. */
+.centro-teaser { display: grid; grid-template-columns: 1.2fr 1fr; gap: 48px; align-items: center; }
+.filosofia { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+.centro-teaser-text, .filosofia-text { display: flex; flex-direction: column; align-items: flex-start; }
+.filosofia-text h2 { font-size: clamp(24px, 3vw, 34px); margin-top: 14px; max-width: 420px; }
+.filosofia-text p { margin-top: 16px; color: var(--muted); font-size: 16px; max-width: 420px; }
+.centro-teaser-text h2 { font-size: clamp(26px, 3vw, 36px); margin-top: 14px; max-width: 420px; }
+.centro-teaser-text p { margin-top: 16px; color: var(--muted); font-size: 16px; max-width: 420px; }
+.centro-teaser-text .btn { margin-top: 8px; }
+@media (max-width: 860px) {
+  .centro-teaser, .filosofia { grid-template-columns: 1fr; }
+  .filosofia-photo { order: -1; }
+}
+
+/* ---------- ¿EN QUÉ PODEMOS AYUDARTE? (intent-grid, reusa .promo-card) ---------- */
+.intent-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+@media (max-width: 860px) { .intent-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { .intent-grid { grid-template-columns: 1fr; } }
 
 /* ---------- FORMULARIOS (alquiler / trabaja-con-nosotros) ---------- */
 .form-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-m); padding: 40px; max-width: 560px; }

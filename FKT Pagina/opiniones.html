@@ -11,6 +11,7 @@
 <meta property="og:title" content="Opiniones de Pacientes — FKT Lomas">
 <meta property="og:description" content="Mirá las reseñas de nuestros pacientes en Google y dejá tu propia opinión sobre FKT Lomas, centro médico y de kinesiología en Lomas de Zamora.">
 <meta property="og:url" content="https://fktlomas.com/opiniones.html">
+<link rel="canonical" href="https://fktlomas.com/opiniones.html">
 <meta property="og:image" content="https://fktlomas.com/assets/img/og/preview.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -40,21 +41,6 @@
   .rating-ctas{display:flex; justify-content:center; gap:14px; margin-top:32px; flex-wrap:wrap;}
   .star-fill{clip-path:inset(0 100% 0 0); transition:clip-path 1.1s var(--ease);}
   .star-fill.filled{clip-path:inset(0 0 0 0);}
-
-  /* ---------- REVIEWS GRID ---------- */
-  .reviews-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:22px;}
-  .review-card{border:1px solid var(--line); border-radius:var(--radius-m); padding:28px; background:var(--white); display:flex; flex-direction:column; gap:16px; transition:transform .25s var(--ease), border-color .25s var(--ease), box-shadow .25s var(--ease);}
-  .review-card:hover{transform:translateY(-4px); border-color:var(--teal); box-shadow:var(--shadow-md);}
-  .review-card:active{transform:translateY(-4px) scale(.98); border-color:var(--teal); box-shadow:var(--shadow-md); transition:transform .15s var(--ease-out);}
-  .review-card .stars-mini{display:flex; gap:2px; color:var(--teal);}
-  .review-card .stars-mini svg{width:15px; height:15px;}
-  .review-card p.txt{font-size:15px; color:var(--ink-soft); flex-grow:1;}
-  .review-card .who{display:flex; align-items:center; justify-content:space-between; font-size:12.5px; color:var(--muted); border-top:1px solid var(--line); padding-top:14px;}
-  .who .src{display:flex; align-items:center; gap:6px; font-weight:600;}
-  .who .src svg{width:14px; height:14px;}
-  @media (max-width:900px){ .reviews-grid{grid-template-columns:1fr 1fr;} }
-  @media (max-width:600px){ .reviews-grid{grid-template-columns:1fr;} }
-  .reviews-note{margin-top:28px; font-size:13.5px; color:var(--muted); max-width:680px; line-height:1.6;}
 
   /* ---------- SOCIALS ---------- */
   .socials-row{display:flex; gap:12px; flex-wrap:wrap;}

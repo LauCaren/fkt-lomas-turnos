@@ -11,6 +11,7 @@
 <meta property="og:title" content="FKT Lomas — Kinesiología y Especialidades Médicas en Lomas de Zamora">
 <meta property="og:description" content="Centro médico y de kinesiología en Lomas de Zamora. Kinesiología, RPD, ondas de choque radiales, acupuntura kinésica y especialidades médicas. Se atienden obras sociales.">
 <meta property="og:url" content="https://fktlomas.com/">
+<link rel="canonical" href="https://fktlomas.com/">
 <meta property="og:image" content="https://fktlomas.com/assets/img/og/preview.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -88,6 +89,35 @@
   .promo-card p{color:var(--muted); font-size:15px; flex-grow:1;}
   @media (max-width:800px){ .promo-grid{grid-template-columns:1fr;} }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MedicalClinic",
+  "name": "FKT Lomas",
+  "alternateName": "FKT Lomas — Fisio Kinesio Terapia",
+  "url": "https://fktlomas.com/",
+  "telephone": "+541159505888",
+  "image": "https://fktlomas.com/assets/img/og/preview.jpg",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Juan Larrea 496",
+    "addressLocality": "Lomas de Zamora",
+    "addressRegion": "Buenos Aires",
+    "addressCountry": "AR"
+  },
+  "openingHoursSpecification": {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    "opens": "08:00",
+    "closes": "20:00"
+  },
+  "sameAs": [
+    "https://www.instagram.com/fktlomas",
+    "https://www.facebook.com/fktlomas496/",
+    "https://www.google.com/maps/place/?q=place_id:ChIJcZceT5rSvJURu57YHxCu_eE"
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -138,9 +168,10 @@
         <h1>Cada grado de movimiento es <span class="hl">un paso</span> hacia tu recuperación.</h1>
         <p class="lead">Kinesiología, reeducación postural dinámica, ondas de choque radiales, acupuntura kinésica y especialidades médicas, en un mismo centro sobre Juan Larrea 496.</p>
         <div class="hero-ctas">
-          <a class="btn btn-primary" href="https://wa.me/5491123515402?text=Hola%20FKT%20Lomas%2C%20quiero%20consultar%20por%20un%20turno." target="_blank" rel="noopener">Escribinos por WhatsApp</a>
-          <a class="hero-call" href="tel:+541159505888">o llamá al 11 5950-5888</a>
+          <a class="btn btn-primary" href="http://localhost:5173" target="_blank" rel="noopener">Pedir turno</a>
+          <a class="btn btn-outline" href="https://wa.me/5491123515402?text=Hola%20FKT%20Lomas%2C%20quiero%20consultar%20por%20un%20turno." target="_blank" rel="noopener">Escribinos por WhatsApp</a>
         </div>
+        <a class="hero-call" href="tel:+541159505888" style="margin-top:14px; display:inline-block;">¿Preferís consultar antes? Llamá al 11 5950-5888</a>
         <div class="hero-trust">
           <span class="hero-trust-stars" aria-hidden="true">
             <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
@@ -163,7 +194,7 @@
   <!-- ---------- PHOTO BAND (real photo of the center) ---------- -->
   <section style="padding:0;">
     <div class="photo-band reveal">
-      <img src="assets/img/hero/kinesio-hero.jpg" alt="Sesión de kinesiología en FKT Lomas" onerror="imgFallback(this)">
+      <img src="assets/img/hero/kinesio-hero.jpg" alt="Sesión de kinesiología en FKT Lomas" loading="lazy" onerror="imgFallback(this)">
       <div class="overlay"></div>
       <div class="cap">
         <div class="wrap">
@@ -174,23 +205,78 @@
     </div>
   </section>
 
-  <!-- ---------- TRUST STRIP ---------- -->
-  <section class="soft" style="padding:96px 0;">
+  <!-- ---------- ¿EN QUÉ PODEMOS AYUDARTE? (navegación por intención, no por estructura médica) ---------- -->
+  <section class="soft">
     <div class="wrap">
-      <a class="trust-strip reveal" href="opiniones.html" style="display:flex;">
-        <div class="trust-left">
-          <div class="trust-stars" aria-hidden="true">
-            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
-            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
-            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
-            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
-            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
-          </div>
-          <div class="trust-score">4.4/5</div>
-          <div class="trust-copy">Basado en <b>+60 reseñas en Google</b> de nuestros pacientes</div>
+      <div class="section-head reveal">
+        <span class="eyebrow">¿En qué podemos ayudarte?</span>
+        <h2>Contanos qué te pasa, no cómo se llama el tratamiento</h2>
+        <p>Elegí la opción que más se parece a tu situación y te llevamos directo a la información que necesitás.</p>
+      </div>
+      <div class="intent-grid reveal stagger">
+        <a class="promo-card" href="servicios.html">
+          <h3>Tengo dolor o una lesión</h3>
+          <p>Kinesiología para evaluar tu caso y empezar un tratamiento.</p>
+          <span class="btn btn-outline" style="pointer-events:none; align-self:flex-start;">Ver servicios →</span>
+        </a>
+        <a class="promo-card" href="servicios.html#rpd">
+          <h3>Quiero mejorar mi postura</h3>
+          <p>Reeducación postural dinámica (RPD) para corregir la postura y aliviar contracturas.</p>
+          <span class="btn btn-outline" style="pointer-events:none; align-self:flex-start;">Ver RPD Postural →</span>
+        </a>
+        <a class="promo-card" href="servicios.html">
+          <h3>Necesito rehabilitación</h3>
+          <p>Recuperá movilidad, fuerza y funcionalidad después de una lesión o cirugía.</p>
+          <span class="btn btn-outline" style="pointer-events:none; align-self:flex-start;">Ver servicios →</span>
+        </a>
+        <a class="promo-card" href="servicios.html">
+          <h3>Quiero volver al deporte</h3>
+          <p>Tratamientos para retomar tu actividad física con seguridad.</p>
+          <span class="btn btn-outline" style="pointer-events:none; align-self:flex-start;">Ver servicios →</span>
+        </a>
+        <a class="promo-card" href="especialidades.html">
+          <h3>Necesito un especialista médico</h3>
+          <p>Traumatología, reumatología, nutrición y otras 8 especialidades en el centro.</p>
+          <span class="btn btn-outline" style="pointer-events:none; align-self:flex-start;">Ver especialidades →</span>
+        </a>
+        <a class="promo-card" href="http://localhost:5173" target="_blank" rel="noopener">
+          <h3>Ya sé qué necesito</h3>
+          <p>Elegí el día y horario que mejor te quede, online.</p>
+          <span class="btn btn-primary" style="pointer-events:none; align-self:flex-start;">Pedir turno →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- ¿POR QUÉ FKT? ---------- -->
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">¿Por qué FKT?</span>
+        <h2>Lo que encontrás en cada visita</h2>
+      </div>
+      <div class="team-grid reveal stagger">
+        <div class="team-card">
+          <span class="tag">Atención personalizada</span>
+          <h3>Un plan para tu caso</h3>
+          <p>Evaluamos cada caso y armamos un plan de tratamiento que se adapta a tu situación, no una rutina genérica.</p>
         </div>
-        <span class="btn btn-outline" style="pointer-events:none;">Ver opiniones →</span>
-      </a>
+        <div class="team-card">
+          <span class="tag">Profesionales especializados</span>
+          <h3>Un equipo, muchas especialidades</h3>
+          <p>Kinesiólogos y médicos de distintas especialidades — traumatología, reumatología, nutrición y más — dentro del mismo centro.</p>
+        </div>
+        <div class="team-card">
+          <span class="tag">Seguimiento</span>
+          <h3>Acompañamiento real</h3>
+          <p>Acompañamos tu progreso en cada control, desde la evaluación inicial hasta el alta.</p>
+        </div>
+        <div class="team-card">
+          <span class="tag">Todo en un mismo lugar</span>
+          <h3>Sin derivar a otro lado</h3>
+          <p>Kinesiología, tratamientos especializados y especialidades médicas, en un mismo centro sobre Juan Larrea 496.</p>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -204,7 +290,7 @@
       </div>
       <div class="cards-grid reveal stagger">
         <div class="service-card">
-          <div class="scard-img"><img src="assets/img/servicios/kinesiologia.jpg" alt="Kinesiología en FKT Lomas" onerror="imgFallback(this)"></div>
+          <div class="scard-img"><img src="assets/img/servicios/kinesiologia.jpg" alt="Kinesiología en FKT Lomas" loading="lazy" onerror="imgFallback(this)"></div>
           <div class="scard-body">
             <svg class="icn" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8 30 A14 14 0 0 1 32 30" stroke="#1C3240" stroke-width="2"/><circle cx="20" cy="30" r="2" fill="#239A96"/><line x1="20" y1="30" x2="29" y2="17" stroke="#239A96" stroke-width="2" stroke-linecap="round"/></svg>
             <h3>Kinesiología</h3>
@@ -212,7 +298,7 @@
           </div>
         </div>
         <div class="service-card">
-          <div class="scard-img"><img src="assets/img/servicios/rpg.jpg" alt="Reeducación postural en FKT Lomas" onerror="imgFallback(this)"></div>
+          <div class="scard-img"><img src="assets/img/servicios/rpg.jpg" alt="Reeducación postural en FKT Lomas" loading="lazy" onerror="imgFallback(this)"></div>
           <div class="scard-body">
             <svg class="icn" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M20 6 C 12 14, 12 26, 20 34 C 28 26, 28 14, 20 6 Z" stroke="#1C3240" stroke-width="2"/><line x1="20" y1="10" x2="20" y2="30" stroke="#239A96" stroke-width="2"/></svg>
             <h3>RPD Postural</h3>
@@ -220,7 +306,7 @@
           </div>
         </div>
         <div class="service-card">
-          <div class="scard-img"><img src="assets/img/servicios/ondas-de-choque.jpg" alt="Ondas de choque radiales en FKT Lomas" onerror="imgFallback(this)"></div>
+          <div class="scard-img"><img src="assets/img/servicios/ondas-de-choque.jpg" alt="Ondas de choque radiales en FKT Lomas" loading="lazy" onerror="imgFallback(this)"></div>
           <div class="scard-body">
             <svg class="icn" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8 20 A12 12 0 0 1 20 8" stroke="#1C3240" stroke-width="2" stroke-linecap="round"/><path d="M14 20 A6 6 0 0 1 20 14" stroke="#239A96" stroke-width="2" stroke-linecap="round"/><circle cx="20" cy="20" r="2" fill="#1C3240"/></svg>
             <h3>Ondas de choque</h3>
@@ -228,7 +314,7 @@
           </div>
         </div>
         <div class="service-card">
-          <div class="scard-img"><img src="assets/img/servicios/acupuntura.jpg" alt="Acupuntura kinésica en FKT Lomas" onerror="imgFallback(this)"></div>
+          <div class="scard-img"><img src="assets/img/servicios/acupuntura.jpg" alt="Acupuntura kinésica en FKT Lomas" loading="lazy" onerror="imgFallback(this)"></div>
           <div class="scard-body">
             <svg class="icn" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="20" cy="20" r="3" fill="#239A96"/><circle cx="10" cy="12" r="1.6" fill="#1C3240"/><circle cx="30" cy="12" r="1.6" fill="#1C3240"/><circle cx="10" cy="28" r="1.6" fill="#1C3240"/><circle cx="30" cy="28" r="1.6" fill="#1C3240"/><line x1="20" y1="20" x2="10" y2="12" stroke="#1C3240" stroke-width="1.4"/><line x1="20" y1="20" x2="30" y2="12" stroke="#1C3240" stroke-width="1.4"/><line x1="20" y1="20" x2="10" y2="28" stroke="#1C3240" stroke-width="1.4"/><line x1="20" y1="20" x2="30" y2="28" stroke="#1C3240" stroke-width="1.4"/></svg>
             <h3>Acupuntura kinésica</h3>
@@ -269,8 +355,207 @@
     </div>
   </section>
 
-  <!-- ---------- CONSULTORIOS Y TRABAJA CON NOSOTROS ---------- -->
+  <!-- ---------- CONOCÉ FKT (teaser de el-centro.html) ---------- -->
+  <section class="soft">
+    <div class="wrap">
+      <div class="centro-teaser reveal">
+        <div class="detail-photo">
+          <img src="assets/img/centro/consultorio-1.jpg" alt="Consultorio privado FKT Lomas" loading="lazy" onerror="imgFallback(this)">
+        </div>
+        <div class="centro-teaser-text">
+          <span class="eyebrow">Conocé FKT</span>
+          <h2>Un espacio pensado para tu recuperación</h2>
+          <p>Consultorios privados, jardín con equipamiento de entrenamiento, y un equipo administrativo que coordina tu turno y tu obra social.</p>
+          <a class="btn btn-dark" href="el-centro.html">Conocer el centro</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- NUESTRA FILOSOFÍA ---------- -->
   <section>
+    <div class="wrap">
+      <div class="filosofia reveal">
+        <div class="filosofia-text">
+          <span class="eyebrow">Nuestra filosofía</span>
+          <h2>No todos los cuerpos necesitan lo mismo.</h2>
+          <p>Por eso evaluamos cada caso antes de armar un plan de tratamiento, y lo ajustamos a medida que avanza tu recuperación.</p>
+        </div>
+        <div class="detail-photo filosofia-photo">
+          <img src="assets/img/centro/consultorio-3.jpg" alt="Consultorio con camilla FKT Lomas" loading="lazy" onerror="imgFallback(this)">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- CÓMO FUNCIONA ---------- -->
+  <section class="soft">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Cómo funciona</span>
+        <h2>Empezar es simple</h2>
+      </div>
+      <div class="process reveal stagger">
+        <div class="step">
+          <span class="step-deg">01</span>
+          <h3>Elegí</h3>
+          <p>Encontrá el servicio o la especialidad que necesitás.</p>
+        </div>
+        <div class="step">
+          <span class="step-deg">02</span>
+          <h3>Reservá</h3>
+          <p>Pedí tu turno online o escribinos por WhatsApp.</p>
+        </div>
+        <div class="step">
+          <span class="step-deg">03</span>
+          <h3>Vení</h3>
+          <p>Te esperamos en Juan Larrea 496, Lomas de Zamora.</p>
+        </div>
+      </div>
+      <div style="margin-top:34px;">
+        <a class="btn btn-primary" href="http://localhost:5173" target="_blank" rel="noopener">Pedir turno</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- OPINIONES ---------- -->
+  <section>
+    <div class="wrap">
+      <a class="trust-strip reveal" href="opiniones.html" style="display:flex;">
+        <div class="trust-left">
+          <div class="trust-stars" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
+          </div>
+          <div class="trust-score">4.4/5</div>
+          <div class="trust-copy">Basado en <b>+60 reseñas en Google</b> de nuestros pacientes</div>
+        </div>
+        <span class="btn btn-outline" style="pointer-events:none;">Ver opiniones →</span>
+      </a>
+
+      <div class="reviews-grid reveal stagger" style="margin-top:32px;">
+        <div class="review-card">
+          <div class="stars-mini" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
+          </div>
+          <p class="txt">Hace mucho tiempo que se atiende con Fernando y destaca su ayuda para recuperarse de varias lesiones.</p>
+          <div class="who"><span>Paciente de Kinesiología</span><span class="src">Google</span></div>
+        </div>
+        <div class="review-card">
+          <div class="stars-mini" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
+          </div>
+          <p class="txt">Destacan a Diego, Fernando y Yohana como un equipo de profesionales muy recomendable, con otros especialistas también disponibles.</p>
+          <div class="who"><span>Paciente del centro</span><span class="src">Google</span></div>
+        </div>
+        <div class="review-card">
+          <div class="stars-mini" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z"/></svg>
+          </div>
+          <p class="txt">Un buen espacio para trabajar la kinesiología y mejorar la movilidad, con un grupo de profesionales muy sólido.</p>
+          <div class="who"><span>Paciente de Kinesiología</span><span class="src">Google</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- ¿ES TU PRIMERA VEZ EN FKT? (FAQ real, reutilizada de contacto.html) ---------- -->
+  <section class="soft">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">¿Es tu primera vez en FKT?</span>
+        <h2>Antes de pedir tu turno</h2>
+      </div>
+      <div class="faq-list reveal">
+        <details class="faq-item">
+          <summary>¿Qué obras sociales atienden?<span class="faq-icon"></span></summary>
+          <p>Trabajamos con numerosas obras sociales y prepagas. Si la tuya no aparece en el listado completo, escribinos por WhatsApp y te confirmamos la cobertura.</p>
+        </details>
+        <details class="faq-item">
+          <summary>¿Necesito orden médica para sacar un turno?<span class="faq-icon"></span></summary>
+          <p>Depende de tu obra social: algunas la piden y otras no. Te recomendamos consultarlo con nosotros por WhatsApp antes de tu turno para evitar demoras.</p>
+        </details>
+        <details class="faq-item">
+          <summary>¿Cómo cancelo un turno?<span class="faq-icon"></span></summary>
+          <p>Desde "Mis turnos" en la web, ingresando con tu cuenta, o escribiéndonos por WhatsApp con la mayor anticipación posible para liberar el horario a otro paciente.</p>
+        </details>
+        <details class="faq-item">
+          <summary>¿Puedo atenderme si no tengo obra social?<span class="faq-icon"></span></summary>
+          <p>Sí, atendemos pacientes particulares. El costo de la sesión se confirma directamente con el centro.</p>
+        </details>
+        <details class="faq-item">
+          <summary>¿Cuál es el horario de atención?<span class="faq-icon"></span></summary>
+          <p>Atendemos de lunes a viernes de 8 a 20 hs. No hay turnos disponibles los fines de semana.</p>
+        </details>
+      </div>
+      <div style="margin-top:24px;">
+        <a class="btn btn-outline" href="contacto.html#preguntas-frecuentes">Ver todas las preguntas frecuentes</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- CTA BAND ---------- -->
+  <section class="dark-band cta-band">
+    <div class="wrap cta-inner reveal">
+      <div>
+        <h2>¿Empezamos con tu tratamiento?</h2>
+        <p>Coordiná tu turno hoy mismo por WhatsApp o llamando al centro.</p>
+      </div>
+      <div class="cta-ctas">
+        <a class="btn btn-primary" href="https://wa.me/5491123515402?text=Hola%20FKT%20Lomas%2C%20quiero%20consultar%20por%20un%20turno." target="_blank" rel="noopener">Escribinos por WhatsApp</a>
+        <a class="btn btn-outline-light" href="tel:+541159505888">Llamar · 11 5950-5888</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- UBICACIÓN ---------- -->
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Estamos en Lomas de Zamora</span>
+        <h2>Juan Larrea 496</h2>
+      </div>
+      <div class="contact-grid reveal">
+        <div>
+          <div class="info-list">
+            <div class="info-row">
+              <svg class="icn" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 21 C 8 16.5 5 13 5 9.5 A7 7 0 0 1 19 9.5 C 19 13 16 16.5 12 21 Z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="9.5" r="2.4" stroke="currentColor" stroke-width="1.6"/></svg>
+              <div>
+                <div class="k">Dirección</div>
+                <div class="v"><a href="https://maps.google.com/?q=Juan+Larrea+496,+Lomas+de+Zamora" target="_blank" rel="noopener">Juan Larrea 496, Lomas de Zamora, Buenos Aires</a></div>
+              </div>
+            </div>
+          </div>
+          <div class="contact-ctas">
+            <a class="btn btn-primary" href="https://maps.google.com/?q=Juan+Larrea+496,+Lomas+de+Zamora" target="_blank" rel="noopener">Cómo llegar</a>
+            <a class="btn btn-outline" href="https://wa.me/5491123515402?text=Hola%20FKT%20Lomas%2C%20quiero%20consultar%20por%20un%20turno." target="_blank" rel="noopener">WhatsApp</a>
+            <a class="btn btn-outline" href="tel:+541159505888">Llamar</a>
+          </div>
+        </div>
+        <div class="map-frame">
+          <iframe src="https://maps.google.com/maps?q=Juan%20Larrea%20496%2C%20Lomas%20de%20Zamora&t=m&z=16&output=embed&iwloc=near" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Ubicación de FKT Lomas en el mapa"></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- CONSULTORIOS Y TRABAJA CON NOSOTROS ---------- -->
+  <section class="soft">
     <div class="wrap">
       <div class="section-head reveal">
         <span class="eyebrow">Sumate a FKT Lomas</span>
@@ -299,20 +584,6 @@
           <p>Sumate al equipo de FKT Lomas. Enviá tu CV en PDF y Fernando lo revisa personalmente.</p>
           <span class="btn btn-outline" style="pointer-events:none; align-self:flex-start;">Enviar mi CV →</span>
         </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ---------- CTA BAND ---------- -->
-  <section class="dark-band cta-band">
-    <div class="wrap cta-inner reveal">
-      <div>
-        <h2>¿Empezamos con tu tratamiento?</h2>
-        <p>Coordiná tu turno hoy mismo por WhatsApp o llamando al centro.</p>
-      </div>
-      <div class="cta-ctas">
-        <a class="btn btn-primary" href="https://wa.me/5491123515402?text=Hola%20FKT%20Lomas%2C%20quiero%20consultar%20por%20un%20turno." target="_blank" rel="noopener">Escribinos por WhatsApp</a>
-        <a class="btn btn-outline-light" href="tel:+541159505888">Llamar · 11 5950-5888</a>
       </div>
     </div>
   </section>

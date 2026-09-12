@@ -11,6 +11,7 @@
 <meta property="og:title" content="Servicios de Kinesiología — FKT Lomas">
 <meta property="og:description" content="Kinesiología, reeducación postural dinámica (RPD), ondas de choque radiales y acupuntura kinésica en FKT Lomas, Lomas de Zamora.">
 <meta property="og:url" content="https://fktlomas.com/servicios.html">
+<link rel="canonical" href="https://fktlomas.com/servicios.html">
 <meta property="og:image" content="https://fktlomas.com/assets/img/og/preview.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -27,14 +28,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
 <style>
-  .process{display:grid; grid-template-columns:repeat(3,1fr); gap:0; position:relative;}
-  .process::before{content:""; position:absolute; top:26px; left:0; right:0; height:1px; background:var(--line);}
-  .step{padding-right:36px; position:relative;}
-  .step-deg{font-family:'JetBrains Mono',monospace; font-size:15px; color:var(--teal-dark); font-weight:500; background:var(--bg); display:inline-block; padding-right:14px; position:relative; z-index:2;}
-  section.soft .step-deg{background:var(--bg-soft);}
-  .step h3{margin-top:22px; font-size:20px;} .step p{margin-top:12px; color:var(--muted); font-size:15px;}
-  @media (max-width:800px){ .process{grid-template-columns:1fr; gap:40px;} .process::before{display:none;} .step{padding-right:0; border-left:2px solid var(--line); padding-left:20px;} }
-
   .scard-checks{display:flex; flex-direction:column; gap:8px; margin-top:2px;}
   .scard-checks li{display:flex; align-items:flex-start; gap:8px; font-size:13.5px; color:var(--ink-soft); line-height:1.4;}
   .scard-checks svg{width:15px; height:15px; flex-shrink:0; margin-top:2px; color:var(--teal);}
@@ -42,9 +35,6 @@
   .detail-list{display:flex; flex-direction:column; gap:0;}
   .detail-row{display:grid; grid-template-columns:280px 1fr; gap:36px; padding:40px 0; border-top:1px solid var(--line); align-items:center;}
   .detail-row:last-child{border-bottom:1px solid var(--line);}
-  .detail-photo{width:100%; aspect-ratio:4/3; border-radius:var(--radius-m); overflow:hidden; background:var(--bg-soft);}
-  .detail-photo img{width:100%; height:100%; object-fit:cover; display:block;}
-  .detail-photo video{width:100%; height:100%; object-fit:contain; display:block; background:var(--bg-soft);}
   .detail-row .num{font-family:'JetBrains Mono',monospace; color:var(--teal-dark); font-size:13px; letter-spacing:0.08em; text-transform:uppercase;}
   .detail-row h3{margin-top:10px; font-size:22px;}
   .detail-row p{color:var(--muted); font-size:15.5px; max-width:600px;}
@@ -167,7 +157,7 @@
         <h2>Cómo trabajamos cada tratamiento</h2>
       </div>
       <div class="detail-list reveal">
-        <div class="detail-row">
+        <div class="detail-row" id="kinesiologia">
           <div class="detail-photo"><img src="assets/img/hero/kinesio-hero.jpg" alt="Kinesiología en FKT Lomas" onerror="imgFallback(this)"></div>
           <div>
             <div class="num">Servicio 01</div>
@@ -175,7 +165,7 @@
             <p>Evaluación y tratamiento kinésico para recuperar movilidad, fuerza y funcionalidad después de una lesión, cirugía o dolor crónico. Trabajamos con planes individuales según tu diagnóstico, edad y actividad física.</p>
           </div>
         </div>
-        <div class="detail-row">
+        <div class="detail-row" id="rpd">
           <div class="detail-photo"><img src="assets/img/hero/centro-whatsapp.jpeg" alt="Reeducación postural en FKT Lomas" onerror="imgFallback(this)"></div>
           <div>
             <div class="num">Servicio 02</div>
@@ -183,7 +173,7 @@
             <p>Técnica que trabaja cadenas musculares completas —no músculos aislados— para corregir la postura, aliviar contracturas y tratar dolores de espalda de origen postural.</p>
           </div>
         </div>
-        <div class="detail-row">
+        <div class="detail-row" id="ondas-de-choque">
           <div class="detail-photo"><video src="assets/video/ondas-de-choque.mp4" poster="assets/img/servicios/ondas-de-choque.jpg" controls playsinline preload="metadata"></video></div>
           <div>
             <div class="num">Servicio 03</div>
@@ -192,7 +182,7 @@
             <p style="margin-top:8px; font-size:13.5px; color:var(--muted);">Indicada para tendinitis calcificante del manguito rotador, codo de tenista, trocanteritis, tendinitis rotuliana, fascitis plantar, espolón calcáneo, y epicondilitis o epitrocleitis crónica.</p>
           </div>
         </div>
-        <div class="detail-row">
+        <div class="detail-row" id="acupuntura">
           <div class="detail-photo"><img src="assets/img/servicios/acupuntura.jpg" alt="Acupuntura kinésica en FKT Lomas" onerror="imgFallback(this)"></div>
           <div>
             <div class="num">Servicio 04</div>
