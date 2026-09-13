@@ -688,4 +688,52 @@ body.fkt-cursor-on input, body.fkt-cursor-on textarea, body.fkt-cursor-on select
 .body-map-links a { border: 1px solid var(--line); border-radius: 100px; padding: 9px 17px; font-size: 13.5px; font-weight: 600; color: var(--ink); transition: border-color .2s var(--ease), background .2s var(--ease), color .2s var(--ease), transform .15s var(--ease-out); }
 .body-map-links a:hover { border-color: var(--teal); color: var(--teal-dark); background: var(--teal-tint); }
 .body-map-links a:active { transform: scale(.96); }
+
+/* ---------- SCROLLBAR A MEDIDA ---------- */
+/* Chico, en el teal de marca — la barra de scroll por defecto del navegador es de esos
+   detalles que en una página con esta atención al resto de la UI se nota por ausencia. */
+html { scrollbar-width: thin; scrollbar-color: var(--teal) var(--bg-soft); }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg-soft); }
+::-webkit-scrollbar-thumb { background: var(--teal); border-radius: 10px; border: 2px solid var(--bg-soft); background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: var(--teal-dark); background-clip: padding-box; }
+
+/* ---------- NUMERACIÓN EDITORIAL ---------- */
+/* Cada página numera sus propias secciones grandes (reinicia en cada <main>) — un guiño de
+   revista/editorial más, coherente con el resto de la tipografía mono ya usada en .eyebrow. */
+main { counter-reset: fkt-section; }
+.section-head > .eyebrow { counter-increment: fkt-section; }
+.section-head > .eyebrow::after { content: " · " counter(fkt-section, decimal-leading-zero); color: var(--muted); font-weight: 400; }
+
+/* ---------- RIPPLE EN BOTONES PRIMARIOS ---------- */
+/* Feedback táctil al soltar el click/tap — .btn:active ya escala el botón, esto suma un
+   destello que se expande y se apaga, para que una acción importante (reservar, confirmar)
+   se sienta "recibida" y no solo apretada. */
+.btn-primary { position: relative; overflow: hidden; }
+.btn-primary::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+  background: radial-gradient(circle, rgba(255, 255, 255, .55) 0%, transparent 70%);
+  opacity: 0; transform: scale(0); transition: transform .5s var(--ease-out), opacity .5s var(--ease-out);
+}
+.btn-primary:active::after { transform: scale(2.2); opacity: 1; transition: none; }
+
+/* ---------- HOJA DE IMPRESIÓN ---------- */
+/* Que alguien pueda imprimir la dirección/horarios sin el header pegajoso, el buscador, los
+   botones flotantes ni el modo oscuro — solo el contenido, en blanco y negro legible. */
+@media print {
+  header, footer, .wa-float, .sticky-cta, .search-overlay, .ficha-overlay, .lightbox,
+  .fkt-cursor, .fkt-intro, .skip-link, .logos-marquee, .theme-toggle, .search-trigger,
+  .body-spot-ring, .treat-hint {
+    display: none !important;
+  }
+  :root, :root[data-theme="dark"] {
+    --bg: #fff; --bg-soft: #fff; --ink: #000; --ink-soft: #222; --muted: #555;
+    --line: #ccc; --white: #fff; --black: #fff; color-scheme: light;
+  }
+  body { background: #fff; }
+  a { text-decoration: underline; color: #000; }
+  .dark-band { background: #fff !important; color: #000 !important; }
+  .dark-band::before, .dark-band::after { display: none; }
+  section { padding: 24px 0; }
+}
 @media (max-width: 760px) { .body-map-wrap { grid-template-columns: 1fr; justify-items: center; gap: 28px; } }

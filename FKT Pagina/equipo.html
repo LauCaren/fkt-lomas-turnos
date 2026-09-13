@@ -37,6 +37,17 @@
   .team-card li.clickable { transform-origin: left center; transition: color .2s var(--ease), transform .15s var(--ease-out); }
   .team-card li.clickable:hover { transform: translateX(3px); }
   .team-card li.clickable:active { transform: translateX(3px) scale(.97); }
+
+  /* ---------- AVATAR CHICO (solo cuando el backend tiene una foto real) ---------- */
+  .li-avatar { display: inline-block; width: 20px; height: 20px; border-radius: 50%; object-fit: cover; vertical-align: -5px; margin-right: 8px; background: var(--bg-soft); border: 1px solid var(--line); }
+
+  /* ---------- SELLO DE TÍTULO VERIFICADO (ficha de profesional) ---------- */
+  .ficha-verificado { display: inline-flex; align-items: center; gap: 5px; margin-top: 10px; font-size: 12px; font-weight: 600; color: var(--teal-dark); background: var(--teal-tint); padding: 4px 10px 4px 8px; border-radius: 100px; }
+  .ficha-verificado svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+  /* ---------- AVISO SI FALLA LA CONEXIÓN AL BACKEND ---------- */
+  .team-fetch-notice { max-width: 640px; margin: 0 0 28px; padding: 14px 18px; border: 1px solid var(--line); border-radius: var(--radius-s); background: var(--bg-soft); color: var(--muted); font-size: 14px; line-height: 1.6; }
+  .team-fetch-notice a { color: var(--teal-dark); font-weight: 600; text-decoration: underline; text-decoration-color: var(--teal); }
 </style>
 </head>
 <body>
@@ -309,6 +320,7 @@
         <h3 class="ficha-nombre" id="fichaNombre"></h3>
         <div class="ficha-especialidad" id="fichaEspecialidad"></div>
         <p class="ficha-experiencia" id="fichaExperiencia"></p>
+        <span class="ficha-verificado" id="fichaVerificado" style="display:none;"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8.5" stroke="currentColor" stroke-width="1.6"/><path d="M6.2 10.3 L8.8 12.8 L13.8 7.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Título verificado</span>
       </div>
     </div>
     <div class="ficha-titulo-box" id="fichaTituloBox" style="display:none;">
@@ -340,6 +352,7 @@
   const elExperiencia = document.getElementById('fichaExperiencia');
   const elTituloBox = document.getElementById('fichaTituloBox');
   const elTituloImg = document.getElementById('fichaTituloImg');
+  const elVerificado = document.getElementById('fichaVerificado');
 
   function abrirFicha(medico) {
     elFoto.src = medico.tieneFoto ? `${API_URL}/api/medicos/${medico.id}/foto` : FOTO_PLACEHOLDER;
@@ -351,8 +364,10 @@
     if (medico.tieneTitulo) {
       elTituloImg.src = `${API_URL}/api/medicos/${medico.id}/titulo`;
       elTituloBox.style.display = '';
+      elVerificado.style.display = '';
     } else {
       elTituloBox.style.display = 'none';
+      elVerificado.style.display = 'none';
     }
     fichaTrap.remember();
     overlay.classList.add('open');
@@ -410,9 +425,26 @@
         li.setAttribute('tabindex', '0');
         li.addEventListener('click', () => abrirFicha(medico));
         li.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirFicha(medico); } });
+        // Avatar chico solo cuando hay foto real cargada — nada de placeholders genéricos
+        // repetidos al lado de cada nombre, que se verían más a relleno que a dato real.
+        if (medico.tieneFoto) {
+          const avatar = document.createElement('img');
+          avatar.className = 'li-avatar';
+          avatar.src = `${API_URL}/api/medicos/${medico.id}/foto`;
+          avatar.alt = '';
+          avatar.loading = 'lazy';
+          li.insertBefore(avatar, li.firstChild);
+        }
       });
     })
-    .catch(() => { /* Sin conexión al backend: la página sigue funcionando, solo no quedan clickeables los nombres. */ });
+    .catch(() => {
+      // Sin conexión al backend: la página sigue funcionando, solo no quedan clickeables los
+      // nombres — pero mejor avisar que quedar en silencio, para que no parezca que faltan a propósito.
+      const notice = document.createElement('p');
+      notice.className = 'team-fetch-notice';
+      notice.innerHTML = 'No pudimos cargar las fotos y fichas del equipo en este momento. Los datos de cada profesional siguen siendo correctos — <a href="https://wa.me/5491123515402?text=Hola%2C%20quiero%20consultar%20por%20un%20profesional%20del%20equipo." target="_blank" rel="noopener">escribinos por WhatsApp</a> si necesitás algo puntual.';
+      document.querySelector('.team-grid').insertAdjacentElement('beforebegin', notice);
+    });
 </script>
 
 <a class="wa-float" href="https://wa.me/5491123515402?text=Hola%20FKT%20Lomas%2C%20quiero%20consultar%20por%20un%20turno." target="_blank" rel="noopener" aria-label="Escribinos por WhatsApp">
