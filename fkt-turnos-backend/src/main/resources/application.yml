@@ -131,14 +131,19 @@ app:
     webhook-secret: ${MERCADOPAGO_WEBHOOK_SECRET:}
 
 springdoc:
-  # Apagado en producción por defecto (SWAGGER_ENABLED=false) — no hay perfiles de Spring en
-  # este proyecto, así que se resuelve igual que el resto de la config, con una env var. Cuando
-  # está en false, springdoc no registra ni el JSON de /v3/api-docs ni la UI de /docs: no hace
-  # falta bloquearlo aparte en SecurityConfig, esas rutas simplemente no existen.
+  # Apagado por defecto — mismo criterio "fail-closed" que JWT_SECRET/MFA_ENCRYPTION_KEY/
+  # ADMIN_BOOTSTRAP_PASSWORD: no hay perfiles de Spring en este proyecto (todo se resuelve por
+  # env var), así que si alguna vez se despliega sin terminar de configurar todo, el olvido
+  # tiene que dejar la app más cerrada, no más abierta. Antes el default era "true" (con un
+  # comentario que decía lo contrario) — cualquier deploy que no seteara SWAGGER_ENABLED=false
+  # a mano quedaba exponiendo el spec completo de la API (paths, DTOs, hasta los endpoints de
+  # admin) sin querer. En dev, activarlo a mano con SWAGGER_ENABLED=true (ver .env.example).
+  # Cuando está en false, springdoc no registra ni el JSON de /v3/api-docs ni la UI de /docs: no
+  # hace falta bloquearlo aparte en SecurityConfig, esas rutas simplemente no existen.
   api-docs:
-    enabled: ${SWAGGER_ENABLED:true}
+    enabled: ${SWAGGER_ENABLED:false}
   swagger-ui:
-    enabled: ${SWAGGER_ENABLED:true}
+    enabled: ${SWAGGER_ENABLED:false}
     path: /docs
 
 management:

@@ -104,9 +104,8 @@ public class SecurityConfig {
                         // "/v3/api-docs" (sin barra final, el JSON del OpenAPI en sí) va aparte de
                         // "/v3/api-docs/**" para que quede explícito que hace falta cubrir ambos.
                         // permitAll acá es seguro incluso en producción: con SWAGGER_ENABLED=false
-                        // (default recomendado fuera de dev, ver application.yml) springdoc no
-                        // registra estos controllers y las rutas ni existen — no dependen de esta
-                        // regla para quedar cerradas.
+                        // (el default, ver application.yml) springdoc no registra estos controllers
+                        // y las rutas ni existen — no dependen de esta regla para quedar cerradas.
                         .requestMatchers("/docs/**", "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         // Puerta gruesa por URL: ambos roles de staff de oficina entran acá. La
