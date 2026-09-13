@@ -1,8 +1,12 @@
+import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
+import { cargarFotoInfo } from '../features/perfil/perfilSlice';
 import { SITE_URL, isElectron } from '../config';
 import InstalarAppBanner from './InstalarAppBanner';
+import UsuarioAvatar from './UsuarioAvatar';
+import SelectorFotoPerfil from './SelectorFotoPerfil';
 
 function Marca() {
   return (
@@ -22,13 +26,23 @@ const ROLES_PANEL_INTERNO = ['ADMIN', 'SECRETARIA', 'CONTADOR', 'MEDICO'];
 
 export default function Layout({ children }) {
   const usuario = useSelector((state) => state.auth.usuario);
+  const fotoInfo = useSelector((state) => state.perfil.fotoInfo);
+  const fotoVersion = useSelector((state) => state.perfil.fotoVersion);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+  const [selectorFotoAbierto, setSelectorFotoAbierto] = useState(false);
   // Los paneles internos usan un layout de sidebar + contenido (ver SidebarNav) que necesita
   // más aire que las páginas del paciente — angostarlos al mismo --maxw de siempre apretaba
   // demasiado la columna de contenido junto a la barra lateral.
   const esPanelInterno = usuario && ROLES_PANEL_INTERNO.includes(usuario.role);
+
+  // Cualquier rol puede tener una foto de perfil (ver SelectorFotoPerfil) — se carga acá, una
+  // sola vez por sesión mientras haya alguien logueado, para que el avatar del header ya
+  // aparezca listo en la primera pantalla que se visita, no recién al abrir "mi cuenta".
+  useEffect(() => {
+    if (usuario) dispatch(cargarFotoInfo());
+  }, [usuario, dispatch]);
 
   function handleLogout() {
     dispatch(logout());
@@ -65,7 +79,22 @@ export default function Layout({ children }) {
                 {usuario.role === 'MEDICO' && <Link to="/medico">Panel médico</Link>}
                 {usuario.role === 'CONTADOR' && <Link to="/contador">Panel contador</Link>}
               </div>
-              <span style={{ fontSize: 14, color: 'var(--muted)' }}>{usuario.nombreCompleto}</span>
+              <button
+                type="button"
+                onClick={() => setSelectorFotoAbierto(true)}
+                aria-label="Tu foto de perfil"
+                style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer', padding: 2, borderRadius: 100 }}
+              >
+                <UsuarioAvatar
+                  fotoUrl="/api/usuarios/me/foto"
+                  tieneFoto={!!fotoInfo?.tieneFoto}
+                  avatarGenerico={fotoInfo?.avatarGenerico}
+                  nombreCompleto={usuario.nombreCompleto}
+                  size={30}
+                  version={fotoVersion}
+                />
+                <span style={{ fontSize: 14, color: 'var(--muted)' }}>{usuario.nombreCompleto}</span>
+              </button>
               <button className="btn btn-outline" onClick={handleLogout}>Salir</button>
             </div>
           )}
@@ -79,6 +108,7 @@ export default function Layout({ children }) {
           </div>
         </div>
       </main>
+      {selectorFotoAbierto && <SelectorFotoPerfil onCerrar={() => setSelectorFotoAbierto(false)} />}
     </div>
   );
 }

@@ -87,6 +87,20 @@ public class Usuario {
     @Column(name = "sessions_revoked_at")
     private Instant sessionsRevokedAt;
 
+    /**
+     * Foto de perfil personal (cualquier rol) — distinta de Medico.fotoPath, que es la foto
+     * pública de marketing del profesional. Ver UsuarioFotoService: fotoPath manda si está
+     * presente; si no, se usa avatarGenerico; si tampoco, el frontend muestra las iniciales.
+     */
+    @Column(name = "foto_path")
+    private String fotoPath;
+
+    @Column(name = "foto_content_type", length = 100)
+    private String fotoContentType;
+
+    @Column(name = "avatar_generico", length = 30)
+    private String avatarGenerico;
+
     @PrePersist
     void prePersist() {
         if (createdAt == null) {

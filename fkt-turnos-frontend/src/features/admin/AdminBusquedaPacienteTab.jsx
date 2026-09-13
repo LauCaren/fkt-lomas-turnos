@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import axiosClient, { mensajeDeError } from '../../api/axiosClient';
 import { formatMoneda, hoyISO } from '../../utils/formato';
 import EstadoVacio from '../../components/EstadoVacio';
+import UsuarioAvatar from '../../components/UsuarioAvatar';
 import { setDniPrellenado, setObjetivoReprogramar, setPacienteAAbrir, cancelarTurnoStaff, enviarMensajeManual } from './adminSlice';
 import { useConfirm } from '../../components/ui/useConfirm';
 import { useToast } from '../../components/ui/useToast';
@@ -149,10 +150,19 @@ function Ficha({ ficha, irAAgenda, onRecargar }) {
       </div>
       <div className="card" style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
-          <div>
-            <div style={{ fontWeight: 600, fontSize: 17 }}>{ficha.paciente.nombreCompleto}</div>
-            <div style={{ fontSize: 13.5, color: 'var(--muted)', marginTop: 4 }}>
-              DNI {ficha.paciente.dni} · {ficha.paciente.telefono} · avisos por {ficha.paciente.canalNotificacionPreferido}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <UsuarioAvatar
+              fotoUrl={`/api/usuarios/${ficha.paciente.id}/foto`}
+              tieneFoto={ficha.paciente.tieneFoto}
+              avatarGenerico={ficha.paciente.avatarGenerico}
+              nombreCompleto={ficha.paciente.nombreCompleto}
+              size={48}
+            />
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 17 }}>{ficha.paciente.nombreCompleto}</div>
+              <div style={{ fontSize: 13.5, color: 'var(--muted)', marginTop: 4 }}>
+                DNI {ficha.paciente.dni} · {ficha.paciente.telefono} · avisos por {ficha.paciente.canalNotificacionPreferido}
+              </div>
             </div>
           </div>
           {ficha.ausenciasCount > 0 && (
@@ -268,9 +278,12 @@ export default function AdminBusquedaPacienteTab({ irAAgenda }) {
               key={p.id}
               className="card card-hover"
               onClick={() => verFicha(p.id)}
-              style={{ textAlign: 'left', padding: '12px 18px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', border: 'none', width: '100%' }}
+              style={{ textAlign: 'left', padding: '12px 18px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: 'none', width: '100%' }}
             >
-              <span><strong>{p.nombreCompleto}</strong> · DNI {p.dni}</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <UsuarioAvatar fotoUrl={`/api/usuarios/${p.id}/foto`} tieneFoto={p.tieneFoto} avatarGenerico={p.avatarGenerico} nombreCompleto={p.nombreCompleto} size={34} />
+                <span><strong>{p.nombreCompleto}</strong> · DNI {p.dni}</span>
+              </span>
               <span style={{ color: 'var(--muted)' }}>{p.telefono}</span>
             </button>
           ))}
