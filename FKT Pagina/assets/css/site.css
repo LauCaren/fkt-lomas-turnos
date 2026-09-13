@@ -537,3 +537,98 @@ footer { background: var(--black); color: rgba(255, 255, 255, 0.75); padding: 56
 .treat-social-proof p { font-size: 13.5px; color: var(--ink-soft); line-height: 1.5; }
 .treat-social-proof a { text-decoration: underline; text-decoration-color: var(--teal); color: var(--teal-dark); font-weight: 600; }
 .treat-footer { display: flex; gap: 12px; margin-top: 26px; flex-wrap: wrap; }
+
+/* ==========================================================================
+   MOTION PACK — cursor magnético, cursor a medida, tilt 3D, texto que se
+   revela, íconos que se dibujan, spotlight, scroll con inercia e intro de
+   carga. Todo lo que depende de mousemove se auto-desactiva en touch/trackpad
+   sin hover fino (matchMedia en site.js) y todo respeta prefers-reduced-motion.
+   ========================================================================== */
+
+/* ---------- TEXTO QUE SE REVELA (máscara, no fade) ---------- */
+/* Los títulos grandes no hacen fade+translate como el resto de .reveal — se
+   revelan con un clip-path de cortina, más editorial y menos "tarjeta que sube". */
+h1.reveal, .section-head h2 {
+  opacity: 1; transform: none;
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path .9s var(--ease-out) .05s;
+}
+h1.reveal.in-view, .section-head.in-view h2 { clip-path: inset(0 0 0% 0); }
+@media (prefers-reduced-motion: reduce) { h1.reveal, .section-head h2 { clip-path: inset(0 0 0% 0); } }
+
+/* ---------- CONTADOR: leve desenfoque mientras cuenta rápido ---------- */
+[data-count-to].counting { filter: blur(1.5px); }
+
+/* ---------- CURSOR A MEDIDA ---------- */
+.fkt-cursor {
+  position: fixed; top: 0; left: 0; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--teal); pointer-events: none; z-index: 2000; opacity: 0;
+  transition: width .3s var(--ease-out), height .3s var(--ease-out), opacity .2s var(--ease), background .2s var(--ease);
+  display: flex; align-items: center; justify-content: center;
+}
+.fkt-cursor.active { opacity: .85; }
+.fkt-cursor.hover { width: 60px; height: 60px; opacity: .95; }
+.fkt-cursor-label { font-size: 11px; font-weight: 700; letter-spacing: .05em; color: #fff; text-transform: uppercase; opacity: 0; transition: opacity .15s var(--ease); }
+.fkt-cursor.hover .fkt-cursor-label { opacity: 1; }
+body.fkt-cursor-on, body.fkt-cursor-on a, body.fkt-cursor-on button, body.fkt-cursor-on [data-treatment], body.fkt-cursor-on .body-spot { cursor: none; }
+body.fkt-cursor-on input, body.fkt-cursor-on textarea, body.fkt-cursor-on select { cursor: auto; }
+@media (hover: none), (pointer: coarse) { .fkt-cursor { display: none !important; } }
+
+/* ---------- SPOTLIGHT EN BANDAS OSCURAS ---------- */
+.dark-band::after {
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0;
+  background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), rgba(35, 154, 150, .22), transparent 70%);
+  transition: opacity .3s var(--ease);
+}
+.dark-band:hover::after { opacity: 1; }
+@media (hover: none), (pointer: coarse) { .dark-band::after { display: none; } }
+
+/* ---------- INTRO DE CARGA ---------- */
+/* Solo la primera vez por sesión (sessionStorage) — nadie quiere ver un splash
+   screen cada vez que navega entre las 11 páginas del sitio. */
+.fkt-intro {
+  position: fixed; inset: 0; z-index: 3000; background: var(--bg);
+  display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+  transition: opacity .5s var(--ease);
+}
+.fkt-intro img { width: 52px; height: 52px; object-fit: contain; opacity: 0; transform: scale(.7) rotate(-8deg); transition: opacity .6s var(--ease-out), transform .6s var(--ease-out); }
+.fkt-intro .word { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 19px; color: var(--ink); clip-path: inset(0 0 100% 0); transition: clip-path .6s var(--ease-out) .15s; }
+.fkt-intro.show img { opacity: 1; transform: scale(1) rotate(0deg); }
+.fkt-intro.show .word { clip-path: inset(0 0 0% 0); }
+.fkt-intro.hide { opacity: 0; pointer-events: none; }
+
+/* ---------- GLOSARIO EN LÍNEA ---------- */
+.glossary { border-bottom: 1.5px dotted var(--teal); cursor: help; position: relative; }
+.glossary-tip {
+  position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translateX(-50%) translateY(4px);
+  background: var(--ink); color: #fff; padding: 10px 14px; border-radius: var(--radius-s); font-size: 13px;
+  line-height: 1.5; width: max-content; max-width: 260px; box-shadow: var(--shadow-md); z-index: 500;
+  opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .2s var(--ease), transform .2s var(--ease);
+  font-style: normal; font-weight: 400; text-align: left;
+}
+.glossary-tip::after { content: ""; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: var(--ink); }
+.glossary:hover .glossary-tip, .glossary:focus-visible .glossary-tip { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+
+/* ---------- MAPA CORPORAL INTERACTIVO ---------- */
+.body-map-wrap { display: grid; grid-template-columns: 260px 1fr; gap: 52px; align-items: center; }
+.body-map { width: 100%; max-width: 260px; height: auto; overflow: visible; display: block; margin: 0 auto; }
+.body-fig { fill: none; stroke: var(--line); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.body-spot { cursor: pointer; }
+.body-spot-dot { fill: var(--teal); transition: r .2s var(--ease), fill .2s var(--ease); }
+.body-spot-ring { fill: none; stroke: var(--teal); stroke-width: 1.5; opacity: .5; animation: body-pulse 2.4s ease-out infinite; transform-origin: center; transform-box: fill-box; }
+.body-spot:hover .body-spot-dot, .body-spot:focus-visible .body-spot-dot, .body-spot.active .body-spot-dot { r: 7; fill: var(--teal-dark); }
+.body-spot:focus-visible { outline: none; }
+.body-spot.active .body-spot-ring { stroke: var(--teal-dark); }
+@keyframes body-pulse { 0% { transform: scale(1); opacity: .55; } 100% { transform: scale(2.4); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .body-spot-ring { animation: none; } }
+
+.body-map-info { border: 1px solid var(--line); border-radius: var(--radius-m); padding: 28px 32px; min-height: 176px; display: flex; flex-direction: column; justify-content: center; transition: border-color .25s var(--ease); }
+.body-map-info.filled { border-color: var(--teal); }
+.body-map-placeholder { color: var(--muted); font-size: 14.5px; }
+.body-map-part-title { font-size: 20px; font-family: 'Playfair Display', serif; font-weight: 600; color: var(--ink); }
+.body-map-part-note { margin-top: 8px; color: var(--muted); font-size: 14px; }
+.body-map-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.body-map-links a { border: 1px solid var(--line); border-radius: 100px; padding: 9px 17px; font-size: 13.5px; font-weight: 600; color: var(--ink); transition: border-color .2s var(--ease), background .2s var(--ease), color .2s var(--ease), transform .15s var(--ease-out); }
+.body-map-links a:hover { border-color: var(--teal); color: var(--teal-dark); background: var(--teal-tint); }
+.body-map-links a:active { transform: scale(.96); }
+@media (max-width: 760px) { .body-map-wrap { grid-template-columns: 1fr; justify-items: center; gap: 28px; } }

@@ -227,6 +227,32 @@ function fktInitSearch() {
   });
 }
 
+// ---------- GLOSARIO EN LÍNEA ----------
+// Términos técnicos que aparecen en las fichas de tratamiento, con una definición corta.
+// Se resuelven automáticamente al renderizar el texto (fktWrapGlossary), no hace falta
+// marcarlos a mano en cada página.
+const FKT_GLOSSARY = {
+  'RPD': 'Reeducación Postural Dinámica: técnica que trabaja cadenas musculares completas — no músculos aislados — para corregir la postura.',
+  'bio-ortopedia': 'Abordaje que combina plasma rico en plaquetas, ozonoterapia y terapia neural para artrosis y tendinopatías.',
+  'tendinopatías': 'Lesiones por sobrecarga o desgaste de un tendón, causa frecuente de dolor persistente al mover o cargar la zona.',
+  'fascitis plantar': 'Inflamación del tejido que conecta el talón con los dedos, una causa frecuente de dolor en la planta del pie.',
+};
+
+function fktWrapGlossary(text) {
+  // Una sola pasada sobre el texto ORIGINAL con todos los términos en un único regex —
+  // si se reemplazara término por término, la definición de uno podía contener la palabra
+  // de otro (p. ej. "bio-ortopedia" menciona "tendinopatías") y terminaba anidando un
+  // tooltip dentro de otro. Con un solo pase esto no puede pasar: nunca se re-escanea el
+  // texto ya reemplazado.
+  const terms = Object.keys(FKT_GLOSSARY).sort((a, b) => b.length - a.length);
+  const pattern = terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+  const re = new RegExp('\\b(' + pattern + ')\\b', 'gi');
+  return text.replace(re, (m) => {
+    const key = terms.find((t) => t.toLowerCase() === m.toLowerCase());
+    return '<span class="glossary" tabindex="0">' + m + '<span class="glossary-tip">' + FKT_GLOSSARY[key] + '</span></span>';
+  });
+}
+
 // ---------- FICHA DE TRATAMIENTO (beneficios + casos reales) ----------
 // Beneficios generales y honestos por tratamiento (los de servicios ya estaban escritos como
 // checks en servicios.html, acá se reutilizan tal cual). Para "casos donde fue efectivo" no
@@ -336,7 +362,6 @@ const FKT_TREATMENTS = {
 
 function fktInitTreatments() {
   const cards = document.querySelectorAll('[data-treatment]');
-  if (!cards.length) return;
 
   cards.forEach((card) => {
     const body = card.querySelector('.scard-body, .spec-body');
@@ -384,7 +409,7 @@ function fktInitTreatments() {
     overlay.querySelector('.treat-photo img').alt = t.title;
     overlay.querySelector('.treat-cat').textContent = t.cat;
     overlay.querySelector('.treat-title').textContent = t.title;
-    overlay.querySelector('.treat-intro').textContent = t.intro;
+    overlay.querySelector('.treat-intro').innerHTML = fktWrapGlossary(t.intro);
     overlay.querySelector('.treat-benefits').innerHTML = t.benefits.map((b) => `<li>${CHECK_SVG}<span>${b}</span></li>`).join('');
 
     const casesEl = overlay.querySelector('.treat-cases');
@@ -416,6 +441,8 @@ function fktInitTreatments() {
   closeBtn.addEventListener('click', close);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && overlay.classList.contains('open')) close(); });
+
+  window.fktOpenTreatment = open;
 }
 
 // ---------- BARRA STICKY DE RESERVA ----------
@@ -445,11 +472,12 @@ function fktInitCounters(reduceMotion) {
     const suffix = el.dataset.countSuffix || '';
     if (reduceMotion) { el.textContent = to.toFixed(decimals) + suffix; return; }
     const duration = 1100, start = performance.now();
+    el.classList.add('counting');
     function tick(now) {
       const t = Math.min((now - start) / duration, 1);
       const eased = 1 - Math.pow(1 - t, 3);
       el.textContent = (to * eased).toFixed(decimals) + suffix;
-      if (t < 1) requestAnimationFrame(tick);
+      if (t < 1) { requestAnimationFrame(tick); } else { el.classList.remove('counting'); }
     }
     requestAnimationFrame(tick);
   }
@@ -506,6 +534,261 @@ function fktInitProcessRail() {
   });
 }
 
+// ---------- ¿DÓNDE TE DUELE? (mapa corporal interactivo) ----------
+// Cada zona del cuerpo linkea a tratamientos/especialidades reales que ya existen en el
+// sitio (mismos slugs que FKT_TREATMENTS) — nada de "casos" inventados, sólo navegación
+// por síntoma hacia contenido que ya está en la página.
+const FKT_BODY_MAP = {
+  hombro: { label: 'Hombro', items: [
+    { title: 'Kinesiología', treatment: 'kinesiologia' },
+    { title: 'Traumatología', treatment: 'traumatologia' },
+    { title: 'Ondas de choque radiales', treatment: 'ondas-de-choque' },
+  ]},
+  codo: { label: 'Codo y muñeca', items: [
+    { title: 'Ondas de choque radiales', treatment: 'ondas-de-choque' },
+    { title: 'Kinesiología', treatment: 'kinesiologia' },
+    { title: 'Traumatología', treatment: 'traumatologia' },
+  ]},
+  columna: { label: 'Columna y espalda', items: [
+    { title: 'RPD Postural', treatment: 'rpd' },
+    { title: 'Kinesiología', treatment: 'kinesiologia' },
+    { title: 'Traumatología', treatment: 'traumatologia' },
+  ]},
+  cadera: { label: 'Cadera', items: [
+    { title: 'Traumatología', treatment: 'traumatologia' },
+    { title: 'Kinesiología', treatment: 'kinesiologia' },
+  ]},
+  rodilla: { label: 'Rodilla', items: [
+    { title: 'Traumatología', treatment: 'traumatologia' },
+    { title: 'Kinesiología', treatment: 'kinesiologia' },
+    { title: 'Ondas de choque radiales', treatment: 'ondas-de-choque' },
+  ]},
+  pie: { label: 'Tobillo y pie', items: [
+    { title: 'Ondas de choque radiales', treatment: 'ondas-de-choque' },
+    { title: 'Traumatología', treatment: 'traumatologia' },
+    { title: 'Kinesiología', treatment: 'kinesiologia' },
+  ]},
+};
+
+function fktInitBodyMap() {
+  const map = document.querySelector('.body-map');
+  const panel = document.querySelector('.body-map-info');
+  if (!map || !panel) return;
+  const spots = map.querySelectorAll('.body-spot');
+
+  function select(part) {
+    const data = FKT_BODY_MAP[part];
+    if (!data) return;
+    spots.forEach((s) => s.classList.toggle('active', s.dataset.part === part));
+    panel.classList.add('filled');
+    panel.innerHTML = '<div class="body-map-part-title">' + data.label + '</div>' +
+      '<p class="body-map-part-note">Esto es lo que solemos indicar para esta zona:</p>' +
+      '<div class="body-map-links">' + data.items.map((it) =>
+        '<a href="#" data-treatment-link="' + it.treatment + '">' + it.title + ' →</a>'
+      ).join('') + '</div>';
+  }
+
+  spots.forEach((spot) => {
+    spot.addEventListener('click', () => select(spot.dataset.part));
+    spot.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(spot.dataset.part); }
+    });
+  });
+  panel.addEventListener('click', (e) => {
+    const link = e.target.closest('[data-treatment-link]');
+    if (!link) return;
+    e.preventDefault();
+    if (window.fktOpenTreatment) window.fktOpenTreatment(link.dataset.treatmentLink);
+  });
+}
+
+// ==========================================================================
+// MOTION PACK — cursor magnético, cursor a medida, tilt 3D, íconos que se
+// dibujan, spotlight, scroll con inercia e intro de carga. Todas las que
+// dependen de mousemove se apagan solas en touch (matchMedia hover/pointer)
+// y todas respetan prefers-reduced-motion.
+// ==========================================================================
+
+const FKT_FINE_POINTER = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+// ---------- ÍCONOS QUE SE DIBUJAN ----------
+function fktInitIconDraw(reduceMotion) {
+  const icons = document.querySelectorAll('.scard-body .icn, .spec-icn svg');
+  if (!icons.length) return;
+  icons.forEach((svg) => {
+    const shapes = svg.querySelectorAll('path, line, circle, rect');
+    const geoms = [];
+    shapes.forEach((el) => {
+      const fill = el.getAttribute('fill');
+      if (fill && fill !== 'none') return; // sólo se dibujan los trazos, no los rellenos
+      if (typeof el.getTotalLength !== 'function') return;
+      let len;
+      try { len = el.getTotalLength(); } catch (e) { return; }
+      el.style.strokeDasharray = len;
+      el.style.strokeDashoffset = reduceMotion ? '0' : String(len);
+      el.style.transition = 'stroke-dashoffset 1.1s ' + 'cubic-bezier(.22,.68,.32,1)';
+      geoms.push(el);
+    });
+    svg._fktDrawEls = geoms;
+  });
+  if (reduceMotion) return;
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      const svg = entry.target;
+      (svg._fktDrawEls || []).forEach((el, i) => {
+        setTimeout(() => { el.style.strokeDashoffset = '0'; }, i * 130);
+      });
+      io.unobserve(svg);
+    });
+  }, { threshold: 0.4 });
+  icons.forEach((svg) => io.observe(svg));
+}
+
+// ---------- CURSOR A MEDIDA ----------
+function fktInitCustomCursor(reduceMotion) {
+  if (reduceMotion || !FKT_FINE_POINTER()) return;
+  const cursor = document.createElement('div');
+  cursor.className = 'fkt-cursor';
+  cursor.innerHTML = '<span class="fkt-cursor-label">Ver</span>';
+  cursor.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(cursor);
+
+  let mx = 0, my = 0, cx = 0, cy = 0, raf = null;
+  function loop() {
+    cx += (mx - cx) * 0.25;
+    cy += (my - cy) * 0.25;
+    cursor.style.transform = 'translate(' + cx + 'px, ' + cy + 'px) translate(-50%, -50%)';
+    raf = requestAnimationFrame(loop);
+  }
+  document.addEventListener('mousemove', (e) => {
+    mx = e.clientX; my = e.clientY;
+    cursor.classList.add('active');
+    document.body.classList.add('fkt-cursor-on');
+    if (!raf) raf = requestAnimationFrame(loop);
+  }, { passive: true });
+  document.documentElement.addEventListener('mouseleave', () => cursor.classList.remove('active'));
+
+  const PHOTO_SEL = '.gallery-item, .scard-img, .spec-img, .detail-photo, [data-treatment], .logos-track img';
+  document.addEventListener('mouseover', (e) => {
+    cursor.classList.toggle('hover', !!e.target.closest(PHOTO_SEL));
+  });
+}
+
+// ---------- CURSOR MAGNÉTICO EN BOTONES PRIMARIOS ----------
+function fktInitMagneticButtons(reduceMotion) {
+  if (reduceMotion || !FKT_FINE_POINTER()) return;
+  document.querySelectorAll('.btn-primary, .btn-outline-light').forEach((btn) => {
+    let raf = null;
+    btn.addEventListener('mousemove', (e) => {
+      const r = btn.getBoundingClientRect();
+      const mx = e.clientX - (r.left + r.width / 2);
+      const my = e.clientY - (r.top + r.height / 2);
+      if (raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        btn.style.transition = 'transform .12s ' + 'linear';
+        btn.style.transform = 'translate(' + (mx * 0.25) + 'px, ' + (my * 0.3) + 'px)';
+      });
+    });
+    btn.addEventListener('mouseleave', () => {
+      btn.style.transition = 'transform .4s ' + 'cubic-bezier(.22,.68,.32,1)';
+      btn.style.transform = '';
+    });
+  });
+}
+
+// ---------- TILT 3D EN TARJETAS ----------
+function fktInitTilt(reduceMotion) {
+  if (reduceMotion || !FKT_FINE_POINTER()) return;
+  document.querySelectorAll('.service-card, .spec-item, .promo-card, .review-card').forEach((card) => {
+    card.addEventListener('mousemove', (e) => {
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;
+      const py = (e.clientY - r.top) / r.height;
+      const rx = (0.5 - py) * 7;
+      const ry = (px - 0.5) * 7;
+      card.style.transition = 'transform .08s linear';
+      card.style.transform = 'perspective(900px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg)';
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transition = 'transform .5s cubic-bezier(.22,.68,.32,1)';
+      card.style.transform = '';
+    });
+  });
+}
+
+// ---------- SPOTLIGHT EN BANDAS OSCURAS ----------
+function fktInitSpotlight(reduceMotion) {
+  if (reduceMotion || !FKT_FINE_POINTER()) return;
+  document.querySelectorAll('.dark-band').forEach((band) => {
+    band.addEventListener('mousemove', (e) => {
+      const r = band.getBoundingClientRect();
+      band.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+      band.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+    });
+  });
+}
+
+// ---------- SCROLL CON INERCIA ----------
+// Suaviza la rueda del mouse/trackpad interpolando hacia un scroll objetivo en vez de
+// saltar de golpe — el scroll real de window sigue siendo la fuente de verdad (se sigue
+// llamando window.scrollTo de verdad), así que el paralaje, el riel de progreso y la
+// barra sticky que ya leen window.scrollY siguen funcionando sin tocarlos.
+function fktInitSmoothScroll(reduceMotion) {
+  if (reduceMotion || !FKT_FINE_POINTER()) return;
+  const SKIP_SEL = '.ficha-card, .search-panel, .search-results, .logos-marquee, .map-frame, textarea, select, iframe';
+  let target = window.scrollY;
+  let current = window.scrollY;
+  let raf = null;
+
+  function tick() {
+    current += (target - current) * 0.14;
+    if (Math.abs(target - current) < 0.4) {
+      current = target;
+      window.scrollTo(0, current);
+      raf = null;
+      return;
+    }
+    window.scrollTo(0, current);
+    raf = requestAnimationFrame(tick);
+  }
+
+  window.addEventListener('wheel', (e) => {
+    if (document.body.style.overflow === 'hidden') return; // hay un modal abierto
+    if (e.target instanceof Element && e.target.closest(SKIP_SEL)) return;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    target = Math.min(Math.max(0, max), Math.max(0, target + e.deltaY));
+    e.preventDefault();
+    if (!raf) raf = requestAnimationFrame(tick);
+  }, { passive: false });
+
+  window.addEventListener('scroll', () => {
+    if (!raf) { target = window.scrollY; current = window.scrollY; }
+  }, { passive: true });
+}
+
+// ---------- INTRO DE CARGA ----------
+// Sólo la primera vez por sesión de navegador — sessionStorage evita que se repita en
+// cada una de las 11 páginas mientras el visitante navega el sitio.
+function fktInitIntro(reduceMotion) {
+  if (reduceMotion) return;
+  let seen = true;
+  try { seen = sessionStorage.getItem('fkt-intro-seen') === '1'; } catch (e) { seen = true; }
+  if (seen) return;
+  try { sessionStorage.setItem('fkt-intro-seen', '1'); } catch (e) {}
+
+  const intro = document.createElement('div');
+  intro.className = 'fkt-intro';
+  intro.setAttribute('aria-hidden', 'true');
+  intro.innerHTML = '<img src="assets/img/logo/fkt-logo-mark-transparent.png" alt=""><span class="word">FKT Lomas</span>';
+  document.body.prepend(intro);
+  requestAnimationFrame(() => requestAnimationFrame(() => intro.classList.add('show')));
+  setTimeout(() => {
+    intro.classList.add('hide');
+    setTimeout(() => intro.remove(), 550);
+  }, 1000);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const burger = document.getElementById('burgerBtn');
   const header = document.getElementById('site-header');
@@ -556,4 +839,12 @@ document.addEventListener('DOMContentLoaded', () => {
   fktInitCounters(reduceMotion);
   fktInitHeroParallax(reduceMotion);
   fktInitProcessRail();
+  fktInitBodyMap();
+  fktInitIconDraw(reduceMotion);
+  fktInitCustomCursor(reduceMotion);
+  fktInitMagneticButtons(reduceMotion);
+  fktInitTilt(reduceMotion);
+  fktInitSpotlight(reduceMotion);
+  fktInitSmoothScroll(reduceMotion);
+  fktInitIntro(reduceMotion);
 });

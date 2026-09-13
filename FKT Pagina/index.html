@@ -177,7 +177,7 @@
     <div class="hero-split">
       <div class="hero-text">
         <span class="eyebrow">Centro médico y de kinesiología · Lomas de Zamora</span>
-        <h1>Cada grado de movimiento es <span class="hl">un paso</span> hacia tu recuperación.</h1>
+        <h1 class="reveal">Cada grado de movimiento es <span class="hl">un paso</span> hacia tu recuperación.</h1>
         <p class="lead">Kinesiología, reeducación postural dinámica, ondas de choque radiales, acupuntura kinésica y especialidades médicas, en un mismo centro sobre Juan Larrea 496.</p>
         <div class="hero-ctas">
           <a class="btn btn-primary" href="http://localhost:5173" target="_blank" rel="noopener">Pedir turno</a>
@@ -260,6 +260,58 @@
           <p>Elegí el día y horario que mejor te quede, online.</p>
           <span class="btn btn-primary" style="pointer-events:none; align-self:flex-start;">Pedir turno →</span>
         </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- ¿DÓNDE TE DUELE? (mapa corporal interactivo) ---------- -->
+  <section class="soft">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">¿Dónde te duele?</span>
+        <h2>Elegí la zona y te mostramos qué te conviene</h2>
+        <p>Tocá un punto de la silueta para ver los tratamientos y especialidades que solemos indicar para esa zona.</p>
+      </div>
+      <div class="body-map-wrap reveal">
+        <svg class="body-map" viewBox="0 0 200 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Silueta del cuerpo humano con zonas clickeables">
+          <circle cx="100" cy="36" r="24" class="body-fig"></circle>
+          <line x1="100" y1="60" x2="100" y2="74" class="body-fig"></line>
+          <path d="M70,74 L130,74 L124,192 L76,192 Z" class="body-fig"></path>
+          <path d="M70,80 C48,100 42,140 48,182" class="body-fig"></path>
+          <path d="M130,80 C152,100 158,140 152,182" class="body-fig"></path>
+          <path d="M88,192 C82,260 78,330 76,398" class="body-fig"></path>
+          <path d="M112,192 C118,260 122,330 124,398" class="body-fig"></path>
+          <path d="M66,398 L86,398" class="body-fig"></path>
+          <path d="M114,398 L134,398" class="body-fig"></path>
+
+          <g class="body-spot" data-part="hombro" tabindex="0" role="button" aria-label="Hombro">
+            <circle cx="66" cy="85" r="11" class="body-spot-ring"></circle>
+            <circle cx="66" cy="85" r="5" class="body-spot-dot"></circle>
+          </g>
+          <g class="body-spot" data-part="codo" tabindex="0" role="button" aria-label="Codo y muñeca">
+            <circle cx="48" cy="150" r="11" class="body-spot-ring"></circle>
+            <circle cx="48" cy="150" r="5" class="body-spot-dot"></circle>
+          </g>
+          <g class="body-spot" data-part="columna" tabindex="0" role="button" aria-label="Columna y espalda">
+            <circle cx="100" cy="130" r="11" class="body-spot-ring"></circle>
+            <circle cx="100" cy="130" r="5" class="body-spot-dot"></circle>
+          </g>
+          <g class="body-spot" data-part="cadera" tabindex="0" role="button" aria-label="Cadera">
+            <circle cx="100" cy="196" r="11" class="body-spot-ring"></circle>
+            <circle cx="100" cy="196" r="5" class="body-spot-dot"></circle>
+          </g>
+          <g class="body-spot" data-part="rodilla" tabindex="0" role="button" aria-label="Rodilla">
+            <circle cx="94" cy="290" r="11" class="body-spot-ring"></circle>
+            <circle cx="94" cy="290" r="5" class="body-spot-dot"></circle>
+          </g>
+          <g class="body-spot" data-part="pie" tabindex="0" role="button" aria-label="Tobillo y pie">
+            <circle cx="88" cy="392" r="11" class="body-spot-ring"></circle>
+            <circle cx="88" cy="392" r="5" class="body-spot-dot"></circle>
+          </g>
+        </svg>
+        <div class="body-map-info">
+          <p class="body-map-placeholder">Elegí hombro, codo, columna, cadera, rodilla o pie en la silueta para ver qué te conviene.</p>
+        </div>
       </div>
     </div>
   </section>
