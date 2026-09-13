@@ -95,16 +95,17 @@ header.scrolled { background: rgba(255, 255, 255, 0.88); box-shadow: var(--shado
    inferior del header para que se note sin competir con la nav. */
 #scroll-progress { position: absolute; left: 0; bottom: -1px; height: 2px; width: 0%; background: var(--teal); transform-origin: left; transition: width .1s linear; }
 @media (prefers-reduced-motion: reduce) { #scroll-progress { transition: none; } }
-.nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; }
+.nav { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 18px 0; }
 .logo { display: flex; align-items: center; gap: 10px; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 20px; }
 .logo-mark { width: 34px; height: 34px; flex-shrink: 0; object-fit: contain; }
 .logo small { display: block; font-family: 'Caveat', cursive; font-weight: 600; font-size: 14px; letter-spacing: 0.01em; color: var(--muted); text-transform: none; }
-.nav-links { display: flex; align-items: center; gap: 28px; }
-.nav-links a { font-size: 14.5px; font-weight: 600; color: var(--ink-soft); position: relative; padding: 4px 0; }
+.nav-links { display: flex; align-items: center; gap: 34px; flex-shrink: 0; }
+.nav-links a { font-size: 14.5px; font-weight: 600; color: var(--ink-soft); position: relative; padding: 4px 0; white-space: nowrap; }
 .nav-links a::after { content: ""; position: absolute; left: 0; bottom: 0; width: 0; height: 2px; background: var(--teal); transition: width .25s var(--ease); }
 .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
 .nav-links a.active { color: var(--ink); }
-.nav-cta { display: flex; align-items: center; gap: 12px; }
+.nav-cta { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+@media (min-width: 901px) { .nav-cta { padding-left: 20px; margin-left: 4px; border-left: 1px solid var(--line); } }
 .nav-cta .btn { padding: 10px 18px; font-size: 14px; }
 .burger { display: none; width: 26px; height: 20px; position: relative; }
 .burger span { position: absolute; left: 0; width: 100%; height: 2px; background: var(--ink); transition: transform .25s var(--ease), opacity .25s var(--ease); }
@@ -378,3 +379,161 @@ footer { background: var(--black); color: rgba(255, 255, 255, 0.75); padding: 56
 .team-banner img, .bg-photo img, .detail-photo img {
   filter: saturate(.94) contrast(1.03) brightness(1.01);
 }
+
+/* ---------- GRANO SUTIL EN FONDOS OSCUROS ---------- */
+/* Un ruido casi imperceptible (mix-blend-mode:overlay, opacidad muy baja) para que el
+   negro de .dark-band no se lea plano/digital — más textura de impresión, menos "flat design". */
+.dark-band { position: relative; isolation: isolate; }
+.dark-band::before {
+  content: ""; position: absolute; inset: 0; z-index: 0; opacity: .06; pointer-events: none;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+.dark-band > * { position: relative; z-index: 1; }
+
+/* ---------- LAVADO TEAL AL HOVER (fotos de servicios y galería) ---------- */
+/* En vez de un simple scale(), un velo de color de marca con mix-blend-mode:color — la
+   foto se sigue leyendo pero queda "teñida" con la identidad del sitio al interactuar. */
+.scard-img, .gallery-item { position: relative; }
+.scard-img::after, .gallery-item::after {
+  content: ""; position: absolute; inset: 0; background: var(--teal); opacity: 0; z-index: 1;
+  mix-blend-mode: color; transition: opacity .4s var(--ease); pointer-events: none;
+}
+.service-card:hover .scard-img::after, .gallery-item:hover::after { opacity: .35; }
+
+/* ---------- BLOBS DE FONDO (profundidad sin sombras duras) ---------- */
+.blob-bg { position: relative; isolation: isolate; overflow: hidden; }
+.blob-bg::before, .blob-bg::after { content: ""; position: absolute; z-index: -1; border-radius: 50%; filter: blur(80px); }
+.blob-bg::before { width: 440px; height: 440px; background: var(--teal-tint); top: -160px; left: -140px; opacity: .8; }
+.blob-bg::after { width: 340px; height: 340px; background: var(--teal); top: 40%; right: -140px; opacity: .07; }
+
+/* ---------- MARQUEE DE OBRAS SOCIALES ---------- */
+/* Se recorre sola: dos copias idénticas del mismo listado, una al lado de la otra, animadas
+   -50% para que el loop sea perfecto sin salto. Se pausa al hover para poder leer un logo. */
+.logos-marquee { overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+.logos-track { display: flex; align-items: center; gap: 56px; width: max-content; animation: logos-scroll 42s linear infinite; }
+.logos-marquee:hover .logos-track { animation-play-state: paused; }
+.logos-track img { height: 32px; width: auto; object-fit: contain; filter: grayscale(1) opacity(.5); transition: filter .3s var(--ease); flex-shrink: 0; }
+.logos-track img:hover { filter: grayscale(0) opacity(1); }
+@keyframes logos-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .logos-track { animation: none; overflow-x: auto; } }
+
+/* ---------- NÚMEROS FANTASMA + RIEL DE PROGRESO (pasos numerados) ---------- */
+/* El número grande semi-transparente es marca de agua editorial (revista, no UI); el riel
+   de progreso se llena con JS a medida que scrolleás la sección — ver initProcessRail en site.js. */
+.step { position: relative; }
+.step::before {
+  content: attr(data-num); position: absolute; top: -38px; left: 0; z-index: 0;
+  font-family: 'Playfair Display', serif; font-weight: 700; font-size: 92px; line-height: 1;
+  color: var(--ink); opacity: .045; pointer-events: none; user-select: none;
+}
+.step-deg, .step h3, .step p { position: relative; z-index: 1; }
+.process { position: relative; }
+.process-rail-fill { position: absolute; top: 26px; left: 0; height: 1px; width: 0%; background: var(--teal); z-index: 1; }
+@media (max-width: 800px) {
+  .step::before { font-size: 60px; top: -28px; }
+  .process-rail-fill { display: none; }
+}
+
+/* ---------- CONTADORES (data-count-to, animados por site.js) ---------- */
+[data-count-to] { font-variant-numeric: tabular-nums; }
+
+/* ---------- NOTA MANUSCRITA (marginalia) ---------- */
+.marginalia { font-family: 'Caveat', cursive; font-weight: 600; color: var(--teal-dark); line-height: 1.15; pointer-events: none; }
+.marginalia svg { stroke: var(--teal-dark); fill: none; }
+
+/* ---------- BARRA STICKY DE RESERVA ---------- */
+/* Aparece recién después de pasar el hero, así no compite con los CTA que ya están ahí arriba.
+   En desktop es una píldora abajo a la izquierda (el WhatsApp ya ocupa la derecha); en mobile
+   se convierte en una barra de ancho completo que reemplaza al WhatsApp flotante para no
+   duplicar botones en una pantalla chica. */
+.sticky-cta { display: flex; gap: 10px; position: fixed; left: 24px; bottom: 24px; z-index: 899; opacity: 0; transform: translateY(14px) scale(.96); pointer-events: none; transition: opacity .3s var(--ease), transform .3s var(--ease); }
+.sticky-cta.visible { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+.sticky-cta .btn { box-shadow: var(--shadow-md); }
+.sticky-cta-wa { display: none; }
+@media (max-width: 640px) {
+  .sticky-cta { left: 0; right: 0; bottom: 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid var(--line); transform: translateY(100%); box-shadow: none; }
+  .sticky-cta.visible { transform: translateY(0); }
+  .sticky-cta .btn { flex: 1; justify-content: center; box-shadow: none; }
+  .sticky-cta-wa { display: inline-flex; }
+  .wa-float { display: none; }
+}
+
+/* ---------- BÚSQUEDA DEL SITIO (Ctrl/Cmd+K) ---------- */
+/* Inyectada por site.js en las 11 páginas a partir de un único índice — evita repetir el
+   marcado del botón y del modal en cada .html (mismo criterio que la barra de progreso). */
+.search-trigger { display: flex; align-items: center; gap: 8px; padding: 9px 13px; border: 1.5px solid var(--line); border-radius: 100px; color: var(--muted); font-size: 13px; transition: border-color .2s var(--ease), color .2s var(--ease), background .2s var(--ease); }
+.search-trigger:hover { border-color: var(--teal); color: var(--teal-dark); background: var(--teal-tint); }
+.search-trigger svg { width: 15px; height: 15px; flex-shrink: 0; }
+.search-trigger kbd { font-family: 'JetBrains Mono', monospace; font-size: 11px; border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; color: var(--muted); }
+/* El texto "Buscar" y el atajo solo entran cómodos en pantallas bien anchas; en laptops
+   estándar (1280-1366px, lo más común) el header ya viene ajustado con logo + 7 links +
+   teléfono + CTA, así que ahí el buscador se reduce a ícono para no forzar el wrap. */
+@media (max-width: 1300px) { .search-trigger kbd { display: none; } }
+@media (max-width: 1150px) { .search-trigger span { display: none; } .search-trigger { padding: 9px; } }
+
+.search-overlay {
+  position: fixed; inset: 0; background: rgba(19, 35, 44, 0.5); backdrop-filter: blur(2px);
+  z-index: 1200; display: flex; align-items: flex-start; justify-content: center; padding: 12vh 20px 20px;
+  opacity: 0; visibility: hidden; transition: opacity .2s var(--ease), visibility 0s linear .2s;
+}
+.search-overlay.open { opacity: 1; visibility: visible; transition: opacity .2s var(--ease), visibility 0s linear; }
+.search-panel {
+  background: #fff; border-radius: var(--radius-m); width: 100%; max-width: 600px; max-height: 70vh;
+  overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 24px 70px rgba(19, 35, 44, .35);
+  transform: translateY(-10px) scale(.98); transition: transform .2s var(--ease-out);
+}
+.search-overlay.open .search-panel { transform: translateY(0) scale(1); }
+.search-input-row { display: flex; align-items: center; gap: 12px; padding: 18px 20px; border-bottom: 1px solid var(--line); flex-shrink: 0; }
+.search-input-row svg { width: 19px; height: 19px; color: var(--muted); flex-shrink: 0; }
+.search-input-row input { flex-grow: 1; min-width: 0; border: none; outline: none; font: inherit; font-size: 16.5px; color: var(--ink); background: none; }
+.search-input-row input::placeholder { color: var(--muted); }
+.search-esc { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 2px 6px; flex-shrink: 0; }
+.search-results { overflow-y: auto; padding: 10px; }
+.search-result { display: flex; flex-direction: column; gap: 3px; padding: 12px 14px; border-radius: var(--radius-s); cursor: pointer; transition: background .15s var(--ease); }
+.search-result:hover, .search-result.active { background: var(--teal-tint); }
+.search-result-cat { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--teal-dark); }
+.search-result-title { font-weight: 600; font-size: 15px; color: var(--ink); }
+.search-result-title mark { background: none; color: var(--teal-dark); font-weight: 700; }
+.search-result-snippet { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.search-empty { padding: 40px 20px; text-align: center; color: var(--muted); font-size: 14.5px; }
+.search-hint { padding: 10px 20px; border-top: 1px solid var(--line); display: flex; gap: 16px; font-size: 12px; color: var(--muted); flex-shrink: 0; }
+.search-hint span { display: flex; align-items: center; gap: 5px; }
+.search-hint kbd { font-family: 'JetBrains Mono', monospace; border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; }
+@media (max-width: 600px) {
+  .search-overlay { padding: 0; }
+  .search-panel { max-width: 100%; height: 100%; max-height: 100%; border-radius: 0; }
+  .search-hint { display: none; }
+}
+
+/* ---------- FICHA DE TRATAMIENTO (beneficios + reseñas, servicios y especialidades) ---------- */
+/* Reusa el shell visual de .ficha-overlay/.ficha-card (mismo modal que equipo.html) — acá solo
+   se agrega el contenido específico de un tratamiento: beneficios reales del servicio y, cuando
+   existe, una reseña real de Google ya publicada en el sitio (nunca un caso inventado). */
+[data-treatment] { cursor: pointer; }
+[data-treatment] .scard-body, [data-treatment] .spec-body { position: relative; }
+.treat-hint { position: absolute; top: 0; right: 0; display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: var(--teal-dark); opacity: 0; transform: translateX(-4px); transition: opacity .2s var(--ease), transform .2s var(--ease); }
+[data-treatment]:hover .treat-hint, [data-treatment]:focus-visible .treat-hint { opacity: 1; transform: translateX(0); }
+.treat-hint svg { width: 13px; height: 13px; }
+.spec-item .treat-hint { position: static; margin-top: 10px; opacity: .55; transform: none; }
+.spec-item:hover .treat-hint, .spec-item:focus-visible .treat-hint { opacity: 1; }
+
+.treat-card { max-width: 640px; }
+.treat-photo { width: 100%; aspect-ratio: 16/9; border-radius: var(--radius-s); overflow: hidden; background: var(--bg-soft); margin-bottom: 22px; }
+.treat-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.treat-cat { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--teal-dark); }
+.treat-title { font-size: 25px; margin-top: 6px; }
+.treat-intro { font-size: 15px; color: var(--ink-soft); margin-top: 12px; line-height: 1.65; }
+.treat-label { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 26px 0 14px; font-weight: 500; }
+.treat-benefits { display: flex; flex-direction: column; gap: 11px; }
+.treat-benefits li { display: flex; gap: 10px; align-items: flex-start; font-size: 14.5px; color: var(--ink-soft); line-height: 1.5; }
+.treat-benefits svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; color: var(--teal); }
+.treat-review { border-left: 2px solid var(--teal); padding-left: 14px; margin-bottom: 14px; }
+.treat-review:last-child { margin-bottom: 0; }
+.treat-review p { font-size: 14px; color: var(--ink-soft); font-style: italic; line-height: 1.55; }
+.treat-review span { display: block; margin-top: 6px; font-size: 12px; color: var(--muted); font-style: normal; }
+.treat-social-proof { display: flex; align-items: center; gap: 16px; padding: 16px 18px; background: var(--teal-tint); border-radius: var(--radius-s); }
+.treat-social-proof strong { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--teal-dark); white-space: nowrap; }
+.treat-social-proof p { font-size: 13.5px; color: var(--ink-soft); line-height: 1.5; }
+.treat-social-proof a { text-decoration: underline; text-decoration-color: var(--teal); color: var(--teal-dark); font-weight: 600; }
+.treat-footer { display: flex; gap: 12px; margin-top: 26px; flex-wrap: wrap; }
