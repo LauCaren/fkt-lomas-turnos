@@ -2,6 +2,7 @@
 <html lang="es-AR">
 <head>
 <meta charset="UTF-8">
+<script>try{var t=localStorage.getItem("fkt-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Especialidades Médicas — FKT Lomas</title>
 <meta name="description" content="Traumatología, reumatología, flebología, dermopatología, nutrición, psicología, psiquiatría, psicopedagogía, genética ADN, estética y pilates en FKT Lomas.">
@@ -20,6 +21,7 @@
 <meta name="twitter:description" content="Traumatología, reumatología, flebología, dermopatología, nutrición, psicología, psiquiatría, psicopedagogía, genética ADN, estética y pilates en FKT Lomas.">
 <meta name="twitter:image" content="https://fktlomas.com/assets/img/og/preview.jpg">
 
+<meta name="theme-color" content="#239A96">
 <link rel="icon" type="image/png" href="assets/img/logo/favicon-fkt-2026.png">
 <link rel="shortcut icon" type="image/png" href="assets/img/logo/favicon-fkt-2026.png">
 <link rel="apple-touch-icon" href="assets/img/logo/favicon-fkt-2026.png">
@@ -35,7 +37,7 @@
   .spec-img{position:relative; width:100%; aspect-ratio:4/3; background:var(--bg-soft); overflow:hidden;}
   .spec-img img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s var(--ease);}
   .spec-item:hover .spec-img img{transform:scale(1.07);}
-  .spec-icn{position:absolute; left:14px; bottom:-16px; width:36px; height:36px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 3px 10px rgba(0,0,0,0.14); color:var(--teal-dark);}
+  .spec-icn{position:absolute; left:14px; bottom:-16px; width:36px; height:36px; background:var(--white); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 3px 10px rgba(0,0,0,0.14); color:var(--teal-dark);}
   .spec-icn svg{width:18px; height:18px;}
   .spec-body{padding:28px 18px 18px;}
   .spec-body h3{font-size:15.5px; font-weight:600; font-family:'Inter',sans-serif;}
@@ -43,8 +45,27 @@
   @media (max-width:960px){ .spec-grid{grid-template-columns:1fr 1fr;} }
   @media (max-width:560px){ .spec-grid{grid-template-columns:1fr;} }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    { "@type": "Service", "name": "Traumatología", "url": "https://fktlomas.com/especialidades.html#traumatologia", "description": "Lesiones óseas, articulares y musculares.", "provider": { "@type": "MedicalClinic", "name": "FKT Lomas" } },
+    { "@type": "Service", "name": "Reumatología", "url": "https://fktlomas.com/especialidades.html#reumatologia", "description": "Enfermedades del sistema músculo-esquelético.", "provider": { "@type": "MedicalClinic", "name": "FKT Lomas" } },
+    { "@type": "Service", "name": "Flebología", "url": "https://fktlomas.com/especialidades.html#flebologia", "description": "Salud venosa y circulatoria.", "provider": { "@type": "MedicalClinic", "name": "FKT Lomas" } },
+    { "@type": "Service", "name": "Dermopatología", "url": "https://fktlomas.com/especialidades.html#dermopatologia", "description": "Diagnóstico y cuidado de la piel.", "provider": { "@type": "MedicalClinic", "name": "FKT Lomas" } },
+    { "@type": "Service", "name": "Nutrición", "url": "https://fktlomas.com/especialidades.html#nutricion", "description": "Planes alimentarios personalizados.", "provider": { "@type": "MedicalClinic", "name": "FKT Lomas" } },
+    { "@type": "Service", "name": "Psicología", "url": "https://fktlomas.com/especialidades.html#psicologia", "description": "Acompañamiento y salud mental.", "provider": { "@type": "MedicalClinic", "name": "FKT Lomas" } },
+    { "@type": "Service", "name": "Psiquiatría", "url": "https://fktlomas.com/especialidades.html#psiquiatria", "description": "Diagnóstico y tratamiento psiquiátrico.", "provider": { "@type": "MedicalClinic", "name": "FKT Lomas" } },
+    { "@type": "Service", "name": "Psicopedagogía", "url": "https://fktlomas.com/especialidades.html#psicopedagogia", "description": "Aprendizaje y desarrollo.", "provider": { "@type": "MedicalClinic", "name": "FKT Lomas" } },
+    { "@type": "Service", "name": "Genética ADN", "url": "https://fktlomas.com/especialidades.html#genetica-adn", "description": "Estudios genéticos y de filiación.", "provider": { "@type": "MedicalClinic", "name": "FKT Lomas" } },
+    { "@type": "Service", "name": "Estética", "url": "https://fktlomas.com/especialidades.html#estetica", "description": "Tratamientos faciales y corporales.", "provider": { "@type": "MedicalClinic", "name": "FKT Lomas" } },
+    { "@type": "Service", "name": "Pilates", "url": "https://fktlomas.com/especialidades.html#pilates", "description": "Fortalecimiento y control corporal.", "provider": { "@type": "MedicalClinic", "name": "FKT Lomas" } }
+  ]
+}
+</script>
 </head>
 <body>
+<a class="skip-link" href="#main">Saltar al contenido</a>
 
 <header id="site-header">
   <div class="wrap nav">
@@ -84,7 +105,7 @@
   </div>
 </header>
 
-<main>
+<main id="main">
   <section class="page-hero">
     <div class="wrap">
       <span class="eyebrow reveal">Especialidades médicas</span>
@@ -117,37 +138,37 @@
           <div class="spec-body"><h3>Dermopatología</h3><p>Diagnóstico y cuidado de la piel.</p></div>
         </div>
         <div class="spec-item" id="nutricion" data-treatment="nutricion" tabindex="0" role="button" aria-haspopup="dialog">
-          <div class="spec-img"><img src="assets/img/especialidades/nutricion.jpg" alt="Nutrición en FKT Lomas" onerror="imgFallback(this)"></div>
+          <div class="spec-img"><img src="assets/img/especialidades/nutricion.jpg" alt="Nutrición en FKT Lomas" loading="lazy" decoding="async" onerror="imgFallback(this)"></div>
           <span class="spec-icn"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 20 C 6 16 5 9 12 4 C 19 9 18 16 12 20 Z" stroke="currentColor" stroke-width="1.6"/><line x1="12" y1="20" x2="12" y2="11" stroke="currentColor" stroke-width="1.6"/></svg></span>
           <div class="spec-body"><h3>Nutrición</h3><p>Planes alimentarios personalizados.</p></div>
         </div>
         <div class="spec-item" id="psicologia" data-treatment="psicologia" tabindex="0" role="button" aria-haspopup="dialog">
-          <div class="spec-img"><img src="assets/img/especialidades/psicologia.jpg" alt="Psicología en FKT Lomas" onerror="imgFallback(this)"></div>
+          <div class="spec-img"><img src="assets/img/especialidades/psicologia.jpg" alt="Psicología en FKT Lomas" loading="lazy" decoding="async" onerror="imgFallback(this)"></div>
           <span class="spec-icn"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M6 12 A6 6 0 1 1 15 17 L15 20 L9 20 L9 17 A6 6 0 0 1 6 12 Z" stroke="currentColor" stroke-width="1.6"/></svg></span>
           <div class="spec-body"><h3>Psicología</h3><p>Acompañamiento y salud mental.</p></div>
         </div>
         <div class="spec-item" id="psiquiatria" data-treatment="psiquiatria" tabindex="0" role="button" aria-haspopup="dialog">
-          <div class="spec-img"><img src="assets/img/especialidades/psiquiatria.jpg" alt="Psiquiatría en FKT Lomas" onerror="imgFallback(this)"></div>
+          <div class="spec-img"><img src="assets/img/especialidades/psiquiatria.jpg" alt="Psiquiatría en FKT Lomas" loading="lazy" decoding="async" onerror="imgFallback(this)"></div>
           <span class="spec-icn"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M6 12 A6 6 0 1 1 15 17 L15 20 L9 20 L9 17 A6 6 0 0 1 6 12 Z" stroke="currentColor" stroke-width="1.6"/><line x1="9.5" y1="12" x2="12.5" y2="12" stroke="currentColor" stroke-width="1.6"/><line x1="11" y1="10.5" x2="11" y2="13.5" stroke="currentColor" stroke-width="1.6"/></svg></span>
           <div class="spec-body"><h3>Psiquiatría</h3><p>Diagnóstico y tratamiento psiquiátrico.</p></div>
         </div>
         <div class="spec-item" id="psicopedagogia" data-treatment="psicopedagogia" tabindex="0" role="button" aria-haspopup="dialog">
-          <div class="spec-img"><img src="assets/img/especialidades/psicopedagogia.jpg" alt="Psicopedagogía en FKT Lomas" onerror="imgFallback(this)"></div>
+          <div class="spec-img"><img src="assets/img/especialidades/psicopedagogia.jpg" alt="Psicopedagogía en FKT Lomas" loading="lazy" decoding="async" onerror="imgFallback(this)"></div>
           <span class="spec-icn"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4 6 C 8 4, 12 4, 12 6 C 12 4, 16 4, 20 6 L20 18 C 16 16, 12 16, 12 18 C 12 16, 8 16, 4 18 Z" stroke="currentColor" stroke-width="1.6"/></svg></span>
           <div class="spec-body"><h3>Psicopedagogía</h3><p>Aprendizaje y desarrollo.</p></div>
         </div>
         <div class="spec-item" id="genetica-adn" data-treatment="genetica-adn" tabindex="0" role="button" aria-haspopup="dialog">
-          <div class="spec-img"><img src="assets/img/especialidades/genetica-adn.jpg" alt="Genética ADN en FKT Lomas" onerror="imgFallback(this)"></div>
+          <div class="spec-img"><img src="assets/img/especialidades/genetica-adn.jpg" alt="Genética ADN en FKT Lomas" loading="lazy" decoding="async" onerror="imgFallback(this)"></div>
           <span class="spec-icn"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8 4 C 8 9, 16 9, 16 14 C 16 19, 8 19, 8 20" stroke="currentColor" stroke-width="1.6"/><path d="M16 4 C 16 9, 8 9, 8 14 C 8 19, 16 19, 16 20" stroke="currentColor" stroke-width="1.6"/></svg></span>
           <div class="spec-body"><h3>Genética ADN</h3><p>Estudios genéticos y de filiación.</p></div>
         </div>
         <div class="spec-item" id="estetica" data-treatment="estetica" tabindex="0" role="button" aria-haspopup="dialog">
-          <div class="spec-img"><img src="assets/img/especialidades/estetica.jpg" alt="Estética en FKT Lomas" onerror="imgFallback(this)"></div>
+          <div class="spec-img"><img src="assets/img/especialidades/estetica.jpg" alt="Estética en FKT Lomas" loading="lazy" decoding="async" onerror="imgFallback(this)"></div>
           <span class="spec-icn"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 3 L13.5 9 L19 9 L14.5 12.5 L16 18 L12 14.5 L8 18 L9.5 12.5 L5 9 L10.5 9 Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></span>
           <div class="spec-body"><h3>Estética</h3><p>Tratamientos faciales y corporales.</p></div>
         </div>
         <div class="spec-item" id="pilates" data-treatment="pilates" tabindex="0" role="button" aria-haspopup="dialog">
-          <div class="spec-img"><img src="assets/img/especialidades/pilates.jpg" alt="Pilates en FKT Lomas" onerror="imgFallback(this)"></div>
+          <div class="spec-img"><img src="assets/img/especialidades/pilates.jpg" alt="Pilates en FKT Lomas" loading="lazy" decoding="async" onerror="imgFallback(this)"></div>
           <span class="spec-icn"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="2.4" fill="currentColor"/></svg></span>
           <div class="spec-body"><h3>Pilates</h3><p>Fortalecimiento y control corporal.</p></div>
         </div>
@@ -211,7 +232,7 @@
   </div>
 </footer>
 
-<script src="assets/js/site.js" defer></script>
+<script src="assets/js/site.js"></script>
 
 <a class="wa-float" href="https://wa.me/5491123515402?text=Hola%20FKT%20Lomas%2C%20quiero%20consultar%20por%20un%20turno." target="_blank" rel="noopener" aria-label="Escribinos por WhatsApp">
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12.001 2C6.478 2 2 6.478 2 12c0 1.999.594 3.86 1.615 5.42L2 22l4.674-1.588A9.953 9.953 0 0012 22c5.523 0 10-4.478 10-10S17.523 2 12.001 2zm0 18.163a8.135 8.135 0 01-4.146-1.135l-.297-.176-3.09.99.99-3.021-.194-.313A8.128 8.128 0 013.837 12c0-4.507 3.656-8.163 8.164-8.163 4.507 0 8.163 3.656 8.163 8.163 0 4.508-3.656 8.163-8.163 8.163z"/></svg>

@@ -2,6 +2,7 @@
 <html lang="es-AR">
 <head>
 <meta charset="UTF-8">
+<script>try{var t=localStorage.getItem("fkt-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Trabajá con nosotros — FKT Lomas</title>
 <meta name="description" content="Sumate al equipo de FKT Lomas. Postulate enviando tu CV en PDF.">
@@ -20,6 +21,7 @@
 <meta name="twitter:description" content="Sumate al equipo de FKT Lomas. Postulate enviando tu CV en PDF.">
 <meta name="twitter:image" content="https://fktlomas.com/assets/img/og/preview.jpg">
 
+<meta name="theme-color" content="#239A96">
 <link rel="icon" type="image/png" href="assets/img/logo/favicon-fkt-2026.png">
 <link rel="shortcut icon" type="image/png" href="assets/img/logo/favicon-fkt-2026.png">
 <link rel="apple-touch-icon" href="assets/img/logo/favicon-fkt-2026.png">
@@ -42,6 +44,7 @@
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main">Saltar al contenido</a>
 
 <header id="site-header">
   <div class="wrap nav">
@@ -81,7 +84,7 @@
   </div>
 </header>
 
-<main>
+<main id="main">
   <section class="page-hero">
     <div class="wrap">
       <span class="eyebrow reveal">Trabajá con nosotros</span>
@@ -171,7 +174,7 @@
   </div>
 </footer>
 
-<script src="assets/js/site.js" defer></script>
+<script src="assets/js/site.js"></script>
 <script>
   // Antes de publicar el sitio, reemplazar por la URL real del backend desplegado.
   const API_URL = 'http://localhost:8080';

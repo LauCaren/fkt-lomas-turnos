@@ -2,6 +2,7 @@
 <html lang="es-AR">
 <head>
 <meta charset="UTF-8">
+<script>try{var t=localStorage.getItem("fkt-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>El Centro — FKT Lomas</title>
 <meta name="description" content="Conocé el centro de FKT Lomas: consultorios privados, jardín con equipamiento de entrenamiento, y un equipo administrativo que se encarga de tus turnos.">
@@ -20,6 +21,7 @@
 <meta name="twitter:description" content="Conocé el centro de FKT Lomas: consultorios privados, jardín con equipamiento de entrenamiento, y un equipo administrativo que se encarga de tus turnos.">
 <meta name="twitter:image" content="https://fktlomas.com/assets/img/og/preview.jpg">
 
+<meta name="theme-color" content="#239A96">
 <link rel="icon" type="image/png" href="assets/img/logo/favicon-fkt-2026.png">
 <link rel="shortcut icon" type="image/png" href="assets/img/logo/favicon-fkt-2026.png">
 <link rel="apple-touch-icon" href="assets/img/logo/favicon-fkt-2026.png">
@@ -29,6 +31,7 @@
 <link rel="stylesheet" href="assets/css/site.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Saltar al contenido</a>
 
 <header id="site-header">
   <div class="wrap nav">
@@ -68,7 +71,7 @@
   </div>
 </header>
 
-<main>
+<main id="main">
   <!-- ---------- BANNER ---------- -->
   <section style="padding:0;">
     <div class="team-banner">
@@ -125,14 +128,14 @@
         <p>Fotos del centro en Juan Larrea 496, sin retocar.</p>
       </div>
       <div class="gallery-grid reveal stagger">
-        <div class="gallery-item"><img src="assets/img/centro/consultorio-1.jpg" alt="Consultorio privado FKT Lomas" onerror="imgFallback(this)"></div>
-        <div class="gallery-item"><img src="assets/img/centro/consultorio-2.jpg" alt="Consultorio privado FKT Lomas" onerror="imgFallback(this)"></div>
-        <div class="gallery-item"><img src="assets/img/centro/consultorio-3.jpg" alt="Consultorio con camilla FKT Lomas" onerror="imgFallback(this)"></div>
-        <div class="gallery-item"><img src="assets/img/centro/consultorio-4.jpg" alt="Consultorio privado FKT Lomas" onerror="imgFallback(this)"></div>
-        <div class="gallery-item"><img src="assets/img/centro/jardin-1.jpg" alt="Jardín con equipamiento de entrenamiento" onerror="imgFallback(this)"></div>
-        <div class="gallery-item"><img src="assets/img/centro/jardin-2.jpg" alt="Equipamiento de entrenamiento FKT Lomas" onerror="imgFallback(this)"></div>
-        <div class="gallery-item"><img src="assets/img/centro/jardin-3.jpg" alt="Jardín de FKT Lomas" onerror="imgFallback(this)"></div>
-        <div class="gallery-item"><img src="assets/img/centro/recepcion-1.jpg" alt="Recepción de FKT Lomas" onerror="imgFallback(this)"></div>
+        <div class="gallery-item"><img src="assets/img/centro/consultorio-1.jpg" alt="Consultorio privado FKT Lomas" loading="lazy" decoding="async" onerror="imgFallback(this)"></div>
+        <div class="gallery-item"><img src="assets/img/centro/consultorio-2.jpg" alt="Consultorio privado FKT Lomas" loading="lazy" decoding="async" onerror="imgFallback(this)"></div>
+        <div class="gallery-item"><img src="assets/img/centro/consultorio-3.jpg" alt="Consultorio con camilla FKT Lomas" loading="lazy" decoding="async" onerror="imgFallback(this)"></div>
+        <div class="gallery-item"><img src="assets/img/centro/consultorio-4.jpg" alt="Consultorio privado FKT Lomas" loading="lazy" decoding="async" onerror="imgFallback(this)"></div>
+        <div class="gallery-item"><img src="assets/img/centro/jardin-1.jpg" alt="Jardín con equipamiento de entrenamiento" loading="lazy" decoding="async" onerror="imgFallback(this)"></div>
+        <div class="gallery-item"><img src="assets/img/centro/jardin-2.jpg" alt="Equipamiento de entrenamiento FKT Lomas" loading="lazy" decoding="async" onerror="imgFallback(this)"></div>
+        <div class="gallery-item"><img src="assets/img/centro/jardin-3.jpg" alt="Jardín de FKT Lomas" loading="lazy" decoding="async" onerror="imgFallback(this)"></div>
+        <div class="gallery-item"><img src="assets/img/centro/recepcion-1.jpg" alt="Recepción de FKT Lomas" loading="lazy" decoding="async" onerror="imgFallback(this)"></div>
       </div>
     </div>
   </section>
@@ -198,23 +201,27 @@
   <img id="lightboxImg" src="" alt="">
 </div>
 
-<script src="assets/js/site.js" defer></script>
+<script src="assets/js/site.js"></script>
 <script>
 
   // ---------- LIGHTBOX ----------
   const lightbox = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightboxImg');
+  const lightboxTrap = window.fktCreateFocusTrap(lightbox);
 
   function abrirLightbox(src, alt) {
+    lightboxTrap.remember();
     lightboxImg.src = src;
     lightboxImg.alt = alt;
     lightbox.classList.add('open');
     lightbox.setAttribute('aria-hidden', 'false');
+    document.getElementById('lightboxCerrar').focus();
   }
 
   function cerrarLightbox() {
     lightbox.classList.remove('open');
     lightbox.setAttribute('aria-hidden', 'true');
+    lightboxTrap.restore();
   }
 
   document.querySelectorAll('.gallery-item').forEach((item) => {

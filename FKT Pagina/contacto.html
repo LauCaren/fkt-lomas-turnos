@@ -2,6 +2,7 @@
 <html lang="es-AR">
 <head>
 <meta charset="UTF-8">
+<script>try{var t=localStorage.getItem("fkt-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Contacto y Obras Sociales — FKT Lomas</title>
 <meta name="description" content="Dirección, teléfono, WhatsApp y obras sociales de FKT Lomas, centro médico y de kinesiología en Juan Larrea 496, Lomas de Zamora.">
@@ -20,6 +21,7 @@
 <meta name="twitter:description" content="Dirección, teléfono, WhatsApp y obras sociales de FKT Lomas, centro médico y de kinesiología en Juan Larrea 496, Lomas de Zamora.">
 <meta name="twitter:image" content="https://fktlomas.com/assets/img/og/preview.jpg">
 
+<meta name="theme-color" content="#239A96">
 <link rel="icon" type="image/png" href="assets/img/logo/favicon-fkt-2026.png">
 <link rel="shortcut icon" type="image/png" href="assets/img/logo/favicon-fkt-2026.png">
 <link rel="apple-touch-icon" href="assets/img/logo/favicon-fkt-2026.png">
@@ -35,13 +37,60 @@
 
   /* ---------- OBRAS SOCIALES (logos) ---------- */
   .os-logos-grid{display:flex; flex-wrap:wrap; gap:14px;}
-  .os-logo{width:130px; height:72px; display:flex; align-items:center; justify-content:center; padding:10px; background:var(--white); border:1px solid var(--line); border-radius:var(--radius-s); transition:border-color .2s var(--ease);}
+  /* Fondo blanco fijo (no var(--white), que en modo oscuro se vuelve oscuro) — los logos
+     de las obras sociales son .jpg con fondo blanco "quemado" en el archivo, así que
+     necesitan una chapa clara siempre para leerse bien en cualquier tema. */
+  .os-logo{width:130px; height:72px; display:flex; align-items:center; justify-content:center; padding:10px; background:#fff; border:1px solid var(--line); border-radius:var(--radius-s); transition:border-color .2s var(--ease);}
   .os-logo:hover{border-color:var(--teal);}
   .os-logo img{max-width:100%; max-height:100%; object-fit:contain;}
   .os-note{margin-top:20px; font-size:14px; color:var(--muted);}
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "¿Qué obras sociales atienden?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Trabajamos con numerosas obras sociales y prepagas — mirá el listado completo en esta página. Si la tuya no aparece, escribinos por WhatsApp y te confirmamos la cobertura." }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Necesito orden médica para sacar un turno?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Depende de tu obra social: algunas la piden y otras no. Te recomendamos consultarlo con nosotros por WhatsApp antes de tu turno para evitar demoras." }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Cómo cancelo un turno?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Desde \"Mis turnos\" en la web, ingresando con tu cuenta, o escribiéndonos por WhatsApp con la mayor anticipación posible para liberar el horario a otro paciente." }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Puedo atenderme si no tengo obra social?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Sí, atendemos pacientes particulares. El costo de la sesión se confirma directamente con el centro." }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Cuál es el horario de atención?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Atendemos de lunes a viernes de 8 a 20 hs. No hay turnos disponibles los fines de semana." }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Puedo sacar un turno para un familiar?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Sí, podés coordinarlo por WhatsApp o llamando al centro, pasándonos los datos de la persona que se va a atender." }
+    },
+    {
+      "@type": "Question",
+      "name": "No encuentro turnos disponibles para lo que necesito, ¿qué hago?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Escribinos por WhatsApp — a veces se liberan horarios o podemos coordinarlo directamente con el profesional." }
+    }
+  ]
+}
+</script>
 </head>
 <body>
+<a class="skip-link" href="#main">Saltar al contenido</a>
 
 <header id="site-header">
   <div class="wrap nav">
@@ -81,7 +130,7 @@
   </div>
 </header>
 
-<main>
+<main id="main">
   <section class="page-hero">
     <div class="wrap">
       <span class="eyebrow reveal">Visitanos</span>
@@ -169,10 +218,10 @@
         <p>Así te vas a encontrar el lugar el día de tu consulta.</p>
       </div>
       <div class="gallery-grid reveal stagger">
-        <div class="gallery-item"><img src="assets/img/consultorio/consultorio-4.jpg" alt="Consultorio FKT Lomas" onerror="imgFallback(this)"></div>
-        <div class="gallery-item"><img src="assets/img/consultorio/consultorio-7.jpg" alt="Sala de espera FKT Lomas" onerror="imgFallback(this)"></div>
-        <div class="gallery-item"><img src="assets/img/consultorio/consultorio-6.jpg" alt="Consultorio FKT Lomas" onerror="imgFallback(this)"></div>
-        <div class="gallery-item"><img src="assets/img/consultorio/consultorio-2.jpg" alt="Consultorio FKT Lomas" onerror="imgFallback(this)"></div>
+        <div class="gallery-item"><img src="assets/img/consultorio/consultorio-4.jpg" alt="Consultorio FKT Lomas" loading="lazy" decoding="async" onerror="imgFallback(this)"></div>
+        <div class="gallery-item"><img src="assets/img/consultorio/consultorio-7.jpg" alt="Sala de espera FKT Lomas" loading="lazy" decoding="async" onerror="imgFallback(this)"></div>
+        <div class="gallery-item"><img src="assets/img/consultorio/consultorio-6.jpg" alt="Consultorio FKT Lomas" loading="lazy" decoding="async" onerror="imgFallback(this)"></div>
+        <div class="gallery-item"><img src="assets/img/consultorio/consultorio-2.jpg" alt="Consultorio FKT Lomas" loading="lazy" decoding="async" onerror="imgFallback(this)"></div>
       </div>
     </div>
   </section>
@@ -315,7 +364,7 @@
   </div>
 </footer>
 
-<script src="assets/js/site.js" defer></script>
+<script src="assets/js/site.js"></script>
 
 <a class="wa-float" href="https://wa.me/5491123515402?text=Hola%20FKT%20Lomas%2C%20quiero%20consultar%20por%20un%20turno." target="_blank" rel="noopener" aria-label="Escribinos por WhatsApp">
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12.001 2C6.478 2 2 6.478 2 12c0 1.999.594 3.86 1.615 5.42L2 22l4.674-1.588A9.953 9.953 0 0012 22c5.523 0 10-4.478 10-10S17.523 2 12.001 2zm0 18.163a8.135 8.135 0 01-4.146-1.135l-.297-.176-3.09.99.99-3.021-.194-.313A8.128 8.128 0 013.837 12c0-4.507 3.656-8.163 8.164-8.163 4.507 0 8.163 3.656 8.163 8.163 0 4.508-3.656 8.163-8.163 8.163z"/></svg>

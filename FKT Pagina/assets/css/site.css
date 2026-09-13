@@ -24,6 +24,8 @@
   --teal-tint: #E1F3F2;
   --black: #13232C;
   --white: #FFFFFF;
+  --header-bg: rgba(255, 255, 255, 0.72);
+  --header-bg-scrolled: rgba(255, 255, 255, 0.88);
   --radius-s: 6px;
   --radius-m: 16px;
   --maxw: 1180px;
@@ -34,7 +36,33 @@
   --ease-out: cubic-bezier(.23, 1, .32, 1);
   --shadow-sm: 0 1px 2px rgba(19, 35, 44, .04), 0 4px 14px rgba(19, 35, 44, .06);
   --shadow-md: 0 4px 10px rgba(19, 35, 44, .06), 0 20px 48px rgba(19, 35, 44, .16);
+  color-scheme: light;
 }
+
+/* ---------- MODO OSCURO ---------- */
+/* Paleta clara en :root (arriba); acá se sobreescribe dos veces con las mismas variables:
+   primero por preferencia de sistema (prefers-color-scheme), después por el toggle explícito
+   ([data-theme]) que manda siempre que exista — así "sistema en oscuro + toggle en claro"
+   gana el toggle. --ink/--teal-dark cambian de rol: en claro son el tono MÁS oscuro para
+   texto sobre fondo blanco; en oscuro tienen que ser más CLAROS para seguir siendo legibles
+   sobre el fondo oscuro — el nombre de la variable no cambia, sólo a qué valor apunta. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101C23; --bg-soft: #16242C; --ink: #EAF2F1; --ink-soft: #B6C6C9; --muted: #83979B;
+    --line: #25373E; --teal: #35BFB9; --teal-dark: #7FDAD5; --teal-tint: #17302E;
+    --black: #0B141A; --white: #182831;
+    --header-bg: rgba(16, 28, 35, 0.72); --header-bg-scrolled: rgba(16, 28, 35, 0.9);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101C23; --bg-soft: #16242C; --ink: #EAF2F1; --ink-soft: #B6C6C9; --muted: #83979B;
+  --line: #25373E; --teal: #35BFB9; --teal-dark: #7FDAD5; --teal-tint: #17302E;
+  --black: #0B141A; --white: #182831;
+  --header-bg: rgba(16, 28, 35, 0.72); --header-bg-scrolled: rgba(16, 28, 35, 0.9);
+  color-scheme: dark;
+}
+:root[data-theme="light"] { color-scheme: light; }
 
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -88,8 +116,8 @@ button { font: inherit; background: none; border: none; cursor: pointer; color: 
 /* ---------- HEADER / NAV ---------- */
 /* Más traslúcido en reposo (deja pasar el color de lo que hay debajo, como vidrio real)
    y se vuelve más opaco al scrollear para no perder legibilidad sobre contenido denso. */
-header { position: sticky; top: 0; z-index: 100; background: rgba(255, 255, 255, 0.72); backdrop-filter: blur(18px) saturate(180%); -webkit-backdrop-filter: blur(18px) saturate(180%); border-bottom: 1px solid var(--line); transition: box-shadow .25s var(--ease), background .3s var(--ease); }
-header.scrolled { background: rgba(255, 255, 255, 0.88); box-shadow: var(--shadow-sm); }
+header { position: sticky; top: 0; z-index: 100; background: var(--header-bg); backdrop-filter: blur(18px) saturate(180%); -webkit-backdrop-filter: blur(18px) saturate(180%); border-bottom: 1px solid var(--line); transition: box-shadow .25s var(--ease), background .3s var(--ease); }
+header.scrolled { background: var(--header-bg-scrolled); box-shadow: var(--shadow-sm); }
 
 /* Barra de progreso de lectura — inyectada por site.js, vive pegada al borde
    inferior del header para que se note sin competir con la nav. */
@@ -205,7 +233,7 @@ section.soft { background: var(--bg-soft); }
 }
 .ficha-overlay.open { opacity: 1; visibility: visible; transition: opacity .2s var(--ease), visibility 0s linear; }
 .ficha-card {
-  background: #fff; border-radius: var(--radius-m); max-width: 520px; width: 100%; max-height: 90vh;
+  background: var(--white); border-radius: var(--radius-m); max-width: 520px; width: 100%; max-height: 90vh;
   overflow-y: auto; padding: 32px; position: relative; box-shadow: 0 20px 60px rgba(19, 35, 44, 0.3);
   transform: scale(.95); transform-origin: center;
   transition: transform .2s var(--ease-out);
@@ -329,10 +357,11 @@ section.soft .step-deg { background: var(--bg-soft); }
   .filosofia-photo { order: -1; }
 }
 
-/* ---------- ¿EN QUÉ PODEMOS AYUDARTE? (intent-grid, reusa .promo-card) ---------- */
-.intent-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-@media (max-width: 860px) { .intent-grid { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 560px) { .intent-grid { grid-template-columns: 1fr; } }
+/* ---------- ¿EN QUÉ PODEMOS AYUDARTE? (intent-grid-mini, reusa .promo-card) ---------- */
+/* Solo 2 tarjetas — los caminos que el mapa corporal no cubre (especialista médico /
+   ya sé qué necesito). Antes eran 6 en 3 columnas; las otras 4 pasaron al mapa corporal. */
+.intent-grid-mini { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 620px; margin: 40px auto 0; }
+@media (max-width: 560px) { .intent-grid-mini { grid-template-columns: 1fr; } }
 
 /* ---------- FORMULARIOS (alquiler / trabaja-con-nosotros) ---------- */
 .form-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-m); padding: 40px; max-width: 560px; }
@@ -362,6 +391,16 @@ footer { background: var(--black); color: rgba(255, 255, 255, 0.75); padding: 56
 .footer-bottom a:hover { color: var(--teal); }
 
 :focus-visible { outline: 2px solid var(--teal-dark); outline-offset: 3px; }
+
+/* ---------- SKIP LINK ---------- */
+/* Invisible salvo con teclado: el primer Tab en cualquier página tiene que poder saltar
+   directo a <main id="main"> sin recorrer los 7 links del header + el buscador. */
+.skip-link {
+  position: fixed; top: -60px; left: 14px; z-index: 4000;
+  background: var(--black); color: #fff; padding: 12px 20px; border-radius: var(--radius-s);
+  font-weight: 600; font-size: 14px; transition: top .2s var(--ease-out);
+}
+.skip-link:focus { top: 14px; }
 
 /* ---------- WHATSAPP FLOTANTE ---------- */
 .wa-float { position: fixed; bottom: 24px; right: 24px; width: 58px; height: 58px; border-radius: 50%; background: #25D366; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28); z-index: 900; transition: transform .25s var(--ease), box-shadow .25s var(--ease); }
@@ -479,7 +518,7 @@ footer { background: var(--black); color: rgba(255, 255, 255, 0.75); padding: 56
 }
 .search-overlay.open { opacity: 1; visibility: visible; transition: opacity .2s var(--ease), visibility 0s linear; }
 .search-panel {
-  background: #fff; border-radius: var(--radius-m); width: 100%; max-width: 600px; max-height: 70vh;
+  background: var(--white); border-radius: var(--radius-m); width: 100%; max-width: 600px; max-height: 70vh;
   overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 24px 70px rgba(19, 35, 44, .35);
   transform: translateY(-10px) scale(.98); transition: transform .2s var(--ease-out);
 }
@@ -601,13 +640,31 @@ body.fkt-cursor-on input, body.fkt-cursor-on textarea, body.fkt-cursor-on select
 .glossary { border-bottom: 1.5px dotted var(--teal); cursor: help; position: relative; }
 .glossary-tip {
   position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translateX(-50%) translateY(4px);
-  background: var(--ink); color: #fff; padding: 10px 14px; border-radius: var(--radius-s); font-size: 13px;
+  background: var(--black); color: #fff; padding: 10px 14px; border-radius: var(--radius-s); font-size: 13px;
   line-height: 1.5; width: max-content; max-width: 260px; box-shadow: var(--shadow-md); z-index: 500;
   opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .2s var(--ease), transform .2s var(--ease);
   font-style: normal; font-weight: 400; text-align: left;
 }
-.glossary-tip::after { content: ""; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: var(--ink); }
+.glossary-tip::after { content: ""; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: var(--black); }
 .glossary:hover .glossary-tip, .glossary:focus-visible .glossary-tip { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+
+/* ---------- TOGGLE DE TEMA CLARO/OSCURO ---------- */
+.theme-toggle { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: 1.5px solid var(--line); border-radius: 100px; color: var(--muted); flex-shrink: 0; transition: border-color .2s var(--ease), color .2s var(--ease), background .2s var(--ease); }
+.theme-toggle:hover { border-color: var(--teal); color: var(--teal-dark); background: var(--teal-tint); }
+.theme-toggle svg { width: 17px; height: 17px; }
+/* Muestra el ícono de la acción que hace el click, no el estado actual: sol = "pasar a
+   claro" (se ve en oscuro), luna = "pasar a oscuro" (se ve en claro). Por defecto asume
+   claro; si el sistema prefiere oscuro y no hay preferencia explícita, se invierte. */
+.theme-toggle .i-sun { display: none; }
+.theme-toggle .i-moon { display: block; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-toggle .i-sun { display: block; }
+  :root:not([data-theme="light"]) .theme-toggle .i-moon { display: none; }
+}
+:root[data-theme="dark"] .theme-toggle .i-sun { display: block; }
+:root[data-theme="dark"] .theme-toggle .i-moon { display: none; }
+:root[data-theme="light"] .theme-toggle .i-sun { display: none; }
+:root[data-theme="light"] .theme-toggle .i-moon { display: block; }
 
 /* ---------- MAPA CORPORAL INTERACTIVO ---------- */
 .body-map-wrap { display: grid; grid-template-columns: 260px 1fr; gap: 52px; align-items: center; }

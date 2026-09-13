@@ -91,6 +91,44 @@ const FKT_SEARCH_INDEX = [
   { cat: 'Acción', title: 'Escribinos por WhatsApp', snippet: 'Consultanos por un turno o por tu cobertura.', url: 'https://wa.me/5491123515402?text=Hola%20FKT%20Lomas%2C%20quiero%20consultar%20por%20un%20turno.' },
 ];
 
+// ---------- TOGGLE DE TEMA CLARO/OSCURO ----------
+// data-theme en <html> manda siempre que exista; sin eso, sigue prefers-color-scheme del
+// sistema. El flash al cargar se evita con un script mínimo e inline en el <head> de cada
+// página (antes que este archivo cargue) que ya deja seteado data-theme si había uno guardado.
+function fktInitThemeToggle() {
+  const root = document.documentElement;
+  function stored() { try { return localStorage.getItem('fkt-theme'); } catch (e) { return null; } }
+  function isDarkNow() {
+    const explicit = root.getAttribute('data-theme');
+    if (explicit === 'dark') return true;
+    if (explicit === 'light') return false;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  function toggle() {
+    const next = isDarkNow() ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('fkt-theme', next); } catch (e) {}
+  }
+
+  const ICON = '<svg class="i-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v2.5M12 19v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12H5M19 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' +
+    '<svg class="i-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
+
+  function makeButton() {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'theme-toggle';
+    btn.setAttribute('aria-label', 'Cambiar entre tema claro y oscuro');
+    btn.innerHTML = ICON;
+    btn.addEventListener('click', toggle);
+    return btn;
+  }
+
+  const navCta = document.querySelector('.nav-cta');
+  if (navCta) navCta.insertBefore(makeButton(), navCta.firstChild);
+  const mobileCta = document.querySelector('#mobilePanel .nav-cta');
+  if (mobileCta) mobileCta.insertBefore(makeButton(), mobileCta.firstChild);
+}
+
 function fktInitSearch() {
   const navCta = document.querySelector('.nav-cta');
   const mobileCta = document.querySelector('#mobilePanel .nav-cta');
@@ -193,7 +231,9 @@ function fktInitSearch() {
     else window.location.href = item.url;
   }
 
+  const searchTrap = fktCreateFocusTrap(overlay);
   function openSearch() {
+    searchTrap.remember();
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
     input.value = '';
@@ -203,6 +243,7 @@ function fktInitSearch() {
   function closeSearch() {
     overlay.classList.remove('open');
     document.body.style.overflow = '';
+    searchTrap.restore();
   }
 
   trigger.addEventListener('click', openSearch);
@@ -225,12 +266,37 @@ function fktInitSearch() {
       overlay.classList.contains('open') ? closeSearch() : openSearch();
     }
   });
+
+  window.fktOpenSearch = openSearch;
 }
 
 // ---------- GLOSARIO EN LÍNEA ----------
 // Términos técnicos que aparecen en las fichas de tratamiento, con una definición corta.
 // Se resuelven automáticamente al renderizar el texto (fktWrapGlossary), no hace falta
 // marcarlos a mano en cada página.
+// ---------- TRAMPA DE FOCO PARA MODALES ----------
+// Genérica — la usan el buscador y la ficha de tratamiento acá abajo, y también el
+// modal de profesional y el lightbox de equipo.html (window.fktCreateFocusTrap).
+// Sin esto, Tab se escapa del modal hacia el contenido de atrás mientras está abierto.
+const FKT_FOCUSABLE_SEL = 'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
+
+function fktCreateFocusTrap(overlay) {
+  let lastFocused = null;
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab' || !overlay.classList.contains('open')) return;
+    const items = [...overlay.querySelectorAll(FKT_FOCUSABLE_SEL)].filter((el) => el.offsetParent !== null);
+    if (!items.length) return;
+    const first = items[0], last = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+  return {
+    remember() { lastFocused = document.activeElement; },
+    restore() { if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus(); },
+  };
+}
+window.fktCreateFocusTrap = fktCreateFocusTrap;
+
 const FKT_GLOSSARY = {
   'RPD': 'Reeducación Postural Dinámica: técnica que trabaja cadenas musculares completas — no músculos aislados — para corregir la postura.',
   'bio-ortopedia': 'Abordaje que combina plasma rico en plaquetas, ozonoterapia y terapia neural para artrosis y tendinopatías.',
@@ -401,10 +467,12 @@ function fktInitTreatments() {
 
   const closeBtn = overlay.querySelector('.ficha-cerrar');
   const CHECK_SVG = '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10.5 L8 14.5 L16 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const treatTrap = fktCreateFocusTrap(overlay);
 
   function open(slug) {
     const t = FKT_TREATMENTS[slug];
     if (!t) return;
+    treatTrap.remember();
     overlay.querySelector('.treat-photo img').src = t.img;
     overlay.querySelector('.treat-photo img').alt = t.title;
     overlay.querySelector('.treat-cat').textContent = t.cat;
@@ -430,6 +498,7 @@ function fktInitTreatments() {
   function close() {
     overlay.classList.remove('open');
     document.body.style.overflow = '';
+    treatTrap.restore();
   }
 
   cards.forEach((card) => {
@@ -492,16 +561,16 @@ function fktInitCounters(reduceMotion) {
 
 // ---------- PARALAJE SUAVE DEL HERO ----------
 function fktInitHeroParallax(reduceMotion) {
-  const img = document.querySelector('.hero-visual-bleed img');
-  if (!img || reduceMotion) return;
-  const wrap = img.closest('.hero-visual-bleed');
+  const graphic = document.querySelector('.hero-visual .body-map');
+  if (!graphic || reduceMotion) return;
+  const wrap = graphic.closest('.hero-visual');
   let ticking = false;
   function update() {
     const rect = wrap.getBoundingClientRect();
     const vh = window.innerHeight;
     if (rect.bottom > 0 && rect.top < vh) {
       const progress = (rect.top) / vh; // ~1 al entrar, ~0 centrado, negativo al salir
-      img.style.transform = `translateY(${progress * -22}px)`;
+      graphic.style.transform = `translateY(${progress * -16}px)`;
     }
     ticking = false;
   }
@@ -833,6 +902,7 @@ document.addEventListener('DOMContentLoaded', () => {
     revealEls.forEach((el) => io.observe(el));
   }
 
+  fktInitThemeToggle();
   fktInitSearch();
   fktInitTreatments();
   fktInitStickyCta();

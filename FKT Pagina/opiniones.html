@@ -2,6 +2,7 @@
 <html lang="es-AR">
 <head>
 <meta charset="UTF-8">
+<script>try{var t=localStorage.getItem("fkt-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Opiniones de Pacientes — FKT Lomas</title>
 <meta name="description" content="Mirá las reseñas de nuestros pacientes en Google y dejá tu propia opinión sobre FKT Lomas, centro médico y de kinesiología en Lomas de Zamora.">
@@ -20,6 +21,7 @@
 <meta name="twitter:description" content="Mirá las reseñas de nuestros pacientes en Google y dejá tu propia opinión sobre FKT Lomas, centro médico y de kinesiología en Lomas de Zamora.">
 <meta name="twitter:image" content="https://fktlomas.com/assets/img/og/preview.jpg">
 
+<meta name="theme-color" content="#239A96">
 <link rel="icon" type="image/png" href="assets/img/logo/favicon-fkt-2026.png">
 <link rel="shortcut icon" type="image/png" href="assets/img/logo/favicon-fkt-2026.png">
 <link rel="apple-touch-icon" href="assets/img/logo/favicon-fkt-2026.png">
@@ -56,6 +58,7 @@
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main">Saltar al contenido</a>
 
 <header id="site-header">
   <div class="wrap nav">
@@ -95,7 +98,7 @@
   </div>
 </header>
 
-<main>
+<main id="main">
   <!-- ---------- RATING HERO ---------- -->
   <section class="dark-band rating-hero">
     <div class="bg-photo">
@@ -256,7 +259,7 @@
   </div>
 </footer>
 
-<script src="assets/js/site.js" defer></script>
+<script src="assets/js/site.js"></script>
 <script>
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
