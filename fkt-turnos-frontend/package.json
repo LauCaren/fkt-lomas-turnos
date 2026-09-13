@@ -39,6 +39,10 @@
     "react-redux": "^9.3.0",
     "react-router-dom": "^7.18.2"
   },
+  "overrides": {
+    "node-fetch": "^2.7.0",
+    "qs": "^6.16.0"
+  },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^8.4.3",

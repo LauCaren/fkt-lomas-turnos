@@ -4,6 +4,8 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.time.Instant;
 
@@ -41,12 +43,20 @@ public class TotpService {
         }
         byte[] clave = base32Decode(secretoBase32);
         long pasoActual = Instant.now().getEpochSecond() / PERIODO_SEGUNDOS;
+        boolean coincide = false;
+        // Comparación de tiempo constante (MessageDigest.isEqual, mismo criterio que
+        // MercadoPagoService.validarFirma) — con String.equals(), que corta apenas encuentra
+        // el primer dígito distinto, alguien midiendo el tiempo de respuesta con precisión
+        // podría en teoría ir deduciendo el código dígito a dígito. Se recorren las tres
+        // ventanas siempre completas (sin "return" apenas matchea una) por la misma razón:
+        // cortar antes también filtraría por tiempo cuál ventana fue la que coincidió.
         for (int i = -VENTANA_TOLERANCIA; i <= VENTANA_TOLERANCIA; i++) {
-            if (generarCodigo(clave, pasoActual + i).equals(codigo)) {
-                return true;
+            String esperado = generarCodigo(clave, pasoActual + i);
+            if (MessageDigest.isEqual(esperado.getBytes(StandardCharsets.UTF_8), codigo.getBytes(StandardCharsets.UTF_8))) {
+                coincide = true;
             }
         }
-        return false;
+        return coincide;
     }
 
     private String generarCodigo(byte[] clave, long paso) {
