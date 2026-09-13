@@ -2,13 +2,16 @@ import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Modal from './ui/Modal';
 import UsuarioAvatar from './UsuarioAvatar';
+import CropeadorFoto from './CropeadorFoto';
 import { useToast } from './ui/useToast';
 import { AVATARES_GENERICOS, colorDeAvatar } from '../constants/avataresGenericos';
 import AvatarGenericoIcono from './AvatarGenericoIcono';
+import { cargarImagen, recortarYComprimir } from '../utils/imagenPerfil';
+import { moderarFoto } from '../utils/moderacionFoto';
 import { subirFotoPropia, elegirAvatarPropio, quitarFotoPropia, limpiarErrorPerfil } from '../features/perfil/perfilSlice';
 
 const TIPOS_ACEPTADOS = ['image/jpeg', 'image/png'];
-const TAMANO_MAXIMO_BYTES = 5 * 1024 * 1024;
+const TAMANO_MAXIMO_BYTES = 8 * 1024 * 1024;
 
 /**
  * Modal de "mi foto de perfil" — subir desde la galería, sacarse una con la cámara ahí mismo,
@@ -20,14 +23,45 @@ export default function SelectorFotoPerfil({ onCerrar }) {
   const toast = useToast();
   const { fotoInfo, fotoVersion, status, error } = useSelector((state) => state.perfil);
   const usuario = useSelector((state) => state.auth.usuario);
-  const [vista, setVista] = useState('menu'); // 'menu' | 'camara' | 'avatares'
+  const [vista, setVista] = useState('menu'); // 'menu' | 'camara' | 'recortar' | 'avatares'
   const inputArchivoRef = useRef(null);
+
+  // Imagen sin recortar todavía (de la galería o recién sacada con la cámara) — object URL que
+  // hay que revocar apenas deja de hacer falta, para no ir acumulando memoria.
+  const [imagenParaRecortar, setImagenParaRecortar] = useState(null);
+  const [procesandoRecorte, setProcesandoRecorte] = useState(false);
+  const [errorModeracion, setErrorModeracion] = useState(null);
+  // Foto ya recortada/comprimida que pasó el chequeo de contenido pero no encontró una cara
+  // clara — queda "pausada" hasta que el usuario confirme que quiere usarla igual.
+  const [fotoSinCaraConfirmar, setFotoSinCaraConfirmar] = useState(null);
 
   const guardando = status === 'loading';
 
+  // Revoca el object URL de la imagen sin recortar cada vez que cambia o al desmontar (Escape,
+  // click afuera, la X, además del "Volver" explícito) — así nunca se filtra memoria sin
+  // depender de acordarse de revocar a mano en cada lugar que sale de la vista "recortar".
+  useEffect(() => {
+    if (!imagenParaRecortar) return undefined;
+    return () => URL.revokeObjectURL(imagenParaRecortar);
+  }, [imagenParaRecortar]);
+
+  function limpiarImagenParaRecortar() {
+    setImagenParaRecortar(null);
+    setErrorModeracion(null);
+    setFotoSinCaraConfirmar(null);
+  }
+
   function irAMenu() {
+    limpiarImagenParaRecortar();
     setVista('menu');
     dispatch(limpiarErrorPerfil());
+  }
+
+  function abrirRecorte(archivoOImagenSinRecortar) {
+    setImagenParaRecortar(URL.createObjectURL(archivoOImagenSinRecortar));
+    setErrorModeracion(null);
+    setFotoSinCaraConfirmar(null);
+    setVista('recortar');
   }
 
   function handleElegirArchivo(e) {
@@ -39,12 +73,47 @@ export default function SelectorFotoPerfil({ onCerrar }) {
       return;
     }
     if (archivo.size > TAMANO_MAXIMO_BYTES) {
-      toast('La imagen no puede superar los 5MB', { tipo: 'error' });
+      toast('La imagen no puede superar los 8MB', { tipo: 'error' });
       return;
     }
-    dispatch(subirFotoPropia(archivo)).unwrap()
-      .then(() => toast('Foto actualizada'))
-      .catch(() => {});
+    abrirRecorte(archivo);
+  }
+
+  async function subirArchivoRecortado(archivo) {
+    return dispatch(subirFotoPropia(archivo)).unwrap()
+      .then(() => {
+        toast('Foto actualizada');
+        limpiarImagenParaRecortar();
+        setVista('menu');
+      });
+  }
+
+  async function handleConfirmarRecorte(areaRecortePixels) {
+    setProcesandoRecorte(true);
+    setErrorModeracion(null);
+    try {
+      const imagen = await cargarImagen(imagenParaRecortar);
+      const archivo = await recortarYComprimir(imagen, areaRecortePixels);
+      const { caraDetectada, inapropiada } = await moderarFoto(archivo);
+      if (inapropiada) {
+        setErrorModeracion('Esta imagen no se puede usar como foto de perfil. Elegí otra.');
+        return;
+      }
+      if (caraDetectada === false) {
+        setFotoSinCaraConfirmar(archivo);
+        return;
+      }
+      await subirArchivoRecortado(archivo);
+    } catch {
+      toast('No pudimos procesar la foto', { tipo: 'error' });
+    } finally {
+      setProcesandoRecorte(false);
+    }
+  }
+
+  function handleSubirIgual() {
+    if (!fotoSinCaraConfirmar) return;
+    subirArchivoRecortado(fotoSinCaraConfirmar).catch(() => {});
   }
 
   function handleElegirAvatar(key) {
@@ -108,14 +177,39 @@ export default function SelectorFotoPerfil({ onCerrar }) {
       {vista === 'camara' && (
         <VistaCamara
           onVolver={irAMenu}
-          onCapturada={(archivo) => {
-            dispatch(subirFotoPropia(archivo)).unwrap()
-              .then(() => { toast('Foto actualizada'); setVista('menu'); })
-              .catch(() => {});
-          }}
+          onCapturada={abrirRecorte}
           guardando={guardando}
           error={error}
         />
+      )}
+
+      {vista === 'recortar' && (
+        <>
+          {!fotoSinCaraConfirmar && (
+            <>
+              <CropeadorFoto
+                imagenUrl={imagenParaRecortar}
+                onConfirmar={handleConfirmarRecorte}
+                onCancelar={irAMenu}
+                guardando={procesandoRecorte}
+              />
+              {errorModeracion && <div className="alert alert-error" role="alert" style={{ marginTop: 16 }}>{errorModeracion}</div>}
+            </>
+          )}
+          {fotoSinCaraConfirmar && (
+            <>
+              <h2 id="selector-foto-titulo" className="modal-title">No detectamos tu cara con claridad</h2>
+              <p style={{ color: 'var(--muted)', fontSize: 14.5 }}>Puede ser una foto de perfil sin cara a propósito, o quizás no salió bien encuadrada. ¿Querés usarla igual?</p>
+              <div className="modal-actions" style={{ marginTop: 22 }}>
+                <button type="button" className="btn btn-outline" disabled={guardando} onClick={() => setFotoSinCaraConfirmar(null)}>Volver a recortar</button>
+                <button type="button" className="btn btn-primary" disabled={guardando} onClick={handleSubirIgual}>
+                  {guardando && <span className="spinner" aria-hidden="true" />}
+                  Subir igual
+                </button>
+              </div>
+            </>
+          )}
+        </>
       )}
 
       {vista === 'avatares' && (
