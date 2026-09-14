@@ -41,6 +41,8 @@
   .error-links { margin-top: 64px; padding-top: 48px; border-top: 1px solid var(--line); }
   .error-links h2 { font-size: 15px; text-align: center; color: var(--muted); font-weight: 600; font-family: 'Inter', sans-serif; }
   .error-links-grid { margin-top: 24px; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+  .error-orb { display: flex; justify-content: center; margin-bottom: 8px; }
+  .error-orb canvas { width: 120px; height: 120px; filter: drop-shadow(0 12px 32px rgba(35, 154, 150, .25)); }
 </style>
 </head>
 <body>
@@ -87,6 +89,7 @@
 <main id="main">
   <section class="error-hero">
     <div class="wrap">
+      <div class="error-orb" aria-hidden="true"><canvas class="fluid-orb" data-size="120" data-color="#239A96"></canvas></div>
       <span class="error-code">ERROR 404</span>
       <h1>Esta página no existe, pero seguro encontramos lo que buscabas</h1>
       <p>El enlace puede estar roto o la página se movió. Probá buscar el servicio, la especialidad o la información que necesitás.</p>

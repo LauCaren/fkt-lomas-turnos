@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { login, limpiarMensajesAuth } from './authSlice';
 import PasswordInput from '../../components/PasswordInput';
+import FluidOrb from '../../components/FluidOrb';
 import { RUTA_POR_ROL } from '../../config';
 
 export default function LoginPage() {
@@ -30,7 +31,10 @@ export default function LoginPage() {
 
   return (
     <div style={{ maxWidth: 420, margin: '0 auto' }}>
-      <div className="page-head">
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 4 }}>
+        <FluidOrb size={96} />
+      </div>
+      <div className="page-head" style={{ textAlign: 'center' }}>
         <span className="eyebrow">Ingresar</span>
         <h1>Accedé a tu cuenta</h1>
         <p>Ingresá con tu email y contraseña para sacar o revisar tus turnos.</p>
