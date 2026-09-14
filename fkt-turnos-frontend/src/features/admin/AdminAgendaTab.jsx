@@ -2,7 +2,7 @@ import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchAgenda, fetchFeriados, fetchMedicosAdmin, reservarParaPaciente, actualizarAsistencia, deshacerTurno,
-  reprogramarTurno, cancelarTurnoStaff, setDniPrellenado, setObjetivoReprogramar,
+  reprogramarTurno, cancelarTurnoStaff, cancelarTurnosLote, setDniPrellenado, setObjetivoReprogramar,
   fetchListaEsperaCompatibles, asignarTurnoAPaciente, enviarRecordatorioAhora,
 } from './adminSlice';
 import { fetchEspecialidades } from '../turnos/turnosSlice';
@@ -522,7 +522,60 @@ function BotonReprogramar({ turno, agendaCompleta }) {
   );
 }
 
-function VistaLista({ agenda, agendaCompleta, agendaCargando, medicoId, reservandoId, setReservandoId, dniPrellenado }) {
+function VistaLista({ agenda, agendaCompleta, agendaCargando, medicoId, reservandoId, setReservandoId, dniPrellenado, onRecargar }) {
+  // Selección múltiple para cancelar varios turnos de una (ej. un médico avisa que no viene un
+  // día entero) — solo tiene sentido sobre turnos RESERVADO, así que un cambio de filtro/día
+  // que ya no los muestre limpia la selección para no dejar ids "fantasma" seleccionados.
+  const [seleccionados, setSeleccionados] = useState(() => new Set());
+  const dispatch = useDispatch();
+  const confirmar = useConfirm();
+  const toast = useToast();
+  const [cancelandoLote, setCancelandoLote] = useState(false);
+
+  const idsReservadosVisibles = useMemo(() => agenda.filter((t) => t.estado === 'RESERVADO').map((t) => t.id), [agenda]);
+
+  useEffect(() => {
+    setSeleccionados((actual) => {
+      const visibles = new Set(idsReservadosVisibles);
+      const filtrado = new Set([...actual].filter((id) => visibles.has(id)));
+      return filtrado.size === actual.size ? actual : filtrado;
+    });
+  }, [idsReservadosVisibles]);
+
+  function alternarSeleccion(id) {
+    setSeleccionados((actual) => {
+      const nuevo = new Set(actual);
+      if (nuevo.has(id)) nuevo.delete(id); else nuevo.add(id);
+      return nuevo;
+    });
+  }
+
+  async function handleCancelarSeleccionados() {
+    const ids = [...seleccionados];
+    const ok = await confirmar({
+      titulo: `Cancelar ${ids.length} ${ids.length === 1 ? 'turno' : 'turnos'}`,
+      detalle: `Se va a avisar a cada paciente por su canal preferido, igual que al cancelar uno solo.`,
+      confirmarTexto: `Cancelar ${ids.length === 1 ? 'turno' : 'turnos'}`,
+      peligroso: true,
+    });
+    if (!ok) return;
+    setCancelandoLote(true);
+    try {
+      const resultado = await dispatch(cancelarTurnosLote(ids)).unwrap();
+      setSeleccionados(new Set());
+      onRecargar();
+      if (resultado.errores.length === 0) {
+        toast(`${resultado.cancelados.length} ${resultado.cancelados.length === 1 ? 'turno cancelado' : 'turnos cancelados'}`);
+      } else {
+        toast(`${resultado.cancelados.length} cancelados, ${resultado.errores.length} no se pudieron cancelar`, { tipo: 'error' });
+      }
+    } catch {
+      // el thunk ya deja el mensaje en state.admin.error
+    } finally {
+      setCancelandoLote(false);
+    }
+  }
+
   return (
     <>
       {agendaCargando && (
@@ -538,38 +591,63 @@ function VistaLista({ agenda, agendaCompleta, agendaCargando, medicoId, reservan
       {!agendaCargando && agenda.length === 0 && (
         <EstadoVacio titulo="Sin turnos generados" subtitulo={`No hay turnos generados para ese día${medicoId ? ' con ese médico' : ''}.`} />
       )}
+      {seleccionados.size > 0 && (
+        <div className="card" style={{ padding: '10px 16px', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, background: 'var(--red-tint)', borderColor: 'var(--red)' }}>
+          <span style={{ fontSize: 14, fontWeight: 600 }}>{seleccionados.size} {seleccionados.size === 1 ? 'turno seleccionado' : 'turnos seleccionados'}</span>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => setSeleccionados(new Set())} disabled={cancelandoLote}>
+              Deseleccionar todo
+            </button>
+            <button className="btn btn-dark" style={{ padding: '6px 14px', fontSize: 13 }} onClick={handleCancelarSeleccionados} disabled={cancelandoLote}>
+              {cancelandoLote && <span className="spinner" aria-hidden="true" />}
+              Cancelar seleccionados
+            </button>
+          </div>
+        </div>
+      )}
       <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {agenda.map((t) => (
           <div key={t.id} className="card" style={{ padding: '16px 20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
-              <div>
-                <div style={{ fontWeight: 600, fontSize: 15 }}>
-                  {t.horaInicio.slice(0, 5)} a {t.horaFin.slice(0, 5)} · {t.medicoNombre}
-                </div>
-                <div style={{ fontSize: 13, color: 'var(--muted)' }}>{t.especialidadNombre}</div>
-                {t.estado === 'DISPONIBLE' && t.confirmacionPrevia === 'RECHAZADO' && (
-                  <div style={{ fontSize: 12.5, color: 'var(--red)', marginTop: 4 }}>
-                    El paciente anterior avisó que no venía — horario libre otra vez
-                  </div>
-                )}
-                {t.estado === 'DISPONIBLE' && <ListaEsperaParaSlot turno={t} />}
+              <div style={{ display: 'flex', gap: 12 }}>
                 {t.estado === 'RESERVADO' && (
-                  <div style={{ marginTop: 8, fontSize: 14 }}>
-                    <div><strong>{t.pacienteNombre}</strong> · DNI {t.pacienteDni}</div>
-                    <div style={{ color: 'var(--muted)' }}>{t.pacienteTelefono} · {t.pacienteObraSocial}</div>
-                    {t.motivoConsulta && <div style={{ color: 'var(--muted)', marginTop: 2 }}>Motivo: {t.motivoConsulta}</div>}
-                    {t.confirmacionPrevia === 'CONFIRMADO' && (
-                      <div style={{ fontSize: 12.5, color: 'var(--teal-dark)', marginTop: 4 }}>Confirmó que viene</div>
-                    )}
-                    {t.tieneEvolucion && (
-                      <div style={{ fontSize: 12.5, color: 'var(--teal-dark)', marginTop: 4 }} title="El médico cargó una evolución para esta consulta — el contenido es privado del profesional">
-                        Evolución cargada
-                      </div>
-                    )}
-                    <CheckInBotones turno={t} />
-                    <RecordatorioEnAgenda turno={t} />
-                  </div>
+                  <input
+                    type="checkbox"
+                    checked={seleccionados.has(t.id)}
+                    onChange={() => alternarSeleccion(t.id)}
+                    aria-label={`Seleccionar el turno de ${t.pacienteNombre}`}
+                    style={{ marginTop: 4, width: 16, height: 16, flexShrink: 0, cursor: 'pointer' }}
+                  />
                 )}
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: 15 }}>
+                    {t.horaInicio.slice(0, 5)} a {t.horaFin.slice(0, 5)} · {t.medicoNombre}
+                  </div>
+                  <div style={{ fontSize: 13, color: 'var(--muted)' }}>{t.especialidadNombre}</div>
+                  {t.estado === 'DISPONIBLE' && t.confirmacionPrevia === 'RECHAZADO' && (
+                    <div style={{ fontSize: 12.5, color: 'var(--red)', marginTop: 4 }}>
+                      El paciente anterior avisó que no venía — horario libre otra vez
+                    </div>
+                  )}
+                  {t.estado === 'DISPONIBLE' && <ListaEsperaParaSlot turno={t} />}
+                  {t.estado === 'RESERVADO' && (
+                    <div style={{ marginTop: 8, fontSize: 14 }}>
+                      <div><strong>{t.pacienteNombre}</strong> · DNI {t.pacienteDni}</div>
+                      <div style={{ color: 'var(--muted)' }}>{t.pacienteTelefono} · {t.pacienteObraSocial}</div>
+                      {t.motivoConsulta && <div style={{ color: 'var(--muted)', marginTop: 2 }}>Motivo: {t.motivoConsulta}</div>}
+                      {t.confirmacionPrevia === 'CONFIRMADO' && (
+                        <div style={{ fontSize: 12.5, color: 'var(--teal-dark)', marginTop: 4 }}>Confirmó que viene</div>
+                      )}
+                      {t.tieneEvolucion && (
+                        <div style={{ fontSize: 12.5, color: 'var(--teal-dark)', marginTop: 4 }} title="El médico cargó una evolución para esta consulta — el contenido es privado del profesional">
+                          Evolución cargada
+                        </div>
+                      )}
+                      <CheckInBotones turno={t} />
+                      <RecordatorioEnAgenda turno={t} />
+                    </div>
+                  )}
+                </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span className={`badge badge-${t.estado === 'DISPONIBLE' ? 'disponible' : 'reservado'}`}>
@@ -1063,7 +1141,8 @@ export default function AdminAgendaTab() {
       {(filtroEstado === 'todos' || agendaFiltrada.length > 0) && (
         <>
           {vista === 'lista' && (
-            <VistaLista agenda={agendaFiltrada} agendaCompleta={agenda} agendaCargando={agendaCargando} medicoId={medicoId} reservandoId={reservandoId} setReservandoId={setReservandoId} dniPrellenado={dniPrellenado} />
+            <VistaLista agenda={agendaFiltrada} agendaCompleta={agenda} agendaCargando={agendaCargando} medicoId={medicoId} reservandoId={reservandoId} setReservandoId={setReservandoId} dniPrellenado={dniPrellenado}
+              onRecargar={() => dispatch(fetchAgenda({ desde: rango.desde, hasta: rango.hasta, medicoId, especialidadId }))} />
           )}
           {vista === 'dia' && (
             <VistaDia agenda={agendaFiltrada} agendaCompleta={agenda} agendaCargando={agendaCargando} feriados={feriados} medicos={medicos} medicoId={medicoId} fecha={fecha} denso={denso} dniPrellenado={dniPrellenado} />

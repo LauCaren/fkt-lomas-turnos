@@ -5,6 +5,8 @@ import com.fktlomas.turnos.dto.RecordatorioDto;
 import com.fktlomas.turnos.dto.TurnoAdminDto;
 import com.fktlomas.turnos.dto.admin.ActualizarAsistenciaRequest;
 import com.fktlomas.turnos.dto.admin.AsignarPacienteRequest;
+import com.fktlomas.turnos.dto.admin.CancelarLoteRequest;
+import com.fktlomas.turnos.dto.admin.CancelarLoteResponse;
 import com.fktlomas.turnos.dto.admin.ReprogramarTurnoRequest;
 import com.fktlomas.turnos.dto.admin.ReprogramarTurnoResponse;
 import com.fktlomas.turnos.dto.admin.ReservarParaPacienteRequest;
@@ -24,6 +26,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -91,6 +94,31 @@ public class AdminTurnoController {
     @PutMapping("/{id}/cancelar")
     public TurnoAdminDto cancelar(@AuthenticationPrincipal AppUserDetails principal, @PathVariable Long id) {
         return turnoService.cancelarComoStaff(id, principal.getUsuario());
+    }
+
+    /**
+     * Cancela varios turnos de una — ej. un médico avisa que no viene un día entero y hay que
+     * liberar los 10-15 turnos reservados de esa jornada sin hacerlo uno por uno. Cada turno se
+     * cancela con el mismo `turnoService.cancelarComoStaff` de siempre (mismo aviso al paciente,
+     * misma auditoría, mismo aviso a lista de espera) en su PROPIA transacción — llamado acá
+     * desde afuera de TurnoService, a través del bean con proxy de Spring, así el @Transactional
+     * de cada cancelarComoStaff es real y no una auto-invocación que Spring ignora. Si un turno
+     * puntual ya no está RESERVADO (alguien lo canceló mientras tanto, por ejemplo), esa fila
+     * queda en `errores` con el motivo y el resto se sigue procesando igual — no es todo o nada.
+     */
+    @PutMapping("/cancelar-lote")
+    public CancelarLoteResponse cancelarLote(@AuthenticationPrincipal AppUserDetails principal, @Valid @RequestBody CancelarLoteRequest request) {
+        List<Long> cancelados = new ArrayList<>();
+        List<CancelarLoteResponse.ErrorCancelacion> errores = new ArrayList<>();
+        for (Long turnoId : request.turnoIds()) {
+            try {
+                turnoService.cancelarComoStaff(turnoId, principal.getUsuario());
+                cancelados.add(turnoId);
+            } catch (RuntimeException e) {
+                errores.add(new CancelarLoteResponse.ErrorCancelacion(turnoId, e.getMessage()));
+            }
+        }
+        return new CancelarLoteResponse(cancelados, errores);
     }
 
     @PutMapping("/{id}/reprogramar")

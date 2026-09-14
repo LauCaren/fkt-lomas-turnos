@@ -199,6 +199,20 @@ export const cancelarTurnoStaff = createAsyncThunk('admin/cancelarTurnoStaff', a
   }
 });
 
+// El backend cancela cada turno en su propia transacción y devuelve {cancelados, errores} — uno
+// que ya no esté RESERVADO (alguien lo canceló mientras tanto) no aborta el resto. No devuelve
+// el TurnoAdminDto completo de cada uno (a diferencia de cancelarTurnoStaff), así que quien
+// llama a esto tiene que volver a pedir la agenda para reflejar el resultado — ver
+// AdminAgendaTab.jsx, que ya tiene el fetchAgenda con los parámetros de rango a mano.
+export const cancelarTurnosLote = createAsyncThunk('admin/cancelarTurnosLote', async (turnoIds, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.put('/api/admin/turnos/cancelar-lote', { turnoIds });
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudieron cancelar los turnos'));
+  }
+});
+
 export const reprogramarTurno = createAsyncThunk('admin/reprogramarTurno', async ({ turnoOrigenId, turnoDestinoId }, { rejectWithValue }) => {
   try {
     const { data } = await axiosClient.put(`/api/admin/turnos/${turnoOrigenId}/reprogramar`, { turnoDestinoId });
