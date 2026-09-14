@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { Moon, Sun } from 'lucide-react';
 import { logout } from '../features/auth/authSlice';
 import { cargarFotoInfo } from '../features/perfil/perfilSlice';
 import { SITE_URL, isElectron } from '../config';
+import { useTema } from '../hooks/useTema';
 import InstalarAppBanner from './InstalarAppBanner';
 import UsuarioAvatar from './UsuarioAvatar';
 import SelectorFotoPerfil from './SelectorFotoPerfil';
+import NotificacionesBell from './NotificacionesBell';
 
 function Marca() {
   return (
@@ -32,6 +35,7 @@ export default function Layout({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [selectorFotoAbierto, setSelectorFotoAbierto] = useState(false);
+  const { tema, alternar: alternarTema } = useTema();
   // Los paneles internos usan un layout de sidebar + contenido (ver SidebarNav) que necesita
   // más aire que las páginas del paciente — angostarlos al mismo --maxw de siempre apretaba
   // demasiado la columna de contenido junto a la barra lateral.
@@ -64,8 +68,8 @@ export default function Layout({ children }) {
               <Marca />
             </a>
           )}
-          {usuario && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+            {usuario && (
               <div className="app-nav-links">
                 {usuario.role === 'PACIENTE' && (
                   <>
@@ -79,25 +83,39 @@ export default function Layout({ children }) {
                 {usuario.role === 'MEDICO' && <Link to="/medico">Panel médico</Link>}
                 {usuario.role === 'CONTADOR' && <Link to="/contador">Panel contador</Link>}
               </div>
-              <button
-                type="button"
-                onClick={() => setSelectorFotoAbierto(true)}
-                aria-label="Tu foto de perfil"
-                style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer', padding: 2, borderRadius: 100 }}
-              >
-                <UsuarioAvatar
-                  fotoUrl="/api/usuarios/me/foto"
-                  tieneFoto={!!fotoInfo?.tieneFoto}
-                  avatarGenerico={fotoInfo?.avatarGenerico}
-                  nombreCompleto={usuario.nombreCompleto}
-                  size={30}
-                  version={fotoVersion}
-                />
-                <span style={{ fontSize: 14, color: 'var(--muted)' }}>{usuario.nombreCompleto}</span>
-              </button>
-              <button className="btn btn-outline" onClick={handleLogout}>Salir</button>
-            </div>
-          )}
+            )}
+            <button
+              type="button"
+              onClick={alternarTema}
+              aria-label={tema === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'}
+              title={tema === 'dark' ? 'Tema claro' : 'Tema oscuro'}
+              className="btn-icon-tema"
+            >
+              {tema === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+            {usuario && (
+              <>
+                <NotificacionesBell />
+                <button
+                  type="button"
+                  onClick={() => setSelectorFotoAbierto(true)}
+                  aria-label="Tu foto de perfil"
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer', padding: 2, borderRadius: 100 }}
+                >
+                  <UsuarioAvatar
+                    fotoUrl="/api/usuarios/me/foto"
+                    tieneFoto={!!fotoInfo?.tieneFoto}
+                    avatarGenerico={fotoInfo?.avatarGenerico}
+                    nombreCompleto={usuario.nombreCompleto}
+                    size={30}
+                    version={fotoVersion}
+                  />
+                  <span style={{ fontSize: 14, color: 'var(--muted)' }}>{usuario.nombreCompleto}</span>
+                </button>
+                <button className="btn btn-outline" onClick={handleLogout}>Salir</button>
+              </>
+            )}
+          </div>
         </div>
       </header>
       <main style={{ flex: 1, padding: '40px 0' }}>

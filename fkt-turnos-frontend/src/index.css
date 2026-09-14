@@ -18,12 +18,14 @@
   --red: #BE3E12;
   --red-tint: #FBEAE4;
   --green: #2E7D32;
+  --green-tint: #E8F5E9;
   --amber: #B4740E;
   --amber-tint: #FBF1DF;
   /* Solo para texto sobre --amber-tint (.alert-warning): --amber ahí da 3.44:1, no
      alcanza AA (4.5:1) para texto normal. --amber en sí no se toca porque también se
      usa como color de fondo/borde en otros lados donde este tono más oscuro no queda bien. */
   --amber-dark: #97610C;
+  --header-bg: rgba(255, 255, 255, 0.88);
   --radius-s: 6px;
   --radius-m: 16px;
   --maxw: 960px;
@@ -38,6 +40,34 @@
   --shadow-md: 0 4px 10px rgba(19, 35, 44, .06), 0 20px 48px rgba(19, 35, 44, .16);
   --shadow-lg: 0 12px 24px rgba(19, 35, 44, .10), 0 32px 80px rgba(19, 35, 44, .26);
 }
+
+/* Mismo mecanismo y misma paleta que FKT Pagina (assets/css/site.css) para que el modo oscuro
+   se sienta como una sola marca entre el sitio público y la app — data-theme en <html> manda
+   siempre que exista (lo pone useTema.js, persistido en localStorage); sin eso, sigue
+   prefers-color-scheme del sistema. El script inline en index.html evita el flash al cargar. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101C23; --bg-soft: #16242C; --ink: #EAF2F1; --ink-soft: #B6C6C9; --muted: #83979B;
+    --line: #25373E; --teal: #35BFB9; --teal-dark: #7FDAD5; --teal-tint: #17302E;
+    --black: #0B141A; --white: #182831;
+    --red: #FF8A6B; --red-tint: #3A1F16;
+    --green: #6FCF73; --green-tint: #1C3320;
+    --amber: #E4A93A; --amber-tint: #3A2E14; --amber-dark: #F5C563;
+    --header-bg: rgba(16, 28, 35, 0.85);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101C23; --bg-soft: #16242C; --ink: #EAF2F1; --ink-soft: #B6C6C9; --muted: #83979B;
+  --line: #25373E; --teal: #35BFB9; --teal-dark: #7FDAD5; --teal-tint: #17302E;
+  --black: #0B141A; --white: #182831;
+  --red: #FF8A6B; --red-tint: #3A1F16;
+  --green: #6FCF73; --green-tint: #1C3320;
+  --amber: #E4A93A; --amber-tint: #3A2E14; --amber-dark: #F5C563;
+  --header-bg: rgba(16, 28, 35, 0.85);
+  color-scheme: dark;
+}
+:root[data-theme="light"] { color-scheme: light; }
 
 * , *::before, *::after { box-sizing: border-box; }
 
@@ -120,6 +150,19 @@ input, select, textarea { font: inherit; }
 .btn-dark { background: var(--black); color: #fff; }
 .btn-outline { border-color: var(--line); color: var(--ink); background: transparent; }
 .btn-outline:hover:not(:disabled) { border-color: var(--ink); background: var(--bg-soft); }
+
+/* Toggle de tema claro/oscuro del header (Layout.jsx) — mismo tamaño de zona de toque que el
+   resto de los controles del header, pero sin el peso visual de un .btn-outline: es una
+   preferencia de visualización, no una acción sobre la cuenta. */
+.btn-icon-tema {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 100px; border: 1px solid var(--line);
+  background: transparent; color: var(--ink-soft); cursor: pointer; flex-shrink: 0;
+  transition: color .2s var(--ease), border-color .2s var(--ease), background .2s var(--ease), transform .15s var(--ease-out);
+}
+.btn-icon-tema:hover { color: var(--ink); border-color: var(--ink-soft); background: var(--bg-soft); }
+.btn-icon-tema:active { transform: scale(.92); }
+.btn-icon-tema:focus-visible { outline: 2px solid var(--teal-dark); outline-offset: 2px; }
 .btn-block { width: 100%; }
 
 /* Un spinner que gira rápido se percibe como una carga más rápida que uno lento, aunque el
@@ -487,11 +530,11 @@ details[open] > :not(summary) { animation: detailsContentIn .25s var(--ease-out)
   animation: alertIn .3s var(--ease-out);
 }
 .alert-error { background: var(--red-tint); color: var(--red); border: 1px solid var(--red); }
-.alert-success { background: #E8F5E9; color: var(--green); border: 1px solid var(--green); }
+.alert-success { background: var(--green-tint); color: var(--green); border: 1px solid var(--green); }
 .alert-warning { background: var(--amber-tint); color: var(--amber-dark); border: 1px solid var(--amber); }
 
 .badge { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 12px; font-weight: 600; }
-.badge-disponible { background: #E8F5E9; color: var(--green); }
+.badge-disponible { background: var(--green-tint); color: var(--green); }
 .badge-reservado { background: var(--red-tint); color: var(--red); }
 /* --muted acá daba 3.35:1 sobre --line, no alcanza AA — --ink-soft es un tono que ya existe en la paleta, no uno nuevo. */
 .badge-cancelado { background: var(--line); color: var(--ink-soft); }
@@ -752,7 +795,7 @@ details[open] > :not(summary) { animation: detailsContentIn .25s var(--ease-out)
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(255, 255, 255, 0.88);
+  background: var(--header-bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);

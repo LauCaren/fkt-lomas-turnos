@@ -5,6 +5,7 @@ import com.fktlomas.turnos.domain.EstadoAsistencia;
 import com.fktlomas.turnos.domain.EstadoTurno;
 import com.fktlomas.turnos.domain.OrigenConsentimiento;
 import com.fktlomas.turnos.domain.Role;
+import com.fktlomas.turnos.domain.TipoNotificacion;
 import com.fktlomas.turnos.domain.Turno;
 import com.fktlomas.turnos.domain.Usuario;
 import com.fktlomas.turnos.dto.CheckInDto;
@@ -50,6 +51,7 @@ public class TurnoService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final NotificacionTurnoService notificacionTurnoService;
+    private final NotificacionService notificacionService;
     private final ListaEsperaService listaEsperaService;
     private final AuditoriaService auditoriaService;
     private final EvolucionClinicaRepository evolucionClinicaRepository;
@@ -203,6 +205,14 @@ public class TurnoService {
         auditoriaService.registrar(paciente, AUDITORIA_TIPO_TURNO, turnoId, operacionAuditoria, antes, snapshotDe(guardado));
 
         notificacionTurnoService.confirmarCancelacion(paciente, medicoNombre, especialidadNombre, fecha, horaInicio, horaFin);
+        // Solo cuando lo cancela secretaría/admin — si lo canceló el propio paciente (o
+        // contestó que no venía al link de confirmación previa) no hace falta "avisarle" de
+        // su propia acción en la campanita.
+        if ("CANCELAR_STAFF".equals(operacionAuditoria)) {
+            notificacionService.crear(paciente, TipoNotificacion.TURNO_CANCELADO_STAFF,
+                    "Tu turno de " + especialidadNombre + " con " + medicoNombre + " el " + fecha + " a las "
+                            + horaInicio + " fue cancelado.", null);
+        }
         listaEsperaService.notificarLiberacion(medicoId, fecha);
     }
 
@@ -309,6 +319,10 @@ public class TurnoService {
                     actualizado.getMedico().getEspecialidad().getNombre(), actualizado.getFecha(),
                     actualizado.getHoraInicio(), actualizado.getHoraFin());
         }
+        notificacionService.crear(paciente, TipoNotificacion.TURNO_ASIGNADO_LISTA_ESPERA,
+                "Se te asignó un turno de " + actualizado.getMedico().getEspecialidad().getNombre() + " con "
+                        + actualizado.getMedico().getNombreCompleto() + " el " + actualizado.getFecha() + " a las "
+                        + actualizado.getHoraInicio() + " desde la lista de espera.", actualizado.getId());
         return TurnoAdminDto.de(actualizado);
     }
 
@@ -437,6 +451,13 @@ public class TurnoService {
         listaEsperaService.notificarLiberacion(medicoIdOrigen, fechaOrigen);
         notificacionTurnoService.avisarReprogramacion(paciente, medicoNombre, especialidadNombre,
                 destinoActualizado.getFecha(), destinoActualizado.getHoraInicio(), destinoActualizado.getHoraFin());
+        // reprogramar() es exclusivo de secretaría/admin (ver AdminTurnoController) — no hay
+        // vía para que un paciente reprograme su propio turno, así que siempre vale la pena
+        // avisarle acá, a diferencia de cancelarInterno más arriba.
+        notificacionService.crear(paciente, TipoNotificacion.TURNO_REPROGRAMADO,
+                "Tu turno de " + especialidadNombre + " con " + medicoNombre + " se reprogramó para el "
+                        + destinoActualizado.getFecha() + " a las " + destinoActualizado.getHoraInicio() + ".",
+                destinoActualizado.getId());
 
         return new ReprogramarTurnoResponse(TurnoAdminDto.de(origenLibre), TurnoAdminDto.de(destinoActualizado));
     }
