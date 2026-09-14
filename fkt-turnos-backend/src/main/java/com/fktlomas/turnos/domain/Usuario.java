@@ -43,6 +43,17 @@ public class Usuario {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
+    /**
+     * Claim "sub" del ID token de Google — solo para pacientes que se registraron o vincularon
+     * su cuenta con "Iniciar sesión con Google" (ver AuthService.loginConGoogle). Null para
+     * cualquier cuenta que solo usa email/contraseña. Una cuenta de Google siempre tiene
+     * passwordHash igual (con un valor aleatorio imposible de adivinar, no null) para no tener
+     * que tocar el resto del código que asume passwordHash no nulo — "olvidé mi contraseña" les
+     * sirve como forma de fijar una contraseña real si alguna vez la quieren.
+     */
+    @Column(name = "google_id", unique = true, length = 255)
+    private String googleId;
+
     @Column(name = "acepta_politica_privacidad", nullable = false)
     private boolean aceptaPoliticaPrivacidad;
 

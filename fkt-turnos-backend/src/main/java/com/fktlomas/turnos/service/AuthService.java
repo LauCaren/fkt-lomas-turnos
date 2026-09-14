@@ -6,6 +6,8 @@ import com.fktlomas.turnos.domain.Usuario;
 import com.fktlomas.turnos.dto.admin.CambiarPasswordRequest;
 import com.fktlomas.turnos.dto.admin.IniciarMfaResponse;
 import com.fktlomas.turnos.dto.auth.AuthResponse;
+import com.fktlomas.turnos.dto.auth.GoogleAuthRequest;
+import com.fktlomas.turnos.dto.auth.GoogleAuthResponse;
 import com.fktlomas.turnos.dto.auth.LoginRequest;
 import com.fktlomas.turnos.dto.auth.OlvidePasswordRequest;
 import com.fktlomas.turnos.dto.auth.RegistroRequest;
@@ -16,6 +18,7 @@ import com.fktlomas.turnos.exception.MfaRequeridaException;
 import com.fktlomas.turnos.exception.RecursoNoEncontradoException;
 import com.fktlomas.turnos.repository.UsuarioRepository;
 import com.fktlomas.turnos.security.AppUserDetails;
+import com.fktlomas.turnos.security.GoogleTokenVerifierService;
 import com.fktlomas.turnos.security.JwtService;
 import com.fktlomas.turnos.security.RateLimiterService;
 import lombok.RequiredArgsConstructor;
@@ -72,6 +75,7 @@ public class AuthService {
     private final LoginRateLimiterService loginRateLimiterService;
     private final RateLimiterService rateLimiterService;
     private final PasswordFiltradaService passwordFiltradaService;
+    private final GoogleTokenVerifierService googleTokenVerifierService;
 
     @Value("${app.frontend-url}")
     private String frontendUrl;
@@ -140,6 +144,105 @@ public class AuthService {
         alertarLoginFueraDeHorarioSiCorresponde(usuario);
         boolean mfaSetupRequerido = ROLES_MFA_OBLIGATORIO.contains(usuario.getRole()) && !usuario.isMfaHabilitado();
         return new AuthResponse(jwtService.generarToken(usuario), usuario.getNombreCompleto(), usuario.getEmail(), usuario.getRole().name(), mfaSetupRequerido);
+    }
+
+    /**
+     * "Iniciar sesión con Google", solo para pacientes (el personal sigue entrando con
+     * email/contraseña + 2FA obligatorio, ver ROLES_MFA_OBLIGATORIO — combinar eso con Google
+     * complica el flujo de 2FA sin necesidad, y el personal ya tiene una cuenta creada por un
+     * admin, no hace falta la conveniencia de "un click"). Tres casos según lo que ya exista:
+     * 1) googleId conocido → login directo (con el mismo chequeo de MFA que login() de arriba).
+     * 2) el email ya tiene cuenta por password → se vincula (Google ya verificó el email, así
+     *    que confiar en esa verificación para linkear es seguro) y se loguea igual que el caso 1.
+     * 3) ni lo uno ni lo otro → alta nueva. El DNI es inmutable una vez creado (ver MiCuentaPage
+     *    en el frontend, que lo muestra deshabilitado) así que NO se crea la cuenta todavía si
+     *    todavía faltan dni/obraSocial/teléfono/género — se le pide el resto al frontend primero
+     *    (GoogleAuthResponse.requierePerfil) reenviando el mismo credential.
+     */
+    @Transactional
+    public GoogleAuthResponse loginConGoogle(GoogleAuthRequest request) {
+        GoogleTokenVerifierService.DatosGoogle datos = googleTokenVerifierService.verificar(request.credential());
+        if (datos == null) {
+            throw new BadCredentialsException("No pudimos verificar tu cuenta de Google");
+        }
+        String email = datos.email().trim().toLowerCase();
+
+        Usuario usuario = usuarioRepository.findByGoogleId(datos.googleId()).orElse(null);
+        if (usuario == null) {
+            usuario = usuarioRepository.findByEmail(email).orElse(null);
+            if (usuario != null) {
+                usuario.setGoogleId(datos.googleId());
+                usuarioRepository.save(usuario);
+            }
+        }
+
+        return usuario != null
+                ? iniciarSesionGoogle(usuario, request)
+                : registrarPacienteConGoogle(datos, email, request);
+    }
+
+    private GoogleAuthResponse iniciarSesionGoogle(Usuario usuario, GoogleAuthRequest request) {
+        loginRateLimiterService.verificarNoBloqueado(usuario.getEmail());
+        if (usuario.isMfaHabilitado()) {
+            if (request.codigoMfa() == null || request.codigoMfa().isBlank()) {
+                throw new MfaRequeridaException();
+            }
+            if (!totpService.verificar(usuario.getMfaSecret(), request.codigoMfa())) {
+                loginRateLimiterService.registrarFallo(usuario.getEmail());
+                throw new BadCredentialsException("Código de verificación incorrecto");
+            }
+        }
+        loginRateLimiterService.registrarExito(usuario.getEmail());
+        alertarLoginFueraDeHorarioSiCorresponde(usuario);
+        boolean mfaSetupRequerido = ROLES_MFA_OBLIGATORIO.contains(usuario.getRole()) && !usuario.isMfaHabilitado();
+        AuthResponse auth = new AuthResponse(jwtService.generarToken(usuario), usuario.getNombreCompleto(), usuario.getEmail(), usuario.getRole().name(), mfaSetupRequerido);
+        return GoogleAuthResponse.sesion(auth);
+    }
+
+    private GoogleAuthResponse registrarPacienteConGoogle(GoogleTokenVerifierService.DatosGoogle datos, String email, GoogleAuthRequest request) {
+        boolean perfilCompleto = request.dni() != null && !request.dni().isBlank()
+                && request.obraSocial() != null && !request.obraSocial().isBlank()
+                && request.telefono() != null && !request.telefono().isBlank()
+                && request.genero() != null
+                && Boolean.TRUE.equals(request.aceptaPoliticaPrivacidad());
+        if (!perfilCompleto) {
+            return GoogleAuthResponse.requierePerfil(datos.nombre(), email);
+        }
+
+        verificarLimite(email, MAX_REGISTROS_POR_HORA);
+        if (request.pareceSpam()) {
+            throw new IllegalArgumentException("No pudimos procesar el registro");
+        }
+        if (usuarioRepository.existsByEmail(email)) {
+            throw new ConflictoDeDatosException("Ya existe una cuenta registrada con ese email");
+        }
+        if (usuarioRepository.existsByDni(request.dni())) {
+            throw new ConflictoDeDatosException("Ya existe una cuenta registrada con ese DNI");
+        }
+
+        // Nunca se usa para loguear (esta cuenta entra por Google) — solo para que passwordHash,
+        // que es NOT NULL en toda la tabla, tenga un valor válido que nadie puede adivinar.
+        // "Olvidé mi contraseña" les sirve para fijar una de verdad si alguna vez la quieren.
+        byte[] bytes = new byte[32];
+        RANDOM.nextBytes(bytes);
+        String passwordInutilizable = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+
+        Usuario usuario = new Usuario();
+        usuario.setDni(request.dni());
+        usuario.setObraSocial(request.obraSocial());
+        usuario.setNombreCompleto(datos.nombre() != null && !datos.nombre().isBlank() ? datos.nombre() : email);
+        usuario.setEmail(email);
+        usuario.setTelefono(request.telefono());
+        usuario.setGenero(request.genero());
+        usuario.setPasswordHash(passwordEncoder.encode(passwordInutilizable));
+        usuario.setRole(Role.PACIENTE);
+        usuario.setAceptaPoliticaPrivacidad(true);
+        usuario.setOrigenConsentimiento(OrigenConsentimiento.WEB);
+        usuario.setGoogleId(datos.googleId());
+        usuarioRepository.save(usuario);
+
+        AuthResponse auth = new AuthResponse(jwtService.generarToken(usuario), usuario.getNombreCompleto(), usuario.getEmail(), usuario.getRole().name(), false);
+        return GoogleAuthResponse.sesion(auth);
     }
 
     /**

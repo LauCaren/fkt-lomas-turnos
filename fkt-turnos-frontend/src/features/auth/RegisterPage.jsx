@@ -3,9 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { registrarPaciente } from './authSlice';
 import PasswordInput from '../../components/PasswordInput';
+import GoogleAuthButton from '../../components/GoogleAuthButton';
 import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../../constants/obrasSociales';
 import { PATRON_PASSWORD, TITULO_PASSWORD, AYUDA_PASSWORD } from '../../constants/validacion';
-import { SITE_URL } from '../../config';
+import { SITE_URL, GOOGLE_CLIENT_ID } from '../../config';
 
 const GENEROS = [
   { value: '', label: 'Seleccioná una opción' },
@@ -46,7 +47,18 @@ export default function RegisterPage() {
         <p>Necesitamos estos datos para gestionar tu atención en el centro.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="card" style={{ marginTop: 28 }}>
+      {GOOGLE_CLIENT_ID && (
+        <>
+          <GoogleAuthButton />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '18px 0', color: 'var(--muted)', fontSize: 13 }}>
+            <span style={{ flex: 1, height: 1, background: 'var(--line)' }} />
+            O completá el formulario
+            <span style={{ flex: 1, height: 1, background: 'var(--line)' }} />
+          </div>
+        </>
+      )}
+
+      <form onSubmit={handleSubmit} className="card" style={{ marginTop: GOOGLE_CLIENT_ID ? 0 : 28 }}>
         {error && <div className="alert alert-error" role="alert">{error}</div>}
 
         <div className="field">

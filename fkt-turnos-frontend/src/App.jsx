@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import Layout from './components/Layout';
 import { ConfirmProvider } from './components/ui/ConfirmDialog';
 import { ToastProvider } from './components/ui/ToastProvider';
@@ -14,7 +15,7 @@ import MisTurnosPage from './features/turnos/MisTurnosPage';
 import MiCuentaPage from './features/cuenta/MiCuentaPage';
 import ConfirmarTurnoPage from './features/turnos/ConfirmarTurnoPage';
 import CheckInPage from './features/turnos/CheckInPage';
-import { RUTA_POR_ROL } from './config';
+import { RUTA_POR_ROL, GOOGLE_CLIENT_ID } from './config';
 
 // Cada panel de staff (admin/secretaria/médico/contador) y el módulo de kinesiología son
 // pantallas grandes que un paciente reservando un turno nunca visita — separarlos en su
@@ -39,7 +40,7 @@ function CargandoPagina() {
   );
 }
 
-export default function App() {
+function AppRoutes() {
   return (
     <ToastProvider>
       <ConfirmProvider>
@@ -67,5 +68,16 @@ export default function App() {
         </Layout>
       </ConfirmProvider>
     </ToastProvider>
+  );
+}
+
+export default function App() {
+  // Sin VITE_GOOGLE_CLIENT_ID configurado, ni se monta el provider — GoogleAuthButton
+  // simplemente no se muestra en vez de mostrar un botón que fallaría al clickearlo.
+  if (!GOOGLE_CLIENT_ID) return <AppRoutes />;
+  return (
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <AppRoutes />
+    </GoogleOAuthProvider>
   );
 }

@@ -16,7 +16,17 @@ const initialState = {
   status: 'idle',
   error: null,
   requiereMfa: false,
+  // 'password' | 'google' | null — de qué formulario vino el requiereMfa de arriba. LoginPage
+  // (email/contraseña) y GoogleAuthButton comparten el mismo flag `requiereMfa` porque ambos
+  // pueden toparse con una cuenta con 2FA activado, pero son dos formularios en pantalla al
+  // mismo tiempo — sin esto, un requiereMfa disparado por Google también hacía aparecer el
+  // campo de código del formulario de contraseña (que nunca iba a funcionar, esa cuenta no
+  // tiene contraseña real).
+  mfaOrigen: null,
   mensajeExito: null,
+  // Cuenta nueva por Google que todavía no mandó dni/obraSocial/teléfono/género — ver
+  // GoogleAuthButton. Null = no hay ningún completar-perfil pendiente.
+  googlePerfilPendiente: null,
 };
 
 function guardarSesion(data) {
@@ -49,6 +59,21 @@ export const login = createAsyncThunk(
     } catch (error) {
       return rejectWithValue({
         mensaje: mensajeDeError(error, 'Email o contraseña incorrectos'),
+        requiereMfa: !!error.response?.data?.requiereMfa,
+      });
+    }
+  }
+);
+
+export const loginConGoogle = createAsyncThunk(
+  'auth/loginConGoogle',
+  async (datos, { rejectWithValue }) => {
+    try {
+      const { data } = await axiosClient.post('/api/auth/google', datos);
+      return data;
+    } catch (error) {
+      return rejectWithValue({
+        mensaje: mensajeDeError(error, 'No pudimos iniciar sesión con Google'),
         requiereMfa: !!error.response?.data?.requiereMfa,
       });
     }
@@ -97,6 +122,8 @@ const authSlice = createSlice({
       state.error = null;
       state.mensajeExito = null;
       state.requiereMfa = false;
+      state.mfaOrigen = null;
+      state.googlePerfilPendiente = null;
     },
   },
   extraReducers: (builder) => {
@@ -124,6 +151,27 @@ const authSlice = createSlice({
         state.status = 'idle';
         state.error = action.payload.mensaje;
         state.requiereMfa = action.payload.requiereMfa;
+        state.mfaOrigen = action.payload.requiereMfa ? 'password' : null;
+      })
+      .addCase(loginConGoogle.pending, (state) => { state.status = 'loading'; state.error = null; })
+      .addCase(loginConGoogle.fulfilled, (state, action) => {
+        state.status = 'idle';
+        if (action.payload.requierePerfil) {
+          state.googlePerfilPendiente = { nombreSugerido: action.payload.nombreSugerido, email: action.payload.email };
+          return;
+        }
+        state.googlePerfilPendiente = null;
+        state.requiereMfa = false;
+        state.mfaOrigen = null;
+        state.token = action.payload.token;
+        state.usuario = { nombreCompleto: action.payload.nombreCompleto, email: action.payload.email, role: action.payload.role };
+        guardarSesion(action.payload);
+      })
+      .addCase(loginConGoogle.rejected, (state, action) => {
+        state.status = 'idle';
+        state.error = action.payload.mensaje;
+        state.requiereMfa = action.payload.requiereMfa;
+        state.mfaOrigen = action.payload.requiereMfa ? 'google' : null;
       })
       .addCase(olvidePassword.pending, (state) => { state.status = 'loading'; state.error = null; state.mensajeExito = null; })
       .addCase(olvidePassword.fulfilled, (state) => {

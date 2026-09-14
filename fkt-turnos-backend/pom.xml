@@ -93,6 +93,14 @@
       <version>3.7.0</version>
     </dependency>
 
+    <!-- Verificación del ID token de "Iniciar sesión con Google" (solo pacientes) — ver
+         GoogleTokenVerifierService. Librería oficial de Google, no un tercero. -->
+    <dependency>
+      <groupId>com.google.api-client</groupId>
+      <artifactId>google-api-client</artifactId>
+      <version>2.7.0</version>
+    </dependency>
+
     <!-- Storage de archivos en producción (fotos de médicos, CVs) — bucket S3-compatible,
          funciona tanto con AWS S3 como con Cloudflare R2 (ver S3FileStorageService) -->
     <dependency>

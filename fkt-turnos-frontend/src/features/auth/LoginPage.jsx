@@ -4,13 +4,15 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { login, limpiarMensajesAuth } from './authSlice';
 import PasswordInput from '../../components/PasswordInput';
 import FluidOrb from '../../components/FluidOrb';
-import { RUTA_POR_ROL } from '../../config';
+import GoogleAuthButton from '../../components/GoogleAuthButton';
+import { RUTA_POR_ROL, GOOGLE_CLIENT_ID } from '../../config';
 
 export default function LoginPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { status, error, requiereMfa } = useSelector((state) => state.auth);
+  const { status, error, requiereMfa, mfaOrigen } = useSelector((state) => state.auth);
+  const requiereMfaPassword = requiereMfa && mfaOrigen === 'password';
   const [form, setForm] = useState({ email: '', password: '', codigoMfa: '' });
 
   // Solo se usa si es una ruta interna (nunca una URL absoluta) — evita un open-redirect
@@ -44,13 +46,13 @@ export default function LoginPage() {
         {error && <div className="alert alert-error" role="alert">{error}</div>}
         <div className="field">
           <label htmlFor="email">Email</label>
-          <input id="email" name="email" type="email" required disabled={requiereMfa} value={form.email} onChange={handleChange} />
+          <input id="email" name="email" type="email" required disabled={requiereMfaPassword} value={form.email} onChange={handleChange} />
         </div>
         <div className="field">
           <label htmlFor="password">Contraseña</label>
-          <PasswordInput id="password" name="password" required disabled={requiereMfa} value={form.password} onChange={handleChange} />
+          <PasswordInput id="password" name="password" required disabled={requiereMfaPassword} value={form.password} onChange={handleChange} />
         </div>
-        {requiereMfa && (
+        {requiereMfaPassword && (
           <div className="field">
             <label htmlFor="codigoMfa">Código de verificación</label>
             <input id="codigoMfa" name="codigoMfa" inputMode="numeric" pattern="\d{6}" maxLength={6} autoFocus required
@@ -63,6 +65,17 @@ export default function LoginPage() {
           {status === 'loading' ? 'Ingresando…' : 'Ingresar'}
         </button>
       </form>
+
+      {GOOGLE_CLIENT_ID && !requiereMfaPassword && (
+        <>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '18px 0', color: 'var(--muted)', fontSize: 13 }}>
+            <span style={{ flex: 1, height: 1, background: 'var(--line)' }} />
+            O
+            <span style={{ flex: 1, height: 1, background: 'var(--line)' }} />
+          </div>
+          <GoogleAuthButton />
+        </>
+      )}
 
       <p style={{ marginTop: 18, textAlign: 'center', color: 'var(--muted)' }}>
         <Link to="/olvide-password" onClick={() => dispatch(limpiarMensajesAuth())} style={{ color: 'var(--teal-dark)', fontWeight: 600 }}>¿Olvidaste tu contraseña?</Link>

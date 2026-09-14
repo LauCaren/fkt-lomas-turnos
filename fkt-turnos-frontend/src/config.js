@@ -29,3 +29,8 @@ export const RUTA_POR_ROL = { ADMIN: '/admin', SECRETARIA: '/secretaria', MEDICO
 // y AppUserDetails en el backend) — usado para bloquear el panel hasta que la activen y para
 // ocultar la opción de desactivarla una vez activa.
 export const ROLES_MFA_OBLIGATORIO = ['ADMIN', 'SECRETARIA', 'CONTADOR'];
+
+// ID de cliente OAuth de Google (mismo valor que GOOGLE_CLIENT_ID del backend). Vacío = "Iniciar
+// sesión con Google" simplemente no se muestra, en vez de mostrar un botón roto — mismo criterio
+// que MercadoPago/Twilio del backend (ver GoogleAuthButton).
+export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';

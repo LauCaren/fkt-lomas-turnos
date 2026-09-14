@@ -1,6 +1,8 @@
 package com.fktlomas.turnos.controller;
 
 import com.fktlomas.turnos.dto.auth.AuthResponse;
+import com.fktlomas.turnos.dto.auth.GoogleAuthRequest;
+import com.fktlomas.turnos.dto.auth.GoogleAuthResponse;
 import com.fktlomas.turnos.dto.auth.LoginRequest;
 import com.fktlomas.turnos.dto.auth.OlvidePasswordRequest;
 import com.fktlomas.turnos.dto.auth.RegistroRequest;
@@ -26,6 +28,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<GoogleAuthResponse> google(@Valid @RequestBody GoogleAuthRequest request) {
+        return ResponseEntity.ok(authService.loginConGoogle(request));
     }
 
     @PostMapping("/olvide-password")

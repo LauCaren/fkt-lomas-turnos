@@ -63,6 +63,12 @@ app:
   jwt:
     secret: ${JWT_SECRET:changeme-dev-secret-change-in-prod-please-0123456789}
     expiration-minutes: ${JWT_EXPIRATION_MINUTES:10080}
+  google:
+    # ID de cliente OAuth de Google Cloud Console (Credentials > OAuth client ID > Web
+    # application) — el mismo valor va también en VITE_GOOGLE_CLIENT_ID del frontend. Sin
+    # esto configurado, "Iniciar sesión con Google" queda deshabilitado (ver
+    # GoogleTokenVerifierService.habilitado()) — mismo criterio fail-closed que Mercado Pago.
+    client-id: ${GOOGLE_CLIENT_ID:}
   mfa:
     # Clave AES de 256 bits en Base64 para encriptar el secreto TOTP en la base
     # (ver MfaSecretConverter). Generar una propia para producción, por ejemplo:

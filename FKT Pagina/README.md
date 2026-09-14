@@ -43,7 +43,7 @@ a propósito (sin buscador, sin menú hamburguesa), decisión ya tomada, no es u
 - Servicios y especialidades con fichas clickeables (beneficios + reseñas reales o
   calificación agregada — nunca casos inventados).
 - Equipo con ficha de profesional (foto, especialidad, años de experiencia, título
-  habilitante si está cargado) conectada al backend real.
+  habilitante si está cargado, días y horarios de atención) conectada al backend real.
 - El Centro, Opiniones (reseñas reales + link a Google), Contacto (obras sociales,
   FAQ completa, mapa, datos), Alquiler de consultorios y Trabajá con nosotros (formularios
   reales contra el backend).
@@ -107,7 +107,16 @@ grillas); las imágenes hero/banner quedan eager a propósito (son el LCP de cad
   tiene una foto real cargada** (nada de placeholders repetidos).
 - Sello "Título verificado" en la ficha de profesional cuando el backend confirma
   `tieneTitulo`.
+- Días y horarios de atención de cada profesional en su ficha (equipo.html) — se piden a
+  `/api/medicos/{id}/horarios` recién al abrir la ficha (no de entrada para las 26 personas
+  del equipo), la misma `ReglaDisponibilidad` que ya usa el turnero para calcular
+  disponibilidad. Si un profesional todavía no tiene horarios cargados en el sistema, la
+  ficha lo dice explícitamente en vez de mostrar la sección vacía o inventar un horario.
 - Aviso visible (no silencioso) si falla la conexión al backend en equipo.html.
+- Orb de fluido animado (WebGL, shader GLSL de ruido/fbm propio, sin librerías de por medio)
+  en la página 404 — portado desde [rare-ui](https://github.com/swamimalode07/rare-ui) (MIT)
+  a JS vanilla en vez de instalar su stack completo (Tailwind + shadcn). Ver `fktInitFluidOrb`
+  en `assets/js/site.js`.
 - Nota de "listado actualizado en [mes/año]" en la grilla de obras sociales de contacto.html
   — hoy dice "septiembre de 2026"; **hay que actualizarla a mano** la próxima vez que se
   toque esa lista (no es un dato dinámico, es honesto: se actualiza cuando alguien la edita).

@@ -2,7 +2,9 @@ package com.fktlomas.turnos.controller;
 
 import com.fktlomas.turnos.dto.MedicoDto;
 import com.fktlomas.turnos.dto.TurnoDto;
+import com.fktlomas.turnos.dto.admin.ReglaDisponibilidadDto;
 import com.fktlomas.turnos.dto.resena.ResumenResenasDto;
+import com.fktlomas.turnos.service.DisponibilidadService;
 import com.fktlomas.turnos.service.MedicoService;
 import com.fktlomas.turnos.service.ResenaService;
 import com.fktlomas.turnos.service.TurnoService;
@@ -24,6 +26,7 @@ public class MedicoController {
     private final MedicoService medicoService;
     private final TurnoService turnoService;
     private final ResenaService resenaService;
+    private final DisponibilidadService disponibilidadService;
 
     @GetMapping
     public List<MedicoDto> listar(@RequestParam(required = false) Long especialidadId) {
@@ -41,6 +44,17 @@ public class MedicoController {
     public List<LocalDate> proximaDisponibilidad(@PathVariable Long id,
                                                   @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde) {
         return turnoService.proximaDisponibilidad(id, desde);
+    }
+
+    /**
+     * Público a propósito (bajo /api/medicos/**, ya permitAll): días y horarios de atención
+     * de este médico, para la sección de horarios del sitio de marketing (equipo.html) — la
+     * misma data (ReglaDisponibilidad) que ya usa el wizard de turnos para calcular
+     * disponibilidad, no algo nuevo inventado para esta pantalla.
+     */
+    @GetMapping("/{id}/horarios")
+    public List<ReglaDisponibilidadDto> horarios(@PathVariable Long id) {
+        return disponibilidadService.listarReglas(id);
     }
 
     /** Público (bajo /api/medicos/**, ya permitAll): reseñas aprobadas, para el sitio de marketing o la ficha del médico en la app. */

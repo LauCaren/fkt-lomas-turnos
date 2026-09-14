@@ -327,6 +327,11 @@
       <h4>Título habilitante</h4>
       <img class="ficha-titulo-img" id="fichaTituloImg" src="" alt="Título habilitante">
     </div>
+    <div class="ficha-horarios">
+      <h4>Días y horarios de atención</h4>
+      <ul class="ficha-horarios-lista" id="fichaHorariosLista"></ul>
+      <p class="ficha-horarios-vacio" id="fichaHorariosVacio" style="display:none;"></p>
+    </div>
   </div>
 </div>
 
@@ -353,6 +358,44 @@
   const elTituloBox = document.getElementById('fichaTituloBox');
   const elTituloImg = document.getElementById('fichaTituloImg');
   const elVerificado = document.getElementById('fichaVerificado');
+  const elHorariosLista = document.getElementById('fichaHorariosLista');
+  const elHorariosVacio = document.getElementById('fichaHorariosVacio');
+
+  const DIAS_SEMANA = {
+    MONDAY: 'Lunes', TUESDAY: 'Martes', WEDNESDAY: 'Miércoles', THURSDAY: 'Jueves',
+    FRIDAY: 'Viernes', SATURDAY: 'Sábado', SUNDAY: 'Domingo',
+  };
+  const ORDEN_DIAS = Object.keys(DIAS_SEMANA);
+
+  function cargarHorarios(medicoId) {
+    elHorariosLista.innerHTML = '';
+    elHorariosVacio.style.display = 'none';
+    fetch(`${API_URL}/api/medicos/${medicoId}/horarios`)
+      .then((res) => res.json())
+      .then((reglas) => {
+        if (!reglas.length) {
+          elHorariosVacio.textContent = 'Todavía no cargamos los horarios de este profesional acá — escribinos y te confirmamos disponibilidad.';
+          elHorariosVacio.style.display = '';
+          return;
+        }
+        reglas
+          .slice()
+          .sort((a, b) => ORDEN_DIAS.indexOf(a.diaSemana) - ORDEN_DIAS.indexOf(b.diaSemana) || a.horaInicio.localeCompare(b.horaInicio))
+          .forEach((regla) => {
+            const li = document.createElement('li');
+            const dia = document.createElement('span');
+            dia.textContent = DIAS_SEMANA[regla.diaSemana] || regla.diaSemana;
+            const horario = document.createElement('span');
+            horario.textContent = `${regla.horaInicio.slice(0, 5)} a ${regla.horaFin.slice(0, 5)}`;
+            li.append(dia, horario);
+            elHorariosLista.appendChild(li);
+          });
+      })
+      .catch(() => {
+        elHorariosVacio.textContent = 'No pudimos cargar los horarios en este momento — escribinos por WhatsApp y te confirmamos disponibilidad.';
+        elHorariosVacio.style.display = '';
+      });
+  }
 
   function abrirFicha(medico) {
     elFoto.src = medico.tieneFoto ? `${API_URL}/api/medicos/${medico.id}/foto` : FOTO_PLACEHOLDER;
@@ -369,6 +412,7 @@
       elTituloBox.style.display = 'none';
       elVerificado.style.display = 'none';
     }
+    cargarHorarios(medico.id);
     fichaTrap.remember();
     overlay.classList.add('open');
     overlay.setAttribute('aria-hidden', 'false');

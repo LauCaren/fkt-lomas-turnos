@@ -251,6 +251,12 @@ section.soft { background: var(--bg-soft); }
 .ficha-titulo-box { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); }
 .ficha-titulo-box h4 { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; font-weight: 500; }
 .ficha-titulo-img { width: 100%; border-radius: 8px; border: 1px solid var(--line); display: block; cursor: zoom-in; }
+.ficha-horarios { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); }
+.ficha-horarios h4 { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; font-weight: 500; }
+.ficha-horarios-lista { display: flex; flex-direction: column; gap: 6px; }
+.ficha-horarios-lista li { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; color: var(--ink-soft); }
+.ficha-horarios-lista li span:first-child { font-weight: 600; color: var(--ink); }
+.ficha-horarios-vacio { font-size: 13.5px; color: var(--muted); }
 
 /* ---------- LIGHTBOX ---------- */
 .lightbox {
