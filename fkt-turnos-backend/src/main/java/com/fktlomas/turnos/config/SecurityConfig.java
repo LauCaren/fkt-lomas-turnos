@@ -119,19 +119,42 @@ public class SecurityConfig {
                         .requestMatchers("/api/contador/**").hasRole("CONTADOR")
                         .anyRequest().authenticated()
                 )
-                // Sin esto, Spring Security responde 403 tanto para "no autenticado" (falta el
-                // token, o es inválido/expiró/quedó viejo tras un cambio de contraseña) como para
-                // "autenticado pero sin el rol necesario". El frontend solo puede distinguir un
-                // 401 de un 403, así que sin este entry point no había forma de que, ante una
-                // sesión vencida, cerrara sesión y mandara a un paciente o admin de vuelta al
-                // login — se quedaba con la pantalla rota mostrando errores genéricos.
-                .exceptionHandling(eh -> eh.authenticationEntryPoint((request, response, authException) -> {
-                    response.setStatus(401);
-                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                    response.getWriter().write("""
-                            {"timestamp":"%s","status":401,"mensaje":"No autenticado o la sesión venció"}
-                            """.formatted(Instant.now()));
-                }))
+                // Sin authenticationEntryPoint, Spring Security respondía 403 tanto para "no
+                // autenticado" (falta el token, o es inválido/expiró/quedó viejo tras un cambio
+                // de contraseña) como para "autenticado pero sin el rol necesario". El frontend
+                // solo puede distinguir un 401 de un 403, así que sin este entry point no había
+                // forma de que, ante una sesión vencida, cerrara sesión y mandara a un paciente o
+                // admin de vuelta al login — se quedaba con la pantalla rota mostrando errores
+                // genéricos.
+                //
+                // accessDeniedHandler explícito por la misma razón, en el otro sentido: la
+                // denegación por rol insuficiente que decide .hasAnyRole()/.hasRole() de acá
+                // arriba pasa por AuthorizationFilter, ANTES de que el request llegue a
+                // despachar a un controller — nunca la ve GlobalExceptionHandler (ese
+                // @ExceptionHandler(AccessDeniedException.class) solo cubre la denegación de
+                // @PreAuthorize a nivel de método, que sí ocurre durante el despacho a MVC). Sin
+                // este handler puntual, esa denegación de nivel-filtro terminaba resuelta como
+                // 401 (con este mismo authenticationEntryPoint) en vez de 403 — verificado en
+                // vivo: una cuenta de staff con 2FA obligatorio activado pero sin terminar de
+                // configurar (rol "pendiente", ver AppUserDetails) recibía 401 al pisar
+                // /api/admin/**, y el frontend la deslogueaba en el acto en vez de dejarla ver
+                // la pantalla de "activá tu verificación en dos pasos".
+                .exceptionHandling(eh -> eh
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(401);
+                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            response.getWriter().write("""
+                                    {"timestamp":"%s","status":401,"mensaje":"No autenticado o la sesión venció"}
+                                    """.formatted(Instant.now()));
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(403);
+                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            response.getWriter().write("""
+                                    {"timestamp":"%s","status":403,"mensaje":"No tenés permiso para hacer esto"}
+                                    """.formatted(Instant.now()));
+                        })
+                )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

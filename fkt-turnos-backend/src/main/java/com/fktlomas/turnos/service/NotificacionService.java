@@ -34,7 +34,7 @@ public class NotificacionService {
 
     @Transactional(readOnly = true)
     public Page<NotificacionDto> mias(Long usuarioId, Pageable pageable) {
-        return notificacionRepository.findByUsuarioIdOrderByCreatedAtDesc(usuarioId, pageable).map(NotificacionDto::de);
+        return notificacionRepository.findByUsuarioIdOrderByCreatedAtDescIdDesc(usuarioId, pageable).map(NotificacionDto::de);
     }
 
     @Transactional(readOnly = true)

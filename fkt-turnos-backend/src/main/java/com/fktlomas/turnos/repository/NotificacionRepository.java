@@ -10,7 +10,10 @@ import org.springframework.data.repository.query.Param;
 
 public interface NotificacionRepository extends JpaRepository<Notificacion, Long> {
 
-    Page<Notificacion> findByUsuarioIdOrderByCreatedAtDesc(Long usuarioId, Pageable pageable);
+    // Desempate por id además de createdAt: dos notificaciones creadas en el mismo milisegundo
+    // (ej. una cancelación en lote sobre varios turnos del mismo paciente) quedarían en orden
+    // indefinido con un solo criterio — id sí es siempre estrictamente creciente por inserción.
+    Page<Notificacion> findByUsuarioIdOrderByCreatedAtDescIdDesc(Long usuarioId, Pageable pageable);
 
     long countByUsuarioIdAndLeidaFalse(Long usuarioId);
 
