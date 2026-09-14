@@ -2,26 +2,26 @@ import { useState } from 'react';
 import Cropper from 'react-easy-crop';
 
 /**
- * Recorte cuadrado con zoom/arrastre antes de guardar la foto de perfil — se usa tanto para una
- * imagen elegida desde la galería como para una recién sacada con la cámara (ver
- * SelectorFotoPerfil.jsx), para que en los dos casos el usuario pueda centrar bien la cara antes
- * de que se comprima y se mande a moderar.
+ * Recorte con zoom/arrastre antes de guardar una foto — se usa para la foto de perfil circular
+ * de cualquier rol (SelectorFotoPerfil.jsx, aspect=1 cropShape="round", los defaults) y para la
+ * foto "tipo carnet" de un médico en la web pública (AdminMedicosTab.jsx, retrato rectangular).
+ * En los dos casos deja centrar bien la cara antes de que se comprima y se mande a moderar.
  */
-export default function CropeadorFoto({ imagenUrl, onConfirmar, onCancelar, guardando }) {
+export default function CropeadorFoto({ imagenUrl, onConfirmar, onCancelar, guardando, aspect = 1, cropShape = 'round', titulo = 'Ajustá tu foto' }) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [areaRecortePixels, setAreaRecortePixels] = useState(null);
 
   return (
     <>
-      <h2 id="selector-foto-titulo" className="modal-title">Ajustá tu foto</h2>
-      <div style={{ position: 'relative', width: '100%', aspectRatio: '1', borderRadius: 'var(--radius-m)', overflow: 'hidden', background: 'var(--bg-soft)' }}>
+      <h2 id="selector-foto-titulo" className="modal-title">{titulo}</h2>
+      <div style={{ position: 'relative', width: '100%', aspectRatio: String(aspect), borderRadius: 'var(--radius-m)', overflow: 'hidden', background: 'var(--bg-soft)' }}>
         <Cropper
           image={imagenUrl}
           crop={crop}
           zoom={zoom}
-          aspect={1}
-          cropShape="round"
+          aspect={aspect}
+          cropShape={cropShape}
           showGrid={false}
           onCropChange={setCrop}
           onZoomChange={setZoom}

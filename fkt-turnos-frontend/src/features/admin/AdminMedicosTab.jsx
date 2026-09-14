@@ -7,6 +7,7 @@ import {
 } from './adminSlice';
 import { fetchEspecialidades } from '../turnos/turnosSlice';
 import Lightbox from '../../components/Lightbox';
+import SubirFotoConRecorte from '../../components/SubirFotoConRecorte';
 import { hoyISO } from '../../utils/formato';
 import EstadoVacio from '../../components/EstadoVacio';
 
@@ -116,15 +117,7 @@ function MedicoDetalle({ medico }) {
   const [fotoVersion, setFotoVersion] = useState(0);
   const [tituloVersion, setTituloVersion] = useState(0);
   const [lightboxSrc, setLightboxSrc] = useState(null);
-
-  function handleSubirFoto(e) {
-    const file = e.target.files[0];
-    if (file) {
-      dispatch(subirFotoMedico({ medicoId: medico.id, file })).unwrap()
-        .then(() => setFotoVersion((v) => v + 1)).catch(() => {});
-    }
-    e.target.value = '';
-  }
+  const [recortandoFoto, setRecortandoFoto] = useState(false);
 
   function handleSubirTitulo(e) {
     const file = e.target.files[0];
@@ -155,7 +148,20 @@ function MedicoDetalle({ medico }) {
               onClick={() => setLightboxSrc(`${apiUrl}/api/medicos/${medico.id}/foto?v=${fotoVersion}`)}
               style={{ width: 90, height: 110, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--line)', marginBottom: 8, display: 'block', cursor: 'zoom-in' }} />
           )}
-          <input type="file" accept="image/jpeg,image/png" onChange={handleSubirFoto} style={{ fontSize: 12.5 }} />
+          <button type="button" className="btn btn-outline" style={{ padding: '6px 12px', fontSize: 12.5 }} onClick={() => setRecortandoFoto(true)}>
+            {medico.tieneFoto ? 'Cambiar foto' : 'Subir foto'}
+          </button>
+          {recortandoFoto && (
+            <SubirFotoConRecorte
+              titulo="Ajustá la foto del médico"
+              aspect={90 / 110}
+              cropShape="rect"
+              ancho={480}
+              alto={587}
+              onSubir={(file) => dispatch(subirFotoMedico({ medicoId: medico.id, file })).unwrap().then(() => setFotoVersion((v) => v + 1))}
+              onCerrar={() => setRecortandoFoto(false)}
+            />
+          )}
         </div>
         <div>
           <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>Título / matrícula (imagen)</label>
