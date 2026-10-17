@@ -27,7 +27,7 @@
 <link rel="apple-touch-icon" href="assets/img/logo/favicon-fkt-2026.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,300..800;1,400&family=Caveat:wght@600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
 <style>
   /* ---------- RATING HERO ---------- */
@@ -36,7 +36,7 @@
   .rating-hero .bg-photo img{width:100%; height:100%; object-fit:cover; display:block;}
   .rating-hero .bg-photo .overlay{position:absolute; inset:0; background:linear-gradient(180deg, rgba(11,11,10,0.88) 0%, rgba(11,11,10,0.94) 100%);}
   .rating-hero .wrap{position:relative; z-index:1;}
-  .rating-num{font-family:'Playfair Display',serif; font-weight:700; font-size:clamp(56px,9vw,100px); line-height:1; color:#fff; font-variant-numeric:tabular-nums;}
+  .rating-num{font-family:var(--font); font-weight:700; font-size:clamp(56px,9vw,100px); line-height:1; color:#fff; font-variant-numeric:tabular-nums;}
   .rating-stars{display:flex; justify-content:center; gap:6px; margin:16px 0 12px; color:var(--teal);}
   .rating-stars svg{width:26px; height:26px;}
   .rating-hero .cap{color:rgba(255,255,255,0.6); font-size:15px;}
@@ -106,7 +106,6 @@
       <div class="overlay"></div>
     </div>
     <div class="wrap">
-      <span class="eyebrow on-dark reveal">Opiniones de pacientes</span>
       <div class="rating-num reveal" id="ratingNum">0.0</div>
       <div class="rating-stars reveal" id="ratingStars" aria-hidden="true"></div>
       <p class="cap reveal">Calificación en Google, basada en más de 60 reseñas de pacientes</p>
@@ -121,7 +120,6 @@
   <section>
     <div class="wrap">
       <div class="section-head reveal">
-        <span class="eyebrow">Lo que dicen nuestros pacientes</span>
         <h2>Reseñas destacadas de Google</h2>
         <p>Una selección de comentarios reales, resumidos para esta página. Podés leer todos los comentarios completos en el enlace de arriba.</p>
       </div>
@@ -169,7 +167,6 @@
   <section class="soft">
     <div class="wrap">
       <div class="section-head reveal">
-        <span class="eyebrow">Encontranos también en</span>
         <h2>Seguinos y dejanos tu opinión</h2>
       </div>
       <div class="socials-row reveal stagger">
@@ -194,7 +191,6 @@
     <div class="wrap">
       <div class="leave-review reveal">
         <div>
-          <span class="eyebrow">Tu opinión nos ayuda</span>
           <h2 style="margin-top:14px;">¿Ya te atendiste con nosotros?</h2>
           <p>Contanos cómo fue tu experiencia. Tu reseña en Google ayuda a que más pacientes conozcan el centro.</p>
         </div>

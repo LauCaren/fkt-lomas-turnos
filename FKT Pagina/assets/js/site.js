@@ -795,15 +795,45 @@ function fktInitBodyMap() {
   if (!map || !panel) return;
   const spots = map.querySelectorAll('.body-spot');
 
+  // Al elegir una zona, un goniómetro "mide" esa articulación: el gesto del kinesiólogo
+  // que da nombre al centro ("cada grado de movimiento"). Es solo visual: no muestra
+  // ningún valor, porque no hay una medición real del visitante detrás.
+  function medir(spot) {
+    map.querySelectorAll('.spot-gonio').forEach((g) => g.remove());
+    const ring = spot.querySelector('.body-spot-ring');
+    if (!ring) return;
+    const cx = +ring.getAttribute('cx');
+    const cy = +ring.getAttribute('cy');
+    const r = 24;
+    const ns = 'http://www.w3.org/2000/svg';
+    const g = document.createElementNS(ns, 'g');
+    g.setAttribute('class', 'spot-gonio');
+    g.setAttribute('aria-hidden', 'true');
+    const arco = 'M ' + (cx - r) + ' ' + cy + ' A ' + r + ' ' + r + ' 0 0 1 ' + (cx + r) + ' ' + cy;
+    let ticks = '';
+    for (let a = 0; a <= 180; a += 30) {
+      const rad = a * Math.PI / 180;
+      ticks += '<line class="spot-gonio-tick" x1="' + (cx + (r - 4) * Math.cos(rad)).toFixed(1) + '" y1="' + (cy - (r - 4) * Math.sin(rad)).toFixed(1) +
+        '" x2="' + (cx + (r - 9) * Math.cos(rad)).toFixed(1) + '" y2="' + (cy - (r - 9) * Math.sin(rad)).toFixed(1) + '"/>';
+    }
+    g.innerHTML = '<path class="spot-gonio-base" d="' + arco + '"/>' +
+      '<path class="spot-gonio-avance" pathLength="1" d="' + arco + '"/>' + ticks +
+      '<line class="spot-gonio-aguja" x1="' + cx + '" y1="' + cy + '" x2="' + (cx - r + 6) + '" y2="' + cy + '" style="transform-origin:' + cx + 'px ' + cy + 'px"/>';
+    spot.parentNode.insertBefore(g, spot);
+    requestAnimationFrame(() => requestAnimationFrame(() => g.classList.add('midiendo')));
+  }
+
   function select(part) {
     const data = FKT_BODY_MAP[part];
     if (!data) return;
     spots.forEach((s) => s.classList.toggle('active', s.dataset.part === part));
+    const elegido = [...spots].find((s) => s.dataset.part === part);
+    if (elegido) medir(elegido);
     panel.classList.add('filled');
     panel.innerHTML = '<div class="body-map-part-title">' + data.label + '</div>' +
       '<p class="body-map-part-note">Esto es lo que solemos indicar para esta zona:</p>' +
       '<div class="body-map-links">' + data.items.map((it) =>
-        '<a href="#" data-treatment-link="' + it.treatment + '">' + it.title + ' →</a>'
+        '<a href="#" data-treatment-link="' + it.treatment + '">' + it.title + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>'
       ).join('') + '</div>';
   }
 
@@ -822,10 +852,8 @@ function fktInitBodyMap() {
 }
 
 // ==========================================================================
-// MOTION PACK — cursor magnético, cursor a medida, tilt 3D, íconos que se
-// dibujan, spotlight, scroll con inercia e intro de carga. Todas las que
-// dependen de mousemove se apagan solas en touch (matchMedia hover/pointer)
-// y todas respetan prefers-reduced-motion.
+// MOVIMIENTO — íconos que se dibujan, spotlight en bandas oscuras y los
+// goniómetros (pasos y mapa corporal). Todo respeta prefers-reduced-motion.
 // ==========================================================================
 
 const FKT_FINE_POINTER = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -864,75 +892,38 @@ function fktInitIconDraw(reduceMotion) {
   icons.forEach((svg) => io.observe(svg));
 }
 
-// ---------- CURSOR A MEDIDA ----------
-function fktInitCustomCursor(reduceMotion) {
-  if (reduceMotion || !FKT_FINE_POINTER()) return;
-  const cursor = document.createElement('div');
-  cursor.className = 'fkt-cursor';
-  cursor.innerHTML = '<span class="fkt-cursor-label">Ver</span>';
-  cursor.setAttribute('aria-hidden', 'true');
-  document.body.appendChild(cursor);
-
-  let mx = 0, my = 0, cx = 0, cy = 0, raf = null;
-  function loop() {
-    cx += (mx - cx) * 0.25;
-    cy += (my - cy) * 0.25;
-    cursor.style.transform = 'translate(' + cx + 'px, ' + cy + 'px) translate(-50%, -50%)';
-    raf = requestAnimationFrame(loop);
-  }
-  document.addEventListener('mousemove', (e) => {
-    mx = e.clientX; my = e.clientY;
-    cursor.classList.add('active');
-    document.body.classList.add('fkt-cursor-on');
-    if (!raf) raf = requestAnimationFrame(loop);
-  }, { passive: true });
-  document.documentElement.addEventListener('mouseleave', () => cursor.classList.remove('active'));
-
-  const PHOTO_SEL = '.gallery-item, .scard-img, .spec-img, .detail-photo, [data-treatment], .logos-track img';
-  document.addEventListener('mouseover', (e) => {
-    cursor.classList.toggle('hover', !!e.target.closest(PHOTO_SEL));
-  });
-}
-
-// ---------- CURSOR MAGNÉTICO EN BOTONES PRIMARIOS ----------
-function fktInitMagneticButtons(reduceMotion) {
-  if (reduceMotion || !FKT_FINE_POINTER()) return;
-  document.querySelectorAll('.btn-primary, .btn-outline-light').forEach((btn) => {
-    let raf = null;
-    btn.addEventListener('mousemove', (e) => {
-      const r = btn.getBoundingClientRect();
-      const mx = e.clientX - (r.left + r.width / 2);
-      const my = e.clientY - (r.top + r.height / 2);
-      if (raf) cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        btn.style.transition = 'transform .12s ' + 'linear';
-        btn.style.transform = 'translate(' + (mx * 0.25) + 'px, ' + (my * 0.3) + 'px)';
+// ---------- GONIÓMETRO EN LOS PASOS ----------
+// Cada paso del proceso (.step-deg) se marca con un goniómetro chico: si el paso ya trae
+// grados (0°, 90°, 180° en servicios.html) la aguja marca esos grados; si trae un número de
+// orden (01, 02...), marca qué parte del recorrido es. Se mide al entrar en pantalla.
+function fktInitStepGauges(reduceMotion) {
+  document.querySelectorAll('.process').forEach((process) => {
+    const steps = [...process.querySelectorAll('.step')];
+    steps.forEach((step, i) => {
+      const marca = step.querySelector('.step-deg');
+      if (!marca || marca.querySelector('.step-gonio')) return;
+      const grados = /°$/.test(marca.textContent.trim()) ? parseFloat(marca.textContent) : null;
+      const p = grados != null ? Math.min(1, grados / 180) : (i + 1) / steps.length;
+      step.style.setProperty('--p', p.toFixed(3));
+      marca.insertAdjacentHTML('afterbegin',
+        '<svg class="step-gonio" viewBox="0 0 60 34" aria-hidden="true" focusable="false">' +
+        '<path class="base" d="M 4 30 A 26 26 0 0 1 56 30"/>' +
+        '<path class="avance" pathLength="1" d="M 4 30 A 26 26 0 0 1 56 30"/>' +
+        '<line class="aguja" x1="30" y1="30" x2="10" y2="30"/>' +
+        '<circle class="eje" cx="30" cy="30" r="4"/></svg>');
+    });
+    if (reduceMotion || !('IntersectionObserver' in window)) {
+      steps.forEach((st) => st.classList.add('medido'));
+      return;
+    }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        steps.forEach((st, i) => setTimeout(() => st.classList.add('medido'), i * 160));
+        io.disconnect();
       });
-    });
-    btn.addEventListener('mouseleave', () => {
-      btn.style.transition = 'transform .4s ' + 'cubic-bezier(.22,.68,.32,1)';
-      btn.style.transform = '';
-    });
-  });
-}
-
-// ---------- TILT 3D EN TARJETAS ----------
-function fktInitTilt(reduceMotion) {
-  if (reduceMotion || !FKT_FINE_POINTER()) return;
-  document.querySelectorAll('.service-card, .spec-item, .promo-card, .review-card').forEach((card) => {
-    card.addEventListener('mousemove', (e) => {
-      const r = card.getBoundingClientRect();
-      const px = (e.clientX - r.left) / r.width;
-      const py = (e.clientY - r.top) / r.height;
-      const rx = (0.5 - py) * 7;
-      const ry = (px - 0.5) * 7;
-      card.style.transition = 'transform .08s linear';
-      card.style.transform = 'perspective(900px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg)';
-    });
-    card.addEventListener('mouseleave', () => {
-      card.style.transition = 'transform .5s cubic-bezier(.22,.68,.32,1)';
-      card.style.transform = '';
-    });
+    }, { threshold: 0.35 });
+    io.observe(process);
   });
 }
 
@@ -946,66 +937,6 @@ function fktInitSpotlight(reduceMotion) {
       band.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
     });
   });
-}
-
-// ---------- SCROLL CON INERCIA ----------
-// Suaviza la rueda del mouse/trackpad interpolando hacia un scroll objetivo en vez de
-// saltar de golpe — el scroll real de window sigue siendo la fuente de verdad (se sigue
-// llamando window.scrollTo de verdad), así que el paralaje, el riel de progreso y la
-// barra sticky que ya leen window.scrollY siguen funcionando sin tocarlos.
-function fktInitSmoothScroll(reduceMotion) {
-  if (reduceMotion || !FKT_FINE_POINTER()) return;
-  const SKIP_SEL = '.ficha-card, .search-panel, .search-results, .logos-marquee, .map-frame, textarea, select, iframe';
-  let target = window.scrollY;
-  let current = window.scrollY;
-  let raf = null;
-
-  function tick() {
-    current += (target - current) * 0.14;
-    if (Math.abs(target - current) < 0.4) {
-      current = target;
-      window.scrollTo(0, current);
-      raf = null;
-      return;
-    }
-    window.scrollTo(0, current);
-    raf = requestAnimationFrame(tick);
-  }
-
-  window.addEventListener('wheel', (e) => {
-    if (document.body.style.overflow === 'hidden') return; // hay un modal abierto
-    if (e.target instanceof Element && e.target.closest(SKIP_SEL)) return;
-    const max = document.documentElement.scrollHeight - window.innerHeight;
-    target = Math.min(Math.max(0, max), Math.max(0, target + e.deltaY));
-    e.preventDefault();
-    if (!raf) raf = requestAnimationFrame(tick);
-  }, { passive: false });
-
-  window.addEventListener('scroll', () => {
-    if (!raf) { target = window.scrollY; current = window.scrollY; }
-  }, { passive: true });
-}
-
-// ---------- INTRO DE CARGA ----------
-// Sólo la primera vez por sesión de navegador — sessionStorage evita que se repita en
-// cada una de las 11 páginas mientras el visitante navega el sitio.
-function fktInitIntro(reduceMotion) {
-  if (reduceMotion) return;
-  let seen = true;
-  try { seen = sessionStorage.getItem('fkt-intro-seen') === '1'; } catch (e) { seen = true; }
-  if (seen) return;
-  try { sessionStorage.setItem('fkt-intro-seen', '1'); } catch (e) {}
-
-  const intro = document.createElement('div');
-  intro.className = 'fkt-intro';
-  intro.setAttribute('aria-hidden', 'true');
-  intro.innerHTML = '<img src="assets/img/logo/fkt-logo-mark-transparent.png" alt=""><span class="word">FKT Lomas</span>';
-  document.body.prepend(intro);
-  requestAnimationFrame(() => requestAnimationFrame(() => intro.classList.add('show')));
-  setTimeout(() => {
-    intro.classList.add('hide');
-    setTimeout(() => intro.remove(), 550);
-  }, 1000);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1062,10 +993,6 @@ document.addEventListener('DOMContentLoaded', () => {
   fktInitBodyMap();
   fktInitFluidOrb();
   fktInitIconDraw(reduceMotion);
-  fktInitCustomCursor(reduceMotion);
-  fktInitMagneticButtons(reduceMotion);
-  fktInitTilt(reduceMotion);
   fktInitSpotlight(reduceMotion);
-  fktInitSmoothScroll(reduceMotion);
-  fktInitIntro(reduceMotion);
+  fktInitStepGauges(reduceMotion);
 });
