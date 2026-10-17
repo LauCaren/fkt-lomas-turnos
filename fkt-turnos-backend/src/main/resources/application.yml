@@ -28,6 +28,13 @@ spring:
       hibernate:
         format_sql: true
 
+  jackson:
+    # Spring Boot 4 usa Jackson 3, que cambió varios defaults (ordena las propiedades
+    # alfabéticamente, falla con null en campos primitivos, etc.). Esto mantiene el JSON
+    # de la API igual que con Jackson 2 — el frontend y los snapshots de auditoría ya
+    # guardados en la base dependen de ese formato.
+    use-jackson2-defaults: true
+
   flyway:
     enabled: true
     locations: classpath:db/migration

@@ -1,7 +1,5 @@
 package com.fktlomas.turnos.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fktlomas.turnos.domain.RegistroAuditoria;
 import com.fktlomas.turnos.domain.Usuario;
 import com.fktlomas.turnos.dto.auditoria.RegistroAuditoriaDto;
@@ -14,8 +12,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.ObjectMapper;
 
-import java.io.UncheckedIOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -86,20 +84,13 @@ public class AuditoriaService {
         return deserializar(ultimo.getSnapshotAntes(), tipo);
     }
 
+    // Jackson 3: JacksonException ya es unchecked, no hace falta envolverla.
     private String serializar(Object o) {
         if (o == null) return null;
-        try {
-            return objectMapper.writeValueAsString(o);
-        } catch (JsonProcessingException e) {
-            throw new UncheckedIOException(e);
-        }
+        return objectMapper.writeValueAsString(o);
     }
 
     private <T> T deserializar(String json, Class<T> tipo) {
-        try {
-            return objectMapper.readValue(json, tipo);
-        } catch (JsonProcessingException e) {
-            throw new UncheckedIOException(e);
-        }
+        return objectMapper.readValue(json, tipo);
     }
 }

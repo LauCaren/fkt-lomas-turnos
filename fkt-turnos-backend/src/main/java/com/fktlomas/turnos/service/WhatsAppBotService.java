@@ -1,6 +1,6 @@
 package com.fktlomas.turnos.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.fktlomas.turnos.domain.ConversacionWhatsApp;
 import com.fktlomas.turnos.domain.EstadoConversacion;
 import com.fktlomas.turnos.domain.Medico;
