@@ -161,8 +161,9 @@ header.scrolled { background: var(--header-bg-scrolled); box-shadow: var(--shado
 header.open .burger span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
 header.open .burger span:nth-child(2) { opacity: 0; }
 header.open .burger span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
-.mobile-panel { display: flex; flex-direction: column; gap: 2px; max-height: 0; opacity: 0; padding: 0 0; overflow: hidden; transition: max-height .35s var(--ease), opacity .25s var(--ease), padding .35s var(--ease); }
-header.open .mobile-panel { max-height: 480px; opacity: 1; padding: 6px 0 20px; }
+.mobile-panel { display: none; flex-direction: column; gap: 2px; padding: 6px 0 20px; }
+header.open .mobile-panel { display: flex; animation: panelIn .28s var(--ease-out); }
+@keyframes panelIn { from { opacity: 0; transform: translateY(-8px); } }
 .mobile-panel a { padding: 14px 4px; font-size: 17px; font-weight: 700; border-top: 1px solid var(--line); }
 .mobile-panel .nav-cta { padding: 14px 4px 4px; gap: 10px; flex-direction: column; align-items: stretch; }
 @media (max-width: 1180px) {
@@ -414,7 +415,7 @@ footer { background: var(--black); color: rgba(255, 255, 255, 0.75); padding: 56
 .footer-logo img { width: 38px; height: 38px; object-fit: contain; flex-shrink: 0; }
 .footer-logo small { display: block; font-family: 'Caveat', cursive; font-weight: 600; font-size: 16px; color: rgba(255, 255, 255, 0.6); margin-top: 4px; letter-spacing: 0.01em; }
 .footer-cols { display: flex; gap: 64px; flex-wrap: wrap; }
-.footer-col h4 { font-family: var(--font); font-weight: 700; font-size: 13.5px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255, 255, 255, 0.45); margin-bottom: 14px; }
+.footer-col h3 { font-family: var(--font); font-weight: 700; font-size: 13.5px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255, 255, 255, 0.45); margin-bottom: 14px; }
 .footer-col a, .footer-col span { display: block; font-size: 14.5px; margin-bottom: 10px; color: rgba(255, 255, 255, 0.8); transition: color .2s var(--ease); }
 .footer-col a:hover { color: var(--teal); }
 .footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 22px; flex-wrap: wrap; gap: 12px; font-size: 15px; color: rgba(255, 255, 255, 0.4); }
@@ -482,7 +483,15 @@ footer { background: var(--black); color: rgba(255, 255, 255, 0.75); padding: 56
    -50% para que el loop sea perfecto sin salto. Se pausa al hover para poder leer un logo. */
 .logos-marquee { overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
 .logos-track { display: flex; align-items: center; gap: 56px; width: max-content; animation: logos-scroll 42s linear infinite; }
-.logos-marquee:hover .logos-track { animation-play-state: paused; }
+.logos-marquee:hover .logos-track, .logos-marquee:focus-within .logos-track, .logos-marquee.pausado .logos-track { animation-play-state: paused; }
+.marquee-pausa {
+  display: flex; align-items: center; gap: 8px; min-height: 40px; margin: 14px auto 0; padding: 6px 14px;
+  border: 1.5px solid var(--line); border-radius: 100px; background: var(--white); color: var(--ink-soft);
+  font-size: 14.5px; font-weight: 700; transition: border-color .2s var(--ease), color .2s var(--ease);
+}
+.marquee-pausa:hover { border-color: var(--line-strong); color: var(--ink); }
+.marquee-pausa svg { width: 14px; height: 14px; fill: currentColor; }
+@media (prefers-reduced-motion: reduce) { .marquee-pausa { display: none; } }
 .logos-track img { height: 32px; width: auto; object-fit: contain; filter: grayscale(1) opacity(.5); transition: filter .3s var(--ease); flex-shrink: 0; }
 .logos-track img:hover { filter: grayscale(0) opacity(1); }
 @keyframes logos-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
@@ -502,9 +511,6 @@ footer { background: var(--black); color: rgba(255, 255, 255, 0.75); padding: 56
 /* ---------- CONTADORES (data-count-to, animados por site.js) ---------- */
 [data-count-to] { font-variant-numeric: tabular-nums; }
 
-/* ---------- NOTA MANUSCRITA (marginalia) ---------- */
-.marginalia { font-family: 'Caveat', cursive; font-weight: 600; color: var(--teal-dark); line-height: 1.15; pointer-events: none; }
-.marginalia svg { stroke: var(--teal-dark); fill: none; }
 
 /* ---------- BARRA STICKY DE RESERVA ---------- */
 /* Aparece recién después de pasar el hero, así no compite con los CTA que ya están ahí arriba.
@@ -592,7 +598,7 @@ footer { background: var(--black); color: rgba(255, 255, 255, 0.75); padding: 56
 .treat-benefits { display: flex; flex-direction: column; gap: 11px; }
 .treat-benefits li { display: flex; gap: 10px; align-items: flex-start; font-size: 14.5px; color: var(--ink-soft); line-height: 1.5; }
 .treat-benefits svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; color: var(--teal); }
-.treat-review { border-left: 2px solid var(--teal); padding-left: 14px; margin-bottom: 14px; }
+.treat-review { background: var(--bg-soft); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; }
 .treat-review:last-child { margin-bottom: 0; }
 .treat-review p { font-size: 14px; color: var(--ink-soft); font-style: italic; line-height: 1.55; }
 .treat-review span { display: block; margin-top: 6px; font-size: 14px; color: var(--muted); font-style: normal; }

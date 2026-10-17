@@ -253,7 +253,8 @@ function CeldaAgenda({ turno, feriado, onSeleccionar }) {
       onClick={() => onSeleccionar(turno.id)}
       title={disponible ? 'Disponible' : `${turno.pacienteNombre} (${turno.pacienteDni})${confirmado ? ' · confirmó que viene' : ''}${ausente ? ' · ausente' : ''}`}
     >
-      {disponible ? 'Libre' : (turno.pacienteNombre || '').split(' ')[0]}
+      {/* El apellido (última palabra) distingue mejor que el nombre de pila en una agenda llena. */}
+      {disponible ? 'Libre' : (turno.pacienteNombre || '').trim().split(/\s+/).pop()}
     </button>
   );
 }
@@ -963,37 +964,20 @@ export default function AdminAgendaTab() {
         </div>
       )}
 
-      {resumenDia && !agendaCargando && (
-        <div className="agenda-resumen">
-          <div className="agenda-resumen-medidor">
-            <Goniometro progreso={(resumenDia.reservadosTotal + resumenDia.disponibles) ? resumenDia.reservadosTotal / (resumenDia.reservadosTotal + resumenDia.disponibles) : 0} compacto />
-          </div>
-          <div className="agenda-resumen-cifras">
-            <p className="agenda-resumen-dia">{resumenDia.esHoy ? 'Hoy' : etiquetaDia(fecha)}</p>
-            <p className="agenda-resumen-total"><strong>{resumenDia.reservadosTotal}</strong> reservado{resumenDia.reservadosTotal === 1 ? '' : 's'}</p>
-            <p className="agenda-resumen-libres">{resumenDia.disponibles} libre{resumenDia.disponibles === 1 ? '' : 's'}</p>
-          </div>
-          {resumenDia.proximos.length > 0 && (
-            <div className="agenda-resumen-proximos">
-              <p className="agenda-resumen-subtitulo">{resumenDia.esHoy ? 'Próximos turnos' : 'Turnos del día'}</p>
-              <ol>
-                {resumenDia.proximos.map((t) => (
-                  <li key={t.id}>
-                    <strong>{t.horaInicio.slice(0, 5)}</strong> {t.pacienteNombre} <span>· {t.medicoNombre}</span>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          )}
-        </div>
-      )}
-
       <div className="agenda-barra">
         <div className="tabnav agenda-vistas" role="tablist" aria-label="Vista de la agenda">
           {[['lista', 'Lista'], ['dia', 'Día'], ['semana', 'Semana']].map(([id, label]) => (
             <button key={id} type="button" role="tab" aria-selected={vista === id} className={`tabnav-btn${vista === id ? ' active' : ''}`} onClick={() => setVista(id)}>{label}</button>
           ))}
         </div>
+        {resumenDia && !agendaCargando && (
+          <p className="agenda-ocupacion" title="Ocupación del día">
+            <span className="agenda-ocupacion-medidor" aria-hidden="true">
+              <Goniometro progreso={(resumenDia.reservadosTotal + resumenDia.disponibles) ? resumenDia.reservadosTotal / (resumenDia.reservadosTotal + resumenDia.disponibles) : 0} compacto />
+            </span>
+            <span><strong>{resumenDia.reservadosTotal}</strong> reservado{resumenDia.reservadosTotal === 1 ? '' : 's'} · <span className="agenda-ocupacion-libres">{resumenDia.disponibles} libre{resumenDia.disponibles === 1 ? '' : 's'}</span></span>
+          </p>
+        )}
         {(vista === 'dia' || vista === 'semana') && (
           <label className="check agenda-compacta" title="Filas más chicas para ver más turnos sin scrollear">
             <input type="checkbox" checked={!!denso} onChange={() => setDenso((d) => !d)} />

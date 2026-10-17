@@ -676,9 +676,42 @@ function fktInitStickyCta() {
   document.body.appendChild(cta);
 
   const threshold = hero ? hero.offsetHeight * 0.6 + hero.offsetTop : 420;
-  function onScroll() { cta.classList.toggle('visible', window.scrollY > threshold); }
+  // Se esconde mientras está a la vista la banda de llamado a la acción o el footer: ahí ya
+  // hay botones propios y la barra los tapaba (y se apilaba con el de WhatsApp).
+  const tapables = document.querySelectorAll('.cta-band, footer');
+  const visibles = new Set();
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => (e.isIntersecting ? visibles.add(e.target) : visibles.delete(e.target)));
+      onScroll();
+    });
+    tapables.forEach((el) => io.observe(el));
+  }
+  function onScroll() { cta.classList.toggle('visible', window.scrollY > threshold && visibles.size === 0); }
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
+}
+
+// ---------- PAUSA DEL MARQUEE DE OBRAS SOCIALES ----------
+// Una animación que se mueve sola más de 5 segundos necesita un control visible para
+// frenarla (WCAG 2.2.2): el hover no alcanza en celular ni con teclado.
+function fktInitMarqueePause(reduceMotion) {
+  if (reduceMotion) return;
+  const PAUSA = '<svg viewBox="0 0 14 14" aria-hidden="true"><rect x="2" y="1" width="3.5" height="12" rx="1"/><rect x="8.5" y="1" width="3.5" height="12" rx="1"/></svg>';
+  const PLAY = '<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v11l9.5-5.5z"/></svg>';
+  document.querySelectorAll('.logos-marquee').forEach((m) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'marquee-pausa';
+    function pintar() {
+      const pausado = m.classList.contains('pausado');
+      btn.innerHTML = (pausado ? PLAY : PAUSA) + (pausado ? 'Mover logos' : 'Pausar logos');
+      btn.setAttribute('aria-pressed', String(pausado));
+    }
+    btn.addEventListener('click', () => { m.classList.toggle('pausado'); pintar(); });
+    pintar();
+    m.insertAdjacentElement('afterend', btn);
+  });
 }
 
 // ---------- CONTADORES ANIMADOS ----------
@@ -995,4 +1028,5 @@ document.addEventListener('DOMContentLoaded', () => {
   fktInitIconDraw(reduceMotion);
   fktInitSpotlight(reduceMotion);
   fktInitStepGauges(reduceMotion);
+  fktInitMarqueePause(reduceMotion);
 });

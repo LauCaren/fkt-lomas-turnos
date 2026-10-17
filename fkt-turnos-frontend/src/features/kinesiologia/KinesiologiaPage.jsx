@@ -390,7 +390,6 @@ export default function KinesiologiaPage() {
       )}
 
       <section className="mis-turnos-seccion" aria-label="Nuevo plan">
-        {misPlanes.length > 0 && <h2 className="seccion-titulo">Nuevo plan</h2>}
         {especialidadKinesiologia && <NuevoPlanForm medicos={medicosPorEspecialidad} />}
       </section>
     </div>

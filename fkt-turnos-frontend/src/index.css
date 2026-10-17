@@ -643,8 +643,8 @@ details[open] > :not(summary) { animation: detailsContentIn .25s var(--ease-out)
 }
 .agenda-celda-btn:hover { filter: brightness(.96); }
 .agenda-celda-btn:active { transform: scale(.95); }
-.agenda-celda-disponible { background: var(--teal-tint); color: var(--teal-dark); }
-.agenda-celda-reservado { background: var(--primary); color: var(--on-primary); }
+.agenda-celda-disponible { background: var(--white); color: var(--green); font-weight: 600; }
+.agenda-celda-reservado { background: var(--teal-tint); color: var(--ink); }
 /* Anillo interno en vez de otro color nuevo — reutiliza --green, ya el color de
    "confirmó" en el resto de la agenda (ver .badge-disponible), para no sumar un
    tercer significado de color a la grilla. */
@@ -1093,7 +1093,7 @@ button.reserva-paso-btn:hover { background: var(--teal-tint); color: var(--ink);
 .escala-etiqueta { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink-soft); letter-spacing: -0.01em; }
 .escala-etiqueta span { font-size: 14px; color: var(--muted); font-weight: 600; margin-left: 1px; }
 .escala-vacio { height: 48px; display: flex; align-items: center; justify-content: center; }
-.escala-vacio::before { content: ""; width: 14px; height: 2px; border-radius: 2px; background: var(--line); }
+.escala-vacio::before { content: ""; width: 2px; height: 16px; border-radius: 2px; background: var(--line-strong); opacity: .7; }
 .horario {
   height: 48px; border-radius: var(--radius-s); border: 1.5px solid var(--line-strong);
   background: var(--white); color: var(--ink); font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums;
@@ -1164,7 +1164,10 @@ button.reserva-paso-btn:hover { background: var(--teal-tint); color: var(--ink);
   .acceso-hoja { padding: 22px 18px; }
 }
 .reserva-etapa h1:focus { outline: none; }
-.gonio-compacto .gonio-tick { stroke-width: 4; }
+.reserva-etapa h1 { scroll-margin-top: 96px; }
+@media (max-width: 860px) { .reserva-etapa h1 { scroll-margin-top: 128px; } }
+.gonio-compacto .gonio-tick { stroke-width: 4; stroke: var(--muted); }
+.gonio-compacto .gonio-tick-medida { stroke: var(--teal-dark); }
 .gonio-compacto .gonio-aguja-linea { stroke-width: 6; }
 .gonio-compacto .gonio-aguja-punta { r: 5; }
 
@@ -1225,7 +1228,7 @@ button.reserva-paso-btn:hover { background: var(--teal-tint); color: var(--ink);
 /* ======================================================================================
    ÁREA DEL PACIENTE
    ====================================================================================== */
-.seccion-titulo { font-size: 15px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+.seccion-titulo { font-size: 21px; font-weight: 800; letter-spacing: -0.015em; color: var(--ink); margin-bottom: 14px; }
 .btn-peligro { color: var(--red); }
 .btn-peligro:hover:not(:disabled) { background: var(--red-tint); }
 .alert-cerrable { display: flex; align-items: flex-start; gap: 12px; }
@@ -1250,7 +1253,7 @@ button.reserva-paso-btn:hover { background: var(--teal-tint); color: var(--ink);
 }
 .turno-fecha .dia-semana { color: var(--teal-dark); }
 .turno-fecha .dia-numero { font-size: 36px; }
-.turno-hora { font-size: 30px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.turno-hora { font-size: 40px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .turno-hora span { font-size: 16px; font-weight: 700; color: var(--muted); letter-spacing: 0; }
 .turno-quien { margin-top: 4px; font-size: 16.5px; color: var(--ink-soft); }
 .turno-quien strong { color: var(--ink); }
@@ -1533,3 +1536,10 @@ kbd {
 .estrellas { display: inline-flex; gap: 1px; color: var(--line-strong); vertical-align: -3px; }
 .estrellas svg { fill: transparent; }
 .estrellas .encendida { color: var(--amber); fill: currentColor; }
+
+/* Ocupación del día: una línea junto al selector de vista (antes, una tarjeta de cifra grande que
+   repetía los conteos de los filtros y le quitaba lugar a la lista). */
+.agenda-ocupacion { display: inline-flex; align-items: center; gap: 10px; margin: 0; font-size: 15.5px; color: var(--ink-soft); }
+.agenda-ocupacion strong { color: var(--ink); font-variant-numeric: tabular-nums; }
+.agenda-ocupacion-medidor { width: 46px; flex-shrink: 0; }
+.agenda-ocupacion-libres { color: var(--green); font-weight: 700; }
