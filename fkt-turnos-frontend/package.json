@@ -52,7 +52,7 @@
     "@testing-library/user-event": "^14.6.7",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
-    "@vitejs/plugin-react": "^6.1.0",
+    "@vitejs/plugin-react": "^6.1.1",
     "electron": "^44.3.0",
     "electron-builder": "^26.15.3",
     "jsdom": "^30.0.1",
