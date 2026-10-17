@@ -62,8 +62,9 @@ function iniciarServidorEstatico() {
     }));
     // Fallback de SPA: cualquier ruta que no sea un archivo estático (las de
     // react-router-dom) devuelve index.html, para que el router del lado
-    // cliente la resuelva.
-    servidor.get('*', (_req, res) => {
+    // cliente la resuelva. Express 5 ya no acepta '*' suelto como ruta — el
+    // comodín tiene que tener nombre ('/{*ruta}' también matchea '/').
+    servidor.get('/{*ruta}', (_req, res) => {
       res.setHeader('Cache-Control', 'no-store');
       res.sendFile(path.join(carpetaDist(), 'index.html'));
     });

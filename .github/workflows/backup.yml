@@ -15,10 +15,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - name: Instalar cliente de Postgres, aws-cli y age
+      - name: Instalar cliente de Postgres y age
+        # aws-cli no se instala: el runner ubuntu-latest ya trae AWS CLI v2, y el paquete
+        # apt "awscli" no existe en Ubuntu 24.04 (pedirlo rompía este paso todos los días).
         run: |
           sudo apt-get update
-          sudo apt-get install -y postgresql-client awscli age
+          sudo apt-get install -y postgresql-client age
+          aws --version
       - name: Correr backup
         run: bash scripts/backup-db.sh
         env:
