@@ -1,15 +1,31 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+/* Atkinson Hyperlegible Next: diseñada por el Braille Institute para baja visión — formas de
+   letra que no se confunden entre sí (Il1, 0O, 5S). Elegida porque muchos pacientes son
+   adultos mayores; la misma familia cubre texto, títulos y cifras. Caveat queda solo para la
+   bajada manuscrita de la marca ("Fisio Kinesio Terapia"), igual que en el sitio. */
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,300..800;1,400&family=Caveat:wght@600&display=swap');
 
 :root {
+  --font: 'Atkinson Hyperlegible Next', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --bg: #FFFFFF;
-  --bg-soft: #F3F9F9;
+  --bg-soft: #F2F7F7;
   --ink: #1C3240;
   --ink-soft: #3D5566;
-  --muted: #6D8089;
-  --line: #DFEAEA;
+  /* #5A6E78 y no el #6D8089 anterior: sobre --bg-soft el viejo quedaba en ~4.2:1, por
+     debajo de AA para texto chico. Este da 5.0:1 sobre --bg-soft y 5.4:1 sobre blanco. */
+  --muted: #5A6E78;
+  --line: #DCE7E8;
+  /* Graduaciones del goniómetro y bordes de controles: un paso más marcado que --line,
+     3:1 contra blanco para que se lean como componente de UI (WCAG 1.4.11). */
+  --line-strong: #93A9AE;
   --teal: #239A96;
   --teal-dark: #186F6C;
-  --teal-tint: #E1F3F2;
+  --teal-tint: #E3F3F2;
+  /* Fondo de botón primario: el teal de marca con texto blanco da 3.3:1 (no alcanza AA
+     en 16px), así que el botón usa el teal profundo (5.9:1) y el teal claro queda para la
+     aguja, los arcos y los acentos gráficos, donde 3:1 alcanza. */
+  --primary: #186F6C;
+  --primary-hover: #125855;
+  --on-primary: #FFFFFF;
   --black: #13232C;
   --white: #FFFFFF;
   /* #BE3E12, no #C23F12: el texto de .alert-error sobre --red-tint quedaba en 4.48:1,
@@ -25,10 +41,15 @@
      alcanza AA (4.5:1) para texto normal. --amber en sí no se toca porque también se
      usa como color de fondo/borde en otros lados donde este tono más oscuro no queda bien. */
   --amber-dark: #97610C;
-  --header-bg: rgba(255, 255, 255, 0.88);
-  --radius-s: 6px;
-  --radius-m: 16px;
+  --header-bg: rgba(255, 255, 255, 0.86);
+  --radius-s: 10px;
+  --radius-m: 18px;
+  --radius-l: 26px;
   --maxw: 960px;
+  /* Resorte casi crítico (un rebote mínimo, ~2%): el de la aguja del goniómetro y las
+     selecciones. Calmo a propósito — un rebote marcado se sentiría juguete en un turnero
+     médico. linear() lo resuelve sin JS; los navegadores sin soporte caen a --ease-out. */
+  --spring: linear(0, 0.0618 2.2%, 0.2307 4.6%, 0.4788 7.6%, 0.7149 11%, 0.8803 14.6%, 0.9752 18.4%, 1.0176 22.6%, 1.0255 27.2%, 1.0161 33.2%, 1.0034 42%, 0.998 54%, 1);
   --ease: cubic-bezier(.22, .68, .32, 1);
   /* Curva más marcada para feedback rápido (press states, skeletons) — --ease ya
      funciona bien para transiciones de hover/entrada más largas, esta es para
@@ -36,9 +57,10 @@
   --ease-out: cubic-bezier(.23, 1, .32, 1);
   /* Sombras en dos capas (contacto + ambiente) en vez de una sola — misma tinta
      (rgba de --ink) que antes, solo con más profundidad real. */
-  --shadow-sm: 0 1px 2px rgba(19, 35, 44, .04), 0 4px 14px rgba(19, 35, 44, .06);
-  --shadow-md: 0 4px 10px rgba(19, 35, 44, .06), 0 20px 48px rgba(19, 35, 44, .16);
-  --shadow-lg: 0 12px 24px rgba(19, 35, 44, .10), 0 32px 80px rgba(19, 35, 44, .26);
+  --shadow-sm: 0 1px 2px rgba(19, 35, 44, .05), 0 6px 18px -6px rgba(19, 35, 44, .08);
+  --shadow-md: 0 2px 6px rgba(19, 35, 44, .05), 0 18px 40px -12px rgba(19, 35, 44, .16);
+  --shadow-lg: 0 10px 24px rgba(19, 35, 44, .08), 0 36px 80px -20px rgba(19, 35, 44, .28);
+  --ring: 0 0 0 4px rgba(35, 154, 150, .18);
 }
 
 /* Mismo mecanismo y misma paleta que FKT Pagina (assets/css/site.css) para que el modo oscuro
@@ -47,24 +69,34 @@
    prefers-color-scheme del sistema. El script inline en index.html evita el flash al cargar. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #101C23; --bg-soft: #16242C; --ink: #EAF2F1; --ink-soft: #B6C6C9; --muted: #83979B;
-    --line: #25373E; --teal: #35BFB9; --teal-dark: #7FDAD5; --teal-tint: #17302E;
-    --black: #0B141A; --white: #182831;
+    --bg: #13222A; --bg-soft: #0C171D; --ink: #E8F1F1; --ink-soft: #B9CACC; --muted: #93A7AB;
+    --line: #22363D; --line-strong: #4F6A70; --teal: #3CC4BE; --teal-dark: #8ADFDA; --teal-tint: #133230;
+    --primary: #3CC4BE; --primary-hover: #63D3CE; --on-primary: #06221F;
+    --black: #0B141A; --white: #13222A;
     --red: #FF8A6B; --red-tint: #3A1F16;
     --green: #6FCF73; --green-tint: #1C3320;
     --amber: #E4A93A; --amber-tint: #3A2E14; --amber-dark: #F5C563;
-    --header-bg: rgba(16, 28, 35, 0.85);
+    --header-bg: rgba(12, 23, 29, 0.84);
+    --ring: 0 0 0 4px rgba(60, 196, 190, .22);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .3), 0 6px 18px -6px rgba(0, 0, 0, .35);
+    --shadow-md: 0 2px 6px rgba(0, 0, 0, .3), 0 18px 40px -12px rgba(0, 0, 0, .5);
+    --shadow-lg: 0 10px 24px rgba(0, 0, 0, .35), 0 36px 80px -20px rgba(0, 0, 0, .6);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #101C23; --bg-soft: #16242C; --ink: #EAF2F1; --ink-soft: #B6C6C9; --muted: #83979B;
-  --line: #25373E; --teal: #35BFB9; --teal-dark: #7FDAD5; --teal-tint: #17302E;
-  --black: #0B141A; --white: #182831;
-  --red: #FF8A6B; --red-tint: #3A1F16;
-  --green: #6FCF73; --green-tint: #1C3320;
-  --amber: #E4A93A; --amber-tint: #3A2E14; --amber-dark: #F5C563;
-  --header-bg: rgba(16, 28, 35, 0.85);
+  --bg: #13222A; --bg-soft: #0C171D; --ink: #E8F1F1; --ink-soft: #B9CACC; --muted: #93A7AB;
+    --line: #22363D; --line-strong: #4F6A70; --teal: #3CC4BE; --teal-dark: #8ADFDA; --teal-tint: #133230;
+    --primary: #3CC4BE; --primary-hover: #63D3CE; --on-primary: #06221F;
+    --black: #0B141A; --white: #13222A;
+    --red: #FF8A6B; --red-tint: #3A1F16;
+    --green: #6FCF73; --green-tint: #1C3320;
+    --amber: #E4A93A; --amber-tint: #3A2E14; --amber-dark: #F5C563;
+    --header-bg: rgba(12, 23, 29, 0.84);
+    --ring: 0 0 0 4px rgba(60, 196, 190, .22);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .3), 0 6px 18px -6px rgba(0, 0, 0, .35);
+    --shadow-md: 0 2px 6px rgba(0, 0, 0, .3), 0 18px 40px -12px rgba(0, 0, 0, .5);
+    --shadow-lg: 0 10px 24px rgba(0, 0, 0, .35), 0 36px 80px -20px rgba(0, 0, 0, .6);
   color-scheme: dark;
 }
 :root[data-theme="light"] { color-scheme: light; }
@@ -89,80 +121,90 @@ body {
   margin: 0;
   background: var(--bg-soft);
   color: var(--ink);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font);
   font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
 }
 
 h1, h2, h3 {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font);
   font-weight: 700;
-  letter-spacing: 0;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  text-wrap: balance;
   margin: 0;
   color: var(--ink);
 }
 
-p { margin: 0; }
+p { margin: 0; text-wrap: pretty; }
 a { color: inherit; text-decoration: none; }
 ul { margin: 0; padding: 0; list-style: none; }
 button { font: inherit; cursor: pointer; }
 input, select, textarea { font: inherit; }
 
+/* Scrollbar fina en el tono de las graduaciones, mismo criterio que el sitio público. */
+html { scrollbar-color: var(--line-strong) transparent; scrollbar-width: thin; }
+
 .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
 
+/* Rótulo chico sobre un título: queda solo por compatibilidad en las pantallas que todavía
+   no pasaron por el rediseño — las nuevas no lo usan (el título se sostiene solo). */
 .eyebrow {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12.5px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: 0.02em;
   color: var(--teal-dark);
-  font-weight: 500;
+  font-weight: 700;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
-.eyebrow::before { content: ""; width: 18px; height: 2px; background: var(--teal); display: inline-block; }
 
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 13px 24px;
+  min-height: 48px;
+  padding: 12px 22px;
   border-radius: var(--radius-s);
-  font-weight: 600;
-  font-size: 15px;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.2;
   border: 1.5px solid transparent;
-  transition: transform .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease), color .2s var(--ease), opacity .2s var(--ease);
+  transition: transform .18s var(--ease-out), background .2s var(--ease), border-color .2s var(--ease), color .2s var(--ease), box-shadow .2s var(--ease), opacity .2s var(--ease);
   white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
 }
-.btn:hover:not(:disabled) { transform: translateY(-2px); }
-/* Feedback de presión: sin esto el botón no daba ninguna señal de haber
-   registrado el click hasta que cambiaba de pantalla — el active pisa el
-   translateY del hover con un scale sutil, confirmando el toque al instante. */
-.btn:active:not(:disabled) { transform: scale(.97); }
-.btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
-.btn-primary { background: var(--teal); color: #fff; }
-.btn-primary:hover:not(:disabled) { background: var(--teal-dark); }
+/* Sin "salto" en hover: en un turnero el botón no tiene que moverse bajo el cursor de una
+   persona mayor que apunta despacio — el cambio de tono alcanza. La presión sí se siente. */
+.btn:active:not(:disabled) { transform: scale(.975); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-primary { background: var(--primary); color: var(--on-primary); box-shadow: 0 1px 2px rgba(19, 35, 44, .12), inset 0 1px 0 rgba(255, 255, 255, .12); }
+.btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
 .btn-dark { background: var(--black); color: #fff; }
-.btn-outline { border-color: var(--line); color: var(--ink); background: transparent; }
-.btn-outline:hover:not(:disabled) { border-color: var(--ink); background: var(--bg-soft); }
+.btn-outline { border-color: var(--line-strong); color: var(--ink); background: var(--white); }
+.btn-outline:hover:not(:disabled) { border-color: var(--ink-soft); background: var(--bg-soft); }
+.btn-ghost { color: var(--teal-dark); background: transparent; padding-inline: 12px; }
+.btn-ghost:hover:not(:disabled) { background: var(--teal-tint); }
+.btn-lg { min-height: 56px; font-size: 17px; padding: 14px 28px; border-radius: 14px; }
 
 /* Toggle de tema claro/oscuro del header (Layout.jsx) — mismo tamaño de zona de toque que el
    resto de los controles del header, pero sin el peso visual de un .btn-outline: es una
    preferencia de visualización, no una acción sobre la cuenta. */
 .btn-icon-tema {
   display: flex; align-items: center; justify-content: center;
-  width: 36px; height: 36px; border-radius: 100px; border: 1px solid var(--line);
+  width: 44px; height: 44px; border-radius: 100px; border: 1px solid var(--line);
   background: transparent; color: var(--ink-soft); cursor: pointer; flex-shrink: 0;
   transition: color .2s var(--ease), border-color .2s var(--ease), background .2s var(--ease), transform .15s var(--ease-out);
 }
-.btn-icon-tema:hover { color: var(--ink); border-color: var(--ink-soft); background: var(--bg-soft); }
+.btn-icon-tema:hover { color: var(--ink); border-color: var(--line-strong); background: var(--bg-soft); }
 .btn-icon-tema:active { transform: scale(.92); }
-.btn-icon-tema:focus-visible { outline: 2px solid var(--teal-dark); outline-offset: 2px; }
+.btn-icon-tema svg { transition: transform .5s var(--spring); }
+.btn-icon-tema:hover svg { transform: rotate(-20deg); }
 .btn-block { width: 100%; }
 
 /* Un spinner que gira rápido se percibe como una carga más rápida que uno lento, aunque el
@@ -171,8 +213,8 @@ input, select, textarea { font: inherit; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .spinner {
   display: inline-block;
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
   border: 2px solid currentColor;
   border-right-color: transparent;
   border-radius: 50%;
@@ -181,6 +223,8 @@ input, select, textarea { font: inherit; }
   flex-shrink: 0;
 }
 
+/* Hoja: la superficie base de la app (antes "card"). Borde fino + sombra suave en dos capas,
+   como una hoja de papel apoyada sobre el fondo frío. */
 .card {
   background: var(--white);
   border: 1px solid var(--line);
@@ -191,38 +235,43 @@ input, select, textarea { font: inherit; }
 }
 .card-hover:hover {
   box-shadow: var(--shadow-md);
-  transform: translateY(-3px);
-  border-color: var(--teal);
+  border-color: var(--line-strong);
 }
-.card-hover:active { transform: scale(.98); box-shadow: var(--shadow-sm); }
+.card-hover:active { transform: scale(.985); box-shadow: var(--shadow-sm); }
 
-.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
-.field label { font-size: 13.5px; font-weight: 600; color: var(--ink-soft); }
+.field { display: flex; flex-direction: column; gap: 7px; margin-bottom: 18px; }
+.field label { font-size: 14.5px; font-weight: 700; color: var(--ink-soft); }
 .field input, .field select, .field textarea {
+  min-height: 48px;
   padding: 11px 14px;
-  border: 1.5px solid var(--line);
+  border: 1.5px solid var(--line-strong);
   border-radius: var(--radius-s);
-  font-size: 15px;
+  font-size: 16px;
   background: var(--white);
   color: var(--ink);
+  transition: border-color .15s var(--ease), box-shadow .2s var(--ease);
 }
+.field textarea { min-height: 96px; resize: vertical; }
+.field input::placeholder, .field textarea::placeholder { color: var(--muted); opacity: 1; }
+.field input:hover:not(:disabled), .field select:hover:not(:disabled), .field textarea:hover:not(:disabled) { border-color: var(--ink-soft); }
 .field input:focus, .field select:focus, .field textarea:focus {
-  border-color: var(--teal);
+  border-color: var(--teal-dark);
+  box-shadow: var(--ring);
+  outline: none;
 }
-/* Sin esto, el foco por teclado en cualquier campo de formulario (la inmensa mayoría de la
-   app pasa por .field) no tenía ningún indicador visible más que este leve cambio de borde
-   (2.79:1 contra el borde en reposo — no alcanza ni el mínimo de 3:1 para componentes de UI):
-   la regla global :focus-visible de más abajo nunca llegaba a aplicarse acá porque esta
-   selectora tiene más especificidad y antes pisaba el outline con "none". */
+/* El anillo de --ring acompaña a cualquier foco; con teclado además va el contorno sólido,
+   que es el indicador que pide WCAG (el halo solo no alcanza 3:1 contra el fondo). */
 .field input:focus-visible, .field select:focus-visible, .field textarea:focus-visible {
   outline: 2px solid var(--teal-dark);
   outline-offset: 2px;
 }
-.field-error { color: var(--red); font-size: 12.5px; }
+.field input:disabled, .field select:disabled, .field textarea:disabled { background: var(--bg-soft); color: var(--muted); }
+.field-hint { font-size: 14px; color: var(--muted); }
+.field-error { color: var(--red); font-size: 14px; }
 
-/* ---------- ENCABEZADO DE PÁGINA (eyebrow + h1 + bajada opcional) ---------- */
-.page-head h1 { margin-top: 12px; font-size: 30px; }
-.page-head p { margin-top: 10px; color: var(--muted); }
+/* ---------- ENCABEZADO DE PÁGINA (h1 + bajada opcional) ---------- */
+.page-head h1 { margin-top: 10px; font-size: clamp(28px, 4vw, 34px); }
+.page-head p { margin-top: 10px; color: var(--muted); font-size: 17px; }
 
 /* ---------- BARRA DE FILTROS (paneles admin/secretaría/contador) ---------- */
 .filter-bar { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 20px; }
@@ -452,15 +501,17 @@ details[open] > :not(summary) { animation: detailsContentIn .25s var(--ease-out)
   border-radius: var(--radius-s);
   background: var(--white);
   box-shadow: var(--shadow-lg);
-  font-size: 13.5px;
+  font-size: 15px;
   line-height: 1.4;
-  border-left: 3px solid var(--teal);
+  border: 1px solid var(--line);
+  --toast-color: var(--teal);
   animation: toastIn .25s var(--ease-out);
   transition: opacity .2s var(--ease), transform .2s var(--ease);
 }
+.toast::before { content: ""; flex-shrink: 0; width: 10px; height: 10px; border-radius: 50%; background: var(--toast-color); box-shadow: 0 0 0 4px color-mix(in srgb, var(--toast-color) 18%, transparent); }
 .toast span { flex: 1; }
-.toast-success { border-left-color: var(--green); }
-.toast-error { border-left-color: var(--red); }
+.toast-success { --toast-color: var(--green); }
+.toast-error { --toast-color: var(--red); }
 .toast-saliendo { opacity: 0; transform: translateY(6px) scale(.97); }
 .toast-cerrar {
   flex-shrink: 0;
@@ -703,9 +754,9 @@ details[open] > :not(summary) { animation: detailsContentIn .25s var(--ease-out)
 .sidebar-nav { flex: 0 0 224px; position: sticky; top: 24px; display: flex; flex-direction: column; gap: 22px; }
 .sidebar-group { display: flex; flex-direction: column; gap: 2px; }
 .sidebar-group-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  letter-spacing: .08em;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .06em;
   text-transform: uppercase;
   color: var(--muted);
   padding: 0 12px;
@@ -799,13 +850,52 @@ details[open] > :not(summary) { animation: detailsContentIn .25s var(--ease-out)
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
-  box-shadow: var(--shadow-sm);
 }
-.app-nav-links { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
-.app-nav-links a { font-size: 14px; font-weight: 600; position: relative; padding: 4px 0; color: var(--ink-soft); transition: color .2s var(--ease); }
-.app-nav-links a::after { content: ""; position: absolute; left: 0; bottom: 0; width: 0; height: 2px; background: var(--teal); transition: width .25s var(--ease); }
-.app-nav-links a:hover { color: var(--ink); }
-.app-nav-links a:hover::after { width: 100%; }
+/* Logo | navegación | acciones en un solo renglón; el header siempre usa el ancho amplio
+   aunque el contenido del paciente sea más angosto, para que la navegación no se parta. */
+.app-header-inner {
+  max-width: max(var(--maxw), 1180px);
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 20px;
+  min-height: 72px; padding-block: 10px;
+}
+.app-marca { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.app-marca-logo { width: 36px; height: 36px; object-fit: contain; flex-shrink: 0; }
+.app-marca-texto { display: flex; flex-direction: column; line-height: 1.1; }
+.app-marca-nombre { font-weight: 800; font-size: 19px; letter-spacing: -0.02em; }
+.app-marca-nombre span { color: var(--teal-dark); font-weight: 700; }
+.app-marca-bajada { font-family: 'Caveat', cursive; font-weight: 600; font-size: 15px; color: var(--muted); }
+.app-nav-links { display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 0; }
+.app-nav-links a {
+  font-size: 15.5px; font-weight: 700; padding: 10px 14px; border-radius: 100px; white-space: nowrap;
+  color: var(--ink-soft); transition: color .2s var(--ease), background .2s var(--ease);
+}
+.app-nav-links a:hover { color: var(--ink); background: var(--bg-soft); }
+.app-nav-links a.active { color: var(--teal-dark); background: var(--teal-tint); }
+.app-acciones { display: flex; align-items: center; gap: 8px; }
+.app-usuario {
+  display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; border: none; border-radius: 100px;
+  background: none; color: var(--ink-soft); font-size: 14.5px; font-weight: 600;
+  transition: background .2s var(--ease);
+}
+.app-usuario:hover { background: var(--bg-soft); }
+.app-usuario-nombre { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app-salir { min-height: 44px; padding: 8px 18px; }
+
+@media (max-width: 1100px) {
+  .app-usuario-nombre { display: none; }
+  .app-usuario { padding: 4px; }
+}
+/* Angosto: logo y acciones arriba, la navegación pasa a un segundo renglón que se desliza
+   de costado si no entra (nunca se parte en dos líneas). */
+@media (max-width: 860px) {
+  .app-header-inner { grid-template-columns: 1fr auto; row-gap: 6px; padding-bottom: 6px; }
+  .app-nav-links {
+    grid-column: 1 / -1; grid-row: 2; justify-content: flex-start; overflow-x: auto;
+    scrollbar-width: none; margin-inline: -16px; padding-inline: 12px;
+  }
+  .app-nav-links::-webkit-scrollbar { display: none; }
+  .app-marca-bajada { display: none; }
+}
 
 /* ---------- IMPRESIÓN DEL CARTEL QR (SalaEsperaQr) ---------- */
 /* Encabezado que solo aparece en la hoja impresa — en pantalla no hace falta, ya
@@ -821,3 +911,268 @@ details[open] > :not(summary) { animation: detailsContentIn .25s var(--ease-out)
   #ficha-imprimir, #ingresos-imprimir { position: absolute; inset: 0; padding: 24px; }
   .ficha-print-header { display: block; font-size: 13px; color: var(--muted); margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
 }
+
+/* ======================================================================================
+   GONIÓMETRO — pieza de identidad (ver components/ui/Goniometro.jsx)
+   ====================================================================================== */
+.gonio { display: block; width: 100%; height: auto; overflow: visible; }
+.gonio-base { fill: none; stroke: var(--line); stroke-width: 10; stroke-linecap: round; }
+.gonio-avance {
+  fill: none; stroke: var(--teal); stroke-width: 10; stroke-linecap: round;
+  stroke-dasharray: 1 1;
+  transition: stroke-dashoffset .9s var(--spring);
+  animation: gonioAvanceIn 1.2s var(--spring) .1s backwards;
+}
+@keyframes gonioAvanceIn { from { stroke-dashoffset: 1; } }
+.gonio-tick { stroke: var(--line-strong); stroke-width: 1.5; stroke-linecap: round; transition: stroke .4s var(--ease); }
+.gonio-tick-larga { stroke-width: 2; }
+.gonio-tick-medida { stroke: var(--teal-dark); }
+.gonio-parada { fill: var(--white); stroke: var(--line-strong); stroke-width: 2.5; transition: fill .3s var(--ease), stroke .3s var(--ease), r .4s var(--spring); }
+.gonio-parada-alcanzada { fill: var(--teal); stroke: var(--white); stroke-width: 3; }
+.gonio-aguja {
+  transform-box: view-box;
+  transform-origin: 160px 164px;
+  transition: transform .9s var(--spring);
+  animation: gonioAgujaIn 1.2s var(--spring) .1s backwards;
+}
+@keyframes gonioAgujaIn { from { transform: rotate(0deg); } }
+.gonio-aguja-linea { stroke: var(--ink); stroke-width: 3.5; stroke-linecap: round; }
+.gonio-aguja-punta { fill: var(--ink); }
+.gonio-eje { fill: var(--ink); }
+.gonio-eje-centro { fill: var(--teal); }
+.gonio-compacto .gonio-base, .gonio-compacto .gonio-avance { stroke-width: 14; }
+
+/* ======================================================================================
+   ACCESO (login / registro / recuperar contraseña)
+   ====================================================================================== */
+.acceso { max-width: 440px; margin: 0 auto; padding-top: 8px; }
+.acceso-marca { width: 168px; margin: 0 auto 6px; }
+.acceso-cabecera { text-align: center; }
+.acceso-cabecera h1 { font-size: clamp(30px, 5vw, 36px); }
+.acceso-cabecera p { margin-top: 10px; color: var(--muted); font-size: 17px; }
+.acceso-hoja { margin-top: 28px; padding: 28px; }
+.acceso-hoja .btn-primary { margin-top: 6px; }
+.acceso-separador { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: var(--muted); font-size: 14px; }
+.acceso-separador::before, .acceso-separador::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.acceso-pie { margin-top: 22px; display: grid; gap: 10px; text-align: center; color: var(--muted); font-size: 15.5px; }
+.link-fuerte {
+  color: var(--teal-dark); font-weight: 700;
+  text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px;
+  text-decoration-color: color-mix(in srgb, var(--teal-dark) 35%, transparent);
+  transition: text-decoration-color .2s var(--ease);
+}
+.link-fuerte:hover { text-decoration-color: var(--teal-dark); }
+.acceso-mfa-ayuda { font-size: 14px; color: var(--muted); }
+
+/* ======================================================================================
+   RESERVA DE TURNO (features/turnos/BookingWizard.jsx)
+   ====================================================================================== */
+.reserva { max-width: 720px; margin: 0 auto; }
+.reserva-medidor { max-width: 340px; margin: 0 auto; }
+.reserva-pasos {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+  margin: 14px 0 0; padding: 0; list-style: none;
+}
+.reserva-paso-item { min-width: 0; text-align: center; }
+.reserva-paso-btn {
+  width: 100%; min-height: 56px; padding: 6px 4px; border: none; border-radius: var(--radius-s);
+  background: none; color: var(--muted); display: grid; justify-items: center; align-content: center; gap: 1px;
+  transition: background .2s var(--ease), color .2s var(--ease);
+}
+button.reserva-paso-btn:hover { background: var(--teal-tint); color: var(--ink); }
+.reserva-paso-nombre { font-size: 14px; font-weight: 700; }
+.reserva-paso-valor {
+  font-size: 13px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--ink-soft); font-variant-numeric: tabular-nums;
+}
+.reserva-paso-item[aria-current="step"] .reserva-paso-btn { color: var(--ink); }
+.reserva-paso-item[aria-current="step"] .reserva-paso-nombre { color: var(--teal-dark); }
+.reserva-paso-hecho .reserva-paso-nombre::before {
+  content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%;
+  background: var(--teal); vertical-align: 1px;
+}
+
+.reserva-aviso {
+  margin-top: 22px; padding: 14px 16px; border-radius: var(--radius-s);
+  background: var(--teal-tint); color: var(--ink); font-size: 15px; line-height: 1.5;
+  border: 1px solid color-mix(in srgb, var(--teal) 35%, transparent);
+}
+.reserva-aviso .link-btn { background: none; border: none; padding: 0; color: var(--teal-dark); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; font-size: inherit; }
+
+.reserva-etapa { margin-top: 34px; }
+.reserva-etapa-cabecera { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.reserva-etapa-cabecera h1 { font-size: clamp(28px, 4.4vw, 36px); }
+.reserva-etapa-cabecera p { margin-top: 8px; color: var(--muted); font-size: 17px; }
+.reserva-contenido { margin-top: 22px; }
+
+/* Entrada de cada paso: corre en la dirección del avance (adelante desde la derecha, atrás
+   desde la izquierda), la misma en la que se movió la aguja. */
+@keyframes etapaAdelante { from { opacity: 0; transform: translateX(28px); } }
+@keyframes etapaAtras { from { opacity: 0; transform: translateX(-28px); } }
+.reserva-etapa-adelante { animation: etapaAdelante .45s var(--ease-out); }
+.reserva-etapa-atras { animation: etapaAtras .45s var(--ease-out); }
+
+/* Opciones (especialidad / profesional): filas grandes, una por renglón, toda la fila es el
+   blanco de toque — no un desplegable chico, difícil para una persona mayor en el celular. */
+.opciones { display: grid; gap: 10px; }
+.opcion {
+  display: flex; align-items: center; gap: 16px; width: 100%; min-height: 64px;
+  padding: 14px 18px; text-align: left; color: var(--ink);
+  background: var(--white); border: 1.5px solid var(--line); border-radius: var(--radius-m);
+  box-shadow: var(--shadow-sm);
+  transition: border-color .2s var(--ease), box-shadow .2s var(--ease), transform .18s var(--ease-out), background .2s var(--ease);
+}
+.opcion:hover { border-color: var(--teal); box-shadow: var(--shadow-md); }
+.opcion:active { transform: scale(.985); }
+.opcion[aria-pressed="true"] { border-color: var(--teal-dark); background: var(--teal-tint); }
+.opcion-texto { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.opcion-titulo { font-size: 17.5px; font-weight: 700; line-height: 1.3; }
+.opcion-detalle { font-size: 14.5px; color: var(--muted); }
+.opcion-flecha { flex-shrink: 0; color: var(--line-strong); transition: transform .3s var(--spring), color .2s var(--ease); }
+.opcion:hover .opcion-flecha { color: var(--teal-dark); transform: translateX(3px); }
+.opcion-esqueleto { min-height: 64px; border-radius: var(--radius-m); }
+
+/* Días: celdas enteras que se reacomodan en columnas completas (7 en escritorio, 4 en el
+   celular) sin partirse nunca a mitad de una celda. */
+.dias { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+.dia {
+  display: grid; justify-items: center; gap: 0; padding: 10px 4px 12px; min-height: 92px;
+  background: var(--white); border: 1.5px solid var(--line); border-radius: var(--radius-m); color: var(--ink);
+  transition: border-color .2s var(--ease), background .2s var(--ease), transform .18s var(--ease-out), box-shadow .2s var(--ease);
+}
+.dia:hover { border-color: var(--teal); box-shadow: var(--shadow-sm); }
+.dia:active { transform: scale(.96); }
+.dia[aria-pressed="true"] { border-color: var(--teal-dark); background: var(--teal-tint); }
+.dia-semana { font-size: 14px; font-weight: 700; color: var(--muted); text-transform: capitalize; }
+.dia-numero { font-size: 30px; font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.dia-mes { font-size: 13.5px; color: var(--muted); text-transform: capitalize; }
+.dia-hoy .dia-semana { color: var(--teal-dark); }
+.dias-otra { margin-top: 18px; display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.dias-otra .field { margin: 0; }
+
+/* Horarios: una escala vertical graduada por hora. Cada renglón es una marca de hora y los
+   turnos caen siempre en la misma columna según su cuarto de hora (registro fijo): :00 :15
+   :30 :45 quedan alineados en toda la escala, y los cuartos sin turno se ven como una
+   graduación vacía en vez de desaparecer. */
+.escala { display: grid; border-top: 1px solid var(--line); }
+.escala-hora {
+  display: grid; grid-template-columns: 64px repeat(4, 1fr); align-items: center; gap: 8px;
+  padding: 10px 0; border-bottom: 1px solid var(--line);
+}
+.escala-etiqueta { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink-soft); letter-spacing: -0.01em; }
+.escala-etiqueta span { font-size: 14px; color: var(--muted); font-weight: 600; margin-left: 1px; }
+.escala-vacio { height: 48px; display: flex; align-items: center; justify-content: center; }
+.escala-vacio::before { content: ""; width: 14px; height: 2px; border-radius: 2px; background: var(--line); }
+.horario {
+  height: 48px; border-radius: var(--radius-s); border: 1.5px solid var(--line-strong);
+  background: var(--white); color: var(--ink); font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums;
+  transition: border-color .2s var(--ease), background .2s var(--ease), color .2s var(--ease), transform .3s var(--spring), box-shadow .2s var(--ease);
+}
+.horario:hover { border-color: var(--teal-dark); background: var(--teal-tint); }
+.horario:active { transform: scale(.94); }
+.horario[aria-pressed="true"] {
+  background: var(--primary); border-color: var(--primary); color: var(--on-primary);
+  transform: scale(1.04); box-shadow: var(--shadow-md);
+}
+.horario-esqueleto { height: 48px; border-radius: var(--radius-s); }
+
+.reserva-sin-turnos { padding: 22px; border: 1.5px dashed var(--line-strong); border-radius: var(--radius-m); background: var(--white); }
+.reserva-sin-turnos h2 { font-size: 20px; }
+.reserva-sin-turnos p { margin-top: 6px; color: var(--muted); }
+.reserva-proximas { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+.reserva-lista-espera { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 15px; }
+
+/* Lectura del turno elegido: la hora a tamaño monumental, como la lectura de un instrumento.
+   En el celular queda fija abajo para que el botón de confirmar esté siempre al alcance. */
+.lectura {
+  margin-top: 26px; padding: 20px 22px; background: var(--white); border: 1px solid var(--line);
+  border-radius: var(--radius-l); box-shadow: var(--shadow-md);
+  display: grid; grid-template-columns: auto 1fr; gap: 6px 22px; align-items: center;
+  animation: lecturaIn .45s var(--ease-out);
+}
+@keyframes lecturaIn { from { opacity: 0; transform: translateY(14px) scale(.98); } }
+.lectura-hora {
+  font-size: clamp(46px, 9vw, 64px); font-weight: 800; line-height: 1; letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums; color: var(--ink);
+}
+.lectura-detalle { display: grid; gap: 2px; font-size: 15.5px; color: var(--ink-soft); min-width: 0; }
+.lectura-detalle strong { color: var(--ink); font-size: 17px; }
+.lectura-campo { grid-column: 1 / -1; margin: 10px 0 0; }
+.lectura-campo textarea { min-height: 72px; }
+.lectura .btn { grid-column: 1 / -1; margin-top: 4px; }
+
+/* Turno confirmado */
+.confirmado { max-width: 560px; margin: 0 auto; text-align: center; }
+.confirmado-medidor { max-width: 260px; margin: 0 auto; }
+.confirmado-estado {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; padding: 6px 14px 6px 10px;
+  border-radius: 100px; background: var(--green-tint); color: var(--green); font-weight: 700; font-size: 15px;
+}
+.confirmado h1 { margin-top: 16px; font-size: clamp(24px, 4vw, 30px); }
+.confirmado-lectura { margin-top: 14px; display: grid; gap: 2px; }
+.confirmado-dia { font-size: 19px; font-weight: 700; color: var(--ink-soft); }
+.confirmado-hora { font-size: clamp(52px, 11vw, 72px); font-weight: 800; letter-spacing: -0.035em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.confirmado-hora span { font-size: .42em; font-weight: 700; color: var(--muted); letter-spacing: -0.01em; }
+.confirmado-hoja { margin-top: 26px; text-align: left; display: grid; gap: 16px; }
+.confirmado-hoja .alert { margin: 0; }
+.confirmado-acciones { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 26px; }
+
+@media (max-width: 640px) {
+  .wrap { padding: 0 16px; }
+  .dias { grid-template-columns: repeat(4, 1fr); }
+  .escala-hora { grid-template-columns: 46px repeat(4, 1fr); gap: 6px; }
+  .escala-etiqueta { font-size: 19px; }
+  .horario { font-size: 16px; }
+  .reserva-paso-valor { display: none; }
+  .reserva-paso-nombre { font-size: 13px; }
+  .reserva-etapa { margin-top: 24px; }
+  .lectura {
+    position: sticky; bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 5;
+    padding: 16px;
+  }
+  .acceso-hoja { padding: 22px 18px; }
+}
+.reserva-etapa h1:focus { outline: none; }
+.gonio-compacto .gonio-tick { stroke-width: 4; }
+.gonio-compacto .gonio-aguja-linea { stroke-width: 6; }
+.gonio-compacto .gonio-aguja-punta { r: 5; }
+
+/* ---------- BANNER "INSTALAR LA APP" (pacientes en el celular) ---------- */
+.instalar-app {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: start;
+  margin-bottom: 26px; padding: 16px 12px 16px 16px; border-radius: var(--radius-m);
+  background: var(--white); border: 1px solid var(--line); box-shadow: var(--shadow-sm);
+}
+.instalar-app-icono {
+  width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center;
+  background: var(--teal-tint); color: var(--teal-dark);
+}
+.instalar-app-texto { font-size: 15px; color: var(--ink-soft); line-height: 1.5; }
+.instalar-app-titulo { font-weight: 700; font-size: 16.5px; color: var(--ink); margin-bottom: 4px; line-height: 1.3; }
+.instalar-app-cerrar {
+  width: 44px; height: 44px; margin: -8px -4px 0 0; border: none; border-radius: 100px; background: none;
+  color: var(--muted); display: grid; place-items: center; transition: background .2s var(--ease), color .2s var(--ease);
+}
+.instalar-app-cerrar:hover { background: var(--bg-soft); color: var(--ink); }
+
+@media (max-width: 640px) {
+  .reserva-medidor { max-width: 280px; }
+  .reserva-pasos { gap: 2px; }
+  .reserva-paso-nombre { font-size: 12.5px; }
+}
+@media (max-width: 440px) {
+  .app-marca-texto { display: none; }
+  .app-acciones { gap: 6px; }
+  .btn-icon-tema { width: 42px; height: 42px; }
+  .app-salir { padding: 8px 14px; }
+}
+@media (max-width: 640px) {
+  .reserva-paso-hecho .reserva-paso-nombre::before { display: none; }
+  .reserva-paso-hecho .reserva-paso-nombre { color: var(--ink); text-decoration: underline; text-decoration-color: var(--teal); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+}
+
+/* ---------- AGREGAR AL CALENDARIO (confirmación de turno, mis turnos) ---------- */
+.agendar { width: 100%; }
+.agendar-titulo { font-size: 14.5px; font-weight: 700; color: var(--ink-soft); margin-bottom: 8px; }
+.agendar-botones { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; }
+.agendar-botones .btn { font-size: 15px; min-height: 46px; }

@@ -25,7 +25,7 @@ export default class ErrorBoundary extends Component {
 
     return (
       <div className="wrap" style={{ paddingTop: 80, paddingBottom: 80, textAlign: 'center' }}>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, marginBottom: 12 }}>
+        <h1 style={{ fontSize: 28, marginBottom: 12 }}>
           Algo salió mal
         </h1>
         <p style={{ color: 'var(--muted)', marginBottom: 24 }}>

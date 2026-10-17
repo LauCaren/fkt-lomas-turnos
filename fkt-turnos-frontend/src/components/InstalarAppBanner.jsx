@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { EllipsisVertical, Smartphone, X } from 'lucide-react';
 
 const CLAVE_VISTO = 'fkt_instalar_app_visto';
 
@@ -48,35 +49,28 @@ export default function InstalarAppBanner() {
   if (!visible) return null;
 
   return (
-    <div className="card" style={{ marginBottom: 24, background: 'var(--teal-tint)', border: '1px solid var(--teal)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-        <div>
-          <div style={{ fontWeight: 700, fontSize: 15.5, marginBottom: 6 }}>📲 Agregá FKT Turnos a tu pantalla de inicio</div>
-          {plataforma.esIOS ? (
-            <p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>
-              Así la tenés a mano como una app: tocá el botón <strong>Compartir</strong> (el cuadrado con la flecha hacia arriba, abajo en Safari) y elegí <strong>"Agregar a pantalla de inicio"</strong>.
-            </p>
-          ) : (
-            <p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>
-              Así la tenés a mano como una app: tocá el menú <strong>⋮</strong> de Chrome y elegí <strong>"Agregar a pantalla de inicio"</strong> o <strong>"Instalar app"</strong>.
-            </p>
-          )}
-        </div>
-        <button
-          type="button"
-          onClick={handleCerrar}
-          aria-label="Cerrar"
-          className="icon-btn-close"
-          style={{ flexShrink: 0, width: 28, height: 28, borderRadius: '50%', border: 'none', background: 'rgba(255,255,255,0.6)', fontSize: 16, lineHeight: 1, cursor: 'pointer', color: 'var(--ink-soft)' }}
-        >
-          &times;
-        </button>
+    <aside className="instalar-app" aria-label="Instalar la app">
+      <span className="instalar-app-icono" aria-hidden="true"><Smartphone size={22} /></span>
+      <div className="instalar-app-texto">
+        <p className="instalar-app-titulo">Agregá FKT Turnos a tu pantalla de inicio</p>
+        {plataforma.esIOS ? (
+          <p>
+            Así la tenés a mano como una app: tocá <strong>Compartir</strong> (el cuadrado con la flecha hacia arriba, abajo en Safari) y elegí <strong>"Agregar a pantalla de inicio"</strong>.
+          </p>
+        ) : (
+          <p>
+            Así la tenés a mano como una app: tocá el menú <EllipsisVertical size={15} aria-label="de tres puntos" style={{ verticalAlign: -2 }} /> de Chrome y elegí <strong>"Agregar a pantalla de inicio"</strong> o <strong>"Instalar app"</strong>.
+          </p>
+        )}
+        {plataforma.esAndroid && eventoInstalacion && (
+          <button type="button" className="btn btn-primary" style={{ marginTop: 12 }} onClick={handleInstalar}>
+            Instalar ahora
+          </button>
+        )}
       </div>
-      {plataforma.esAndroid && eventoInstalacion && (
-        <button type="button" className="btn btn-primary" style={{ marginTop: 14, padding: '9px 18px', fontSize: 13.5 }} onClick={handleInstalar}>
-          Instalar ahora
-        </button>
-      )}
-    </div>
+      <button type="button" onClick={handleCerrar} aria-label="Cerrar" className="instalar-app-cerrar">
+        <X size={20} aria-hidden="true" />
+      </button>
+    </aside>
   );
 }

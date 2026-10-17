@@ -16,3 +16,6 @@ recordatorio-turnos/dist/
 recordatorio-turnos/logs/
 recordatorio-turnos/data/
 recordatorio-turnos/config/application.properties
+
+# Estado temporal de las páginas de decisión de la skill impeccable
+.impeccable/questions/

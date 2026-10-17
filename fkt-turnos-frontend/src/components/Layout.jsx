@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Moon, Sun } from 'lucide-react';
 import { logout } from '../features/auth/authSlice';
@@ -14,12 +14,12 @@ import NotificacionesBell from './NotificacionesBell';
 function Marca() {
   return (
     <>
-      <img src="/img/fkt-logo-mark-transparent.png" alt="" aria-hidden="true" style={{ width: 34, height: 34, objectFit: 'contain', flexShrink: 0 }} />
-      <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
-        <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 20 }}>
-          FKT Lomas<span style={{ color: 'var(--teal)' }}> · Turnos</span>
+      <img src="/img/fkt-logo-mark-transparent.png" alt="" aria-hidden="true" className="app-marca-logo" />
+      <span className="app-marca-texto">
+        <span className="app-marca-nombre">
+          FKT Lomas<span> · Turnos</span>
         </span>
-        <span style={{ fontFamily: "'Caveat', cursive", fontWeight: 600, fontSize: 14, color: 'var(--muted)' }}>Fisio Kinesio Terapia</span>
+        <span className="app-marca-bajada">Fisio Kinesio Terapia</span>
       </span>
     </>
   );
@@ -56,34 +56,34 @@ export default function Layout({ children }) {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <header className="app-header">
-        <div className="wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 0', flexWrap: 'wrap', gap: 12 }}>
+        <div className="wrap app-header-inner" style={esPanelInterno ? { '--maxw': '1240px' } : undefined}>
           {isElectron ? (
             // La app de escritorio es solo para los paneles internos (admin/médico/contador) —
             // no tiene que poder salir nunca al sitio informativo público.
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, whiteSpace: 'nowrap' }}>
+            <div className="app-marca">
               <Marca />
             </div>
           ) : (
-            <a href={SITE_URL} style={{ display: 'flex', alignItems: 'center', gap: 10, whiteSpace: 'nowrap' }}>
+            <a href={SITE_URL} className="app-marca">
               <Marca />
             </a>
           )}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-            {usuario && (
-              <div className="app-nav-links">
-                {usuario.role === 'PACIENTE' && (
-                  <>
-                    <Link to="/turnos">Sacar turno</Link>
-                    <Link to="/turnos/kinesiologia">Kinesiología</Link>
-                    <Link to="/turnos/mis-turnos">Mis turnos</Link>
-                    <Link to="/turnos/mi-cuenta">Mi cuenta</Link>
-                  </>
-                )}
-                {usuario.role === 'ADMIN' && <Link to="/admin">Panel admin</Link>}
-                {usuario.role === 'MEDICO' && <Link to="/medico">Panel médico</Link>}
-                {usuario.role === 'CONTADOR' && <Link to="/contador">Panel contador</Link>}
-              </div>
-            )}
+          {usuario && (
+            <nav className="app-nav-links" aria-label="Secciones">
+              {usuario.role === 'PACIENTE' && (
+                <>
+                  <NavLink to="/turnos" end>Sacar turno</NavLink>
+                  <NavLink to="/turnos/kinesiologia">Kinesiología</NavLink>
+                  <NavLink to="/turnos/mis-turnos">Mis turnos</NavLink>
+                  <NavLink to="/turnos/mi-cuenta">Mi cuenta</NavLink>
+                </>
+              )}
+              {usuario.role === 'ADMIN' && <NavLink to="/admin">Panel admin</NavLink>}
+              {usuario.role === 'MEDICO' && <NavLink to="/medico">Panel médico</NavLink>}
+              {usuario.role === 'CONTADOR' && <NavLink to="/contador">Panel contador</NavLink>}
+            </nav>
+          )}
+          <div className="app-acciones">
             <button
               type="button"
               onClick={alternarTema}
@@ -91,7 +91,7 @@ export default function Layout({ children }) {
               title={tema === 'dark' ? 'Tema claro' : 'Tema oscuro'}
               className="btn-icon-tema"
             >
-              {tema === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              {tema === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
             </button>
             {usuario && (
               <>
@@ -100,25 +100,25 @@ export default function Layout({ children }) {
                   type="button"
                   onClick={() => setSelectorFotoAbierto(true)}
                   aria-label="Tu foto de perfil"
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer', padding: 2, borderRadius: 100 }}
+                  className="app-usuario"
                 >
                   <UsuarioAvatar
                     fotoUrl="/api/usuarios/me/foto"
                     tieneFoto={!!fotoInfo?.tieneFoto}
                     avatarGenerico={fotoInfo?.avatarGenerico}
                     nombreCompleto={usuario.nombreCompleto}
-                    size={30}
+                    size={34}
                     version={fotoVersion}
                   />
-                  <span style={{ fontSize: 14, color: 'var(--muted)' }}>{usuario.nombreCompleto}</span>
+                  <span className="app-usuario-nombre">{usuario.nombreCompleto}</span>
                 </button>
-                <button className="btn btn-outline" onClick={handleLogout}>Salir</button>
+                <button className="btn btn-outline app-salir" onClick={handleLogout}>Salir</button>
               </>
             )}
           </div>
         </div>
       </header>
-      <main style={{ flex: 1, padding: '40px 0' }}>
+      <main style={{ flex: 1, padding: '40px 0 56px' }}>
         <div className="wrap" style={esPanelInterno ? { '--maxw': '1240px' } : undefined}>
           {usuario?.role === 'PACIENTE' && <InstalarAppBanner />}
           <div key={location.pathname} className="page-fade">
