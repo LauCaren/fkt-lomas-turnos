@@ -6,6 +6,17 @@ updates:
       interval: weekly
     open-pull-requests-limit: 10
 
+  - package-ecosystem: maven
+    directory: /recordatorio-turnos
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    ignore:
+      # La app guarda sus datos en un archivo H2 local (LocalDatabaseConfig) en la PC
+      # de la clínica: subir de versión H2 puede cambiar el formato del archivo y dejar
+      # ilegible la base existente. Actualizarlo solo a mano, con export/import.
+      - dependency-name: com.h2database:h2
+
   - package-ecosystem: npm
     directory: /fkt-turnos-frontend
     schedule:
