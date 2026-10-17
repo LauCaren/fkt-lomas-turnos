@@ -24,6 +24,14 @@
     <aws-sdk.version>2.56.0</aws-sdk.version>
     <poi.version>5.5.1</poi.version>
     <pdfbox.version>3.0.8</pdfbox.version>
+    <!-- Parches de seguridad por encima de lo que trae Spring Boot 4.1.1 (CVEs de Tomcat,
+         Jackson y HttpComponents que marca Trivy en CI). Misma línea menor que la del BOM de
+         Boot, solo versión de parche: se pueden borrar cuando Boot traiga estas o más nuevas. -->
+    <tomcat.version>11.0.27</tomcat.version>
+    <jackson-bom.version>3.1.7</jackson-bom.version>
+    <jackson-2-bom.version>2.21.8</jackson-2-bom.version>
+    <httpclient5.version>5.6.5</httpclient5.version>
+    <httpcore5.version>5.4.4</httpcore5.version>
   </properties>
 
   <dependencyManagement>
@@ -43,6 +51,13 @@
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
         <version>2.22.0</version>
+      </dependency>
+      <!-- mercadopago sdk-java 3.7.0 (última) trae commons-beanutils 1.9.4 vía velocity-tools,
+           con una CVE HIGH (GHSA-wxr5-93ph-8wr9) arreglada en 1.11.0, compatible hacia atrás. -->
+      <dependency>
+        <groupId>commons-beanutils</groupId>
+        <artifactId>commons-beanutils</artifactId>
+        <version>1.11.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

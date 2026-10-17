@@ -42,7 +42,12 @@
   },
   "overrides": {
     "node-fetch": "^2.7.0",
-    "qs": "^6.16.0"
+    "qs": "^6.16.0",
+    "@capacitor/assets": {
+      "@capacitor/cli": "$@capacitor/cli"
+    },
+    "sharp": "^0.35.5",
+    "tar": "^7.5.22"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
