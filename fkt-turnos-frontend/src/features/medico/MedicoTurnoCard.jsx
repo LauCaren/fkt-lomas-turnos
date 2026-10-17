@@ -52,7 +52,7 @@ export default function MedicoTurnoCard({ turno, mostrarBotonAtender, mostrarEvo
             <div style={{ marginTop: 6, fontSize: 14 }}>
               <strong>{turno.pacienteNombre}</strong> · DNI {turno.pacienteDni}
               {turno.motivoConsulta && <div style={{ color: 'var(--muted)', marginTop: 2 }}>Motivo: {turno.motivoConsulta}</div>}
-              {turno.tieneEvolucion && <div style={{ color: 'var(--teal-dark)', marginTop: 2, fontSize: 13 }}>Evolución cargada</div>}
+              {turno.tieneEvolucion && <div style={{ color: 'var(--teal-dark)', marginTop: 2, fontSize: 14 }}>Evolución cargada</div>}
             </div>
           )}
         </div>
@@ -62,7 +62,7 @@ export default function MedicoTurnoCard({ turno, mostrarBotonAtender, mostrarEvo
           </span>
           {mostrarBotonAtender && <BotonAtender turnoId={turno.id} />}
           {turno.pacienteId && (
-            <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={toggleHistorial}>
+            <button className="btn btn-outline btn-sm" onClick={toggleHistorial}>
               {verHistorial ? 'Ocultar historial' : 'Ver historial'}
             </button>
           )}
@@ -73,7 +73,7 @@ export default function MedicoTurnoCard({ turno, mostrarBotonAtender, mostrarEvo
 
       {verHistorial && (
         <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--line)' }}>
-          {evoluciones.length === 0 && <p style={{ fontSize: 13, color: 'var(--muted)' }}>No cargaste evoluciones para este paciente todavía.</p>}
+          {evoluciones.length === 0 && <p style={{ fontSize: 14, color: 'var(--muted)' }}>No cargaste evoluciones para este paciente todavía.</p>}
           {evoluciones.length > 0 && (
             <div className="evolucion-timeline">
               {evoluciones.map((e) => (
@@ -96,8 +96,7 @@ function BotonAtender({ turnoId }) {
   const [cargando, setCargando] = useState(false);
   return (
     <button
-      className="btn btn-primary"
-      style={{ padding: '6px 14px', fontSize: 13 }}
+      className="btn btn-primary btn-sm"
       disabled={cargando}
       onClick={() => { setCargando(true); dispatch(marcarAtendido(turnoId)).finally(() => setCargando(false)); }}
     >

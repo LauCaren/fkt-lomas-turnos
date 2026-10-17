@@ -95,13 +95,13 @@ export default function NotificacionesBell() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderBottom: '1px solid var(--line)' }}>
             <span style={{ fontWeight: 600, fontSize: 14.5 }}>Notificaciones</span>
             {cantidadNoLeidas > 0 && (
-              <button type="button" onClick={() => dispatch(marcarTodasLeidas())} style={{ fontSize: 12.5, color: 'var(--teal-dark)', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}>
+              <button type="button" onClick={() => dispatch(marcarTodasLeidas())} style={{ fontSize: 13.5, color: 'var(--teal-dark)', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}>
                 Marcar todas como leídas
               </button>
             )}
           </div>
           {items.length === 0 && (
-            <p style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--muted)', fontSize: 13.5 }}>
+            <p style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--muted)', fontSize: 14.5 }}>
               No tenés notificaciones todavía.
             </p>
           )}
@@ -118,12 +118,12 @@ export default function NotificacionesBell() {
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                 {!n.leida && <span aria-hidden="true" style={{ width: 6, height: 6, borderRadius: 100, background: 'var(--teal)', flexShrink: 0 }} />}
-                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.02em' }}>
+                <span style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.02em' }}>
                   {ETIQUETA_TIPO[n.tipo] || 'Aviso'}
                 </span>
               </div>
-              <p style={{ fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.4 }}>{n.mensaje}</p>
-              <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>{hace(n.createdAt)}</span>
+              <p style={{ fontSize: 14.5, color: 'var(--ink)', lineHeight: 1.4 }}>{n.mensaje}</p>
+              <span style={{ fontSize: 13.5, color: 'var(--muted)' }}>{hace(n.createdAt)}</span>
             </button>
           ))}
         </div>

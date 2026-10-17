@@ -42,7 +42,7 @@ export default function SeccionMfa({ perfil, mfaSetup, onIniciar, onActivar, onD
           <span className="badge badge-disponible">Activada</span> La verificación en dos pasos está activa en tu cuenta.
         </p>
         {esObligatoria ? (
-          <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 8 }}>
+          <p style={{ fontSize: 13.5, color: 'var(--muted)', marginTop: 8 }}>
             Es obligatoria para tu rol y no se puede desactivar.
           </p>
         ) : (
@@ -77,7 +77,7 @@ export default function SeccionMfa({ perfil, mfaSetup, onIniciar, onActivar, onD
           />
         )}
         <details style={{ marginBottom: 16 }}>
-          <summary className="mfa-toggle" style={{ fontSize: 13.5, color: 'var(--muted)', cursor: 'pointer' }}>¿No podés escanear? Cargalo a mano</summary>
+          <summary className="mfa-toggle" style={{ fontSize: 14.5, color: 'var(--muted)', cursor: 'pointer' }}>¿No podés escanear? Cargalo a mano</summary>
           <code style={{ display: 'block', background: 'var(--bg-soft)', padding: '10px 14px', borderRadius: 6, fontSize: 15, letterSpacing: 1, marginTop: 10, wordBreak: 'break-all' }}>
             {mfaSetup.secreto}
           </code>

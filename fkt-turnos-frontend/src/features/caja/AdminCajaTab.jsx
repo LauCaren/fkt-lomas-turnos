@@ -26,14 +26,13 @@ function AnularBoton({ onAnular }) {
   const [abierto, setAbierto] = useState(false);
 
   if (!abierto) {
-    return <button className="btn btn-outline" style={{ padding: '4px 10px', fontSize: 12 }} onClick={() => setAbierto(true)}>Anular</button>;
+    return <button className="btn btn-outline btn-sm" onClick={() => setAbierto(true)}>Anular</button>;
   }
   return (
     <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-      <input placeholder="Motivo" value={motivo} onChange={(e) => setMotivo(e.target.value)} style={{ fontSize: 12.5, padding: '4px 8px', width: 160 }} />
+      <input placeholder="Motivo" value={motivo} onChange={(e) => setMotivo(e.target.value)} style={{ fontSize: 13.5, padding: '4px 8px', width: 160 }} />
       <button
-        className="btn btn-outline"
-        style={{ padding: '4px 10px', fontSize: 12 }}
+        className="btn btn-outline btn-sm"
         disabled={!motivo.trim()}
         onClick={() => { onAnular(motivo.trim()); setAbierto(false); setMotivo(''); }}
       >
@@ -64,19 +63,19 @@ function ResumenTab() {
     <div>
       <div className="stagger" style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 24 }}>
         <div className="card" style={{ minWidth: 180 }}>
-          <div style={{ fontSize: 13, color: 'var(--muted)' }}>Caja física</div>
+          <div style={{ fontSize: 14, color: 'var(--muted)' }}>Caja física</div>
           <div style={{ fontSize: 22, fontWeight: 700 }}>{formatMoneda(resumen.cajaFisica)}</div>
         </div>
         <div className="card" style={{ minWidth: 180 }}>
-          <div style={{ fontSize: 13, color: 'var(--muted)' }}>Ingresos totales</div>
+          <div style={{ fontSize: 14, color: 'var(--muted)' }}>Ingresos totales</div>
           <div style={{ fontSize: 22, fontWeight: 700 }}>{formatMoneda(resumen.ingresosTotal)}</div>
         </div>
         <div className="card" style={{ minWidth: 180 }}>
-          <div style={{ fontSize: 13, color: 'var(--muted)' }}>Retiros totales</div>
+          <div style={{ fontSize: 14, color: 'var(--muted)' }}>Retiros totales</div>
           <div style={{ fontSize: 22, fontWeight: 700 }}>{formatMoneda(resumen.retirosTotal)}</div>
         </div>
         <div className="card" style={{ minWidth: 180 }}>
-          <div style={{ fontSize: 13, color: 'var(--muted)' }}>Gastos totales</div>
+          <div style={{ fontSize: 14, color: 'var(--muted)' }}>Gastos totales</div>
           <div style={{ fontSize: 22, fontWeight: 700 }}>{formatMoneda(resumen.gastosTotal)}</div>
         </div>
       </div>
@@ -87,7 +86,7 @@ function ResumenTab() {
         {resumen.saldosPorMedico.map((s) => (
           <div key={s.medicoId} className="card" style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 18px' }}>
             <span>{s.medicoNombre}</span>
-            <span style={{ display: 'flex', gap: 16, fontSize: 13.5 }}>
+            <span style={{ display: 'flex', gap: 16, fontSize: 14.5 }}>
               <span style={{ color: 'var(--muted)' }}>Cobrado {formatMoneda(s.ingresosTotal)}</span>
               <span style={{ color: 'var(--muted)' }}>Retirado {formatMoneda(s.retirosTotal)}</span>
               <strong>Saldo {formatMoneda(s.saldo)}</strong>
@@ -168,7 +167,7 @@ function IngresosTab() {
             <div key={i.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 18px', opacity: i.anulado ? 0.55 : 1 }}>
               <div>
                 <div style={{ fontWeight: 600 }}>{i.medicoNombre} · {formatMoneda(i.monto)}</div>
-                <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>
+                <div style={{ fontSize: 13.5, color: 'var(--muted)' }}>
                   {i.fecha} · {METODOS_PAGO.find((m) => m.value === i.metodoPago)?.label} · registrado por {i.registradoPorNombre}
                   {i.anulado && ` · ANULADO (${i.motivoAnulacion})`}
                 </div>
@@ -224,7 +223,7 @@ function RetirosTab() {
           <div key={r.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 18px', opacity: r.anulado ? 0.55 : 1 }}>
             <div>
               <div style={{ fontWeight: 600 }}>{r.medicoNombre} · {formatMoneda(r.monto)}</div>
-              <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>
+              <div style={{ fontSize: 13.5, color: 'var(--muted)' }}>
                 {new Date(r.fechaHora).toLocaleString('es-AR')} · entregado por {r.entregadoPorNombre}
                 {r.anulado && ` · ANULADO (${r.motivoAnulacion})`}
               </div>
@@ -306,7 +305,7 @@ function GastosTab() {
           </div>
           <div className="field" style={{ marginBottom: 0 }}>
             <label htmlFor="cajaGastoComprobante">Comprobante (opcional)</label>
-            <input id="cajaGastoComprobante" type="file" accept="image/jpeg,image/png,application/pdf" onChange={(e) => setComprobante(e.target.files[0] || null)} style={{ fontSize: 12.5 }} />
+            <input id="cajaGastoComprobante" type="file" accept="image/jpeg,image/png,application/pdf" onChange={(e) => setComprobante(e.target.files[0] || null)} style={{ fontSize: 13.5 }} />
           </div>
           <button type="submit" className="btn btn-primary">Registrar gasto</button>
         </form>
@@ -317,14 +316,14 @@ function GastosTab() {
           <div key={g.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 18px', opacity: g.anulado ? 0.55 : 1 }}>
             <div>
               <div style={{ fontWeight: 600 }}>{g.categoriaNombre} · {formatMoneda(g.monto)}</div>
-              <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>
+              <div style={{ fontSize: 13.5, color: 'var(--muted)' }}>
                 {g.fecha} · {g.descripcion} · registrado por {g.registradoPorNombre}
                 {g.anulado && ` · ANULADO (${g.motivoAnulacion})`}
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
               {g.tieneComprobante && (
-                <button className="btn btn-outline" style={{ padding: '4px 10px', fontSize: 12 }} onClick={() => verComprobante(g.id)}>Ver comprobante</button>
+                <button className="btn btn-outline btn-sm" onClick={() => verComprobante(g.id)}>Ver comprobante</button>
               )}
               {!g.anulado && <AnularBoton onAnular={(motivo) => dispatch(anularGasto({ id: g.id, motivo }))} />}
             </div>
@@ -357,7 +356,7 @@ export default function AdminCajaTab() {
           <button
             key={t.id}
             className={`btn ${subtab === t.id ? 'btn-primary' : 'btn-outline'}`}
-            style={{ padding: '7px 16px', fontSize: 13.5 }}
+            style={{ padding: '7px 16px', fontSize: 14.5 }}
             onClick={() => { setSubtab(t.id); dispatch(limpiarMensajesCaja()); }}
           >
             {t.label}

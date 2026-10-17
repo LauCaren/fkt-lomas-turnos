@@ -34,7 +34,7 @@ export default function TrendChart({ titulo, datos, valorDe, formatValor, color 
           );
         })}
       </svg>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--muted)', marginTop: 4 }}>
         <span>{formatFechaCorta(datos[0].fecha)}</span>
         <span>{formatFechaCorta(datos[datos.length - 1].fecha)}</span>
       </div>

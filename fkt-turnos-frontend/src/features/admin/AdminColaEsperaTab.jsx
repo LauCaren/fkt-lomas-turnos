@@ -59,7 +59,7 @@ export default function AdminColaEsperaTab() {
               <span style={{ fontSize: 20, fontWeight: 700, color: 'var(--teal)', minWidth: 24 }}>{i + 1}</span>
               <div>
                 <div style={{ fontWeight: 600 }}>{t.pacienteNombre}</div>
-                <div style={{ fontSize: 13, color: 'var(--muted)' }}>
+                <div style={{ fontSize: 14, color: 'var(--muted)' }}>
                   Turno {t.horaInicio.slice(0, 5)} · {t.medicoNombre} · {t.especialidadNombre}
                 </div>
               </div>

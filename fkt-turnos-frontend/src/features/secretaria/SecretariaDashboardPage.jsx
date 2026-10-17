@@ -20,6 +20,7 @@ import AdminPostulacionesTab from '../admin/AdminPostulacionesTab';
 import AdminRecordatoriosTab from '../admin/AdminRecordatoriosTab';
 import AdminSolicitudesBajaTab from '../admin/AdminSolicitudesBajaTab';
 import AdminResenasTab from '../admin/AdminResenasTab';
+import PanelSaludo from '../../components/ui/PanelSaludo';
 
 // Reusa los mismos componentes que el panel de admin (pegan a /api/admin/**, que esta cuenta
 // también puede usar — ver SecurityConfig) en vez de duplicarlos: solo cambia qué subconjunto
@@ -121,10 +122,7 @@ export default function SecretariaDashboardPage() {
 
   return (
     <div>
-      <div className="page-head">
-        <span className="eyebrow">Panel de secretaría</span>
-        <h1>Hola, {usuario?.nombreCompleto || ''}</h1>
-      </div>
+      <PanelSaludo nombre={usuario?.nombreCompleto || ''} panel="Panel de secretaría" />
 
       {perfil === null ? (
         <div style={{ marginTop: 24, maxWidth: 320 }}>

@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import axiosClient, { mensajeDeError } from '../../api/axiosClient';
+import Resultado from '../../components/ui/Resultado';
 
-const ESTILO_POR_RESULTADO = {
-  LLEGO: 'alert-success',
-  REQUIERE_MOSTRADOR: 'alert-warning',
-  SIN_TURNO_HOY: 'alert-error',
-  YA_REGISTRADO: '',
+const SEGUN_RESULTADO = {
+  LLEGO: { estado: 'ok', titulo: '¡Listo, ya sabemos que llegaste!' },
+  YA_REGISTRADO: { estado: 'ok', titulo: 'Tu llegada ya estaba registrada' },
+  REQUIERE_MOSTRADOR: { estado: 'aviso', titulo: 'Pasá por el mostrador' },
+  SIN_TURNO_HOY: { estado: 'error', titulo: 'No encontramos un turno tuyo para hoy' },
 };
 
 export default function CheckInPage() {
@@ -25,27 +26,26 @@ export default function CheckInPage() {
       });
   }, []);
 
-  return (
-    <div style={{ maxWidth: 420, margin: '60px auto', textAlign: 'center' }}>
-      <span className="eyebrow">FKT Lomas</span>
-      <h1 style={{ marginTop: 12, fontSize: 26 }}>Registro de llegada</h1>
+  if (estado === 'cargando') {
+    return <Resultado estado="cargando" titulo="Registrando tu llegada…" />;
+  }
+  if (estado === 'error') {
+    return (
+      <Resultado estado="error" titulo="No pudimos registrar tu llegada">
+        <p role="alert">{error}</p>
+      </Resultado>
+    );
+  }
 
-      <div className="card" style={{ marginTop: 24 }}>
-        {estado === 'cargando' && <p style={{ color: 'var(--muted)' }}>Registrando tu llegada…</p>}
-        {estado === 'error' && <div className="alert alert-error" role="alert">{error}</div>}
-        {estado === 'listo' && (
-          <>
-            <div className={`alert ${ESTILO_POR_RESULTADO[resultado.resultado] || 'alert-error'}`} role="status">
-              {resultado.mensaje}
-            </div>
-            {resultado.medicoNombre && (
-              <p style={{ color: 'var(--muted)', fontSize: 14 }}>
-                {resultado.medicoNombre}{resultado.horaTurno ? ` · ${resultado.horaTurno.slice(0, 5)}` : ''}
-              </p>
-            )}
-          </>
-        )}
-      </div>
-    </div>
+  const segun = SEGUN_RESULTADO[resultado.resultado] || { estado: 'error', titulo: 'Avisale a la secretaria' };
+  return (
+    <Resultado estado={segun.estado} titulo={segun.titulo}>
+      <p role="status">{resultado.mensaje}</p>
+      {resultado.medicoNombre && (
+        <p className="resultado-turno">
+          {resultado.medicoNombre}{resultado.horaTurno ? <> · <strong>{resultado.horaTurno.slice(0, 5)}</strong></> : null}
+        </p>
+      )}
+    </Resultado>
   );
 }

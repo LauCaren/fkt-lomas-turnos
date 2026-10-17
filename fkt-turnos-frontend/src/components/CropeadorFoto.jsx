@@ -29,7 +29,7 @@ export default function CropeadorFoto({ imagenUrl, onConfirmar, onCancelar, guar
         />
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 16 }}>
-        <span style={{ fontSize: 13, color: 'var(--muted)' }}>Zoom</span>
+        <span style={{ fontSize: 14, color: 'var(--muted)' }}>Zoom</span>
         <input
           type="range" min={1} max={3} step={0.01} value={zoom}
           onChange={(e) => setZoom(Number(e.target.value))}

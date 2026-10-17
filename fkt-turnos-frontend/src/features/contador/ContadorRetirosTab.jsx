@@ -31,10 +31,10 @@ export default function ContadorRetirosTab() {
         <div key={r.id} className="card" style={{ padding: '12px 18px', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, opacity: r.anulado ? 0.55 : 1 }}>
           <span>
             {r.medicoNombre} · {new Date(r.fechaHora).toLocaleDateString('es-AR')}
-            {r.anulado && <span style={{ color: 'var(--muted)', fontSize: 12.5 }}> (anulado{r.motivoAnulacion ? `: ${r.motivoAnulacion}` : ''})</span>}
+            {r.anulado && <span style={{ color: 'var(--muted)', fontSize: 13.5 }}> (anulado{r.motivoAnulacion ? `: ${r.motivoAnulacion}` : ''})</span>}
           </span>
           <span style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-            <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>Entregó {r.entregadoPorNombre}</span>
+            <span style={{ fontSize: 13.5, color: 'var(--muted)' }}>Entregó {r.entregadoPorNombre}</span>
             <strong>{formatMoneda(r.monto)}</strong>
           </span>
         </div>

@@ -35,7 +35,7 @@ function CredencialesMedico({ medico }) {
   return (
     <div style={{ marginBottom: 20 }}>
       <h4 style={{ fontSize: 15, marginBottom: 6 }}>Acceso al panel (rol Médico)</h4>
-      <p style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 10 }}>
+      <p style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 10 }}>
         {medico.usuarioEmail
           ? `Ya tiene acceso con ${medico.usuarioEmail}. Completá los campos para cambiar el email o resetear la contraseña.`
           : 'Este médico todavía no tiene usuario para loguearse en el panel. Cargá un email y una contraseña inicial.'}
@@ -142,13 +142,13 @@ function MedicoDetalle({ medico }) {
       </form>
       <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', marginBottom: 20 }}>
         <div>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>Foto (tipo carnet)</label>
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Foto (tipo carnet)</label>
           {medico.tieneFoto && (
             <img src={`${apiUrl}/api/medicos/${medico.id}/foto?v=${fotoVersion}`} alt=""
               onClick={() => setLightboxSrc(`${apiUrl}/api/medicos/${medico.id}/foto?v=${fotoVersion}`)}
               style={{ width: 90, height: 110, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--line)', marginBottom: 8, display: 'block', cursor: 'zoom-in' }} />
           )}
-          <button type="button" className="btn btn-outline" style={{ padding: '6px 12px', fontSize: 12.5 }} onClick={() => setRecortandoFoto(true)}>
+          <button type="button" className="btn btn-outline btn-sm" onClick={() => setRecortandoFoto(true)}>
             {medico.tieneFoto ? 'Cambiar foto' : 'Subir foto'}
           </button>
           {recortandoFoto && (
@@ -164,13 +164,13 @@ function MedicoDetalle({ medico }) {
           )}
         </div>
         <div>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>Título / matrícula (imagen)</label>
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Título / matrícula (imagen)</label>
           {medico.tieneTitulo && (
             <img src={`${apiUrl}/api/medicos/${medico.id}/titulo?v=${tituloVersion}`} alt=""
               onClick={() => setLightboxSrc(`${apiUrl}/api/medicos/${medico.id}/titulo?v=${tituloVersion}`)}
               style={{ width: 140, height: 100, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--line)', marginBottom: 8, display: 'block', cursor: 'zoom-in' }} />
           )}
-          <input type="file" accept="image/jpeg,image/png" onChange={handleSubirTitulo} style={{ fontSize: 12.5 }} />
+          <input type="file" accept="image/jpeg,image/png" onChange={handleSubirTitulo} style={{ fontSize: 13.5 }} />
         </div>
       </div>
       <Lightbox src={lightboxSrc} alt={medico.nombreCompleto} onClose={() => setLightboxSrc(null)} />
@@ -196,7 +196,7 @@ function MedicoDetalle({ medico }) {
         {reglas.map((r) => (
           <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 14 }}>
             <span>{DIAS.find((d) => d.value === r.diaSemana)?.label} · {r.horaInicio.slice(0, 5)} a {r.horaFin.slice(0, 5)}</span>
-            <button className="btn btn-outline" style={{ padding: '4px 10px', fontSize: 12 }}
+            <button className="btn btn-outline btn-sm"
               onClick={() => dispatch(eliminarRegla({ medicoId: medico.id, reglaId: r.id }))}>Quitar</button>
           </div>
         ))}
@@ -332,13 +332,13 @@ export default function AdminMedicosTab() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
               <div>
                 <div style={{ fontWeight: 600 }}>{m.nombreCompleto}</div>
-                <div style={{ fontSize: 13, color: 'var(--muted)' }}>{m.especialidadNombre} · turnos de {m.duracionTurnoMinutos} min {!m.activo && '· inactivo'}</div>
+                <div style={{ fontSize: 14, color: 'var(--muted)' }}>{m.especialidadNombre} · turnos de {m.duracionTurnoMinutos} min {!m.activo && '· inactivo'}</div>
               </div>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => handleToggleActivo(m)}>
+                <button className="btn btn-outline btn-sm" onClick={() => handleToggleActivo(m)}>
                   {m.activo ? 'Desactivar' : 'Activar'}
                 </button>
-                <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => setExpandidoId(expandidoId === m.id ? null : m.id)}>
+                <button className="btn btn-outline btn-sm" onClick={() => setExpandidoId(expandidoId === m.id ? null : m.id)}>
                   {expandidoId === m.id ? 'Ocultar' : 'Gestionar horarios'}
                 </button>
               </div>

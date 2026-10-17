@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Star } from 'lucide-react';
 import { crearResenaTurno } from './turnosSlice';
 
 const ESTRELLAS = [1, 2, 3, 4, 5];
+const TEXTO_PUNTAJE = ['', 'Muy mala', 'Mala', 'Regular', 'Buena', 'Excelente'];
 
 /** Solo aparece para un turno propio ya ATENDIDO sin reseña todavía (ver TurnoDto.tieneResena) — el backend vuelve a validar todo esto igual, esto es solo la UI. */
 export default function DejarResenaTurno({ turnoId }) {
@@ -16,13 +18,13 @@ export default function DejarResenaTurno({ turnoId }) {
   const [comentario, setComentario] = useState('');
 
   if (enviada) {
-    return <p style={{ fontSize: 13, color: 'var(--teal-dark)', marginTop: 10 }}>¡Gracias por tu reseña! La vamos a publicar apenas la revisemos.</p>;
+    return <p className="resena-gracias">¡Gracias por tu reseña! La publicamos apenas la revisemos.</p>;
   }
 
   if (!abierto) {
     return (
-      <button type="button" className="btn btn-outline" style={{ marginTop: 10, padding: '6px 14px', fontSize: 13 }} onClick={() => setAbierto(true)}>
-        Dejar una reseña
+      <button type="button" className="btn btn-outline resena-abrir" onClick={() => setAbierto(true)}>
+        <Star size={17} aria-hidden="true" /> Contanos cómo te fue
       </button>
     );
   }
@@ -35,40 +37,46 @@ export default function DejarResenaTurno({ turnoId }) {
       .catch(() => {});
   }
 
+  const mostrado = hover || puntaje;
+
   return (
-    <form onSubmit={handleSubmit} className="card" style={{ marginTop: 10, padding: 14 }}>
-      {error && <div className="alert alert-error" role="alert" style={{ marginBottom: 10, fontSize: 13 }}>{error}</div>}
-      <div style={{ display: 'flex', gap: 4 }} role="radiogroup" aria-label="Puntaje">
+    <form onSubmit={handleSubmit} className="resena">
+      {error && <div className="alert alert-error" role="alert">{error}</div>}
+      <div className="resena-estrellas" role="radiogroup" aria-label="Puntaje">
         {ESTRELLAS.map((n) => (
           <button
             key={n}
             type="button"
+            role="radio"
             aria-label={`${n} de 5 estrellas`}
-            aria-pressed={puntaje === n}
+            aria-checked={puntaje === n}
             onClick={() => setPuntaje(n)}
             onMouseEnter={() => setHover(n)}
             onMouseLeave={() => setHover(0)}
-            className="estrella-btn"
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, fontSize: 24, lineHeight: 1, color: (hover || puntaje) >= n ? 'var(--amber, #B4740E)' : 'var(--line)' }}
+            className={`estrella-btn${mostrado >= n ? ' encendida' : ''}`}
           >
-            ★
+            <Star size={30} aria-hidden="true" />
           </button>
         ))}
+        <span className="resena-texto" aria-live="polite">{TEXTO_PUNTAJE[mostrado]}</span>
       </div>
-      <textarea
-        rows={2}
-        placeholder="Contanos cómo fue tu experiencia (opcional)"
-        maxLength={500}
-        value={comentario}
-        onChange={(e) => setComentario(e.target.value)}
-        style={{ marginTop: 10, width: '100%' }}
-      />
-      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-        <button type="submit" className="btn btn-primary" style={{ padding: '6px 14px', fontSize: 13 }} disabled={puntaje === 0 || resenaEnCurso === turnoId}>
+      <div className="field" style={{ margin: '12px 0 0' }}>
+        <label htmlFor={`resena-${turnoId}`} className="sr-only">Comentario</label>
+        <textarea
+          id={`resena-${turnoId}`}
+          rows={2}
+          placeholder="Contanos cómo fue tu experiencia (opcional)"
+          maxLength={500}
+          value={comentario}
+          onChange={(e) => setComentario(e.target.value)}
+        />
+      </div>
+      <div className="resena-acciones">
+        <button type="submit" className="btn btn-primary" disabled={puntaje === 0 || resenaEnCurso === turnoId}>
           {resenaEnCurso === turnoId ? 'Enviando…' : 'Enviar reseña'}
         </button>
-        <button type="button" className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => setAbierto(false)}>
-          Cancelar
+        <button type="button" className="btn btn-ghost" onClick={() => setAbierto(false)}>
+          Ahora no
         </button>
       </div>
     </form>

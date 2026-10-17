@@ -50,7 +50,7 @@ function ConfiguracionRecordatorios() {
             onChange={(e) => setForm({ ...form, plantillaMensaje: e.target.value })}
             style={{ width: '100%', padding: '10px 14px', border: '1.5px solid var(--line)', borderRadius: 6, fontFamily: 'inherit' }}
           />
-          <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>
+          <span style={{ fontSize: 13.5, color: 'var(--muted)' }}>
             Placeholders disponibles: {'{paciente}'}, {'{profesional}'}, {'{especialidad}'}, {'{fecha}'}, {'{hora}'}
           </span>
           <div className="alert" style={{ marginTop: 10, background: 'var(--teal-tint)', color: 'var(--teal-dark)', border: '1px solid var(--teal)' }}>
@@ -129,7 +129,7 @@ function MensajePuntual() {
             <button
               key={p.id}
               className="btn btn-outline"
-              style={{ textAlign: 'left', padding: '8px 12px', fontSize: 13.5 }}
+              style={{ textAlign: 'left', padding: '8px 12px', fontSize: 14.5 }}
               onClick={() => handleSeleccionar(p)}
             >
               {p.nombreCompleto} — DNI {p.dni}
@@ -142,7 +142,7 @@ function MensajePuntual() {
         <>
           <div style={{ marginBottom: 12, fontSize: 14 }}>
             Paciente: <strong>{pacienteSeleccionado.nombreCompleto}</strong>{' '}
-            <button type="button" className="btn btn-outline" style={{ padding: '2px 10px', fontSize: 12 }} onClick={() => setPacienteSeleccionado(null)}>
+            <button type="button" className="btn btn-outline btn-sm" onClick={() => setPacienteSeleccionado(null)}>
               Cambiar
             </button>
           </div>
@@ -217,7 +217,7 @@ function MensajeMasivo() {
   return (
     <div className="card" style={{ marginBottom: 20 }}>
       <h3 style={{ fontSize: 17, marginBottom: 6 }}>Aviso masivo</h3>
-      <p style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 14 }}>
+      <p style={{ fontSize: 14.5, color: 'var(--muted)', marginBottom: 14 }}>
         Manda un mensaje a todos los pacientes con un turno reservado en un rango de fechas — por ejemplo, para avisar
         que el centro cierra un feriado. Cada uno lo recibe por su canal preferido (email o WhatsApp).
       </p>
@@ -249,7 +249,7 @@ function MensajeMasivo() {
           <EstadoVacio titulo="Sin destinatarios" subtitulo="No hay pacientes con turno reservado en ese rango." />
         ) : (
           <>
-            <p style={{ fontSize: 13.5, marginBottom: 10 }}>
+            <p style={{ fontSize: 14.5, marginBottom: 10 }}>
               Se va a enviar a <strong>{pacientesEnRango.length}</strong> paciente{pacientesEnRango.length === 1 ? '' : 's'}:{' '}
               <span style={{ color: 'var(--muted)' }}>{pacientesEnRango.map((p) => p.nombreCompleto).join(', ')}</span>
             </p>
@@ -304,17 +304,17 @@ export default function AdminRecordatoriosTab() {
           <div key={r.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
             <div>
               <div style={{ fontWeight: 600 }}>{r.pacienteNombre}</div>
-              <div style={{ fontSize: 13, color: 'var(--muted)' }}>
+              <div style={{ fontSize: 14, color: 'var(--muted)' }}>
                 {r.fecha} {r.horaInicio?.slice(0, 5)} hs · {r.medicoNombre} ({r.especialidadNombre}) · {nombreCanal(r.canal)}
               </div>
               {r.errorMensaje && r.estado !== 'ENVIADO' && (
-                <div style={{ fontSize: 12.5, color: 'var(--red)', marginTop: 4 }}>{r.errorMensaje}</div>
+                <div style={{ fontSize: 13.5, color: 'var(--red)', marginTop: 4 }}>{r.errorMensaje}</div>
               )}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 13, fontWeight: 600 }}>{ESTADO_LABEL[r.estado]}</span>
+              <span style={{ fontSize: 14, fontWeight: 600 }}>{ESTADO_LABEL[r.estado]}</span>
               {r.estado !== 'ENVIADO' && (
-                <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => dispatch(reenviarRecordatorio(r.id))}>
+                <button className="btn btn-outline btn-sm" onClick={() => dispatch(reenviarRecordatorio(r.id))}>
                   Reenviar
                 </button>
               )}

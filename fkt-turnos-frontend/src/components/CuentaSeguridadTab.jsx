@@ -32,7 +32,7 @@ function CambiarPassword() {
       <div className="field">
         <label htmlFor="passwordNueva">Contraseña nueva</label>
         <PasswordInput id="passwordNueva" required minLength={8} pattern={PATRON_PASSWORD} title={TITULO_PASSWORD} value={form.passwordNueva} onChange={(e) => setForm({ ...form, passwordNueva: e.target.value })} />
-        <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{AYUDA_PASSWORD}</p>
+        <p style={{ fontSize: 13.5, color: 'var(--muted)', marginTop: 2 }}>{AYUDA_PASSWORD}</p>
       </div>
       <button type="submit" className="btn btn-primary" disabled={actualizando}>
         {actualizando && <span className="spinner" aria-hidden="true" />}

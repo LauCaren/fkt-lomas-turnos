@@ -62,8 +62,8 @@ export default function AdminResumenTab({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
         <p style={{ color: 'var(--muted)' }}>Hoy, {resumen.fecha}</p>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button type="button" className="btn btn-outline" style={{ padding: '9px 16px', fontSize: 13.5 }} onClick={irAAgenda}>Nuevo turno</button>
-          <button type="button" className="btn btn-outline" style={{ padding: '9px 16px', fontSize: 13.5 }} onClick={irABuscarPaciente}>Buscar paciente</button>
+          <button type="button" className="btn btn-outline btn-sm" onClick={irAAgenda}>Nuevo turno</button>
+          <button type="button" className="btn btn-outline btn-sm" onClick={irABuscarPaciente}>Buscar paciente</button>
         </div>
       </div>
       <div className="stagger" style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 12 }}>
@@ -76,7 +76,7 @@ export default function AdminResumenTab({
         <StatCard etiqueta="Ingresos de hoy" valorNumerico={resumen.ingresosHoy} formatValor={formatMoneda} onClick={irACaja} />
         <StatCard etiqueta="Caja física" valorNumerico={resumen.cajaFisica} formatValor={formatMoneda} onClick={irACaja} />
       </div>
-      <p style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 28 }}>{textoActualizacion} · se actualiza solo cada 30 segundos. Hacé clic en una tarjeta para ir directo a esa sección.</p>
+      <p style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 28 }}>{textoActualizacion} · se actualiza solo cada 30 segundos. Hacé clic en una tarjeta para ir directo a esa sección.</p>
 
       {itemsAtencion.length > 0 && (
         <div className="card" style={{ marginBottom: 28 }}>

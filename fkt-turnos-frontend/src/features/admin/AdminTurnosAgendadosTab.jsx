@@ -93,7 +93,7 @@ export default function AdminTurnosAgendadosTab() {
         <EstadoVacio titulo="Sin turnos ocupados" subtitulo="No hay turnos ocupados con esos filtros." />
       )}
       {!turnosOcupadosCargando && turnosOcupados.length > 0 && (
-        <p style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 12 }}>
+        <p style={{ fontSize: 14.5, color: 'var(--muted)', marginBottom: 12 }}>
           {turnosOcupados.length} turno{turnosOcupados.length === 1 ? '' : 's'} ocupado{turnosOcupados.length === 1 ? '' : 's'}
         </p>
       )}
@@ -106,7 +106,7 @@ export default function AdminTurnosAgendadosTab() {
                 <div style={{ fontWeight: 600, fontSize: 15 }}>
                   {etiquetaFecha(t.fecha)} · {t.horaInicio.slice(0, 5)} a {t.horaFin.slice(0, 5)} · {t.medicoNombre}
                 </div>
-                <div style={{ fontSize: 13, color: 'var(--muted)' }}>{t.especialidadNombre}</div>
+                <div style={{ fontSize: 14, color: 'var(--muted)' }}>{t.especialidadNombre}</div>
                 <div style={{ marginTop: 8, fontSize: 14 }}>
                   <div><strong>{t.pacienteNombre}</strong> · DNI {t.pacienteDni}</div>
                   <div style={{ color: 'var(--muted)' }}>{t.pacienteTelefono} · {t.pacienteObraSocial}</div>

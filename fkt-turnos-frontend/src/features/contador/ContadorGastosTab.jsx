@@ -32,7 +32,7 @@ export default function ContadorGastosTab() {
           <span>
             {g.categoriaNombre} · {g.fecha}
             {g.descripcion && <span style={{ color: 'var(--muted)' }}> — {g.descripcion}</span>}
-            {g.anulado && <span style={{ color: 'var(--muted)', fontSize: 12.5 }}> (anulado{g.motivoAnulacion ? `: ${g.motivoAnulacion}` : ''})</span>}
+            {g.anulado && <span style={{ color: 'var(--muted)', fontSize: 13.5 }}> (anulado{g.motivoAnulacion ? `: ${g.motivoAnulacion}` : ''})</span>}
           </span>
           <strong>{formatMoneda(g.monto)}</strong>
         </div>

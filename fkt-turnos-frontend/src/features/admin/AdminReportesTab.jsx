@@ -25,7 +25,7 @@ function ExportarSeccion({ titulo, descripcion, endpoint, prefijoArchivo }) {
   return (
     <div className="card" style={{ marginBottom: 20 }}>
       <h3 style={{ fontSize: 16, marginBottom: 6 }}>{titulo}</h3>
-      <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14 }}>{descripcion}</p>
+      <p style={{ fontSize: 14, color: 'var(--muted)', marginBottom: 14 }}>{descripcion}</p>
       {error && <div className="alert alert-error" role="alert" style={{ marginBottom: 12 }}>{error}</div>}
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
         <div className="field" style={{ marginBottom: 0 }}>
@@ -75,7 +75,7 @@ function ConfiguracionReporteMensual() {
   return (
     <div className="card">
       <h3 style={{ fontSize: 16, marginBottom: 6 }}>Envío mensual automático de caja</h3>
-      <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14 }}>
+      <p style={{ fontSize: 14, color: 'var(--muted)', marginBottom: 14 }}>
         El último día de cada mes se manda automáticamente un Excel con todos los ingresos, retiros y gastos del mes
         a esta dirección. Dejalo vacío para desactivar el envío.
       </p>

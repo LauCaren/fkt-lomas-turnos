@@ -59,7 +59,8 @@ function DatosPersonales({ perfil }) {
     <form onSubmit={handleSubmit} className="card">
       <div className="field">
         <label htmlFor="dni">DNI</label>
-        <input id="dni" value={perfil.dni || ''} disabled style={{ background: 'var(--bg-soft)', color: 'var(--muted)' }} />
+        <input id="dni" value={perfil.dni || ''} disabled />
+        <p className="field-hint">El DNI no se puede cambiar. Si está mal, avisanos en el centro.</p>
       </div>
       <div className="field">
         <label htmlFor="nombreCompleto">Nombre completo</label>
@@ -125,7 +126,7 @@ function CambiarPassword() {
       <div className="field">
         <label htmlFor="passwordNueva">Contraseña nueva</label>
         <PasswordInput id="passwordNueva" required minLength={8} pattern={PATRON_PASSWORD} title={TITULO_PASSWORD} value={form.passwordNueva} onChange={(e) => setForm({ ...form, passwordNueva: e.target.value })} />
-        <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{AYUDA_PASSWORD}</p>
+        <p className="field-hint">{AYUDA_PASSWORD}</p>
       </div>
       <button type="submit" className="btn btn-primary" disabled={actualizando}>
         {actualizando && <span className="spinner" aria-hidden="true" />}
@@ -144,18 +145,20 @@ function MiHistoriaClinica() {
   }, [dispatch]);
 
   if (evoluciones.length === 0) {
-    return <p style={{ color: 'var(--muted)' }}>Todavía no hay notas cargadas en tu historia clínica.</p>;
+    return <p className="cuenta-vacio">Todavía no hay notas cargadas en tu historia clínica.</p>;
   }
 
   return (
-    <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      {evoluciones.map((e) => (
-        <div key={e.id} className="card">
-          <div style={{ fontWeight: 600 }}>{e.medicoNombre} · {e.especialidadNombre}</div>
-          <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 8 }}>Turno del {e.fechaTurno}</div>
-          <p style={{ fontSize: 14, whiteSpace: 'pre-wrap' }}>{e.texto}</p>
-        </div>
-      ))}
+    <div className="card">
+      <ol className="evolucion-timeline">
+        {evoluciones.map((e) => (
+          <li key={e.id} className="evolucion-item">
+            <span className="evolucion-dot" aria-hidden="true" />
+            <div className="evolucion-fecha">Turno del {e.fechaTurno} · {e.medicoNombre}, {e.especialidadNombre}</div>
+            <p className="evolucion-texto">{e.texto}</p>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }
@@ -169,17 +172,17 @@ function MisPagos() {
   }, [dispatch]);
 
   if (pagos.length === 0) {
-    return <p style={{ color: 'var(--muted)' }}>Todavía no tenés pagos registrados.</p>;
+    return <p className="cuenta-vacio">Todavía no tenés pagos registrados.</p>;
   }
 
   return (
-    <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <div className="card filas">
       {pagos.map((p) => (
-        <div key={p.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-          <div>
-            <strong>{formatMoneda(p.monto)}</strong>
-            <span style={{ color: 'var(--muted)', fontSize: 13.5 }}> · {p.medicoNombre} · {new Date(p.fecha).toLocaleDateString('es-AR', { timeZone: 'UTC' })}</span>
-            {p.anulado && <span className="badge badge-cancelado" style={{ marginLeft: 8 }}>Anulado</span>}
+        <div key={p.id} className="fila">
+          <div className="fila-principal">
+            <strong className="fila-monto">{formatMoneda(p.monto)}</strong>
+            <span className="fila-detalle">{p.medicoNombre} · {new Date(p.fecha).toLocaleDateString('es-AR', { timeZone: 'UTC' })}</span>
+            {p.anulado && <span className="badge badge-cancelado">Anulado</span>}
           </div>
           {!p.anulado && (
             <button
@@ -199,7 +202,7 @@ function MisPagos() {
 function Seccion({ titulo, full, children }) {
   return (
     <div className={full ? 'cuenta-full' : undefined}>
-      <h2 style={{ fontSize: 18, marginBottom: 14 }}>{titulo}</h2>
+      <h2 className="cuenta-seccion-titulo">{titulo}</h2>
       {children}
     </div>
   );
@@ -217,8 +220,8 @@ export default function MiCuentaPage() {
   return (
     <div>
       <div className="page-head">
-        <span className="eyebrow">Mi cuenta</span>
-        <h1>Tus datos</h1>
+        <h1>Mi cuenta</h1>
+        <p>Tus datos, tu seguridad y tu historia en el centro.</p>
       </div>
 
       {error && <div className="alert alert-error" role="alert" style={{ marginTop: 20 }}>{error}</div>}

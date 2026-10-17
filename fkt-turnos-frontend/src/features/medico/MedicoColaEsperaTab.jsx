@@ -28,7 +28,7 @@ export default function MedicoColaEsperaTab() {
     <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {turnoParaEvolucion && (
         <div>
-          <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 6 }}>Acabás de atender a este paciente — cargá la evolución:</p>
+          <p style={{ fontSize: 14, color: 'var(--muted)', marginBottom: 6 }}>Acabás de atender a este paciente — cargá la evolución:</p>
           <MedicoTurnoCard turno={turnoParaEvolucion} mostrarBotonAtender={false} mostrarEvolucion />
         </div>
       )}

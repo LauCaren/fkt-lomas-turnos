@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Star } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchResenas, aprobarResena, rechazarResena } from './adminSlice';
 import EstadoVacio from '../../components/EstadoVacio';
@@ -10,10 +11,14 @@ const ESTADOS = [
   { value: 'RECHAZADA', label: 'Rechazadas' },
 ];
 
-const BADGE_ESTADO = { PENDIENTE: 'badge-pendiente', APROBADA: 'badge-disponible', RECHAZADA: 'badge-reservado' };
+const BADGE_ESTADO = { PENDIENTE: 'badge-pendiente', APROBADA: 'badge-confirmado', RECHAZADA: 'badge-ausente' };
 
 function Estrellas({ puntaje }) {
-  return <span aria-label={`${puntaje} de 5 estrellas`} style={{ color: 'var(--amber)', letterSpacing: 1 }}>{'★'.repeat(puntaje)}{'☆'.repeat(5 - puntaje)}</span>;
+  return (
+    <span className="estrellas" role="img" aria-label={`${puntaje} de 5 estrellas`}>
+      {[1, 2, 3, 4, 5].map((n) => <Star key={n} size={17} aria-hidden="true" className={n <= puntaje ? 'encendida' : undefined} />)}
+    </span>
+  );
 }
 
 function FilaResena({ resena }) {
@@ -27,7 +32,7 @@ function FilaResena({ resena }) {
         <div>
           <div style={{ fontWeight: 600 }}>{resena.pacienteNombre} — {resena.medicoNombre}</div>
           <div style={{ marginTop: 4 }}><Estrellas puntaje={resena.puntaje} /></div>
-          {resena.comentario && <div style={{ fontSize: 13.5, marginTop: 6 }}>{resena.comentario}</div>}
+          {resena.comentario && <div style={{ fontSize: 14.5, marginTop: 6 }}>{resena.comentario}</div>}
         </div>
         <span className={`badge ${BADGE_ESTADO[resena.estado] || 'badge-cancelado'}`}>{resena.estado}</span>
       </div>
@@ -36,26 +41,26 @@ function FilaResena({ resena }) {
         <div style={{ marginTop: 12 }}>
           {!rechazando ? (
             <div style={{ display: 'flex', gap: 8 }}>
-              <button className="btn btn-primary" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => dispatch(aprobarResena(resena.id))}>
+              <button className="btn btn-primary btn-sm" onClick={() => dispatch(aprobarResena(resena.id))}>
                 Aprobar
               </button>
-              <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => setRechazando(true)}>
+              <button className="btn btn-outline btn-sm" onClick={() => setRechazando(true)}>
                 Rechazar
               </button>
             </div>
           ) : (
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              <input placeholder="Motivo del rechazo" value={motivo} onChange={(e) => setMotivo(e.target.value)} style={{ flex: 1, padding: '6px 10px', fontSize: 13 }} />
-              <button className="btn btn-primary" style={{ padding: '6px 14px', fontSize: 13 }} disabled={!motivo.trim()}
+              <input placeholder="Motivo del rechazo" value={motivo} onChange={(e) => setMotivo(e.target.value)} style={{ flex: 1, padding: '6px 10px', fontSize: 14 }} />
+              <button className="btn btn-primary btn-sm" disabled={!motivo.trim()}
                 onClick={() => { dispatch(rechazarResena({ id: resena.id, motivo: motivo.trim() })); setRechazando(false); }}>
                 Confirmar rechazo
               </button>
-              <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => setRechazando(false)}>Cancelar</button>
+              <button className="btn btn-outline btn-sm" onClick={() => setRechazando(false)}>Cancelar</button>
             </div>
           )}
         </div>
       )}
-      {resena.motivoRechazo && <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 8 }}>Motivo de rechazo: {resena.motivoRechazo}</div>}
+      {resena.motivoRechazo && <div style={{ fontSize: 14, color: 'var(--muted)', marginTop: 8 }}>Motivo de rechazo: {resena.motivoRechazo}</div>}
     </div>
   );
 }
@@ -74,7 +79,7 @@ export default function AdminResenasTab() {
       {error && <div className="alert alert-error" role="alert" style={{ marginBottom: 14 }}>{error}</div>}
       {mensajeExito && <div className="alert alert-success" role="status" style={{ marginBottom: 14 }}>{mensajeExito}</div>}
 
-      <p style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 16, maxWidth: 640 }}>
+      <p style={{ fontSize: 14.5, color: 'var(--muted)', marginBottom: 16, maxWidth: 640 }}>
         Reseñas que dejaron pacientes sobre un turno que ya tuvieron atendido. Solo las aprobadas se
         muestran en el sitio y en la ficha del médico — nada se publica automáticamente.
       </p>

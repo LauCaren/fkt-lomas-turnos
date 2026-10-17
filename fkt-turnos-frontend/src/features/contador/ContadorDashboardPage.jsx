@@ -10,6 +10,7 @@ import ContadorIngresosTab from './ContadorIngresosTab';
 import ContadorRetirosTab from './ContadorRetirosTab';
 import ContadorGastosTab from './ContadorGastosTab';
 import CuentaSeguridadTab from '../../components/CuentaSeguridadTab';
+import PanelSaludo from '../../components/ui/PanelSaludo';
 
 const GRUPOS_NAV = [
   { items: [{ id: 'resumen', label: 'Resumen', icon: LayoutDashboard }] },
@@ -39,10 +40,7 @@ export default function ContadorDashboardPage() {
 
   return (
     <div>
-      <div className="page-head">
-        <span className="eyebrow">Panel de contador</span>
-        <h1>Hola, {usuario?.nombreCompleto}</h1>
-      </div>
+      <PanelSaludo nombre={usuario?.nombreCompleto} panel="Panel de contador" />
 
       {perfil === null ? (
         <div style={{ marginTop: 24, maxWidth: 320 }}>

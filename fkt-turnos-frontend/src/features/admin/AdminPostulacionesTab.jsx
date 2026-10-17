@@ -28,15 +28,15 @@ export default function AdminPostulacionesTab() {
         <div key={p.id} className="card" style={{ opacity: p.revisado ? 0.65 : 1 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <div style={{ fontWeight: 600 }}>{p.nombreCompleto}</div>
-            <div style={{ fontSize: 12, color: 'var(--muted)' }}>{new Date(p.createdAt).toLocaleString('es-AR')}</div>
+            <div style={{ fontSize: 13.5, color: 'var(--muted)' }}>{new Date(p.createdAt).toLocaleString('es-AR')}</div>
           </div>
-          <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 4 }}>{p.email} · {p.telefono}</div>
+          <div style={{ fontSize: 14, color: 'var(--muted)', marginTop: 4 }}>{p.email} · {p.telefono}</div>
           {p.mensaje && <p style={{ marginTop: 10 }}>{p.mensaje}</p>}
           <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-            <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }}
+            <button className="btn btn-outline btn-sm"
               onClick={() => descargarCv(p.id, p.cvNombreOriginal)}>Descargar CV</button>
             {!p.revisado && (
-              <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }}
+              <button className="btn btn-outline btn-sm"
                 onClick={() => dispatch(marcarPostulacionRevisada(p.id))}>Marcar como revisado</button>
             )}
           </div>

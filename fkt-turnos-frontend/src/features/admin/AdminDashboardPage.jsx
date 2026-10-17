@@ -27,6 +27,7 @@ import AdminSecretariasTab from './AdminSecretariasTab';
 import AdminAuditoriaTab from './AdminAuditoriaTab';
 import AdminSolicitudesBajaTab from './AdminSolicitudesBajaTab';
 import AdminResenasTab from './AdminResenasTab';
+import PanelSaludo from '../../components/ui/PanelSaludo';
 
 const GRUPOS_NAV = [
   { items: [{ id: 'resumen', label: 'Resumen', icon: LayoutDashboard }] },
@@ -146,10 +147,7 @@ export default function AdminDashboardPage() {
 
   return (
     <div>
-      <div className="page-head">
-        <span className="eyebrow">Panel de administración</span>
-        <h1>Hola, Fernando</h1>
-      </div>
+      <PanelSaludo nombre="Fernando" panel="Panel de administración" />
 
       {perfil === null ? (
         <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>

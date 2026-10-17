@@ -65,7 +65,7 @@ export default function GoogleAuthButton({ destinoPorDefecto = '/turnos' }) {
           <label htmlFor="googleCodigoMfa">Código de verificación</label>
           <input id="googleCodigoMfa" inputMode="numeric" pattern="\d{6}" maxLength={6} autoFocus required
             placeholder="123456" value={codigoMfa} onChange={(e) => setCodigoMfa(e.target.value)} />
-          <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 4 }}>Abrí tu app de autenticación y escribí el código de 6 dígitos.</p>
+          <p style={{ fontSize: 13.5, color: 'var(--muted)', marginTop: 4 }}>Abrí tu app de autenticación y escribí el código de 6 dígitos.</p>
         </div>
         <button type="submit" className="btn btn-primary btn-block" disabled={enviando}>
           {enviando && <span className="spinner" aria-hidden="true" />}
@@ -82,7 +82,7 @@ export default function GoogleAuthButton({ destinoPorDefecto = '/turnos' }) {
         className="card"
         style={{ marginTop: 12 }}
       >
-        <p style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 4 }}>
+        <p style={{ fontSize: 14.5, color: 'var(--muted)', marginBottom: 4 }}>
           Ya verificamos tu cuenta de Google ({googlePerfilPendiente.email}). Nos faltan estos datos para terminar de crear tu cuenta:
         </p>
         <div className="field">

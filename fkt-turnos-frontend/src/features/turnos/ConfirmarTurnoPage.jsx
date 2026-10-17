@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axiosClient, { mensajeDeError } from '../../api/axiosClient';
+import Resultado from '../../components/ui/Resultado';
 
 export default function ConfirmarTurnoPage() {
   const [searchParams] = useSearchParams();
@@ -25,23 +26,24 @@ export default function ConfirmarTurnoPage() {
       });
   }, [token, respuesta]);
 
-  return (
-    <div style={{ maxWidth: 420, margin: '80px auto', textAlign: 'center' }}>
-      <span className="eyebrow">FKT Lomas</span>
-      <h1 style={{ marginTop: 12, fontSize: 26 }}>Confirmación de turno</h1>
-
-      <div className="card" style={{ marginTop: 24 }}>
-        {estado === 'cargando' && <p style={{ color: 'var(--muted)' }}>Procesando…</p>}
-        {estado === 'error' && <div className="alert alert-error" role="alert">{error}</div>}
-        {estado === 'listo' && confirmando && (
-          <div className="alert alert-success" role="status">¡Gracias! Confirmamos que vas a venir a tu turno.</div>
-        )}
-        {estado === 'listo' && !confirmando && (
-          <div className="alert" style={{ background: 'var(--red-tint)', color: 'var(--red)', border: '1px solid var(--red)' }}>
-            Listo, avisamos a la clínica que no vas a poder venir. El horario queda libre para otro paciente.
-          </div>
-        )}
-      </div>
-    </div>
+  if (estado === 'cargando') {
+    return <Resultado estado="cargando" titulo="Un segundo…" />;
+  }
+  if (estado === 'error') {
+    return (
+      <Resultado estado="error" titulo="No pudimos procesar tu respuesta">
+        <p role="alert">{error}</p>
+        <p>Si necesitás confirmar o cancelar, escribinos o llamanos y lo resolvemos.</p>
+      </Resultado>
+    );
+  }
+  return confirmando ? (
+    <Resultado estado="ok" titulo="¡Gracias! Te esperamos">
+      <p role="status">Confirmamos que vas a venir a tu turno.</p>
+    </Resultado>
+  ) : (
+    <Resultado estado="aviso" titulo="Listo, liberamos tu turno">
+      <p role="status">Avisamos al centro que no vas a poder venir. El horario queda libre para otro paciente.</p>
+    </Resultado>
   );
 }

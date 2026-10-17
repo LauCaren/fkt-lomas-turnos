@@ -31,10 +31,10 @@ export default function ContadorIngresosTab() {
         <div key={i.id} className="card" style={{ padding: '12px 18px', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, opacity: i.anulado ? 0.55 : 1 }}>
           <span>
             {i.medicoNombre} · {i.fecha}
-            {i.anulado && <span style={{ color: 'var(--muted)', fontSize: 12.5 }}> (anulado{i.motivoAnulacion ? `: ${i.motivoAnulacion}` : ''})</span>}
+            {i.anulado && <span style={{ color: 'var(--muted)', fontSize: 13.5 }}> (anulado{i.motivoAnulacion ? `: ${i.motivoAnulacion}` : ''})</span>}
           </span>
           <span style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-            <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>{i.metodoPago}</span>
+            <span style={{ fontSize: 13.5, color: 'var(--muted)' }}>{i.metodoPago}</span>
             <strong>{formatMoneda(i.monto)}</strong>
           </span>
         </div>

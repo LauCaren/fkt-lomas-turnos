@@ -8,6 +8,7 @@ import MedicoAgendaTab from './MedicoAgendaTab';
 import MedicoColaEsperaTab from './MedicoColaEsperaTab';
 import CuentaSeguridadTab from '../../components/CuentaSeguridadTab';
 import { formatMoneda } from '../../utils/formato';
+import PanelSaludo from '../../components/ui/PanelSaludo';
 
 const GRUPOS_NAV = [
   {
@@ -30,13 +31,10 @@ export default function MedicoDashboardPage() {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12 }}>
-        <div className="page-head">
-          <span className="eyebrow">Panel del médico</span>
-          <h1>Hola, {usuario?.nombreCompleto}</h1>
-        </div>
+        <PanelSaludo nombre={usuario?.nombreCompleto} panel="Panel del médico" />
         {saldo && (
           <div className="card" style={{ padding: '10px 18px', textAlign: 'right' }}>
-            <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>Tu saldo acumulado</div>
+            <div style={{ fontSize: 13.5, color: 'var(--muted)' }}>Tu saldo acumulado</div>
             <div style={{ fontSize: 20, fontWeight: 700 }}>{formatMoneda(saldo.saldo)}</div>
           </div>
         )}

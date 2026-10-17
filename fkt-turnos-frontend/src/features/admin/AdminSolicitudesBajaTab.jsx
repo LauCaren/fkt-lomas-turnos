@@ -43,8 +43,8 @@ function FilaSolicitud({ solicitud }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
         <div>
           <div style={{ fontWeight: 600 }}>{solicitud.usuarioNombre}</div>
-          <div style={{ fontSize: 13, color: 'var(--muted)' }}>{solicitud.usuarioEmail}</div>
-          {solicitud.motivo && <div style={{ fontSize: 13.5, marginTop: 6 }}>Motivo: {solicitud.motivo}</div>}
+          <div style={{ fontSize: 14, color: 'var(--muted)' }}>{solicitud.usuarioEmail}</div>
+          {solicitud.motivo && <div style={{ fontSize: 14.5, marginTop: 6 }}>Motivo: {solicitud.motivo}</div>}
         </div>
         <span className={`badge ${BADGE_ESTADO[solicitud.estado] || 'badge-cancelado'}`}>{solicitud.estado}</span>
       </div>
@@ -53,26 +53,26 @@ function FilaSolicitud({ solicitud }) {
         <div style={{ marginTop: 12 }}>
           {!rechazando ? (
             <div style={{ display: 'flex', gap: 8 }}>
-              <button className="btn btn-primary" style={{ padding: '6px 14px', fontSize: 13 }} onClick={handleAprobar}>
+              <button className="btn btn-primary btn-sm" onClick={handleAprobar}>
                 Aprobar baja
               </button>
-              <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => setRechazando(true)}>
+              <button className="btn btn-outline btn-sm" onClick={() => setRechazando(true)}>
                 Rechazar
               </button>
             </div>
           ) : (
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              <input placeholder="Motivo del rechazo" value={motivo} onChange={(e) => setMotivo(e.target.value)} style={{ flex: 1, padding: '6px 10px', fontSize: 13 }} />
-              <button className="btn btn-primary" style={{ padding: '6px 14px', fontSize: 13 }} disabled={!motivo.trim()}
+              <input placeholder="Motivo del rechazo" value={motivo} onChange={(e) => setMotivo(e.target.value)} style={{ flex: 1, padding: '6px 10px', fontSize: 14 }} />
+              <button className="btn btn-primary btn-sm" disabled={!motivo.trim()}
                 onClick={() => { dispatch(rechazarSolicitudBaja({ id: solicitud.id, motivo: motivo.trim() })); setRechazando(false); }}>
                 Confirmar rechazo
               </button>
-              <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => setRechazando(false)}>Cancelar</button>
+              <button className="btn btn-outline btn-sm" onClick={() => setRechazando(false)}>Cancelar</button>
             </div>
           )}
         </div>
       )}
-      {solicitud.motivoRechazo && <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 8 }}>Motivo de rechazo: {solicitud.motivoRechazo}</div>}
+      {solicitud.motivoRechazo && <div style={{ fontSize: 14, color: 'var(--muted)', marginTop: 8 }}>Motivo de rechazo: {solicitud.motivoRechazo}</div>}
     </div>
   );
 }
@@ -91,7 +91,7 @@ export default function AdminSolicitudesBajaTab() {
       {error && <div className="alert alert-error" role="alert" style={{ marginBottom: 14 }}>{error}</div>}
       {mensajeExito && <div className="alert alert-success" role="status" style={{ marginBottom: 14 }}>{mensajeExito}</div>}
 
-      <p style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 16, maxWidth: 640 }}>
+      <p style={{ fontSize: 14.5, color: 'var(--muted)', marginBottom: 16, maxWidth: 640 }}>
         Pedidos de baja de cuenta que hicieron los pacientes desde "Mi cuenta". Al aprobar, sus datos
         personales se anonimizan de forma permanente — los turnos y registros ya generados se conservan.
       </p>

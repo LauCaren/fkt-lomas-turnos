@@ -33,7 +33,7 @@ export default function SalaEsperaQr() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
         <div>
           <strong>Cartel QR para la sala de espera</strong>
-          <p style={{ color: 'var(--muted)', fontSize: 13.5, marginTop: 4 }}>
+          <p style={{ color: 'var(--muted)', fontSize: 14.5, marginTop: 4 }}>
             Imprimilo y pegalo en la sala de espera. El paciente lo escanea al llegar y su turno de hoy
             se marca "Llegó" automáticamente (salvo que tenga copago de IOMA, ahí le pide que pase por el mostrador).
           </p>
@@ -50,7 +50,7 @@ export default function SalaEsperaQr() {
           Apuntá la cámara de tu celular a este código para avisarnos que llegaste a tu turno.
         </p>
         <canvas ref={canvasRef} style={{ marginTop: 16 }} />
-        <p style={{ color: 'var(--muted)', fontSize: 12, marginTop: 12 }}>
+        <p style={{ color: 'var(--muted)', fontSize: 13.5, marginTop: 12 }}>
           ¿Tenés copago de IOMA o no podés escanear? Avisale directamente a la secretaria en el mostrador.
         </p>
       </div>

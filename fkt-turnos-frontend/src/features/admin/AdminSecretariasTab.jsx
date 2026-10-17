@@ -41,7 +41,7 @@ function NuevaSecretaria() {
         <label htmlFor="secretariaPassword">Contraseña</label>
         <PasswordInput id="secretariaPassword" required minLength={8} pattern={PATRON_PASSWORD} title={TITULO_PASSWORD}
           value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
-        <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{AYUDA_PASSWORD}</p>
+        <p style={{ fontSize: 13.5, color: 'var(--muted)', marginTop: 2 }}>{AYUDA_PASSWORD}</p>
       </div>
       <div style={{ display: 'flex', gap: 8 }}>
         <button type="submit" className="btn btn-primary">Crear cuenta</button>
@@ -78,22 +78,22 @@ function FilaSecretaria({ cuenta }) {
     <div className="card" style={{ marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
       <div>
         <div style={{ fontWeight: 600 }}>{cuenta.nombreCompleto}</div>
-        <div style={{ fontSize: 13, color: 'var(--muted)' }}>{cuenta.email}</div>
+        <div style={{ fontSize: 14, color: 'var(--muted)' }}>{cuenta.email}</div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: cuenta.activo ? 'var(--teal-dark)' : 'var(--red)' }}>
+        <span style={{ fontSize: 14, fontWeight: 600, color: cuenta.activo ? 'var(--teal-dark)' : 'var(--red)' }}>
           {cuenta.activo ? 'Activa' : 'Desactivada'}
         </span>
         {cuenta.activo ? (
-          <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={handleDesactivar}>
+          <button className="btn btn-outline btn-sm" onClick={handleDesactivar}>
             Desactivar
           </button>
         ) : (
-          <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => dispatch(activarCuentaStaff(cuenta.id))}>
+          <button className="btn btn-outline btn-sm" onClick={() => dispatch(activarCuentaStaff(cuenta.id))}>
             Reactivar
           </button>
         )}
-        <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={handleRevocarSesiones}>
+        <button className="btn btn-outline btn-sm" onClick={handleRevocarSesiones}>
           Cerrar sesiones
         </button>
       </div>
@@ -114,7 +114,7 @@ export default function AdminSecretariasTab() {
       {error && <div className="alert alert-error" role="alert" style={{ marginBottom: 14 }}>{error}</div>}
       {mensajeExito && <div className="alert alert-success" role="status" style={{ marginBottom: 14 }}>{mensajeExito}</div>}
 
-      <p style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 16, maxWidth: 640 }}>
+      <p style={{ fontSize: 14.5, color: 'var(--muted)', marginBottom: 16, maxWidth: 640 }}>
         Cada secretaria entra con su propia cuenta — ve agenda, reserva telefónica, mensajes,
         postulaciones y recordatorios, pero no puede tocar médicos, caja ni reportes financieros.
         Desactivar una cuenta cierra de inmediato cualquier sesión abierta con ella.

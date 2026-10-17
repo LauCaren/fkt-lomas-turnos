@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import axiosClient, { mensajeDeError } from '../../api/axiosClient';
 import { formatMoneda, hoyISO } from '../../utils/formato';
@@ -133,7 +134,7 @@ function AccionesRapidasFicha({ ficha, irAAgenda, onRecargar }) {
         <button type="button" className="btn btn-outline" onClick={() => setContactando((v) => !v)}>Contactar</button>
       </div>
       {proximoTurno && (
-        <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 6 }}>
+        <p style={{ fontSize: 13.5, color: 'var(--muted)', marginTop: 6 }}>
           Próximo turno: {proximoTurno.fecha} {proximoTurno.horaInicio.slice(0, 5)} hs con {proximoTurno.medicoNombre}
         </p>
       )}
@@ -160,7 +161,7 @@ function Ficha({ ficha, irAAgenda, onRecargar }) {
             />
             <div>
               <div style={{ fontWeight: 600, fontSize: 17 }}>{ficha.paciente.nombreCompleto}</div>
-              <div style={{ fontSize: 13.5, color: 'var(--muted)', marginTop: 4 }}>
+              <div style={{ fontSize: 14.5, color: 'var(--muted)', marginTop: 4 }}>
                 DNI {ficha.paciente.dni} · {ficha.paciente.telefono} · avisos por {ficha.paciente.canalNotificacionPreferido}
               </div>
             </div>
@@ -179,7 +180,7 @@ function Ficha({ ficha, irAAgenda, onRecargar }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 24 }}>
         {ficha.turnos.length === 0 && <EstadoVacio titulo="Sin turnos" />}
         {ficha.turnos.slice(0, 30).map((t) => (
-          <div key={t.id} className="card" style={{ padding: '10px 16px', display: 'flex', justifyContent: 'space-between', fontSize: 13.5 }}>
+          <div key={t.id} className="card" style={{ padding: '10px 16px', display: 'flex', justifyContent: 'space-between', fontSize: 14.5 }}>
             <span>{t.fecha} {t.horaInicio.slice(0, 5)} · {t.medicoNombre} ({t.especialidadNombre})</span>
             <span className={`badge badge-${t.estado === 'DISPONIBLE' ? 'disponible' : t.estado === 'RESERVADO' ? 'reservado' : 'cancelado'}`}>{t.estado}</span>
           </div>
@@ -190,7 +191,7 @@ function Ficha({ ficha, irAAgenda, onRecargar }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 24 }}>
         {ficha.planesKinesiologia.length === 0 && <EstadoVacio titulo="Sin planes" />}
         {ficha.planesKinesiologia.map((p) => (
-          <div key={p.id} className="card" style={{ padding: '10px 16px', display: 'flex', justifyContent: 'space-between', fontSize: 13.5 }}>
+          <div key={p.id} className="card" style={{ padding: '10px 16px', display: 'flex', justifyContent: 'space-between', fontSize: 14.5 }}>
             <span>{p.medicoNombre} · {p.sesionesGeneradas} de {p.cantidadSesiones} sesiones</span>
             <span className={`badge ${BADGE_KINESIOLOGIA[p.estado] || 'badge-cancelado'}`}>{ESTADO_KINESIOLOGIA[p.estado] || p.estado}</span>
           </div>
@@ -201,7 +202,7 @@ function Ficha({ ficha, irAAgenda, onRecargar }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         {ficha.ingresos.length === 0 && <EstadoVacio titulo="Sin cobros asociados" subtitulo="No hay cobros asociados a un turno de este paciente." />}
         {ficha.ingresos.map((i) => (
-          <div key={i.id} className="card" style={{ padding: '10px 16px', display: 'flex', justifyContent: 'space-between', fontSize: 13.5, opacity: i.anulado ? 0.55 : 1 }}>
+          <div key={i.id} className="card" style={{ padding: '10px 16px', display: 'flex', justifyContent: 'space-between', fontSize: 14.5, opacity: i.anulado ? 0.55 : 1 }}>
             <span>{i.fecha} · {i.medicoNombre} · {i.metodoPago}</span>
             <strong>{formatMoneda(i.monto)}</strong>
           </div>
@@ -293,7 +294,7 @@ export default function AdminBusquedaPacienteTab({ irAAgenda }) {
       {ficha && (
         <>
           <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-            <button className="btn btn-outline" onClick={() => setFicha(null)}>← Volver a resultados</button>
+            <button className="btn btn-ghost btn-sm" onClick={() => setFicha(null)}><ArrowLeft size={17} aria-hidden="true" /> Volver a resultados</button>
             <button className="btn btn-outline" onClick={() => window.print()}>Imprimir ficha</button>
           </div>
           <div id="ficha-imprimir">

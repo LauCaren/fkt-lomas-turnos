@@ -45,7 +45,7 @@ export default function ContadorResumenTab() {
           {resumen.saldosPorMedico.map((s) => (
             <div key={s.medicoId} className="card" style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, padding: '12px 18px' }}>
               <span>{s.medicoNombre}</span>
-              <span style={{ display: 'flex', gap: 16, fontSize: 13.5, flexWrap: 'wrap' }}>
+              <span style={{ display: 'flex', gap: 16, fontSize: 14.5, flexWrap: 'wrap' }}>
                 <span style={{ color: 'var(--muted)' }}>Cobrado {formatMoneda(s.ingresosTotal)}</span>
                 <span style={{ color: 'var(--muted)' }}>Retirado {formatMoneda(s.retirosTotal)}</span>
                 <strong>Saldo {formatMoneda(s.saldo)}</strong>

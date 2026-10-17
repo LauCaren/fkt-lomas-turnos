@@ -22,31 +22,34 @@ export default function RestablecerPasswordPage() {
 
   if (!token) {
     return (
-      <div style={{ maxWidth: 420, margin: '0 auto' }}>
-        <div className="alert alert-error" role="alert">Este link no es válido. Pedí uno nuevo desde "¿Olvidaste tu contraseña?".</div>
-        <p style={{ marginTop: 18, textAlign: 'center' }}>
-          <Link to="/olvide-password" style={{ color: 'var(--teal-dark)', fontWeight: 600 }}>Pedir un link nuevo</Link>
-        </p>
+      <div className="acceso">
+        <div className="acceso-cabecera">
+          <h1>Este link no sirve</h1>
+          <p>Puede que esté incompleto o que ya se haya usado. Pedí uno nuevo y te llega en un momento.</p>
+        </div>
+        <div className="acceso-pie">
+          <p><Link to="/olvide-password" className="btn btn-primary btn-lg">Pedir un link nuevo</Link></p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: 420, margin: '0 auto' }}>
-      <div className="page-head">
-        <span className="eyebrow">Recuperar acceso</span>
+    <div className="acceso">
+      <div className="acceso-cabecera">
         <h1>Elegí una nueva contraseña</h1>
+        <p>Es la que vas a usar para ingresar de ahora en más.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="card" style={{ marginTop: 28 }}>
+      <form onSubmit={handleSubmit} className="card acceso-hoja">
         {error && <div className="alert alert-error" role="alert">{error}</div>}
         {mensajeExito && <div className="alert alert-success" role="status">{mensajeExito}</div>}
         <div className="field">
           <label htmlFor="passwordNueva">Contraseña nueva</label>
           <PasswordInput id="passwordNueva" required minLength={8} pattern={PATRON_PASSWORD} title={TITULO_PASSWORD} value={passwordNueva} onChange={(e) => setPasswordNueva(e.target.value)} />
-          <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{AYUDA_PASSWORD}</p>
+          <p className="field-hint">{AYUDA_PASSWORD}</p>
         </div>
-        <button type="submit" className="btn btn-primary btn-block" disabled={status === 'loading'}>
+        <button type="submit" className="btn btn-primary btn-block btn-lg" disabled={status === 'loading'}>
           {status === 'loading' && <span className="spinner" aria-hidden="true" />}
           {status === 'loading' ? 'Guardando…' : 'Guardar contraseña'}
         </button>

@@ -119,11 +119,11 @@ function NuevoPlanTelefonico({ medicosKinesiologia }) {
               </select>
               <input type="time" value={h.horaInicio} onChange={(e) => setHorarios(horarios.map((x) => x.id === h.id ? { ...x, horaInicio: e.target.value } : x))} />
               {horarios.length > 1 && (
-                <button type="button" className="btn btn-outline" style={{ padding: '4px 10px', fontSize: 12 }} onClick={() => setHorarios(horarios.filter((x) => x.id !== h.id))}>Quitar</button>
+                <button type="button" className="btn btn-outline btn-sm" onClick={() => setHorarios(horarios.filter((x) => x.id !== h.id))}>Quitar</button>
               )}
             </div>
           ))}
-          <button type="button" className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => setHorarios([...horarios, { id: crypto.randomUUID(), diaSemana: 'MONDAY', horaInicio: '15:00' }])}>
+          <button type="button" className="btn btn-outline btn-sm" onClick={() => setHorarios([...horarios, { id: crypto.randomUUID(), diaSemana: 'MONDAY', horaInicio: '15:00' }])}>
             + Agregar horario
           </button>
         </div>
@@ -161,11 +161,11 @@ function PlanRow({ plan }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
         <div>
           <div style={{ fontWeight: 600 }}>{plan.pacienteNombre} · DNI {plan.pacienteDni}</div>
-          <div style={{ fontSize: 13, color: 'var(--muted)' }}>
+          <div style={{ fontSize: 14, color: 'var(--muted)' }}>
             {plan.medicoNombre} · {plan.cantidadSesiones} sesiones · desde {plan.fechaInicio} · {plan.sesionesGeneradas} generadas
           </div>
         </div>
-        <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => verOrdenMedica(plan.id)}>
+        <button className="btn btn-outline btn-sm" onClick={() => verOrdenMedica(plan.id)}>
           Ver orden médica
         </button>
       </div>
@@ -174,21 +174,21 @@ function PlanRow({ plan }) {
         <div style={{ marginTop: 12 }}>
           {!rechazando ? (
             <div style={{ display: 'flex', gap: 8 }}>
-              <button className="btn btn-primary" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => dispatch(validarPlanKinesiologia(plan.id))}>
+              <button className="btn btn-primary btn-sm" onClick={() => dispatch(validarPlanKinesiologia(plan.id))}>
                 Validar y generar turnos
               </button>
-              <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => setRechazando(true)}>
+              <button className="btn btn-outline btn-sm" onClick={() => setRechazando(true)}>
                 Rechazar
               </button>
             </div>
           ) : (
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              <input placeholder="Motivo del rechazo" value={motivo} onChange={(e) => setMotivo(e.target.value)} style={{ flex: 1, padding: '6px 10px', fontSize: 13 }} />
-              <button className="btn btn-primary" style={{ padding: '6px 14px', fontSize: 13 }} disabled={!motivo.trim()}
+              <input placeholder="Motivo del rechazo" value={motivo} onChange={(e) => setMotivo(e.target.value)} style={{ flex: 1, padding: '6px 10px', fontSize: 14 }} />
+              <button className="btn btn-primary btn-sm" disabled={!motivo.trim()}
                 onClick={() => { dispatch(rechazarPlanKinesiologia({ id: plan.id, motivo: motivo.trim() })); setRechazando(false); }}>
                 Confirmar rechazo
               </button>
-              <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => setRechazando(false)}>Cancelar</button>
+              <button className="btn btn-outline btn-sm" onClick={() => setRechazando(false)}>Cancelar</button>
             </div>
           )}
         </div>
@@ -196,7 +196,7 @@ function PlanRow({ plan }) {
 
       {(plan.estado === 'VALIDADO' || plan.estado === 'PAUSADO') && (
         <div style={{ marginTop: 12 }}>
-          <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={handleCancelarPlan}>
+          <button className="btn btn-outline btn-sm" onClick={handleCancelarPlan}>
             Cancelar plan
           </button>
         </div>

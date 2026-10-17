@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
+import { ArrowLeft, ArrowRight, Phone, UserCheck, UserX } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchAgenda, fetchFeriados, fetchMedicosAdmin, reservarParaPaciente, actualizarAsistencia, deshacerTurno,
@@ -13,6 +14,7 @@ import { useConfirm } from '../../components/ui/useConfirm';
 import { useToast } from '../../components/ui/useToast';
 import axiosClient from '../../api/axiosClient';
 import { leerPref, guardarPref } from '../../utils/uiPrefs';
+import Goniometro from '../../components/ui/Goniometro';
 
 function parseISO(fechaISO) {
   const [y, m, d] = fechaISO.split('-').map(Number);
@@ -64,15 +66,11 @@ function TarjetaAgendaMobile({ turno, etiqueta, onSeleccionar, activo }) {
   return (
     <button
       type="button"
-      className="card"
-      style={{
-        width: '100%', textAlign: 'left', padding: '12px 16px', display: 'flex',
-        justifyContent: 'space-between', alignItems: 'center', gap: 10,
-        border: activo ? '1.5px solid var(--teal)' : '1px solid var(--line)',
-      }}
+      className={`agenda-tarjeta${activo ? ' activa' : ''}`}
+      aria-pressed={activo}
       onClick={() => onSeleccionar(turno.id)}
     >
-      <span style={{ fontSize: 13.5 }}>{etiqueta} · {disponible ? 'Libre' : (turno.pacienteNombre || '').split(' ')[0]}</span>
+      <span>{etiqueta} · <strong>{disponible ? 'Libre' : (turno.pacienteNombre || '').split(' ')[0]}</strong></span>
       <span className={`badge badge-${estadoBadge}`}>{estadoTexto}</span>
     </button>
   );
@@ -127,21 +125,22 @@ function FormularioReserva({ turno, onCancelar, dniInicial }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--line)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <form onSubmit={handleSubmit} className="agenda-reserva">
+      <h4 className="agenda-reserva-titulo">Reservar por teléfono</h4>
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
         <div className="field" style={{ marginBottom: 0, flex: '1 1 140px' }}>
           <label htmlFor="agendaReservaDni">DNI</label>
-          <input id="agendaReservaDni" required value={datos.dni} onChange={(e) => setDatos({ ...datos, dni: e.target.value })} placeholder="30123456" />
+          <input id="agendaReservaDni" inputMode="numeric" autoFocus required value={datos.dni} onChange={(e) => setDatos({ ...datos, dni: e.target.value })} placeholder="30123456" />
         </div>
         <div className="field" style={{ marginBottom: 0, flex: '2 1 220px' }}>
           <label htmlFor="agendaReservaNombre">Nombre completo</label>
           <input id="agendaReservaNombre" required value={datos.nombreCompleto} onChange={(e) => setDatos({ ...datos, nombreCompleto: e.target.value })} />
         </div>
       </div>
-      {buscandoDni && <p style={{ fontSize: 12.5, color: 'var(--muted)', margin: 0 }}>Buscando paciente…</p>}
+      {buscandoDni && <p className="field-hint" style={{ margin: 0 }}>Buscando paciente…</p>}
       {!buscandoDni && pacienteEncontrado && (
-        <p style={{ fontSize: 12.5, color: 'var(--teal-dark)', margin: 0 }}>
-          Paciente existente encontrado — se completaron sus datos automáticamente.
+        <p className="agenda-encontrado">
+          Paciente registrado: completamos sus datos solos.
         </p>
       )}
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
@@ -167,7 +166,7 @@ function FormularioReserva({ turno, onCancelar, dniInicial }) {
         <label htmlFor="agendaReservaMotivo">Motivo de consulta (opcional)</label>
         <input id="agendaReservaMotivo" value={datos.motivoConsulta} onChange={(e) => setDatos({ ...datos, motivoConsulta: e.target.value })} />
       </div>
-      <p style={{ fontSize: 12.5, color: 'var(--muted)' }}>Si el DNI ya está registrado, se usa esa cuenta y se ignoran los demás datos.</p>
+      <p className="field-hint">Si el DNI ya está registrado, se usa esa cuenta y se ignoran los demás datos.</p>
       <div style={{ display: 'flex', gap: 8 }}>
         <button type="submit" className="btn btn-primary" disabled={enviando}>
           {enviando && <span className="spinner" aria-hidden="true" />}
@@ -179,40 +178,48 @@ function FormularioReserva({ turno, onCancelar, dniInicial }) {
   );
 }
 
+function CabeceraTurno({ turno, children }) {
+  return (
+    <div className="agenda-detalle-cabecera">
+      <span className="agenda-detalle-hora">{turno.horaInicio.slice(0, 5)}</span>
+      <div>
+        <p className="agenda-detalle-dia">{etiquetaDia(turno.fecha)} · hasta las {turno.horaFin.slice(0, 5)}</p>
+        <p className="agenda-detalle-medico">{turno.medicoNombre}</p>
+      </div>
+      {children}
+    </div>
+  );
+}
+
 function DetalleTurno({ turno, onCerrar, agendaCompleta, dniPrellenado }) {
   if (turno.estado === 'DISPONIBLE') {
     return (
-      <div className="card" style={{ marginTop: 16 }}>
-        <div style={{ fontWeight: 600, marginBottom: 4 }}>
-          {etiquetaDia(turno.fecha)} · {turno.horaInicio.slice(0, 5)} a {turno.horaFin.slice(0, 5)} · {turno.medicoNombre}
-        </div>
-        <span className="badge badge-disponible">Disponible</span>
+      <div className="card agenda-detalle">
+        <CabeceraTurno turno={turno}>
+          <span className="badge badge-disponible">Libre</span>
+        </CabeceraTurno>
         <ListaEsperaParaSlot turno={turno} />
         <FormularioReserva turno={turno} onCancelar={onCerrar} dniInicial={dniPrellenado} />
       </div>
     );
   }
   return (
-    <div className="card" style={{ marginTop: 16 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-        <div>
-          <div style={{ fontWeight: 600, marginBottom: 4 }}>
-            {etiquetaDia(turno.fecha)} · {turno.horaInicio.slice(0, 5)} a {turno.horaFin.slice(0, 5)} · {turno.medicoNombre}
-          </div>
-          <span className="badge badge-reservado">Reservado</span>
-          <div style={{ marginTop: 10, fontSize: 14 }}>
-            <div><strong>{turno.pacienteNombre}</strong> · DNI {turno.pacienteDni}</div>
-            <div style={{ color: 'var(--muted)' }}>{turno.pacienteTelefono} · {turno.pacienteObraSocial}</div>
-            {turno.motivoConsulta && <div style={{ color: 'var(--muted)', marginTop: 2 }}>Motivo: {turno.motivoConsulta}</div>}
-            {turno.confirmacionPrevia === 'CONFIRMADO' && (
-              <div style={{ fontSize: 12.5, color: 'var(--teal-dark)', marginTop: 4 }}>Confirmó que viene</div>
-            )}
-          </div>
-          <CheckInBotones turno={turno} />
+    <div className="card agenda-detalle">
+      <CabeceraTurno turno={turno}>
+        <button className="btn btn-ghost btn-sm" onClick={onCerrar}>Cerrar</button>
+      </CabeceraTurno>
+      <div className="agenda-paciente">
+        <p className="agenda-paciente-nombre"><strong>{turno.pacienteNombre}</strong> · DNI {turno.pacienteDni}</p>
+        <p className="agenda-paciente-datos">{turno.pacienteTelefono} · {turno.pacienteObraSocial}</p>
+        {turno.motivoConsulta && <p className="agenda-paciente-datos">Motivo: {turno.motivoConsulta}</p>}
+        <div className="agenda-marcas">
+          {turno.confirmacionPrevia === 'CONFIRMADO' && <span className="badge badge-confirmado">Confirmó que viene</span>}
           <RecordatorioEnAgenda turno={turno} />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
-          <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={onCerrar}>Cerrar</button>
+      </div>
+      <div className="agenda-detalle-acciones">
+        <CheckInBotones turno={turno} />
+        <div className="agenda-acciones-secundarias">
           <BotonReprogramar turno={turno} agendaCompleta={agendaCompleta} />
           <BotonCancelarTurno turno={turno} />
           <BotonDeshacer turno={turno} />
@@ -224,24 +231,12 @@ function DetalleTurno({ turno, onCerrar, agendaCompleta, dniPrellenado }) {
 
 function LeyendaAgenda() {
   return (
-    <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 12, color: 'var(--muted)', marginTop: 10 }}>
-      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <span style={{ width: 12, height: 12, borderRadius: 3, background: 'var(--teal-tint)', display: 'inline-block' }} />
-        Libre
-      </span>
-      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <span style={{ width: 12, height: 12, borderRadius: 3, background: 'var(--teal)', display: 'inline-block' }} />
-        Reservado
-      </span>
-      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <span style={{ width: 12, height: 12, borderRadius: 3, background: 'var(--teal)', boxShadow: 'inset 0 0 0 2px var(--green)', display: 'inline-block' }} />
-        Confirmó que viene
-      </span>
-      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <span style={{ width: 12, height: 12, borderRadius: 3, background: 'var(--teal)', boxShadow: 'inset 0 0 0 2px var(--red)', display: 'inline-block' }} />
-        Ausente
-      </span>
-    </div>
+    <ul className="agenda-leyenda" aria-label="Referencias de la grilla">
+      <li><span className="agenda-muestra agenda-celda-disponible" />Libre</li>
+      <li><span className="agenda-muestra agenda-celda-reservado" />Reservado</li>
+      <li><span className="agenda-muestra agenda-celda-reservado agenda-celda-confirmado" />Confirmó que viene</li>
+      <li><span className="agenda-muestra agenda-celda-reservado agenda-celda-ausente" />Ausente</li>
+    </ul>
   );
 }
 
@@ -272,34 +267,14 @@ function CheckInBotones({ turno }) {
   }
 
   return (
-    <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
-      <button
-        type="button"
-        className="btn"
-        onClick={() => marcar('LLEGO')}
-        style={{
-          padding: '5px 12px', fontSize: 12.5,
-          border: asistencia === 'LLEGO' ? '1.5px solid var(--teal)' : '1.5px solid var(--line)',
-          background: asistencia === 'LLEGO' ? 'var(--teal-tint)' : 'var(--white)',
-          color: 'var(--ink)',
-        }}
-      >
-        {asistencia === 'LLEGO' ? '✓ Llegó' : 'Llegó'}
+    <div className="asistencia" role="group" aria-label="Asistencia">
+      <button type="button" className="asistencia-btn asistencia-llego" aria-pressed={asistencia === 'LLEGO'} onClick={() => marcar('LLEGO')}>
+        <UserCheck size={17} aria-hidden="true" /> Llegó
       </button>
-      <button
-        type="button"
-        className="btn"
-        onClick={() => marcar('AUSENTE')}
-        style={{
-          padding: '5px 12px', fontSize: 12.5,
-          border: asistencia === 'AUSENTE' ? '1.5px solid var(--red)' : '1.5px solid var(--line)',
-          background: asistencia === 'AUSENTE' ? 'var(--red-tint)' : 'var(--white)',
-          color: 'var(--ink)',
-        }}
-      >
-        {asistencia === 'AUSENTE' ? '✓ Ausente' : 'Ausente'}
+      <button type="button" className="asistencia-btn asistencia-ausente" aria-pressed={asistencia === 'AUSENTE'} onClick={() => marcar('AUSENTE')}>
+        <UserX size={17} aria-hidden="true" /> Ausente
       </button>
-      {asistencia === 'ATENDIDO' && <span style={{ padding: '5px 10px', fontSize: 12.5, color: 'var(--teal-dark)', fontWeight: 600 }}>Atendido</span>}
+      {asistencia === 'ATENDIDO' && <span className="badge badge-llego">Atendido</span>}
     </div>
   );
 }
@@ -319,8 +294,7 @@ function BotonDeshacer({ turno }) {
 
   return (
     <button
-      className="btn btn-outline"
-      style={{ padding: '6px 14px', fontSize: 13 }}
+      className="btn btn-ghost btn-sm"
       title="Deshace la última reserva/cancelación registrada en este turno"
       onClick={handleClick}
     >
@@ -352,7 +326,7 @@ function BotonCancelarTurno({ turno }) {
   }
 
   return (
-    <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={handleClick}>
+    <button className="btn btn-ghost btn-peligro btn-sm" onClick={handleClick}>
       Cancelar turno
     </button>
   );
@@ -385,7 +359,7 @@ function ListaEsperaParaSlot({ turno }) {
 
   if (!abierto) {
     return (
-      <button type="button" className="btn btn-outline" style={{ padding: '5px 12px', fontSize: 12.5, marginTop: 6 }} onClick={handleAbrir}>
+      <button type="button" className="btn btn-outline btn-sm" style={{ marginTop: 6 }} onClick={handleAbrir}>
         ¿Hay alguien esperando este horario?
       </button>
     );
@@ -393,22 +367,21 @@ function ListaEsperaParaSlot({ turno }) {
 
   return (
     <div style={{ marginTop: 6 }}>
-      {cargando && <p style={{ fontSize: 12.5, color: 'var(--muted)' }}>Buscando en la lista de espera…</p>}
+      {cargando && <p className="field-hint">Buscando en la lista de espera…</p>}
       {!cargando && compatibles?.length === 0 && (
-        <p style={{ fontSize: 12.5, color: 'var(--muted)' }}>Nadie anotado en la lista de espera para este médico este día.</p>
+        <p style={{ fontSize: 13.5, color: 'var(--muted)' }}>Nadie anotado en la lista de espera para este médico este día.</p>
       )}
       {!cargando && compatibles?.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <p style={{ fontSize: 12.5, color: 'var(--teal-dark)', fontWeight: 600 }}>
+          <p style={{ fontSize: 13.5, color: 'var(--teal-dark)', fontWeight: 600 }}>
             Hay {compatibles.length} paciente{compatibles.length === 1 ? '' : 's'} esperando este horario
           </p>
           {compatibles.map((p) => (
-            <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, fontSize: 13 }}>
+            <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, fontSize: 14 }}>
               <span>{p.pacienteNombre} · {p.pacienteTelefono}</span>
               <button
                 type="button"
-                className="btn btn-outline"
-                style={{ padding: '4px 10px', fontSize: 12 }}
+                className="btn btn-outline btn-sm"
                 disabled={asignandoId === p.pacienteId}
                 onClick={() => handleAsignar(p.pacienteId)}
               >
@@ -428,7 +401,7 @@ function RecordatorioEnAgenda({ turno }) {
   const [enviando, setEnviando] = useState(false);
 
   if (turno.estadoRecordatorio === 'ENVIADO') {
-    return <span className="badge badge-confirmado" style={{ marginTop: 6, display: 'inline-block' }}>Recordatorio enviado</span>;
+    return <span className="badge badge-confirmado">Recordatorio enviado</span>;
   }
 
   function handleEnviar() {
@@ -442,7 +415,7 @@ function RecordatorioEnAgenda({ turno }) {
   return (
     <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
       {turno.estadoRecordatorio === 'FALLIDO' && <span className="badge badge-ausente">Recordatorio falló</span>}
-      <button type="button" className="btn btn-outline" style={{ padding: '4px 10px', fontSize: 12 }} disabled={enviando} onClick={handleEnviar}>
+      <button type="button" className="btn btn-outline btn-sm" disabled={enviando} onClick={handleEnviar}>
         {enviando && <span className="spinner" aria-hidden="true" />}
         {enviando ? 'Enviando…' : 'Enviar recordatorio'}
       </button>
@@ -484,7 +457,7 @@ function BotonReprogramar({ turno, agendaCompleta }) {
 
   if (!abierto) {
     return (
-      <button type="button" className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => setAbierto(true)}>
+      <button type="button" className="btn btn-outline btn-sm" onClick={() => setAbierto(true)}>
         Reprogramar
       </button>
     );
@@ -493,13 +466,13 @@ function BotonReprogramar({ turno, agendaCompleta }) {
   return (
     <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--line)', flex: '1 1 100%' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <strong style={{ fontSize: 13.5 }}>Elegí el horario nuevo</strong>
-        <button type="button" className="btn btn-outline" style={{ padding: '4px 10px', fontSize: 12.5 }} onClick={() => setAbierto(false)} disabled={enviando}>
+        <strong style={{ fontSize: 14.5 }}>Elegí el horario nuevo</strong>
+        <button type="button" className="btn btn-outline btn-sm" onClick={() => setAbierto(false)} disabled={enviando}>
           Cancelar
         </button>
       </div>
       {destinosDisponibles.length === 0 ? (
-        <p style={{ fontSize: 13, color: 'var(--muted)' }}>
+        <p style={{ fontSize: 14, color: 'var(--muted)' }}>
           No hay otros horarios libres de este médico cargados en este rango. Cambiá de día o semana para ver más opciones.
         </p>
       ) : (
@@ -508,8 +481,7 @@ function BotonReprogramar({ turno, agendaCompleta }) {
             <button
               key={d.id}
               type="button"
-              className="btn btn-outline"
-              style={{ padding: '6px 12px', fontSize: 12.5 }}
+              className="btn btn-outline btn-sm"
               disabled={enviando}
               onClick={() => elegirDestino(d)}
             >
@@ -581,7 +553,7 @@ function VistaLista({ agenda, agendaCompleta, agendaCargando, medicoId, reservan
       {agendaCargando && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {[0, 1, 2].map((i) => (
-            <div key={i} className="card" style={{ padding: '16px 20px' }}>
+            <div key={i} className="agenda-fila">
               <span className="skeleton skeleton-line" style={{ width: '40%' }} />
               <span className="skeleton skeleton-line" style={{ width: '65%' }} />
             </div>
@@ -592,70 +564,64 @@ function VistaLista({ agenda, agendaCompleta, agendaCargando, medicoId, reservan
         <EstadoVacio titulo="Sin turnos generados" subtitulo={`No hay turnos generados para ese día${medicoId ? ' con ese médico' : ''}.`} />
       )}
       {seleccionados.size > 0 && (
-        <div className="card" style={{ padding: '10px 16px', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, background: 'var(--red-tint)', borderColor: 'var(--red)' }}>
-          <span style={{ fontSize: 14, fontWeight: 600 }}>{seleccionados.size} {seleccionados.size === 1 ? 'turno seleccionado' : 'turnos seleccionados'}</span>
+        <div className="agenda-lote">
+          <span>{seleccionados.size} {seleccionados.size === 1 ? 'turno seleccionado' : 'turnos seleccionados'}</span>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => setSeleccionados(new Set())} disabled={cancelandoLote}>
+            <button className="btn btn-outline btn-sm" onClick={() => setSeleccionados(new Set())} disabled={cancelandoLote}>
               Deseleccionar todo
             </button>
-            <button className="btn btn-dark" style={{ padding: '6px 14px', fontSize: 13 }} onClick={handleCancelarSeleccionados} disabled={cancelandoLote}>
+            <button className="btn btn-dark btn-sm" onClick={handleCancelarSeleccionados} disabled={cancelandoLote}>
               {cancelandoLote && <span className="spinner" aria-hidden="true" />}
               Cancelar seleccionados
             </button>
           </div>
         </div>
       )}
-      <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div className="agenda-lista">
         {agenda.map((t) => (
-          <div key={t.id} className="card" style={{ padding: '16px 20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
-              <div style={{ display: 'flex', gap: 12 }}>
+          <div key={t.id} className={`agenda-fila${t.estado === 'DISPONIBLE' ? ' libre' : ''}${seleccionados.has(t.id) ? ' seleccionada' : ''}`}>
+            <div className="agenda-fila-cuerpo">
+              <div className="agenda-fila-izq">
                 {t.estado === 'RESERVADO' && (
                   <input
                     type="checkbox"
                     checked={seleccionados.has(t.id)}
                     onChange={() => alternarSeleccion(t.id)}
                     aria-label={`Seleccionar el turno de ${t.pacienteNombre}`}
-                    style={{ marginTop: 4, width: 16, height: 16, flexShrink: 0, cursor: 'pointer' }}
+                    className="agenda-check"
                   />
                 )}
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: 15 }}>
-                    {t.horaInicio.slice(0, 5)} a {t.horaFin.slice(0, 5)} · {t.medicoNombre}
-                  </div>
-                  <div style={{ fontSize: 13, color: 'var(--muted)' }}>{t.especialidadNombre}</div>
+                  <p className="agenda-fila-hora">{t.horaInicio.slice(0, 5)}<span> a {t.horaFin.slice(0, 5)}</span></p>
+                  <p className="agenda-fila-medico">{t.medicoNombre} · {t.especialidadNombre}</p>
                   {t.estado === 'DISPONIBLE' && t.confirmacionPrevia === 'RECHAZADO' && (
-                    <div style={{ fontSize: 12.5, color: 'var(--red)', marginTop: 4 }}>
-                      El paciente anterior avisó que no venía — horario libre otra vez
-                    </div>
+                    <p className="agenda-nota agenda-nota-alerta">El paciente anterior avisó que no venía: horario libre otra vez</p>
                   )}
                   {t.estado === 'DISPONIBLE' && <ListaEsperaParaSlot turno={t} />}
                   {t.estado === 'RESERVADO' && (
-                    <div style={{ marginTop: 8, fontSize: 14 }}>
-                      <div><strong>{t.pacienteNombre}</strong> · DNI {t.pacienteDni}</div>
-                      <div style={{ color: 'var(--muted)' }}>{t.pacienteTelefono} · {t.pacienteObraSocial}</div>
-                      {t.motivoConsulta && <div style={{ color: 'var(--muted)', marginTop: 2 }}>Motivo: {t.motivoConsulta}</div>}
-                      {t.confirmacionPrevia === 'CONFIRMADO' && (
-                        <div style={{ fontSize: 12.5, color: 'var(--teal-dark)', marginTop: 4 }}>Confirmó que viene</div>
-                      )}
-                      {t.tieneEvolucion && (
-                        <div style={{ fontSize: 12.5, color: 'var(--teal-dark)', marginTop: 4 }} title="El médico cargó una evolución para esta consulta — el contenido es privado del profesional">
-                          Evolución cargada
-                        </div>
-                      )}
+                    <div className="agenda-paciente">
+                      <p className="agenda-paciente-nombre"><strong>{t.pacienteNombre}</strong> · DNI {t.pacienteDni}</p>
+                      <p className="agenda-paciente-datos">{t.pacienteTelefono} · {t.pacienteObraSocial}</p>
+                      {t.motivoConsulta && <p className="agenda-paciente-datos">Motivo: {t.motivoConsulta}</p>}
+                      <div className="agenda-marcas">
+                        {t.confirmacionPrevia === 'CONFIRMADO' && <span className="badge badge-confirmado">Confirmó que viene</span>}
+                        {t.tieneEvolucion && (
+                          <span className="badge badge-llego" title="El médico cargó una evolución para esta consulta — el contenido es privado del profesional">Evolución cargada</span>
+                        )}
+                        <RecordatorioEnAgenda turno={t} />
+                      </div>
                       <CheckInBotones turno={t} />
-                      <RecordatorioEnAgenda turno={t} />
                     </div>
                   )}
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div className="agenda-fila-acciones">
                 <span className={`badge badge-${t.estado === 'DISPONIBLE' ? 'disponible' : 'reservado'}`}>
-                  {t.estado === 'DISPONIBLE' ? 'Disponible' : 'Reservado'}
+                  {t.estado === 'DISPONIBLE' ? 'Libre' : 'Reservado'}
                 </span>
                 {t.estado === 'DISPONIBLE' && reservandoId !== t.id && (
-                  <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => setReservandoId(t.id)}>
-                    Reservar por teléfono
+                  <button className="btn btn-primary btn-sm" onClick={() => setReservandoId(t.id)}>
+                    <Phone size={16} aria-hidden="true" /> Reservar
                   </button>
                 )}
                 {t.estado === 'RESERVADO' && <BotonReprogramar turno={t} agendaCompleta={agendaCompleta} />}
@@ -716,7 +682,7 @@ function VistaSemana({ agenda, agendaCompleta, agendaCargando, feriados, medicoI
   return (
     <div>
       {esMobile ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className="agenda-lista">
           {turnosOrdenados.map((t) => (
             <TarjetaAgendaMobile
               key={t.id}
@@ -729,24 +695,20 @@ function VistaSemana({ agenda, agendaCompleta, agendaCargando, feriados, medicoI
         </div>
       ) : (
         <div style={{ overflowX: 'auto' }}>
-          <div className={denso ? 'agenda-densa' : undefined} style={{ display: 'grid', gridTemplateColumns: '64px repeat(7, minmax(96px, 1fr))', minWidth: 760, border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden' }}>
-            <div style={{ background: 'var(--bg-soft)', borderBottom: '1px solid var(--line)' }} />
+          <div className={`agenda-grilla${denso ? ' agenda-densa' : ''}`} style={{ gridTemplateColumns: '64px repeat(7, minmax(96px, 1fr))', minWidth: 760 }}>
+            <div className="agenda-grilla-esquina" />
             {dias.map((dia) => (
-              <div key={dia} style={{
-                padding: '10px 6px', textAlign: 'center', fontSize: 12.5, fontWeight: 600,
-                background: feriadosPorDia[dia] ? 'var(--red-tint)' : 'var(--bg-soft)',
-                borderBottom: '1px solid var(--line)', borderLeft: '1px solid var(--line)',
-              }}>
+              <div key={dia} className={`agenda-grilla-cabecera${feriadosPorDia[dia] ? ' feriado' : ''}${dia === hoyISO() ? ' hoy' : ''}`}>
                 {etiquetaDia(dia)}
                 {feriadosPorDia[dia] && (
-                  <div style={{ fontSize: 10.5, fontWeight: 500, color: 'var(--red)', marginTop: 2 }}>{feriadosPorDia[dia].nombre}</div>
+                  <div className="agenda-grilla-feriado">{feriadosPorDia[dia].nombre}</div>
                 )}
               </div>
             ))}
 
             {horarios.map((hora) => (
               <Fragment key={hora}>
-                <div style={{ padding: '8px 6px', fontSize: 12, color: 'var(--muted)', borderTop: '1px solid var(--line)', textAlign: 'right' }}>
+                <div className="agenda-grilla-hora">
                   {hora}
                 </div>
                 {dias.map((dia) => (
@@ -804,7 +766,7 @@ function VistaDia({ agenda, agendaCompleta, agendaCargando, feriados, medicos, m
   return (
     <div>
       {esMobile ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className="agenda-lista">
           {turnosOrdenados.map((t) => (
             <TarjetaAgendaMobile
               key={t.id}
@@ -817,26 +779,17 @@ function VistaDia({ agenda, agendaCompleta, agendaCargando, feriados, medicos, m
         </div>
       ) : (
         <div style={{ overflowX: 'auto' }}>
-          <div className={denso ? 'agenda-densa' : undefined} style={{
-            display: 'grid',
-            gridTemplateColumns: `64px repeat(${medicosColumna.length}, minmax(120px, 1fr))`,
-            minWidth: 120 * medicosColumna.length + 64,
-            border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden',
-          }}>
-            <div style={{ background: 'var(--bg-soft)', borderBottom: '1px solid var(--line)' }} />
+          <div className={`agenda-grilla${denso ? ' agenda-densa' : ''}`} style={{ gridTemplateColumns: `64px repeat(${medicosColumna.length}, minmax(120px, 1fr))`, minWidth: 120 * medicosColumna.length + 64 }}>
+            <div className="agenda-grilla-esquina" />
             {medicosColumna.map((m) => (
-              <div key={m.id} style={{
-                padding: '10px 6px', textAlign: 'center', fontSize: 12.5, fontWeight: 600,
-                background: feriadoDelDia ? 'var(--red-tint)' : 'var(--bg-soft)',
-                borderBottom: '1px solid var(--line)', borderLeft: '1px solid var(--line)',
-              }}>
+              <div key={m.id} className={`agenda-grilla-cabecera${feriadoDelDia ? ' feriado' : ''}`}>
                 {m.nombreCompleto}
               </div>
             ))}
 
             {horarios.map((hora) => (
               <Fragment key={hora}>
-                <div style={{ padding: '8px 6px', fontSize: 12, color: 'var(--muted)', borderTop: '1px solid var(--line)', textAlign: 'right' }}>
+                <div className="agenda-grilla-hora">
                   {hora}
                 </div>
                 {medicosColumna.map((m) => (
@@ -995,76 +948,66 @@ export default function AdminAgendaTab() {
       {error && <div className="alert alert-error" role="alert">{error}</div>}
       {mensajeExito && <div className="alert alert-success" role="status">{mensajeExito}</div>}
       {dniPrellenado && (
-        <div className="alert" style={{ background: 'var(--teal-tint)', color: 'var(--teal-dark)', border: '1px solid var(--teal)' }}>
+        <div className="reserva-aviso" style={{ marginTop: 0, marginBottom: 16 }}>
           Elegí un horario libre para reservarle un turno al paciente con DNI {dniPrellenado} — sus datos se van a completar solos.
         </div>
       )}
       {objetivoReprogramar && (
-        <div className="alert" style={{ background: 'var(--teal-tint)', color: 'var(--teal-dark)', border: '1px solid var(--teal)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+        <div className="reserva-aviso alert-cerrable" style={{ marginTop: 0, marginBottom: 16, alignItems: 'center' }}>
           <span>
             Buscá el turno de <strong>{objetivoReprogramar.pacienteNombre}</strong> del {etiquetaDia(objetivoReprogramar.fecha)} a las {objetivoReprogramar.horaInicio.slice(0, 5)} y tocá "Reprogramar".
           </span>
-          <button type="button" className="btn btn-outline" style={{ padding: '4px 10px', fontSize: 12.5, flexShrink: 0 }} onClick={() => dispatch(setObjetivoReprogramar(null))}>
+          <button type="button" className="btn btn-outline btn-sm" style={{ flexShrink: 0 }} onClick={() => dispatch(setObjetivoReprogramar(null))}>
             Entendido
           </button>
         </div>
       )}
 
       {resumenDia && !agendaCargando && (
-        <div className="card" style={{ marginBottom: 20, display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-          <div>
-            <div style={{ fontSize: 13, color: 'var(--muted)' }}>{resumenDia.esHoy ? 'Hoy' : fecha}</div>
-            <div style={{ fontSize: 22, fontWeight: 700, marginTop: 2 }}>
-              {resumenDia.reservadosTotal} reservado{resumenDia.reservadosTotal === 1 ? '' : 's'}
-            </div>
-            <div style={{ fontSize: 13, color: 'var(--muted)' }}>{resumenDia.disponibles} disponible{resumenDia.disponibles === 1 ? '' : 's'}</div>
+        <div className="agenda-resumen">
+          <div className="agenda-resumen-medidor">
+            <Goniometro progreso={(resumenDia.reservadosTotal + resumenDia.disponibles) ? resumenDia.reservadosTotal / (resumenDia.reservadosTotal + resumenDia.disponibles) : 0} compacto />
+          </div>
+          <div className="agenda-resumen-cifras">
+            <p className="agenda-resumen-dia">{resumenDia.esHoy ? 'Hoy' : etiquetaDia(fecha)}</p>
+            <p className="agenda-resumen-total"><strong>{resumenDia.reservadosTotal}</strong> reservado{resumenDia.reservadosTotal === 1 ? '' : 's'}</p>
+            <p className="agenda-resumen-libres">{resumenDia.disponibles} libre{resumenDia.disponibles === 1 ? '' : 's'}</p>
           </div>
           {resumenDia.proximos.length > 0 && (
-            <div style={{ flex: 1, minWidth: 220 }}>
-              <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 6 }}>
-                {resumenDia.esHoy ? 'Próximos turnos' : 'Turnos del día'}
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div className="agenda-resumen-proximos">
+              <p className="agenda-resumen-subtitulo">{resumenDia.esHoy ? 'Próximos turnos' : 'Turnos del día'}</p>
+              <ol>
                 {resumenDia.proximos.map((t) => (
-                  <div key={t.id} style={{ fontSize: 13.5 }}>
-                    <strong>{t.horaInicio.slice(0, 5)}</strong> · {t.pacienteNombre} — {t.medicoNombre}
-                  </div>
+                  <li key={t.id}>
+                    <strong>{t.horaInicio.slice(0, 5)}</strong> {t.pacienteNombre} <span>· {t.medicoNombre}</span>
+                  </li>
                 ))}
-              </div>
+              </ol>
             </div>
           )}
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-        <button className={`btn ${vista === 'lista' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '7px 16px', fontSize: 13.5 }} onClick={() => setVista('lista')}>Lista</button>
-        <button className={`btn ${vista === 'dia' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '7px 16px', fontSize: 13.5 }} onClick={() => setVista('dia')}>Día</button>
-        <button className={`btn ${vista === 'semana' ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '7px 16px', fontSize: 13.5 }} onClick={() => setVista('semana')}>Semana</button>
+      <div className="agenda-barra">
+        <div className="tabnav agenda-vistas" role="tablist" aria-label="Vista de la agenda">
+          {[['lista', 'Lista'], ['dia', 'Día'], ['semana', 'Semana']].map(([id, label]) => (
+            <button key={id} type="button" role="tab" aria-selected={vista === id} className={`tabnav-btn${vista === id ? ' active' : ''}`} onClick={() => setVista(id)}>{label}</button>
+          ))}
+        </div>
         {(vista === 'dia' || vista === 'semana') && (
-          <button
-            type="button"
-            className={`btn ${denso ? 'btn-primary' : 'btn-outline'}`}
-            style={{ padding: '7px 16px', fontSize: 13.5 }}
-            onClick={() => setDenso((d) => !d)}
-            title="Filas más chicas para ver más turnos sin scrollear"
-          >
-            Vista compacta
-          </button>
+          <label className="check agenda-compacta" title="Filas más chicas para ver más turnos sin scrollear">
+            <input type="checkbox" checked={!!denso} onChange={() => setDenso((d) => !d)} />
+            <span>Vista compacta</span>
+          </label>
         )}
-        <button
-          type="button"
-          className="btn btn-outline"
-          style={{ padding: '7px 16px', fontSize: 13.5, fontWeight: 700, marginLeft: 'auto' }}
-          onClick={() => setFecha(hoyISO())}
-          title="Volver a hoy (tecla T)"
-        >
-          Hoy
-        </button>
+        <p className="agenda-atajos">
+          <kbd aria-label="Flecha izquierda"><ArrowLeft size={13} aria-hidden="true" /></kbd><kbd aria-label="Flecha derecha"><ArrowRight size={13} aria-hidden="true" /></kbd> {vista === 'semana' ? 'semana' : 'día'} · <kbd>T</kbd> hoy
+        </p>
+        <button type="button" className="btn btn-outline btn-sm" onClick={() => setFecha(hoyISO())} title="Volver a hoy (tecla T)">Hoy</button>
       </div>
-      <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 16 }}>← → para cambiar de {vista === 'semana' ? 'semana' : 'día'} · T para volver a hoy</p>
 
       {tiraFechas.length > 0 && (
-        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', marginBottom: 16, paddingBottom: 2 }}>
+        <div className="agenda-tira">
           {tiraFechas.map((d) => {
             const esSeleccionado = d === fecha;
             const esHoy = d === hoyISO();
@@ -1072,34 +1015,27 @@ export default function AdminAgendaTab() {
               <button
                 key={d}
                 type="button"
-                className={`btn ${esSeleccionado ? 'btn-primary' : 'btn-outline'}`}
-                style={{ padding: '6px 12px', fontSize: 12.5, flex: '0 0 auto', fontWeight: esHoy ? 700 : 500 }}
+                className={`agenda-tira-dia${esHoy ? ' hoy' : ''}`}
+                aria-pressed={esSeleccionado}
                 onClick={() => setFecha(d)}
               >
-                {etiquetaDia(d)}
+                {esHoy ? 'Hoy' : etiquetaDia(d)}
               </button>
             );
           })}
         </div>
       )}
 
-      <div className="stagger" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+      <div className="filtros-estado" role="group" aria-label="Filtrar por estado">
         {chipsEstado.map((chip) => (
           <button
             key={chip.key}
             type="button"
-            className={`badge ${chip.colorClass}`}
-            style={{
-              cursor: 'pointer',
-              fontSize: 13,
-              padding: '6px 14px',
-              border: filtroEstado === chip.key ? '1.5px solid currentColor' : '1.5px solid transparent',
-              background: chip.colorClass ? undefined : 'var(--bg-soft)',
-              color: chip.colorClass ? undefined : 'var(--ink)',
-            }}
+            className={`filtro-chip ${chip.colorClass}`}
+            aria-pressed={filtroEstado === chip.key}
             onClick={() => setFiltroEstado(chip.key)}
           >
-            {chip.label} · {chip.count}
+            {chip.label} <strong>{chip.count}</strong>
           </button>
         ))}
       </div>
@@ -1126,7 +1062,7 @@ export default function AdminAgendaTab() {
       </div>
 
       {vista !== 'semana' && feriadoDelDia && (
-        <div className="alert" style={{ background: 'var(--red-tint)', color: 'var(--red)', border: '1px solid var(--red)' }}>
+        <div className="alert alert-error">
           Feriado: {feriadoDelDia.nombre}
         </div>
       )}

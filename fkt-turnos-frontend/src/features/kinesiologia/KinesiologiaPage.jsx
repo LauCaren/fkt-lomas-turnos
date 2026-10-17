@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { FileUp } from 'lucide-react';
 import {
   fetchMisPlanesKinesiologia, fetchHorariosDisponiblesKinesiologia, crearPlanKinesiologia, cancelarPlanKinesiologia,
   pausarPlanKinesiologia, reanudarPlanKinesiologia, limpiarMensajesKinesiologia, limpiarHorariosDisponibles,
@@ -7,6 +8,7 @@ import {
 import { fetchEspecialidades, fetchMedicos } from '../turnos/turnosSlice';
 import { hoyISO } from '../../utils/formato';
 import { useConfirm } from '../../components/ui/useConfirm';
+import Goniometro from '../../components/ui/Goniometro';
 
 const DIA_LABEL = {
   MONDAY: 'Lunes',
@@ -24,7 +26,7 @@ function claveHorario(h) {
 }
 
 const ESTADO_LABEL = {
-  PENDIENTE_VALIDACION: 'Pendiente de revisión',
+  PENDIENTE_VALIDACION: 'En revisión',
   VALIDADO: 'Activo',
   RECHAZADO: 'Rechazado',
   PAUSADO: 'Pausado',
@@ -33,13 +35,22 @@ const ESTADO_LABEL = {
 
 const BADGE_ESTADO = {
   PENDIENTE_VALIDACION: 'badge-pendiente',
-  VALIDADO: 'badge-disponible',
-  RECHAZADO: 'badge-reservado',
+  VALIDADO: 'badge-confirmado',
+  RECHAZADO: 'badge-ausente',
   PAUSADO: 'badge-cancelado',
   CANCELADO: 'badge-cancelado',
 };
 
-function NuevoPlanForm({ medicoKinesiologiaId, medicos }) {
+function aFecha(iso) {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+const fmtSesion = new Intl.DateTimeFormat('es-AR', { weekday: 'short', day: 'numeric', month: 'short' });
+function fechaSesion(iso) {
+  return fmtSesion.format(aFecha(iso)).replace(/\./g, '');
+}
+
+function NuevoPlanForm({ medicos }) {
   const dispatch = useDispatch();
   const horariosDisponibles = useSelector((state) => state.kinesiologia.horariosDisponibles);
   const cargandoHorarios = useSelector((state) => state.kinesiologia.cargandoHorarios);
@@ -65,14 +76,21 @@ function NuevoPlanForm({ medicoKinesiologiaId, medicos }) {
     setSeleccionados([]);
   }, [tieneOrden, modoIndiferente, medicoId, dispatch]);
 
-  const horariosOrdenados = useMemo(() => (
-    [...horariosDisponibles].sort((a, b) => {
+  // Agrupados por día: cada día es un renglón y sus horarios, celdas que se marcan.
+  const horariosPorDia = useMemo(() => {
+    const ordenados = [...horariosDisponibles].sort((a, b) => {
       const diffDia = ORDEN_DIAS.indexOf(a.diaSemana) - ORDEN_DIAS.indexOf(b.diaSemana);
       if (diffDia !== 0) return diffDia;
-      if (a.medicoNombre !== b.medicoNombre) return a.medicoNombre.localeCompare(b.medicoNombre);
-      return a.horaInicio.localeCompare(b.horaInicio);
-    })
-  ), [horariosDisponibles]);
+      if (a.horaInicio !== b.horaInicio) return a.horaInicio.localeCompare(b.horaInicio);
+      return a.medicoNombre.localeCompare(b.medicoNombre);
+    });
+    const grupos = new Map();
+    for (const h of ordenados) {
+      if (!grupos.has(h.diaSemana)) grupos.set(h.diaSemana, []);
+      grupos.get(h.diaSemana).push(h);
+    }
+    return [...grupos.entries()];
+  }, [horariosDisponibles]);
 
   const medicoElegido = seleccionados[0]?.medicoId;
 
@@ -111,14 +129,12 @@ function NuevoPlanForm({ medicoKinesiologiaId, medicos }) {
 
   if (tieneOrden === null) {
     return (
-      <div className="card">
-        <h3 style={{ fontSize: 17, marginBottom: 10 }}>¿Tenés orden médica para kinesiología?</h3>
-        <p style={{ color: 'var(--muted)', marginBottom: 14, fontSize: 14 }}>
-          Para atenderte en kinesiología es obligatorio tener una orden médica vigente.
-        </p>
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button className="btn btn-primary" onClick={() => setTieneOrden(true)}>Sí, tengo</button>
-          <button className="btn btn-outline" onClick={() => setTieneOrden(false)}>No tengo</button>
+      <div className="card kine-pregunta">
+        <h2>¿Tenés orden médica para kinesiología?</h2>
+        <p>Para atenderte en kinesiología hace falta una orden médica vigente. Después la vas a subir como foto o PDF.</p>
+        <div className="kine-pregunta-opciones">
+          <button type="button" className="btn btn-primary btn-lg" onClick={() => setTieneOrden(true)}>Sí, tengo orden</button>
+          <button type="button" className="btn btn-outline btn-lg" onClick={() => setTieneOrden(false)}>Todavía no</button>
         </div>
       </div>
     );
@@ -126,109 +142,136 @@ function NuevoPlanForm({ medicoKinesiologiaId, medicos }) {
 
   if (tieneOrden === false) {
     return (
-      <div className="card">
-        <div className="alert alert-error" role="alert">
-          No podés reservar un turno de kinesiología sin orden médica. Conseguila con tu médico de cabecera y volvé
-          a intentarlo.
+      <div className="card kine-pregunta">
+        <h2>Primero conseguí la orden</h2>
+        <p>Sin orden médica no podemos armar el plan. Pedísela a tu médico de cabecera y volvé cuando la tengas: el plan se arma en un par de minutos.</p>
+        <div className="kine-pregunta-opciones">
+          <button type="button" className="btn btn-outline" onClick={() => setTieneOrden(null)}>Volver</button>
         </div>
-        <button className="btn btn-outline" style={{ marginTop: 12 }} onClick={() => setTieneOrden(null)}>Volver</button>
       </div>
     );
   }
 
+  const puedeVerHorarios = modoIndiferente || medicoId;
+
   return (
-    <div className="card">
-      <h3 style={{ fontSize: 17, marginBottom: 14 }}>Nuevo plan de sesiones</h3>
-      <form onSubmit={handleSubmit}>
-        <div className="field">
-          <label>¿Con quién te querés atender?</label>
-          <div style={{ display: 'flex', gap: 16, marginBottom: 4 }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 400 }}>
-              <input type="radio" name="modoMedico" checked={!modoIndiferente}
-                onChange={() => { setModoIndiferente(false); setMedicoId(''); }} />
-              Un kinesiólogo en particular
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 400 }}>
-              <input type="radio" name="modoMedico" checked={modoIndiferente}
-                onChange={() => { setModoIndiferente(true); setMedicoId(''); }} />
-              Me da igual quién me atienda
-            </label>
-          </div>
-          {!modoIndiferente && (
-            <select required value={medicoId} onChange={(e) => setMedicoId(e.target.value)}>
-              <option value="">Seleccioná un kinesiólogo</option>
+    <form onSubmit={handleSubmit} className="card kine-form">
+      <h2>Armá tu plan de sesiones</h2>
+
+      <fieldset className="kine-bloque">
+        <legend>¿Con quién te querés atender?</legend>
+        <div className="kine-modos">
+          <label className={`kine-modo${!modoIndiferente ? ' activo' : ''}`}>
+            <input type="radio" name="modoMedico" checked={!modoIndiferente}
+              onChange={() => { setModoIndiferente(false); setMedicoId(''); }} />
+            <span><strong>Con un kinesiólogo en particular</strong>Elegís a quién y ves sus horarios.</span>
+          </label>
+          <label className={`kine-modo${modoIndiferente ? ' activo' : ''}`}>
+            <input type="radio" name="modoMedico" checked={modoIndiferente}
+              onChange={() => { setModoIndiferente(true); setMedicoId(''); }} />
+            <span><strong>Me da igual quién</strong>Ves todos los horarios libres del centro.</span>
+          </label>
+        </div>
+        {!modoIndiferente && (
+          <div className="field" style={{ marginTop: 14, marginBottom: 0 }}>
+            <label htmlFor="kineMedico">Kinesiólogo</label>
+            <select id="kineMedico" required value={medicoId} onChange={(e) => setMedicoId(e.target.value)}>
+              <option value="">Elegí un kinesiólogo</option>
               {medicos.map((m) => <option key={m.id} value={m.id}>{m.nombreCompleto}</option>)}
             </select>
-          )}
+          </div>
+        )}
+      </fieldset>
+
+      <div className="campos-2">
+        <div className="field">
+          <label htmlFor="kineCantidadSesiones">Sesiones indicadas en la orden</label>
+          <input id="kineCantidadSesiones" type="number" inputMode="numeric" min={1} max={60} required value={cantidadSesiones} onChange={(e) => setCantidadSesiones(e.target.value)} />
         </div>
         <div className="field">
-          <label htmlFor="kineCantidadSesiones">Cantidad de sesiones indicadas</label>
-          <input id="kineCantidadSesiones" type="number" min={1} max={60} required value={cantidadSesiones} onChange={(e) => setCantidadSesiones(e.target.value)} style={{ width: 100 }} />
-        </div>
-        <div className="field">
-          <label htmlFor="kineFechaInicio">Fecha de inicio</label>
+          <label htmlFor="kineFechaInicio">Empezar desde</label>
           <input id="kineFechaInicio" type="date" min={hoyISO()} required value={fechaInicio} onChange={(e) => setFechaInicio(e.target.value)} />
         </div>
-        <div className="field" role="group" aria-labelledby="kineHorariosFijosLabel">
-          <label id="kineHorariosFijosLabel">Horarios fijos semanales</label>
-          {!modoIndiferente && !medicoId && (
-            <p style={{ fontSize: 13, color: 'var(--muted)' }}>Elegí primero un kinesiólogo para ver sus horarios disponibles.</p>
-          )}
-          {(modoIndiferente || medicoId) && cargandoHorarios && (
-            <div style={{ marginTop: 6 }}>
-              <div className="skeleton skeleton-line" style={{ width: '65%' }} />
-              <div className="skeleton skeleton-line" style={{ width: '50%' }} />
-              <div className="skeleton skeleton-line" style={{ width: '58%' }} />
-            </div>
-          )}
-          {(modoIndiferente || medicoId) && !cargandoHorarios && horariosOrdenados.length === 0 && (
-            <p style={{ fontSize: 13, color: 'var(--muted)' }}>No hay horarios cargados por ahora.</p>
-          )}
-          {(modoIndiferente || medicoId) && !cargandoHorarios && horariosOrdenados.length > 0 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 260, overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 8, padding: 10 }}>
-              {horariosOrdenados.map((h) => {
-                const clave = claveHorario(h);
-                const marcado = seleccionados.some((s) => claveHorario(s) === clave);
-                const deshabilitado = modoIndiferente && medicoElegido && h.medicoId !== medicoElegido;
-                return (
-                  <label key={clave} style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 400, opacity: deshabilitado ? 0.4 : 1 }}>
-                    <input type="checkbox" checked={marcado} disabled={deshabilitado} onChange={() => toggleHorario(h)} />
-                    {DIA_LABEL[h.diaSemana]} {h.horaInicio.slice(0, 5)}
-                    {modoIndiferente && ` — ${h.medicoNombre}`}
-                  </label>
-                );
-              })}
-            </div>
-          )}
-          {modoIndiferente && seleccionados.length > 0 && (
-            <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 6 }}>
-              Elegiste horarios con {medicos.find((m) => m.id === medicoElegido)?.nombreCompleto || seleccionados[0].medicoNombre}. Para cambiar de kinesiólogo, deseleccioná todos los horarios primero.
-            </p>
-          )}
-        </div>
-        <div className="field">
-          <label htmlFor="kineOrdenMedica">Orden médica (foto o PDF)</label>
-          <input id="kineOrdenMedica" type="file" required accept="image/jpeg,image/png,application/pdf" onChange={(e) => setOrdenMedica(e.target.files[0] || null)} />
-        </div>
-        <button type="submit" className="btn btn-primary" disabled={enviando || seleccionados.length === 0}>
-          {enviando && <span className="spinner" aria-hidden="true" />}
-          {enviando ? 'Enviando…' : 'Enviar plan'}
-        </button>
-        <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 8 }}>
-          Un admin va a revisar la orden médica antes de habilitar los turnos.
-        </p>
-      </form>
-    </div>
+      </div>
+
+      <fieldset className="kine-bloque">
+        <legend>Horarios fijos de cada semana</legend>
+        <p className="field-hint" style={{ marginBottom: 12 }}>Marcá uno o más: se repiten todas las semanas hasta completar las sesiones.</p>
+        {!puedeVerHorarios && (
+          <p className="kine-vacio">Elegí primero un kinesiólogo para ver sus horarios.</p>
+        )}
+        {puedeVerHorarios && cargandoHorarios && (
+          <div className="kine-dias" aria-hidden="true">
+            {[0, 1, 2].map((i) => <span key={i} className="skeleton" style={{ height: 52 }} />)}
+          </div>
+        )}
+        {puedeVerHorarios && !cargandoHorarios && horariosPorDia.length === 0 && (
+          <p className="kine-vacio">No hay horarios libres por ahora. Llamanos y lo resolvemos por teléfono.</p>
+        )}
+        {puedeVerHorarios && !cargandoHorarios && horariosPorDia.length > 0 && (
+          <div className="kine-dias">
+            {horariosPorDia.map(([dia, horarios]) => (
+              <div key={dia} className="kine-dia" role="group" aria-label={DIA_LABEL[dia]}>
+                <span className="kine-dia-nombre">{DIA_LABEL[dia]}</span>
+                <div className="kine-dia-horarios">
+                  {horarios.map((h) => {
+                    const clave = claveHorario(h);
+                    const marcado = seleccionados.some((s) => claveHorario(s) === clave);
+                    const deshabilitado = modoIndiferente && medicoElegido && h.medicoId !== medicoElegido;
+                    return (
+                      <button
+                        type="button"
+                        key={clave}
+                        className="horario kine-horario"
+                        aria-pressed={marcado}
+                        disabled={deshabilitado}
+                        onClick={() => toggleHorario(h)}
+                      >
+                        {h.horaInicio.slice(0, 5)}
+                        {modoIndiferente && <span>{h.medicoNombre}</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        {modoIndiferente && seleccionados.length > 0 && (
+          <p className="field-hint" style={{ marginTop: 10 }}>
+            Elegiste horarios con {medicos.find((m) => m.id === medicoElegido)?.nombreCompleto || seleccionados[0].medicoNombre}. Para cambiar de kinesiólogo, desmarcá todos los horarios primero.
+          </p>
+        )}
+      </fieldset>
+
+      <div className="field">
+        <label htmlFor="kineOrdenMedica">Orden médica</label>
+        <label htmlFor="kineOrdenMedica" className={`archivo${ordenMedica ? ' cargado' : ''}`}>
+          <FileUp size={22} aria-hidden="true" />
+          <span>{ordenMedica ? ordenMedica.name : 'Subí una foto o PDF de la orden'}</span>
+        </label>
+        <input id="kineOrdenMedica" className="archivo-input" type="file" required accept="image/jpeg,image/png,application/pdf" onChange={(e) => setOrdenMedica(e.target.files[0] || null)} />
+      </div>
+
+      <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={enviando || seleccionados.length === 0}>
+        {enviando && <span className="spinner" aria-hidden="true" />}
+        {enviando ? 'Enviando…' : seleccionados.length > 0 ? `Enviar plan (${seleccionados.length} ${seleccionados.length === 1 ? 'horario' : 'horarios'} por semana)` : 'Marcá al menos un horario'}
+      </button>
+      <p className="field-hint" style={{ marginTop: 10, textAlign: 'center' }}>
+        El centro revisa la orden antes de confirmar las sesiones.
+      </p>
+    </form>
   );
 }
 
 function PlanCard({ plan }) {
   const dispatch = useDispatch();
   const confirmar = useConfirm();
+  const hoy = hoyISO();
 
   async function handlePausar() {
     const ok = await confirmar({
-      titulo: 'Pausar plan',
+      titulo: '¿Pausar el plan?',
       detalle: 'Se liberan las sesiones futuras ya generadas. Podés reanudarlo después.',
       confirmarTexto: 'Pausar',
     });
@@ -237,60 +280,73 @@ function PlanCard({ plan }) {
 
   async function handleCancelar() {
     const ok = await confirmar({
-      titulo: 'Cancelar plan',
+      titulo: '¿Cancelar el plan?',
       detalle: 'Se liberan las sesiones futuras y no se puede deshacer.',
-      confirmarTexto: 'Cancelar plan',
+      confirmarTexto: 'Sí, cancelar plan',
       peligroso: true,
     });
     if (ok) dispatch(cancelarPlanKinesiologia(plan.id));
   }
 
+  // Lo que se puede afirmar con los datos que hay: cuántas sesiones reservadas ya quedaron
+  // atrás en el calendario (no si el paciente asistió — eso no viene en el plan).
+  const reservadas = plan.sesiones.filter((s) => s.estado === 'RESERVADO');
+  const pasadas = reservadas.filter((s) => s.fecha < hoy).length;
+  const proxima = reservadas.find((s) => s.fecha >= hoy);
+  const total = plan.cantidadSesiones || 1;
+
   return (
-    <div className="card" style={{ marginBottom: 12 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10 }}>
-        <div>
-          <div style={{ fontWeight: 600 }}>{plan.medicoNombre}</div>
-          <div style={{ fontSize: 13, color: 'var(--muted)' }}>
-            {plan.sesionesGeneradas} de {plan.cantidadSesiones} sesiones generadas · desde {plan.fechaInicio}
-          </div>
-        </div>
-        <span className={`badge ${BADGE_ESTADO[plan.estado] || 'badge-cancelado'}`}>{ESTADO_LABEL[plan.estado]}</span>
+    <article className="plan">
+      <div className="plan-medidor">
+        <Goniometro progreso={pasadas / total} compacto />
+        <p className="plan-medida"><strong>{pasadas}</strong> de {plan.cantidadSesiones}</p>
+        <p className="plan-medida-texto">sesiones ya pasaron</p>
       </div>
-
-      {plan.estado === 'RECHAZADO' && plan.motivoRechazo && (
-        <div className="alert alert-error" role="alert" style={{ marginTop: 10 }}>Motivo: {plan.motivoRechazo}</div>
-      )}
-
-      {plan.sesiones.length > 0 && (
-        <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-          {plan.sesiones.map((s) => (
-            <span key={s.turnoId} className={`badge badge-${s.estado === 'RESERVADO' ? 'reservado' : s.estado === 'DISPONIBLE' ? 'disponible' : 'cancelado'}`}>
-              {s.fecha} {s.horaInicio.slice(0, 5)}
-            </span>
-          ))}
+      <div className="plan-cuerpo">
+        <div className="plan-cabecera">
+          <h3>{plan.medicoNombre}</h3>
+          <span className={`badge ${BADGE_ESTADO[plan.estado] || 'badge-cancelado'}`}>{ESTADO_LABEL[plan.estado] || plan.estado}</span>
         </div>
-      )}
+        <p className="plan-dato">
+          Desde el {fechaSesion(plan.fechaInicio)} · {plan.sesionesGeneradas} de {plan.cantidadSesiones} sesiones agendadas
+        </p>
+        {proxima && (
+          <p className="plan-proxima">Próxima sesión: <strong>{fechaSesion(proxima.fecha)} · {proxima.horaInicio.slice(0, 5)}</strong></p>
+        )}
 
-      {(plan.estado === 'VALIDADO' || plan.estado === 'PENDIENTE_VALIDACION') && (
-        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-          <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={handlePausar}>
-            Pausar
-          </button>
-          <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={handleCancelar}>
-            Cancelar
-          </button>
-        </div>
-      )}
+        {plan.estado === 'RECHAZADO' && plan.motivoRechazo && (
+          <div className="alert alert-error" role="alert" style={{ marginTop: 12 }}>Motivo: {plan.motivoRechazo}</div>
+        )}
 
-      {plan.estado === 'PAUSADO' && (
-        <div style={{ marginTop: 12 }}>
-          <button className="btn btn-primary" style={{ padding: '6px 14px', fontSize: 13 }}
-            onClick={() => dispatch(reanudarPlanKinesiologia({ id: plan.id }))}>
-            Reanudar desde hoy
-          </button>
-        </div>
-      )}
-    </div>
+        {plan.sesiones.length > 0 && (
+          <details className="plan-sesiones">
+            <summary>Ver las {plan.sesiones.length} sesiones</summary>
+            <ul>
+              {plan.sesiones.map((s) => (
+                <li key={s.turnoId} className={`badge ${s.estado === 'RESERVADO' ? (s.fecha < hoy ? 'badge-llego' : 'badge-confirmado') : s.estado === 'DISPONIBLE' ? 'badge-disponible' : 'badge-cancelado'}`}>
+                  {fechaSesion(s.fecha)} {s.horaInicio.slice(0, 5)}
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
+
+        {(plan.estado === 'VALIDADO' || plan.estado === 'PENDIENTE_VALIDACION') && (
+          <div className="plan-acciones">
+            <button className="btn btn-outline" onClick={handlePausar}>Pausar</button>
+            <button className="btn btn-ghost btn-peligro" onClick={handleCancelar}>Cancelar plan</button>
+          </div>
+        )}
+
+        {plan.estado === 'PAUSADO' && (
+          <div className="plan-acciones">
+            <button className="btn btn-primary" onClick={() => dispatch(reanudarPlanKinesiologia({ id: plan.id }))}>
+              Reanudar desde hoy
+            </button>
+          </div>
+        )}
+      </div>
+    </article>
   );
 }
 
@@ -315,27 +371,28 @@ export default function KinesiologiaPage() {
   }, [especialidadKinesiologia, dispatch]);
 
   return (
-    <div style={{ maxWidth: 640, margin: '0 auto' }}>
+    <div className="kine">
       <div className="page-head">
-        <span className="eyebrow">Kinesiología</span>
-        <h1>Plan de sesiones</h1>
+        <h1>Kinesiología</h1>
+        <p>Tus sesiones se arman como un plan semanal, a partir de la orden de tu médico.</p>
       </div>
 
       {error && <div className="alert alert-error" role="alert" style={{ marginTop: 16 }}>{error}</div>}
       {mensajeExito && <div className="alert alert-success" role="status" style={{ marginTop: 16 }}>{mensajeExito}</div>}
 
-      <div style={{ marginTop: 20 }}>
-        {especialidadKinesiologia && <NuevoPlanForm medicoKinesiologiaId={especialidadKinesiologia.id} medicos={medicosPorEspecialidad} />}
-      </div>
-
       {misPlanes.length > 0 && (
-        <>
-          <h2 style={{ fontSize: 20, marginTop: 32, marginBottom: 16 }}>Mis planes</h2>
-          <div className="stagger">
+        <section className="mis-turnos-seccion" aria-labelledby="planesTitulo">
+          <h2 id="planesTitulo" className="seccion-titulo">Tus planes</h2>
+          <div className="stagger mis-turnos-lista">
             {misPlanes.map((p) => <PlanCard key={p.id} plan={p} />)}
           </div>
-        </>
+        </section>
       )}
+
+      <section className="mis-turnos-seccion" aria-label="Nuevo plan">
+        {misPlanes.length > 0 && <h2 className="seccion-titulo">Nuevo plan</h2>}
+        {especialidadKinesiologia && <NuevoPlanForm medicos={medicosPorEspecialidad} />}
+      </section>
     </div>
   );
 }

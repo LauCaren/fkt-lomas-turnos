@@ -41,7 +41,7 @@ export default function AdminAuditoriaTab() {
     <div>
       {error && <div className="alert alert-error" role="alert" style={{ marginBottom: 14 }}>{error}</div>}
 
-      <p style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 16, maxWidth: 640 }}>
+      <p style={{ fontSize: 14.5, color: 'var(--muted)', marginBottom: 16, maxWidth: 640 }}>
         Quién hizo qué y cuándo — incluye altas/bajas de cuentas de staff y movimientos de caja,
         además de turnos. Los cambios de médicos/especialidades y las anulaciones de caja quedan acá.
       </p>
@@ -73,9 +73,9 @@ export default function AdminAuditoriaTab() {
                 <strong>{r.operacion}</strong> · {r.tipoEntidad} #{r.entidadId}
                 {r.deshecho && <span className="badge badge-cancelado" style={{ marginLeft: 8 }}>Deshecho</span>}
               </div>
-              <div style={{ fontSize: 13, color: 'var(--muted)' }}>{formatoFecha(r.createdAt)}</div>
+              <div style={{ fontSize: 14, color: 'var(--muted)' }}>{formatoFecha(r.createdAt)}</div>
             </div>
-            <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 4 }}>Por: {r.usuarioNombre}</div>
+            <div style={{ fontSize: 14, color: 'var(--muted)', marginTop: 4 }}>Por: {r.usuarioNombre}</div>
           </div>
         ))}
       </div>
@@ -84,7 +84,7 @@ export default function AdminAuditoriaTab() {
         <div style={{ display: 'flex', gap: 6, marginTop: 16, flexWrap: 'wrap' }}>
           {Array.from({ length: auditoria.totalPages }, (_, i) => i).map((p) => (
             <button key={p} className="btn btn-outline" disabled={p === auditoria.number}
-              style={{ padding: '4px 10px', fontSize: 12 }} onClick={() => irAPagina(p)}>
+              style={{ padding: '4px 10px', fontSize: 13.5 }} onClick={() => irAPagina(p)}>
               {p + 1}
             </button>
           ))}
