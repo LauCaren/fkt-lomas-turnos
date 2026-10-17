@@ -1,6 +1,6 @@
 # fkt-turnos-backend
 
-API REST en Spring Boot 3 (Java 17) para el sistema de turnos, contacto y postulaciones de FKT Lomas.
+API REST en Spring Boot 4 (Java 17) para el sistema de turnos, contacto y postulaciones de FKT Lomas.
 
 ## Requisitos
 
@@ -85,4 +85,6 @@ Cubren, entre otras cosas: que ante dos intentos de reserva sobre el mismo turno
 - **Turno**: la unidad real de reserva (`DISPONIBLE` / `RESERVADO` / `CANCELADO`), con `@Version` para optimistic locking además del `UPDATE` condicional.
 - **MensajeContacto** / **Postulacion**: formularios públicos del sitio estático.
 
-El schema se versiona con Flyway (`src/main/resources/db/migration`), no con `ddl-auto`.
+El schema se versiona con Flyway (`src/main/resources/db/migration`), no con `ddl-auto`. Desde Spring Boot 4 Flyway solo se autoconfigura con `spring-boot-starter-flyway` (ya está en el `pom.xml`): con `flyway-core` suelto las migraciones dejan de correr al arrancar sin dar ningún error, así que no reemplazarlo.
+
+El JSON (de la API y de los snapshots de auditoría) lo arma Jackson 3, el default de Spring Boot 4 (paquete `tools.jackson`, no `com.fasterxml.jackson`). `spring.jackson.use-jackson2-defaults: true` en `application.yml` mantiene el mismo formato que con Jackson 2 — sacarlo cambia el orden de las propiedades y hace fallar requests con `null` en campos primitivos.
