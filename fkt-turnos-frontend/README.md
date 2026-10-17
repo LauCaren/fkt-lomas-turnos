@@ -31,6 +31,16 @@ Paneles internos (uno por rol, cada uno con su propio guard — `RutaAdmin`/`Rut
 
 El login es el mismo endpoint para los cuatro roles; la app redirige según el `role` que viene en el JWT.
 
+## Diseño (sistema "Goniómetro")
+
+La app y el sitio de marketing comparten un mismo sistema visual, documentado en `DESIGN.md` (raíz del repo); el contexto de producto que lo justifica está en `PRODUCT.md`. Lo esencial para tocar pantallas:
+
+- **Estilos**: todo en `src/index.css` con variables CSS (`--ink`, `--teal`, `--primary`, `--line-strong`, `--spring`…) y su versión de modo oscuro. Los componentes usan clases (`.btn`, `.btn-sm`, `.field`, `.card`, `.badge-*`, `.filtro-chip`…); evitar volver a meter `style={{…}}` con colores o tamaños sueltos.
+- **Tipografía**: Atkinson Hyperlegible Next (pensada para baja visión, por los pacientes mayores). Cuerpo mínimo 16px, controles de 48px (`.btn-sm` de 38px solo en pantallas de trabajo de secretaría/admin).
+- **Goniómetro** (`src/components/ui/Goniometro.jsx`): el arco graduado con aguja es la pieza de identidad. Se usa en la reserva (los 4 pasos), en el login, en el avance de los planes de kinesiología, en el resumen del día de la agenda y en las pantallas de resultado (`Resultado.jsx`). Es decorativo (`aria-hidden`): quien lo usa tiene que mostrar el mismo dato en texto.
+- **Estados**: cada `.badge-*` combina color con forma (punto lleno o anillo hueco), nunca solo color. "Reservado" es neutro para el equipo y teal para el paciente, nunca rojo (el rojo es para errores y ausencias).
+- **Movimiento**: resorte suave (`--spring`) solo para la aguja y las selecciones; el resto, `--ease-out` corto. Todo se apaga con `prefers-reduced-motion`.
+
 ## Variables de entorno
 
 - `VITE_API_URL` — URL base del backend.

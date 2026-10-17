@@ -229,7 +229,7 @@ section.soft { background: var(--bg-soft); }
 .team-card { background: var(--white); padding: 30px 32px; transition: background .25s var(--ease), box-shadow .25s var(--ease); position: relative; z-index: 1; }
 .team-card:hover { background: var(--teal-tint); box-shadow: var(--shadow-md); z-index: 2; }
 .team-card .tag { font-family: var(--font); font-weight: 700; font-size: 13.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--teal-dark); }
-.team-card h3 { margin-top: 10px; font-size: 20px; }
+.team-card h3 { font-size: 21px; }
 .team-card ul { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
 .team-card li { font-size: 14.5px; color: var(--ink-soft); padding-left: 16px; position: relative; }
 .team-card li::before { content: ""; position: absolute; left: 0; top: 9px; width: 6px; height: 2px; background: var(--teal); }
@@ -737,3 +737,6 @@ html { scrollbar-width: thin; scrollbar-color: var(--teal) var(--bg-soft); }
 /* Sin el recuadro de foco por defecto al tocar una articulación; con teclado, el anillo crece. */
 .body-spot:focus { outline: none; }
 .body-spot:focus-visible .body-spot-ring { stroke-width: 3; opacity: 1; animation: none; }
+
+/* Tarjeta de equipo: la especialidad es el título; la descripción, la bajada. */
+.team-card-sub { margin-top: 4px; color: var(--muted); font-size: 16px; font-weight: 600; }

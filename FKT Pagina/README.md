@@ -53,25 +53,44 @@ Buscador (Ctrl/Cmd+K o ícono en el header) con índice de ~65 entradas: página
 especialidades, los 26 profesionales del equipo, FAQ, obras sociales — con deep-link directo
 a la sección exacta. Definido en `site.js` (`FKT_SEARCH_INDEX`).
 
+### Sistema visual "Goniómetro" (compartido con la app de turnos)
+Desde octubre de 2026 el sitio usa el mismo sistema visual que `fkt-turnos-frontend`: la
+identidad es el goniómetro (el instrumento con el que el kinesiólogo mide un ángulo
+articular), en línea con el eslogan "Cada grado de movimiento". Ver `DESIGN.md` en la raíz
+del repo para tokens, tipografía y componentes.
+- Tipografía: **Atkinson Hyperlegible Next** (Google Fonts), diseñada para baja visión —
+  elegida porque muchos pacientes son adultos mayores. Caveat queda solo para la bajada
+  manuscrita del logo. Ya no se usan Playfair Display, Inter ni JetBrains Mono.
+- Tokens en `:root` de `site.css` idénticos a los de la app (incluido el modo oscuro). El
+  botón primario usa el teal profundo (`--primary`) porque el teal de marca con texto blanco
+  no llega a contraste AA; el teal claro queda para arcos, agujas y acentos gráficos.
+- Sin rótulos chicos arriba de los títulos (eyebrows) ni numeración 01/02 de secciones: el
+  título se sostiene solo. En equipo.html la especialidad pasó a ser el título de cada
+  tarjeta y la descripción, la bajada.
+
 ### Mapa corporal interactivo
 En el hero del home: silueta clickeable (hombro, codo, columna, cadera, rodilla, pie) que
 muestra los tratamientos/especialidades reales indicados para esa zona y abre su ficha.
-Una sola instancia en toda la página (`FKT_BODY_MAP` en `site.js`).
+Al elegir una zona, aparece un goniómetro sobre esa articulación y la aguja barre: es solo
+visual (no muestra ningún valor, porque no hay una medición real del visitante detrás).
+Una sola instancia en toda la página (`FKT_BODY_MAP` y `fktInitBodyMap` en `site.js`).
 
 ### Motion / interacción
-Todo gateado por `prefers-reduced-motion` y por `pointer:fine` (nada de esto corre en
-celular, que ya tiene su propio scroll con inercia nativo):
-- Cursor a medida + cursor magnético en botones primarios.
-- Tilt 3D en tarjetas (servicios, especialidades, promos, reseñas).
-- Títulos que se revelan con clip-path en vez de fade.
+Todo respeta `prefers-reduced-motion`:
+- Goniómetros en los pasos numerados (`.process`, `fktInitStepGauges`): en servicios.html
+  la aguja marca los grados que ya traía cada etapa (0°, 90°, 180°); en el home, qué parte
+  del recorrido es cada paso. Se miden al entrar en pantalla, con el resorte del sistema.
+- Títulos que se revelan al entrar en pantalla.
 - Íconos de servicios/especialidades que se "dibujan" (stroke-dashoffset) al entrar en pantalla.
-- Spotlight que sigue al cursor en las bandas oscuras de CTA.
-- Scroll con inercia (suaviza la rueda del mouse sin romper el `window.scrollY` real).
-- Intro de carga con el isotipo — una vez por sesión de navegador (`sessionStorage`).
+- Spotlight que sigue al cursor en las bandas oscuras de CTA (solo con mouse).
 - Contadores animados (4.4★, +60 reseñas) con leve desenfoque mientras cuentan.
-- Ripple en botones primarios al soltar el click/tap.
 - Marquee infinito de logos de obras sociales (con fondo blanco fijo para que se lean bien
   también en modo oscuro).
+
+**Sacados a propósito en el rediseño** (jugaban en contra de pacientes mayores, no
+volverlos a agregar): cursor a medida, botones "magnéticos", tilt 3D en tarjetas, scroll
+con inercia (interceptaba la rueda del mouse), intro de carga con el isotipo y el ripple en
+botones.
 
 ### Modo oscuro
 Toggle real (sol/luna) en el header, persistido en `localStorage`, respeta
@@ -100,8 +119,8 @@ grillas); las imágenes hero/banner quedan eager a propósito (son el LCP de cad
 - Glosario en línea (RPD, bio-ortopedia, tendinopatías, fascitis plantar) con tooltip,
   dentro de las fichas de tratamiento.
 - Scrollbar a medida (fina, en teal).
-- Numeración editorial automática en los `eyebrow` de cada `.section-head` (01, 02...),
-  vía CSS counters — reinicia por página.
+- Header con navegación en "pastillas" (la página activa resaltada); pasa al menú
+  hamburguesa por debajo de 1180px para que nunca desborde el ancho de la página.
 - Hoja de impresión (`@media print`) que oculta chrome/flotantes y fuerza colores claros.
 - Avatar chico junto al nombre de cada profesional en equipo.html **solo cuando el backend
   tiene una foto real cargada** (nada de placeholders repetidos).
