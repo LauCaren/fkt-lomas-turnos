@@ -258,7 +258,7 @@ section.soft { background: var(--bg-soft); }
   transition: transform .2s var(--ease-out);
 }
 .ficha-overlay.open .ficha-card { transform: scale(1); }
-.ficha-cerrar { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 50%; background: var(--bg-soft); display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--ink-soft); line-height: 1; transition: background .2s var(--ease), color .2s var(--ease), transform .15s var(--ease-out); }
+.ficha-cerrar { position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 50%; background: var(--bg-soft); display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--ink-soft); line-height: 1; transition: background .2s var(--ease), color .2s var(--ease), transform .15s var(--ease-out); }
 .ficha-cerrar:hover { background: var(--teal-tint); color: var(--teal-dark); }
 .ficha-cerrar:active { transform: scale(.9); }
 .ficha-top { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 4px; }
@@ -289,7 +289,7 @@ section.soft { background: var(--bg-soft); }
   cursor: default; transform: scale(.95); transition: transform .2s var(--ease-out);
 }
 .lightbox.open img { transform: scale(1); }
-.lightbox-cerrar { position: absolute; top: 20px; right: 24px; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.12); color: #fff; font-size: 26px; line-height: 1; display: flex; align-items: center; justify-content: center; transition: background .2s var(--ease), transform .15s var(--ease-out); }
+.lightbox-cerrar { position: absolute; top: 20px; right: 24px; width: 48px; height: 48px; border-radius: 50%; background: rgba(255, 255, 255, 0.12); color: #fff; font-size: 26px; line-height: 1; display: flex; align-items: center; justify-content: center; transition: background .2s var(--ease), transform .15s var(--ease-out); }
 .lightbox-cerrar:hover { background: rgba(255, 255, 255, 0.22); }
 .lightbox-cerrar:active { transform: scale(.9); }
 
@@ -651,7 +651,7 @@ h1.reveal.in-view, .section-head.in-view h2 { clip-path: inset(0 0 0% 0); }
 .glossary:hover .glossary-tip, .glossary:focus-visible .glossary-tip { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); pointer-events: auto; }
 
 /* ---------- TOGGLE DE TEMA CLARO/OSCURO ---------- */
-.theme-toggle { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: 1.5px solid var(--line); border-radius: 100px; color: var(--muted); flex-shrink: 0; transition: border-color .2s var(--ease), color .2s var(--ease), background .2s var(--ease); }
+.theme-toggle { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1.5px solid var(--line); border-radius: 100px; color: var(--muted); flex-shrink: 0; transition: border-color .2s var(--ease), color .2s var(--ease), background .2s var(--ease); }
 .theme-toggle:hover { border-color: var(--teal); color: var(--teal-dark); background: var(--teal-tint); }
 .theme-toggle svg { width: 17px; height: 17px; }
 /* Muestra el ícono de la acción que hace el click, no el estado actual: sol = "pasar a
@@ -722,7 +722,7 @@ html { scrollbar-width: thin; scrollbar-color: var(--teal) var(--bg-soft); }
    botones flotantes ni el modo oscuro — solo el contenido, en blanco y negro legible. */
 @media print {
   header, footer, .wa-float, .sticky-cta, .search-overlay, .ficha-overlay, .lightbox,
-  .fkt-cursor, .fkt-intro, .skip-link, .logos-marquee, .theme-toggle, .search-trigger,
+  .skip-link, .logos-marquee, .theme-toggle, .search-trigger,
   .body-spot-ring, .treat-hint {
     display: none !important;
   }

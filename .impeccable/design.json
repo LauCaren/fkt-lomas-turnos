@@ -1,0 +1,940 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-18T01:18:06.711Z",
+  "title": "Design System: FKT Lomas",
+  "extensions": {
+    "sources": {
+      "app": "fkt-turnos-frontend/src/index.css",
+      "site": "FKT Pagina/assets/css/site.css",
+      "identity": "fkt-turnos-frontend/src/components/ui/Goniometro.jsx",
+      "siteMotion": "FKT Pagina/assets/js/site.js (fktInitBodyMap, fktInitStepGauges)"
+    },
+    "themeMechanism": "Light values on :root. Dark values under @media (prefers-color-scheme: dark) { :root:not([data-theme=\"light\"]) } and under :root[data-theme=\"dark\"]. An explicit data-theme wins.",
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Deep Clinic Teal",
+        "cssVar": "--primary",
+        "canonical": "oklch(49.3% 0.078 191.4)",
+        "tonalRamp": [
+          "#000F0E",
+          "#022C2A",
+          "#034D4A",
+          "#186F6C",
+          "#42918E",
+          "#67B5B1",
+          "#8BDAD6",
+          "#B6FFFA"
+        ]
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Pressed Teal",
+        "cssVar": "--primary-hover",
+        "canonical": "oklch(41.9% 0.066 190.6)",
+        "tonalRamp": [
+          "#000F0E",
+          "#022C2A",
+          "#044D4A",
+          "#2C6D6A",
+          "#508F8B",
+          "#73B3AF",
+          "#97D7D3",
+          "#BBFDF9"
+        ]
+      },
+      "teal": {
+        "role": "primary",
+        "displayName": "Brand Teal / Needle Teal",
+        "cssVar": "--teal",
+        "canonical": "oklch(62.4% 0.099 191.4)",
+        "tonalRamp": [
+          "#000E0E",
+          "#002C2A",
+          "#054C4A",
+          "#06706D",
+          "#1A9591",
+          "#4BB9B4",
+          "#73DED9",
+          "#B4FFFB"
+        ]
+      },
+      "teal-dark": {
+        "role": "primary",
+        "displayName": "Deep Clinic Teal (text and emphasis)",
+        "cssVar": "--teal-dark",
+        "canonical": "oklch(49.3% 0.078 191.4)",
+        "tonalRamp": [
+          "#000F0E",
+          "#022C2A",
+          "#034D4A",
+          "#186F6C",
+          "#42918E",
+          "#67B5B1",
+          "#8BDAD6",
+          "#B6FFFA"
+        ]
+      },
+      "teal-tint": {
+        "role": "primary",
+        "displayName": "Teal Mist",
+        "cssVar": "--teal-tint",
+        "canonical": "oklch(95.2% 0.017 192.4)",
+        "tonalRamp": [
+          "#040D0D",
+          "#1C2827",
+          "#384544",
+          "#576464",
+          "#778685",
+          "#9AA9A8",
+          "#BDCDCC",
+          "#E2F2F1"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Deep Blue-Grey Ink",
+        "cssVar": "--ink",
+        "canonical": "oklch(30.5% 0.038 237.7)",
+        "tonalRamp": [
+          "#000D18",
+          "#122835",
+          "#2F4554",
+          "#4D6574",
+          "#6E8697",
+          "#90A9BA",
+          "#B3CDDF",
+          "#DFF2FE"
+        ]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Soft Ink",
+        "cssVar": "--ink-soft",
+        "canonical": "oklch(43.7% 0.041 239.7)",
+        "tonalRamp": [
+          "#000D18",
+          "#112837",
+          "#2E4556",
+          "#4C6576",
+          "#6D8699",
+          "#8FA9BC",
+          "#B2CDE1",
+          "#DFF1FF"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted Slate",
+        "cssVar": "--muted",
+        "canonical": "oklch(52.6% 0.029 229.6)",
+        "tonalRamp": [
+          "#000D15",
+          "#162830",
+          "#32454E",
+          "#51656E",
+          "#718690",
+          "#94A9B4",
+          "#B7CDD8",
+          "#DCF3FE"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "cssVar": "--line",
+        "canonical": "oklch(92.0% 0.012 203.5)",
+        "tonalRamp": [
+          "#060D0D",
+          "#1E2728",
+          "#3B4445",
+          "#5A6364",
+          "#7B8585",
+          "#9DA7A8",
+          "#C1CCCC",
+          "#E6F1F2"
+        ]
+      },
+      "line-strong": {
+        "role": "neutral",
+        "displayName": "Graduation Grey",
+        "cssVar": "--line-strong",
+        "canonical": "oklch(71.9% 0.026 212.9)",
+        "tonalRamp": [
+          "#000E12",
+          "#16282C",
+          "#32464A",
+          "#51656A",
+          "#71878B",
+          "#94AAAF",
+          "#B7CED3",
+          "#DCF3F9"
+        ]
+      },
+      "bg": {
+        "role": "neutral",
+        "displayName": "Clinical White",
+        "cssVar": "--bg",
+        "canonical": "oklch(100.0% 0.000 89.9)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#A5A5A5",
+          "#C9C9C9",
+          "#EEEEEE"
+        ]
+      },
+      "bg-soft": {
+        "role": "neutral",
+        "displayName": "Cool Ground",
+        "cssVar": "--bg-soft",
+        "canonical": "oklch(97.2% 0.005 197.1)",
+        "tonalRamp": [
+          "#090C0C",
+          "#222626",
+          "#3F4343",
+          "#5E6262",
+          "#7F8383",
+          "#A1A6A6",
+          "#C5CACA",
+          "#EBF0F0"
+        ]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "Sheet",
+        "cssVar": "--white",
+        "canonical": "oklch(100.0% 0.000 89.9)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#A5A5A5",
+          "#C9C9C9",
+          "#EEEEEE"
+        ],
+        "note": "Surface token: #FFFFFF in light, flips to #13222A in dark mode. Use it for sheets, never a literal white."
+      },
+      "black": {
+        "role": "neutral",
+        "displayName": "Night Ink",
+        "cssVar": "--black",
+        "canonical": "oklch(24.6% 0.028 234.1)",
+        "tonalRamp": [
+          "#010D15",
+          "#172731",
+          "#34454F",
+          "#52646F",
+          "#738591",
+          "#95A8B4",
+          "#B9CDD9",
+          "#DDF2FF"
+        ]
+      },
+      "red": {
+        "role": "state",
+        "displayName": "Rust Red",
+        "cssVar": "--red",
+        "canonical": "oklch(54.3% 0.172 37.1)",
+        "tonalRamp": [
+          "#1C0200",
+          "#460F00",
+          "#761F01",
+          "#AA3102",
+          "#D4532B",
+          "#FD7851",
+          "#FEB59F",
+          "#FFE9E3"
+        ]
+      },
+      "red-tint": {
+        "role": "state",
+        "displayName": "Rust Red Tint",
+        "cssVar": "--red-tint",
+        "canonical": "oklch(94.9% 0.020 40.5)",
+        "tonalRamp": [
+          "#120805",
+          "#2E221E",
+          "#4C3F3A",
+          "#6C5E59",
+          "#8E7F79",
+          "#B1A19C",
+          "#D6C5BF",
+          "#FBEAE4"
+        ]
+      },
+      "green": {
+        "role": "state",
+        "displayName": "Clinic Green",
+        "cssVar": "--green",
+        "canonical": "oklch(52.3% 0.135 144.2)",
+        "tonalRamp": [
+          "#001001",
+          "#002F04",
+          "#02510D",
+          "#237429",
+          "#49974B",
+          "#6CBB6D",
+          "#91E090",
+          "#CBFFC9"
+        ]
+      },
+      "green-tint": {
+        "role": "state",
+        "displayName": "Clinic Green Tint",
+        "cssVar": "--green-tint",
+        "canonical": "oklch(95.7% 0.021 147.6)",
+        "tonalRamp": [
+          "#060E06",
+          "#1E281F",
+          "#3B453C",
+          "#5A655B",
+          "#7A867B",
+          "#9DA99E",
+          "#C1CDC2",
+          "#E6F3E7"
+        ]
+      },
+      "amber": {
+        "role": "state",
+        "displayName": "Amber",
+        "cssVar": "--amber",
+        "canonical": "oklch(61.2% 0.129 70.3)",
+        "tonalRamp": [
+          "#140800",
+          "#361F00",
+          "#5D3902",
+          "#865505",
+          "#B2720A",
+          "#D8963E",
+          "#FEBA65",
+          "#FEEBD6"
+        ]
+      },
+      "amber-tint": {
+        "role": "state",
+        "displayName": "Amber Tint",
+        "cssVar": "--amber-tint",
+        "canonical": "oklch(96.1% 0.026 82.4)",
+        "tonalRamp": [
+          "#110A01",
+          "#2B2416",
+          "#494132",
+          "#696051",
+          "#8A8171",
+          "#ADA493",
+          "#D2C8B7",
+          "#F7EDDB"
+        ]
+      },
+      "amber-dark": {
+        "role": "state",
+        "displayName": "Amber Text",
+        "cssVar": "--amber-dark",
+        "canonical": "oklch(53.9% 0.113 70.4)",
+        "tonalRamp": [
+          "#140800",
+          "#361F00",
+          "#5D3902",
+          "#875500",
+          "#AD752A",
+          "#D29850",
+          "#F8BC75",
+          "#FFEBD5"
+        ]
+      },
+      "on-primary": {
+        "role": "primary",
+        "displayName": "On Primary",
+        "cssVar": "--on-primary",
+        "note": "Text on primary fills: #FFFFFF in light, #06221F in dark."
+      },
+      "header-bg": {
+        "role": "neutral",
+        "displayName": "Header Glass",
+        "cssVar": "--header-bg",
+        "note": "App value 0.86 alpha. The site uses 0.78 at rest and 0.92 (--header-bg-scrolled) after scrolling."
+      },
+      "dark-primary": {
+        "role": "dark-mode",
+        "displayName": "Bright Teal (dark primary)",
+        "cssVar": "--primary",
+        "note": "Value of --primary under prefers-color-scheme: dark (without data-theme=\"light\") and under :root[data-theme=\"dark\"]."
+      },
+      "dark-primary-hover": {
+        "role": "dark-mode",
+        "displayName": "Bright Teal Hover",
+        "cssVar": "--primary-hover",
+        "note": "Value of --primary-hover under prefers-color-scheme: dark (without data-theme=\"light\") and under :root[data-theme=\"dark\"]."
+      },
+      "dark-on-primary": {
+        "role": "dark-mode",
+        "displayName": "Dark On Primary",
+        "cssVar": "--on-primary",
+        "note": "Value of --on-primary under prefers-color-scheme: dark (without data-theme=\"light\") and under :root[data-theme=\"dark\"]."
+      },
+      "dark-teal": {
+        "role": "dark-mode",
+        "displayName": "Bright Teal",
+        "cssVar": "--teal",
+        "note": "Value of --teal under prefers-color-scheme: dark (without data-theme=\"light\") and under :root[data-theme=\"dark\"]."
+      },
+      "dark-teal-dark": {
+        "role": "dark-mode",
+        "displayName": "Pale Teal (dark text emphasis)",
+        "cssVar": "--teal-dark",
+        "note": "Value of --teal-dark under prefers-color-scheme: dark (without data-theme=\"light\") and under :root[data-theme=\"dark\"]."
+      },
+      "dark-teal-tint": {
+        "role": "dark-mode",
+        "displayName": "Deep Teal Wash",
+        "cssVar": "--teal-tint",
+        "note": "Value of --teal-tint under prefers-color-scheme: dark (without data-theme=\"light\") and under :root[data-theme=\"dark\"]."
+      },
+      "dark-ink": {
+        "role": "dark-mode",
+        "displayName": "Frost Ink",
+        "cssVar": "--ink",
+        "note": "Value of --ink under prefers-color-scheme: dark (without data-theme=\"light\") and under :root[data-theme=\"dark\"]."
+      },
+      "dark-ink-soft": {
+        "role": "dark-mode",
+        "displayName": "Frost Soft",
+        "cssVar": "--ink-soft",
+        "note": "Value of --ink-soft under prefers-color-scheme: dark (without data-theme=\"light\") and under :root[data-theme=\"dark\"]."
+      },
+      "dark-muted": {
+        "role": "dark-mode",
+        "displayName": "Frost Muted",
+        "cssVar": "--muted",
+        "note": "Value of --muted under prefers-color-scheme: dark (without data-theme=\"light\") and under :root[data-theme=\"dark\"]."
+      },
+      "dark-line": {
+        "role": "dark-mode",
+        "displayName": "Night Hairline",
+        "cssVar": "--line",
+        "note": "Value of --line under prefers-color-scheme: dark (without data-theme=\"light\") and under :root[data-theme=\"dark\"]."
+      },
+      "dark-line-strong": {
+        "role": "dark-mode",
+        "displayName": "Night Graduation",
+        "cssVar": "--line-strong",
+        "note": "Value of --line-strong under prefers-color-scheme: dark (without data-theme=\"light\") and under :root[data-theme=\"dark\"]."
+      },
+      "dark-bg": {
+        "role": "dark-mode",
+        "displayName": "Night Surface",
+        "cssVar": "--bg",
+        "note": "Value of --bg under prefers-color-scheme: dark (without data-theme=\"light\") and under :root[data-theme=\"dark\"]."
+      },
+      "dark-bg-soft": {
+        "role": "dark-mode",
+        "displayName": "Night Ground",
+        "cssVar": "--bg-soft",
+        "note": "Value of --bg-soft under prefers-color-scheme: dark (without data-theme=\"light\") and under :root[data-theme=\"dark\"]."
+      },
+      "dark-white": {
+        "role": "dark-mode",
+        "displayName": "Night Sheet",
+        "cssVar": "--white",
+        "note": "Value of --white under prefers-color-scheme: dark (without data-theme=\"light\") and under :root[data-theme=\"dark\"]."
+      },
+      "dark-black": {
+        "role": "dark-mode",
+        "displayName": "Deepest Night",
+        "cssVar": "--black",
+        "note": "Value of --black under prefers-color-scheme: dark (without data-theme=\"light\") and under :root[data-theme=\"dark\"]."
+      },
+      "dark-red": {
+        "role": "dark-mode",
+        "displayName": "Coral",
+        "cssVar": "--red",
+        "note": "Value of --red under prefers-color-scheme: dark (without data-theme=\"light\") and under :root[data-theme=\"dark\"]."
+      },
+      "dark-red-tint": {
+        "role": "dark-mode",
+        "displayName": "Coral Tint",
+        "cssVar": "--red-tint",
+        "note": "Value of --red-tint under prefers-color-scheme: dark (without data-theme=\"light\") and under :root[data-theme=\"dark\"]."
+      },
+      "dark-green": {
+        "role": "dark-mode",
+        "displayName": "Night Green",
+        "cssVar": "--green",
+        "note": "Value of --green under prefers-color-scheme: dark (without data-theme=\"light\") and under :root[data-theme=\"dark\"]."
+      },
+      "dark-green-tint": {
+        "role": "dark-mode",
+        "displayName": "Night Green Tint",
+        "cssVar": "--green-tint",
+        "note": "Value of --green-tint under prefers-color-scheme: dark (without data-theme=\"light\") and under :root[data-theme=\"dark\"]."
+      },
+      "dark-amber": {
+        "role": "dark-mode",
+        "displayName": "Night Amber",
+        "cssVar": "--amber",
+        "note": "Value of --amber under prefers-color-scheme: dark (without data-theme=\"light\") and under :root[data-theme=\"dark\"]."
+      },
+      "dark-amber-tint": {
+        "role": "dark-mode",
+        "displayName": "Night Amber Tint",
+        "cssVar": "--amber-tint",
+        "note": "Value of --amber-tint under prefers-color-scheme: dark (without data-theme=\"light\") and under :root[data-theme=\"dark\"]."
+      },
+      "dark-amber-dark": {
+        "role": "dark-mode",
+        "displayName": "Night Amber Text",
+        "cssVar": "--amber-dark",
+        "note": "Value of --amber-dark under prefers-color-scheme: dark (without data-theme=\"light\") and under :root[data-theme=\"dark\"]."
+      },
+      "dark-header-bg": {
+        "role": "dark-mode",
+        "displayName": "Night Header Glass",
+        "cssVar": "--header-bg",
+        "note": "Value of --header-bg under prefers-color-scheme: dark (without data-theme=\"light\") and under :root[data-theme=\"dark\"]."
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Site home hero headline only."
+      },
+      "readout": {
+        "displayName": "Readout",
+        "purpose": "The booked time in the booking readout. Siblings: confirmation hour clamp(52px, 11vw, 72px), Mis turnos and agenda detail hour 40px, day-summary total 36px."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "App page h1. Booking step titles use clamp(28px, 4.4vw, 36px)."
+      },
+      "headline-site": {
+        "displayName": "Headline (site)",
+        "purpose": "Interior page hero h1 on the marketing site."
+      },
+      "section-site": {
+        "displayName": "Section (site)",
+        "purpose": "Section h2 on the marketing site."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Section titles in the patient area. Modal titles are 22px."
+      },
+      "option-title": {
+        "displayName": "Option title",
+        "purpose": "Titles of the large choice rows in booking."
+      },
+      "numeric": {
+        "displayName": "Numeric",
+        "purpose": "Stat values and figures, always tabular."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "App body and the minimum size anywhere."
+      },
+      "body-site": {
+        "displayName": "Body (site)",
+        "purpose": "Marketing site body."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Button labels (17px on large buttons, 14.5px on small)."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Field labels, small buttons and chips."
+      },
+      "badge": {
+        "displayName": "Badge",
+        "purpose": "Status badges."
+      },
+      "group-label": {
+        "displayName": "Group label",
+        "purpose": "Uppercase sidebar group names: a nav label, never a kicker above a title."
+      },
+      "brand-script": {
+        "displayName": "Brand script",
+        "purpose": "Caveat, only for the handwritten \"Fisio Kinesio Terapia\" tagline under the logo."
+      }
+    },
+    "shadows": [
+      {
+        "name": "shadow-sm",
+        "value": "0 1px 2px rgba(19, 35, 44, .05), 0 6px 18px -6px rgba(19, 35, 44, .08)",
+        "dark": "0 1px 2px rgba(0, 0, 0, .3), 0 6px 18px -6px rgba(0, 0, 0, .35)",
+        "purpose": "Sheet: resting sheets, option rows, stat cards, the active tab, the sidebar indicator."
+      },
+      {
+        "name": "shadow-md",
+        "value": "0 2px 6px rgba(19, 35, 44, .05), 0 18px 40px -12px rgba(19, 35, 44, .16)",
+        "dark": "0 2px 6px rgba(0, 0, 0, .3), 0 18px 40px -12px rgba(0, 0, 0, .5)",
+        "purpose": "Lifted: hover on clickable sheets, the booking readout, the selected time slot, site photo teasers."
+      },
+      {
+        "name": "shadow-lg",
+        "value": "0 10px 24px rgba(19, 35, 44, .08), 0 36px 80px -20px rgba(19, 35, 44, .28)",
+        "dark": "0 10px 24px rgba(0, 0, 0, .35), 0 36px 80px -20px rgba(0, 0, 0, .6)",
+        "purpose": "Overlay: modals, toasts, lightbox images."
+      },
+      {
+        "name": "ring",
+        "value": "0 0 0 4px rgba(35, 154, 150, .18)",
+        "dark": "0 0 0 4px rgba(60, 196, 190, .22)",
+        "purpose": "Focus halo on fields, always paired with a 2px solid teal-dark outline for keyboard focus."
+      },
+      {
+        "name": "button-primary-inset",
+        "value": "0 1px 2px rgba(19, 35, 44, .12), inset 0 1px 0 rgba(255, 255, 255, .12)",
+        "purpose": "App primary button contact shadow plus top highlight."
+      },
+      {
+        "name": "kbd",
+        "value": "0 1px 0 var(--line-strong)",
+        "purpose": "Keycap bottom edge for keyboard shortcut hints."
+      }
+    ],
+    "motion": [
+      {
+        "name": "spring",
+        "value": "linear(0, 0.0618 2.2%, 0.2307 4.6%, 0.4788 7.6%, 0.7149 11%, 0.8803 14.6%, 0.9752 18.4%, 1.0176 22.6%, 1.0255 27.2%, 1.0161 33.2%, 1.0034 42%, 0.998 54%, 1)",
+        "purpose": "Near-critical spring (about 2% overshoot) for the goniometer needle and arc, selections (time slot scale 1.04), arrow and chevron nudges, the theme icon tilt and star taps. Same value in the app and the site. Browsers without linear() fall back to --ease-out."
+      },
+      {
+        "name": "ease",
+        "value": "cubic-bezier(.22, .68, .32, 1)",
+        "purpose": "Longer hover and color transitions and entrances (stagger fade-up, site .reveal)."
+      },
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(.23, 1, .32, 1)",
+        "purpose": "Short exponential ease-out for press states, step entries, modals, toasts and alerts (100-450ms)."
+      },
+      {
+        "name": "needle-travel",
+        "value": ".9s var(--spring)",
+        "purpose": "Needle rotation and arc stroke-dashoffset between values (app)."
+      },
+      {
+        "name": "needle-intro",
+        "value": "1.2s var(--spring) .1s backwards",
+        "purpose": "Needle and arc sweep in from 0 on mount."
+      },
+      {
+        "name": "needle-search",
+        "value": "1.1s var(--ease) infinite alternate, 40deg to 140deg",
+        "purpose": "Result screen loading state: the needle sweeps from side to side."
+      },
+      {
+        "name": "press",
+        "value": "transform .18s var(--ease-out); scale(.975)",
+        "purpose": "Button press. Sheets press to .985, chips .97, time slots .94, day cells .96."
+      },
+      {
+        "name": "step-entry",
+        "value": ".45s var(--ease-out), translateX(+/-28px)",
+        "purpose": "A booking step enters from the direction the needle moved."
+      },
+      {
+        "name": "readout-in",
+        "value": ".45s var(--ease-out), translateY(14px) scale(.98)",
+        "purpose": "The booking readout rising in."
+      },
+      {
+        "name": "modal-in",
+        "value": ".24s var(--ease-out), scale(.95) plus fade; overlay .2s",
+        "purpose": "Modal enters from the center."
+      },
+      {
+        "name": "toast-in",
+        "value": ".25s var(--ease-out), translateY(100%) scale(.95)",
+        "purpose": "Toasts enter from the bottom and leave toward the bottom."
+      },
+      {
+        "name": "tooltip-delay",
+        "value": ".15s var(--ease-out) after a .35s delay",
+        "purpose": "The tooltip appears after a hover delay and closes instantly."
+      },
+      {
+        "name": "stagger",
+        "value": "fadeUp .45s var(--ease), 40ms steps",
+        "purpose": "List and stat-row entrance in the app. Site grids stagger by 40ms on .reveal."
+      },
+      {
+        "name": "page-fade",
+        "value": ".35s var(--ease)",
+        "purpose": "Route change in the app."
+      },
+      {
+        "name": "sidebar-indicator",
+        "value": "transform .35s var(--ease-out)",
+        "purpose": "Sliding active background in the internal-panel sidebar."
+      },
+      {
+        "name": "step-gauge",
+        "value": "1.1s var(--spring), 160ms stagger",
+        "purpose": "Site process step goniometers, measured on scroll-in."
+      },
+      {
+        "name": "body-map-gauge",
+        "value": "1s var(--spring), needle to 126deg, arc to 70%",
+        "purpose": "Site body map: goniometer over the chosen joint, with no value shown."
+      },
+      {
+        "name": "site-reveal",
+        "value": ".7s var(--ease), translateY(18px); titles use clip-path .9s var(--ease-out)",
+        "purpose": "Site scroll reveals."
+      },
+      {
+        "name": "view-transition",
+        "value": "out 220ms / in 280ms ease, 8px vertical",
+        "purpose": "Site cross-page navigation (@view-transition)."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation/transition-duration .01ms !important",
+        "purpose": "Everything becomes instant under prefers-reduced-motion in both the app and the site."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "app-xs",
+        "value": "440px"
+      },
+      {
+        "name": "app-fields",
+        "value": "520px"
+      },
+      {
+        "name": "app-sm",
+        "value": "560px"
+      },
+      {
+        "name": "app-mobile",
+        "value": "640px"
+      },
+      {
+        "name": "app-header-wrap",
+        "value": "860px"
+      },
+      {
+        "name": "app-panel-stack",
+        "value": "880px"
+      },
+      {
+        "name": "app-header-compact",
+        "value": "1100px"
+      },
+      {
+        "name": "site-mobile",
+        "value": "560px"
+      },
+      {
+        "name": "site-sm",
+        "value": "600px"
+      },
+      {
+        "name": "site-sticky-bar",
+        "value": "640px"
+      },
+      {
+        "name": "site-stack",
+        "value": "760px"
+      },
+      {
+        "name": "site-process",
+        "value": "800px"
+      },
+      {
+        "name": "site-md",
+        "value": "860px"
+      },
+      {
+        "name": "site-cards-2",
+        "value": "960px"
+      },
+      {
+        "name": "site-burger",
+        "value": "1180px"
+      },
+      {
+        "name": "site-search-compact",
+        "value": "1480px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Deep-teal fill with white text for the main action of a screen. No hover movement, a slight press scale.",
+      "html": "<button class=\"ds-btn-primary\">Confirmar turno <svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14M13 6l6 6-6 6\"/></svg></button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 12px 22px; border-radius: 10px; font-family: var(--font, 'Atkinson Hyperlegible Next', system-ui, sans-serif); font-weight: 700; font-size: 16px; line-height: 1.2; border: 1.5px solid transparent; cursor: pointer; transition: transform .18s var(--ease-out, cubic-bezier(.23, 1, .32, 1)), background .2s var(--ease, cubic-bezier(.22, .68, .32, 1)), border-color .2s var(--ease, cubic-bezier(.22, .68, .32, 1)); background: var(--primary, #186F6C); color: var(--on-primary, #FFFFFF); box-shadow: 0 1px 2px rgba(19, 35, 44, .12), inset 0 1px 0 rgba(255, 255, 255, .12); } .ds-btn-primary svg { transition: transform .3s var(--spring, cubic-bezier(.23, 1, .32, 1)); } .ds-btn-primary:hover { background: var(--primary-hover, #125855); } .ds-btn-primary:hover svg { transform: translateX(3px); } .ds-btn-primary:active { transform: scale(.975); } .ds-btn-primary:focus-visible { outline: 2px solid var(--teal-dark, #186F6C); outline-offset: 2px; }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary action: sheet background with a graduation-grey border.",
+      "html": "<button class=\"ds-btn-outline\">Elegir otro día</button>",
+      "css": ".ds-btn-outline { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 12px 22px; border-radius: 10px; font-family: var(--font, 'Atkinson Hyperlegible Next', system-ui, sans-serif); font-weight: 700; font-size: 16px; line-height: 1.2; border: 1.5px solid transparent; cursor: pointer; transition: transform .18s var(--ease-out, cubic-bezier(.23, 1, .32, 1)), background .2s var(--ease, cubic-bezier(.22, .68, .32, 1)), border-color .2s var(--ease, cubic-bezier(.22, .68, .32, 1)); background: var(--white, #FFFFFF); color: var(--ink, #1C3240); border-color: var(--line-strong, #93A9AE); } .ds-btn-outline:hover { border-color: var(--ink-soft, #3D5566); background: var(--bg-soft, #F2F7F7); } .ds-btn-outline:active { transform: scale(.975); } .ds-btn-outline:focus-visible { outline: 2px solid var(--teal-dark, #186F6C); outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Tertiary text action in teal-dark with a Teal Mist wash on hover.",
+      "html": "<button class=\"ds-btn-ghost\">Ver mis turnos</button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 12px 22px; border-radius: 10px; font-family: var(--font, 'Atkinson Hyperlegible Next', system-ui, sans-serif); font-weight: 700; font-size: 16px; line-height: 1.2; border: 1.5px solid transparent; cursor: pointer; transition: transform .18s var(--ease-out, cubic-bezier(.23, 1, .32, 1)), background .2s var(--ease, cubic-bezier(.22, .68, .32, 1)), border-color .2s var(--ease, cubic-bezier(.22, .68, .32, 1)); padding-inline: 12px; background: transparent; color: var(--teal-dark, #186F6C); } .ds-btn-ghost:hover { background: var(--teal-tint, #E3F3F2); } .ds-btn-ghost:active { transform: scale(.975); } .ds-btn-ghost:focus-visible { outline: 2px solid var(--teal-dark, #186F6C); outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "48px field with a stacked 14.5px label. Focus gives a teal-dark border plus a halo.",
+      "html": "<div class=\"ds-field\"><label for=\"ds-dni\">DNI</label><input id=\"ds-dni\" placeholder=\"Sin puntos\" /><span class=\"ds-field-hint\">Lo usamos para encontrar tu ficha.</span></div>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 7px; font-family: var(--font, 'Atkinson Hyperlegible Next', system-ui, sans-serif); max-width: 320px; } .ds-field label { font-size: 14.5px; font-weight: 700; color: var(--ink-soft, #3D5566); } .ds-field input { min-height: 48px; padding: 11px 14px; border: 1.5px solid var(--line-strong, #93A9AE); border-radius: 10px; font: inherit; font-size: 16px; background: var(--white, #FFFFFF); color: var(--ink, #1C3240); transition: border-color .15s var(--ease, cubic-bezier(.22, .68, .32, 1)), box-shadow .2s var(--ease, cubic-bezier(.22, .68, .32, 1)); } .ds-field input::placeholder { color: var(--muted, #5A6E78); } .ds-field input:hover { border-color: var(--ink-soft, #3D5566); } .ds-field input:focus { outline: none; border-color: var(--teal-dark, #186F6C); box-shadow: var(--ring, 0 0 0 4px rgba(35,154,150,.18)); } .ds-field input:focus-visible { outline: 2px solid var(--teal-dark, #186F6C); outline-offset: 2px; } .ds-field-hint { font-size: 14px; color: var(--muted, #5A6E78); }"
+    },
+    {
+      "name": "Status Badges",
+      "kind": "chip",
+      "refersTo": "badge-reservado",
+      "description": "Pill badges with a filled dot, or a hollow ring for cancelado and ausente. Reservado is neutral, never red.",
+      "html": "<div class=\"ds-badges\"><span class=\"ds-badge ds-badge-disponible\">Disponible</span><span class=\"ds-badge ds-badge-reservado\">Reservado</span><span class=\"ds-badge ds-badge-confirmado\">Confirmado</span><span class=\"ds-badge ds-badge-pendiente\">Pendiente</span><span class=\"ds-badge ds-badge-ausente ds-badge-ring\">Ausente</span></div>",
+      "css": ".ds-badges { display: flex; gap: 8px; flex-wrap: wrap; font-family: var(--font, 'Atkinson Hyperlegible Next', system-ui, sans-serif); } .ds-badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 8px; border-radius: 100px; font-size: 13px; font-weight: 700; line-height: 1.4; white-space: nowrap; } .ds-badge::before { content: \"\"; width: 7px; height: 7px; border-radius: 50%; background: currentColor; } .ds-badge-ring::before { background: transparent; box-shadow: inset 0 0 0 1.5px currentColor; } .ds-badge-disponible { background: var(--green-tint, #E8F5E9); color: var(--green, #2E7D32); } .ds-badge-reservado { background: color-mix(in srgb, var(--ink, #1C3240) 8%, var(--white, #FFFFFF)); color: var(--ink-soft, #3D5566); } .ds-badge-confirmado { background: var(--teal-tint, #E3F3F2); color: var(--teal-dark, #186F6C); } .ds-badge-pendiente { background: var(--amber-tint, #FBF1DF); color: var(--amber-dark, #97610C); } .ds-badge-ausente { background: var(--red-tint, #FBEAE4); color: var(--red, #BE3E12); }"
+    },
+    {
+      "name": "Filter Chip",
+      "kind": "chip",
+      "refersTo": "filter-chip",
+      "description": "Operator filter pill with a state dot and a tabular count. The pressed state shows a border.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"true\">Todos <strong>24</strong></button><button class=\"ds-chip\" aria-pressed=\"false\">Libres <strong>6</strong></button></div>",
+      "css": ".ds-chips { display: flex; gap: 8px; font-family: var(--font, 'Atkinson Hyperlegible Next', system-ui, sans-serif); } .ds-chip { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 6px 14px 6px 12px; border-radius: 100px; border: 1.5px solid transparent; font: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer; background: var(--white, #FFFFFF); color: var(--ink-soft, #3D5566); box-shadow: inset 0 0 0 1px var(--line, #DCE7E8); transition: border-color .2s var(--ease, cubic-bezier(.22, .68, .32, 1)), box-shadow .2s var(--ease, cubic-bezier(.22, .68, .32, 1)), transform .15s var(--ease-out, cubic-bezier(.23, 1, .32, 1)); } .ds-chip::before { content: \"\"; width: 8px; height: 8px; border-radius: 50%; background: var(--line-strong, #93A9AE); } .ds-chip strong { font-variant-numeric: tabular-nums; color: var(--ink, #1C3240); } .ds-chip:hover { box-shadow: inset 0 0 0 1px var(--line-strong, #93A9AE); } .ds-chip:active { transform: scale(.97); } .ds-chip[aria-pressed=\"true\"] { border-color: var(--ink, #1C3240); color: var(--ink, #1C3240); box-shadow: none; } .ds-chip:focus-visible { outline: 2px solid var(--teal-dark, #186F6C); outline-offset: 2px; }"
+    },
+    {
+      "name": "Sheet",
+      "kind": "card",
+      "refersTo": "sheet",
+      "description": "Base surface: hairline border, two-layer soft shadow, 18px radius. Hover deepens the shadow only.",
+      "html": "<div class=\"ds-sheet\"><h3>Próximo turno</h3><p>Kinesiología, jueves 14 a las 10:30.</p></div>",
+      "css": ".ds-sheet { background: var(--white, #FFFFFF); border: 1px solid var(--line, #DCE7E8); border-radius: 18px; padding: 28px; box-shadow: var(--shadow-sm, 0 1px 2px rgba(19,35,44,.05), 0 6px 18px -6px rgba(19,35,44,.08)); font-family: var(--font, 'Atkinson Hyperlegible Next', system-ui, sans-serif); color: var(--ink, #1C3240); max-width: 420px; transition: box-shadow .25s var(--ease, cubic-bezier(.22, .68, .32, 1)), border-color .25s var(--ease, cubic-bezier(.22, .68, .32, 1)); } .ds-sheet:hover { box-shadow: var(--shadow-md, 0 2px 6px rgba(19,35,44,.05), 0 18px 40px -12px rgba(19,35,44,.16)); border-color: var(--line-strong, #93A9AE); } .ds-sheet h3 { margin: 0; font-size: 21px; font-weight: 800; letter-spacing: -0.015em; } .ds-sheet p { margin: 8px 0 0; color: var(--muted, #5A6E78); font-size: 16px; line-height: 1.6; }"
+    },
+    {
+      "name": "Goniómetro",
+      "kind": "custom",
+      "refersTo": "goniometro",
+      "description": "Signature instrument: a graduated semicircle with a teal measured arc, step stops and an ink needle that springs to the value. Always aria-hidden, with the value repeated in text.",
+      "html": "<svg class=\"ds-gonio\" viewBox=\"0 0 320 180\" aria-hidden=\"true\"><path class=\"ds-gonio-base\" d=\"M 24 164 A 136 136 0 0 1 296 164\"/><path class=\"ds-gonio-avance\" pathLength=\"1\" d=\"M 24 164 A 136 136 0 0 1 296 164\"/><g class=\"ds-gonio-ticks\"><line class=\"m\" x1=\"31\" y1=\"164\" x2=\"43\" y2=\"164\"/><line class=\"m\" x1=\"48.3\" y1=\"99.5\" x2=\"58.7\" y2=\"105.5\"/><line class=\"m\" x1=\"95.5\" y1=\"52.3\" x2=\"101.5\" y2=\"62.7\"/><line class=\"m\" x1=\"160\" y1=\"35\" x2=\"160\" y2=\"47\"/><line x1=\"224.5\" y1=\"52.3\" x2=\"218.5\" y2=\"62.7\"/><line x1=\"271.7\" y1=\"99.5\" x2=\"261.3\" y2=\"105.5\"/><line x1=\"289\" y1=\"164\" x2=\"277\" y2=\"164\"/></g><circle class=\"ds-gonio-stop on\" cx=\"24\" cy=\"164\" r=\"7\"/><circle class=\"ds-gonio-stop on\" cx=\"92\" cy=\"46.2\" r=\"7\"/><circle class=\"ds-gonio-stop\" cx=\"228\" cy=\"46.2\" r=\"6\"/><circle class=\"ds-gonio-stop\" cx=\"296\" cy=\"164\" r=\"6\"/><g class=\"ds-gonio-aguja\"><line x1=\"160\" y1=\"164\" x2=\"50\" y2=\"164\"/><circle cx=\"50\" cy=\"164\" r=\"3.5\"/></g><circle class=\"ds-gonio-eje\" cx=\"160\" cy=\"164\" r=\"10\"/><circle class=\"ds-gonio-centro\" cx=\"160\" cy=\"164\" r=\"3.5\"/></svg>",
+      "css": ".ds-gonio { display: block; width: 100%; max-width: 340px; height: auto; overflow: visible; } .ds-gonio-base { fill: none; stroke: var(--line, #DCE7E8); stroke-width: 10; stroke-linecap: round; } .ds-gonio-avance { fill: none; stroke: var(--teal, #239A96); stroke-width: 10; stroke-linecap: round; stroke-dasharray: 1 1; stroke-dashoffset: .5; transition: stroke-dashoffset .9s var(--spring, cubic-bezier(.23, 1, .32, 1)); } .ds-gonio-ticks line { stroke: var(--line-strong, #93A9AE); stroke-width: 2; stroke-linecap: round; } .ds-gonio-ticks line.m { stroke: var(--teal-dark, #186F6C); } .ds-gonio-stop { fill: var(--white, #FFFFFF); stroke: var(--line-strong, #93A9AE); stroke-width: 2.5; } .ds-gonio-stop.on { fill: var(--teal, #239A96); stroke: var(--white, #FFFFFF); stroke-width: 3; } .ds-gonio-aguja { transform-box: view-box; transform-origin: 160px 164px; transform: rotate(90deg); transition: transform .9s var(--spring, cubic-bezier(.23, 1, .32, 1)); } .ds-gonio-aguja line { stroke: var(--ink, #1C3240); stroke-width: 3.5; stroke-linecap: round; } .ds-gonio-aguja circle, .ds-gonio-eje { fill: var(--ink, #1C3240); } .ds-gonio-centro { fill: var(--teal, #239A96); } .ds-gonio:hover .ds-gonio-aguja { transform: rotate(120deg); } .ds-gonio:hover .ds-gonio-avance { stroke-dashoffset: .333; } @media (prefers-reduced-motion: reduce) { .ds-gonio-aguja, .ds-gonio-avance { transition-duration: .01ms; } }"
+    },
+    {
+      "name": "Time Scale",
+      "kind": "custom",
+      "refersTo": "time-slot",
+      "description": "Booking time step: one hairline row per hour and fixed quarter-hour columns, with empty quarters shown as a graduation mark. The selected slot fills deep teal and springs to 1.04.",
+      "html": "<div class=\"ds-escala\"><div class=\"ds-escala-hora\"><span class=\"ds-escala-etiqueta\">10<span>h</span></span><button class=\"ds-horario\">10:00</button><span class=\"ds-escala-vacio\"></span><button class=\"ds-horario\" aria-pressed=\"true\">10:30</button><button class=\"ds-horario\">10:45</button></div><div class=\"ds-escala-hora\"><span class=\"ds-escala-etiqueta\">11<span>h</span></span><button class=\"ds-horario\">11:00</button><button class=\"ds-horario\">11:15</button><span class=\"ds-escala-vacio\"></span><span class=\"ds-escala-vacio\"></span></div></div>",
+      "css": ".ds-escala { display: grid; border-top: 1px solid var(--line, #DCE7E8); font-family: var(--font, 'Atkinson Hyperlegible Next', system-ui, sans-serif); max-width: 560px; } .ds-escala-hora { display: grid; grid-template-columns: 64px repeat(4, 1fr); align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--line, #DCE7E8); } .ds-escala-etiqueta { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink-soft, #3D5566); } .ds-escala-etiqueta span { font-size: 14px; color: var(--muted, #5A6E78); font-weight: 600; } .ds-escala-vacio { height: 48px; display: flex; align-items: center; justify-content: center; } .ds-escala-vacio::before { content: \"\"; width: 2px; height: 16px; border-radius: 2px; background: var(--line-strong, #93A9AE); opacity: .7; } .ds-horario { height: 48px; border-radius: 10px; border: 1.5px solid var(--line-strong, #93A9AE); background: var(--white, #FFFFFF); color: var(--ink, #1C3240); font: inherit; font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; cursor: pointer; transition: border-color .2s var(--ease, cubic-bezier(.22, .68, .32, 1)), background .2s var(--ease, cubic-bezier(.22, .68, .32, 1)), color .2s var(--ease, cubic-bezier(.22, .68, .32, 1)), transform .3s var(--spring, cubic-bezier(.23, 1, .32, 1)), box-shadow .2s var(--ease, cubic-bezier(.22, .68, .32, 1)); } .ds-horario:hover { border-color: var(--teal-dark, #186F6C); background: var(--teal-tint, #E3F3F2); } .ds-horario:active { transform: scale(.94); } .ds-horario[aria-pressed=\"true\"] { background: var(--primary, #186F6C); border-color: var(--primary, #186F6C); color: var(--on-primary, #FFFFFF); transform: scale(1.04); box-shadow: var(--shadow-md, 0 2px 6px rgba(19,35,44,.05), 0 18px 40px -12px rgba(19,35,44,.16)); } .ds-horario:focus-visible { outline: 2px solid var(--teal-dark, #186F6C); outline-offset: 2px; }"
+    },
+    {
+      "name": "Option Row",
+      "kind": "custom",
+      "refersTo": "option-row",
+      "description": "Full-width 64px choice row for specialty and professional. The whole row is the target.",
+      "html": "<div class=\"ds-opciones\"><button class=\"ds-opcion\" aria-pressed=\"true\"><span class=\"ds-opcion-texto\"><span class=\"ds-opcion-titulo\">Kinesiología</span><span class=\"ds-opcion-detalle\">Con orden médica</span></span><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14M13 6l6 6-6 6\"/></svg></button><button class=\"ds-opcion\" aria-pressed=\"false\"><span class=\"ds-opcion-texto\"><span class=\"ds-opcion-titulo\">Traumatología</span><span class=\"ds-opcion-detalle\">Consulta médica</span></span><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14M13 6l6 6-6 6\"/></svg></button></div>",
+      "css": ".ds-opciones { display: grid; gap: 10px; max-width: 520px; font-family: var(--font, 'Atkinson Hyperlegible Next', system-ui, sans-serif); } .ds-opcion { display: flex; align-items: center; gap: 16px; width: 100%; min-height: 64px; padding: 14px 18px; text-align: left; color: var(--ink, #1C3240); font: inherit; background: var(--white, #FFFFFF); border: 1.5px solid var(--line, #DCE7E8); border-radius: 18px; box-shadow: var(--shadow-sm, 0 1px 2px rgba(19,35,44,.05), 0 6px 18px -6px rgba(19,35,44,.08)); cursor: pointer; transition: border-color .2s var(--ease, cubic-bezier(.22, .68, .32, 1)), box-shadow .2s var(--ease, cubic-bezier(.22, .68, .32, 1)), transform .18s var(--ease-out, cubic-bezier(.23, 1, .32, 1)), background .2s var(--ease, cubic-bezier(.22, .68, .32, 1)); } .ds-opcion:hover { border-color: var(--teal, #239A96); box-shadow: var(--shadow-md, 0 2px 6px rgba(19,35,44,.05), 0 18px 40px -12px rgba(19,35,44,.16)); } .ds-opcion:active { transform: scale(.985); } .ds-opcion[aria-pressed=\"true\"] { border-color: var(--teal-dark, #186F6C); background: var(--teal-tint, #E3F3F2); } .ds-opcion-texto { flex: 1; display: grid; gap: 2px; } .ds-opcion-titulo { font-size: 17.5px; font-weight: 700; line-height: 1.3; } .ds-opcion-detalle { font-size: 14.5px; color: var(--muted, #5A6E78); } .ds-opcion svg { flex-shrink: 0; color: var(--line-strong, #93A9AE); transition: transform .3s var(--spring, cubic-bezier(.23, 1, .32, 1)), color .2s var(--ease, cubic-bezier(.22, .68, .32, 1)); } .ds-opcion:hover svg { color: var(--teal-dark, #186F6C); transform: translateX(3px); } .ds-opcion:focus-visible { outline: 2px solid var(--teal-dark, #186F6C); outline-offset: 2px; }"
+    },
+    {
+      "name": "Tab Nav",
+      "kind": "nav",
+      "refersTo": "tab",
+      "description": "Segmented tab track tinted from the hairline. The active tab is a white sheet.",
+      "html": "<nav class=\"ds-tabnav\"><button class=\"ds-tab active\">Día</button><button class=\"ds-tab\">Semana</button><button class=\"ds-tab\">Lista de espera</button></nav>",
+      "css": ".ds-tabnav { display: flex; gap: 4px; padding: 4px; width: fit-content; background: color-mix(in srgb, var(--line, #DCE7E8) 55%, var(--bg-soft, #F2F7F7)); border-radius: 14px; font-family: var(--font, 'Atkinson Hyperlegible Next', system-ui, sans-serif); } .ds-tab { min-height: 40px; padding: 8px 16px; border: none; background: none; font: inherit; font-weight: 700; font-size: 15px; color: var(--ink-soft, #3D5566); border-radius: 10px; cursor: pointer; transition: color .2s var(--ease, cubic-bezier(.22, .68, .32, 1)), background .2s var(--ease, cubic-bezier(.22, .68, .32, 1)), box-shadow .2s var(--ease, cubic-bezier(.22, .68, .32, 1)), transform .15s var(--ease-out, cubic-bezier(.23, 1, .32, 1)); } .ds-tab:hover { color: var(--ink, #1C3240); } .ds-tab:active { transform: scale(.96); } .ds-tab.active { color: var(--ink, #1C3240); background: var(--white, #FFFFFF); box-shadow: var(--shadow-sm, 0 1px 2px rgba(19,35,44,.05), 0 6px 18px -6px rgba(19,35,44,.08)); } .ds-tab:focus-visible { outline: 2px solid var(--teal-dark, #186F6C); outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "El Goniómetro: cada grado de movimiento",
+    "overview": "The whole system reads like the instrument a kinesiologist uses to measure a joint angle. Progress, time and occupancy are shown as graduated semicircular arcs and scales with a single teal needle. They are never shown as generic progress bars or loose grids of chips. The React appointment app (`fkt-turnos-frontend/src/index.css`) and the static marketing site (`FKT Pagina/assets/css/site.css`) share the same tokens, the same typeface and the same needle spring, so the clinic reads as one center from the first Google visit to the agenda the secretaría keeps open all day.\n\nThe ground is clinical white over a faintly cool grey-green (`bg-soft`), with deep blue-grey ink. Surfaces are paper sheets: a 1px hairline border plus a soft two-layer shadow. Every time, date, count and amount uses tabular figures and is set large when it is the answer the person came for (the booked hour, the day's total). The user chose the type and contrast decisions for older patients, often booking from a phone and sometimes in pain. They mean 16px minimum body text, 48px controls and AA contrast even where the brand teal would fall short. The secretaría's screens use the same pieces in a denser mode, not a separate look.\n\nMotion follows one grammar. A near-critical spring moves the needle and confirms selections. Everything else uses short exponential ease-out. Nothing moves under the cursor on hover, and everything is instant under `prefers-reduced-motion`. The user removed some site effects in the redesign because they worked against older visitors (see Do's and Don'ts).",
+    "keyCharacteristics": [
+      "One measuring color: the brand teal draws arcs, needles, reached ticks and small accents. Fills that carry white text use the deeper teal.",
+      "Graduations as ornament: 1px tick marks, ruler lines and empty arcs appear where other systems would use icons or dividers.",
+      "Paper sheets on a cool ground: a hairline border plus a two-layer ink-tinted shadow, with radii of 10/18/26px.",
+      "One family, Atkinson Hyperlegible Next, from 400 body to 800 readouts, with tabular figures for every number.",
+      "State shown by shape and color together: a filled dot vs a hollow ring, and an icon plus color for attendance.",
+      "Spring for the needle, ease-out for everything else, nothing under reduced motion."
+    ],
+    "rules": [
+      {
+        "name": "The One Needle Rule",
+        "body": "The brand teal (#239A96) is the only measuring color. It draws arcs, needles, reached ticks and small marks, and nothing else gets a second accent hue.",
+        "section": "colors"
+      },
+      {
+        "name": "The Deep Teal Fill Rule",
+        "body": "Any fill that carries white text uses `primary` (#186F6C), never the brand teal. The brand teal with white text fails AA at 16px.",
+        "section": "colors"
+      },
+      {
+        "name": "The Reservado Is Never Red Rule",
+        "body": "For staff a booked slot means occupied, not a problem, so \"Reservado\" uses the neutral ink-tinted badge with a filled dot. Red is kept for errors, absences and holidays.",
+        "section": "colors"
+      },
+      {
+        "name": "The Shape Plus Color Rule",
+        "body": "No state is shown by color alone. Badges carry a filled dot, and cancelled or absent states use a hollow ring. Attendance buttons pair an icon with their color. The agenda grid marks confirmed slots with an inset green ring and absent slots with an inset red ring.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Family Rule",
+        "body": "Atkinson Hyperlegible Next sets everything. Caveat appears only in the logo tagline. Playfair Display, Inter and JetBrains Mono were retired in the redesign.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Readout Rule",
+        "body": "Every time, date number, count and amount uses `font-variant-numeric: tabular-nums`, so a value changing from 9 to 10 never shifts the row.",
+        "section": "typography"
+      },
+      {
+        "name": "The Title Stands Alone Rule",
+        "body": "Headings carry no eyebrow or kicker above them and no 01/02 section numbering. Context goes below the title as a subtitle (for example the panel greeting: \"Hola, {nombre}\" with \"panel · fecha\" beneath).",
+        "section": "typography"
+      },
+      {
+        "name": "The Paper Sheet Rule",
+        "body": "A surface is a sheet: a 1px hairline border, a two-layer ink-tinted shadow and a 10/18/26px radius. Short lists inside a sheet are hairline-ruled rows, not a card per row. Groupings inside a sheet use a tint block (cool ground or Teal Mist) rather than another bordered, shadowed sheet.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Shadow Responds, The Button Stays Rule",
+        "body": "On hover the shadow deepens and the border darkens. Buttons never translate or jump under the cursor, and press feedback is a slight scale (0.975).",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use `primary` (#186F6C) for any fill carrying white text, and keep the brand teal (#239A96) for arcs, needles, ticks and small marks.",
+      "Do express progress, occupancy and outcome with the goniometer (arc plus needle plus graduations) and give the same value in text beside it, because the gauge is `aria-hidden`.",
+      "Do set every time, date number, count and amount in tabular figures, and set the answer (the booked hour, the day total) large.",
+      "Do keep patient controls at 48px or more (56px for the final confirm) and touch targets at 44px or more. Use 38px small buttons and chips only on secretaría/admin work screens.",
+      "Do pair every state color with a shape: a filled dot or hollow ring on badges, an icon on attendance, inset rings in the grid.",
+      "Do use the `--spring` curve only for the needle, arc, selections and small arrow nudges, and `--ease-out` (0.12–0.45s) for everything else. Let `prefers-reduced-motion` reduce all of it to 0.01ms.",
+      "Do build surfaces as sheets: `white` token, 1px `line` border, Sheet shadow, 18px or 26px radius. Rule short lists with hairlines inside one sheet.",
+      "Do keep focus visible: a 2px solid teal-dark outline (2px offset in the app), plus the 4px teal halo on fields.",
+      "Do read every color through the tokens so dark mode (`data-theme` over `prefers-color-scheme`) follows automatically."
+    ],
+    "donts": [
+      "Don't put white text on the brand teal #239A96 (3.3:1, below AA).",
+      "Don't color \"Reservado\" red. It is neutral for staff and teal for patients. Red means error, absence or holiday.",
+      "Don't place eyebrows, kickers or 01/02 numbering above headings. The title stands alone, and context goes in a subtitle below it.",
+      "Don't move buttons or cards on hover (no translateY lift). Change tone, border and shadow instead, and keep press feedback to a slight scale.",
+      "Don't re-add the effects removed in the redesign: a custom cursor, magnetic buttons, 3D tilt on cards, inertia or hijacked wheel scrolling, a loading intro with the isotype, ripple on buttons, a spotlight following the cursor on dark bands, or handwritten promo notes.",
+      "Don't introduce Playfair Display, Inter, JetBrains Mono or any second text family. Caveat stays confined to the logo tagline.",
+      "Don't print a degree or score on a goniometer unless a real measurement or real step value backs it.",
+      "Don't use a small dropdown where a patient chooses specialty, professional, day or time. Use full-width rows, whole day cells and the graduated time scale.",
+      "Don't add a second accent hue, or a gradient on buttons or text, to carry emphasis. The one teal needle is the emphasis."
+    ]
+  }
+}

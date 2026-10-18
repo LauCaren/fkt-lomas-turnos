@@ -82,15 +82,31 @@ Todo respeta `prefers-reduced-motion`:
   del recorrido es cada paso. Se miden al entrar en pantalla, con el resorte del sistema.
 - Títulos que se revelan al entrar en pantalla.
 - Íconos de servicios/especialidades que se "dibujan" (stroke-dashoffset) al entrar en pantalla.
-- Spotlight que sigue al cursor en las bandas oscuras de CTA (solo con mouse).
 - Contadores animados (4.4★, +60 reseñas) con leve desenfoque mientras cuentan.
 - Marquee infinito de logos de obras sociales (con fondo blanco fijo para que se lean bien
-  también en modo oscuro).
+  también en modo oscuro), con botón visible "Pausar logos" (WCAG 2.2.2; el hover solo no
+  alcanza en celular ni con teclado). Con "reducir movimiento" el carrusel queda quieto y el
+  botón no se muestra.
 
 **Sacados a propósito en el rediseño** (jugaban en contra de pacientes mayores, no
 volverlos a agregar): cursor a medida, botones "magnéticos", tilt 3D en tarjetas, scroll
-con inercia (interceptaba la rueda del mouse), intro de carga con el isotipo y el ripple en
-botones.
+con inercia (interceptaba la rueda del mouse), intro de carga con el isotipo, el ripple en
+botones, el spotlight que seguía al cursor en las bandas oscuras y la nota manuscrita
+"reservá en 1 min" del hero (además de salir del sistema tipográfico, el "1 min" era un dato
+sin verificar).
+
+### Composición (rediseño de octubre 2026)
+- Home: "Dos caminos" son dos paneles grandes (reservar va relleno en teal: es la acción
+  fuerte); "Lo que encontrás en cada visita" es una lista con filetes y marcas de graduación,
+  con el título fijo al costado, en vez de cuatro tarjetas iguales.
+- Encabezados de páginas internas (`.page-hero`) y banners con foto (`.team-banner`) llevan
+  una regla graduada bajo el título — mismo recurso en todas las páginas.
+- La banda oscura de llamado a la acción (`.cta-band`) lleva un goniómetro grande de fondo.
+- Tarjetas de servicios y especialidades separadas, con la foto real como protagonista.
+- Formularios: campos de 48px, anillo de foco visible y errores en rojo (antes en teal).
+- La barra fija de "Pedir turno" se esconde cuando ya se ve la banda de CTA o el footer.
+- Verificado: ninguna de las 12 páginas desborda a 375 / 960 / 1366px y todas tienen un
+  solo `h1` (opiniones.html lo había perdido al sacar los rótulos).
 
 ### Modo oscuro
 Toggle real (sol/luna) en el header, persistido en `localStorage`, respeta
@@ -120,7 +136,10 @@ grillas); las imágenes hero/banner quedan eager a propósito (son el LCP de cad
   dentro de las fichas de tratamiento.
 - Scrollbar a medida (fina, en teal).
 - Header con navegación en "pastillas" (la página activa resaltada); pasa al menú
-  hamburguesa por debajo de 1180px para que nunca desborde el ancho de la página.
+  hamburguesa por debajo de 1180px para que nunca desborde el ancho de la página. El
+  teléfono y el texto "Buscar" aparecen recién desde 1480px; en celular (≤560px) el buscador
+  y el cambio de tema viven solo dentro del menú.
+- Títulos del footer en `h3` (antes `h4` después de un `h2`, salteaba un nivel).
 - Hoja de impresión (`@media print`) que oculta chrome/flotantes y fuerza colores claros.
 - Avatar chico junto al nombre de cada profesional en equipo.html **solo cuando el backend
   tiene una foto real cargada** (nada de placeholders repetidos).

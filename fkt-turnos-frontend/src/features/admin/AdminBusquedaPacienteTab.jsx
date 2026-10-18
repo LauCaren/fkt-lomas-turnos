@@ -25,7 +25,7 @@ const ESTADO_KINESIOLOGIA = {
 const BADGE_KINESIOLOGIA = {
   PENDIENTE_VALIDACION: 'badge-pendiente',
   VALIDADO: 'badge-disponible',
-  RECHAZADO: 'badge-reservado',
+  RECHAZADO: 'badge-ausente',
   PAUSADO: 'badge-cancelado',
   CANCELADO: 'badge-cancelado',
 };

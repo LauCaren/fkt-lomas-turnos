@@ -11,7 +11,7 @@ const ESTADOS = [
   { value: 'RECHAZADA', label: 'Rechazados' },
 ];
 
-const BADGE_ESTADO = { PENDIENTE: 'badge-pendiente', APROBADA: 'badge-disponible', RECHAZADA: 'badge-reservado' };
+const BADGE_ESTADO = { PENDIENTE: 'badge-pendiente', APROBADA: 'badge-disponible', RECHAZADA: 'badge-ausente' };
 
 function FilaSolicitud({ solicitud }) {
   const dispatch = useDispatch();

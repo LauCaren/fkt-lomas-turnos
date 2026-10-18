@@ -607,7 +607,6 @@ details[open] > :not(summary) { animation: detailsContentIn .25s var(--ease-out)
    también por forma, no solo por color (daltonismo, impresión en blanco y negro). */
 .badge-cancelado::before, .badge-ausente::before { background: transparent; box-shadow: inset 0 0 0 1.5px currentColor; }
 .badge-disponible { background: var(--green-tint); color: var(--green); }
-.badge-reservado { background: var(--red-tint); color: var(--red); }
 /* --muted acá daba 3.35:1 sobre --line, no alcanza AA — --ink-soft es un tono que ya existe en la paleta, no uno nuevo. */
 .badge-cancelado { background: var(--line); color: var(--ink-soft); }
 /* Mismo par que .alert-warning (ya validado para AA) — variante de badge que faltaba para los

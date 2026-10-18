@@ -24,6 +24,10 @@ fkt-turnos-frontend/     App React + Redux Toolkit: registro/login de pacientes,
                           (Capacitor).
 
 docker-compose.yml       Postgres local para desarrollo.
+
+PRODUCT.md               Contexto de producto (usuarios, principios, qué no se inventa).
+DESIGN.md                Sistema visual "Goniómetro" compartido por la app y el sitio:
+                          tokens, tipografía, componentes y movimiento.
 ```
 
 ## Cómo levantar todo en local
