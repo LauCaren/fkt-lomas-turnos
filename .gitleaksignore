@@ -1,0 +1,11 @@
+# Falsos positivos del escáner de secretos (gitleaks, job "security" de la CI), uno por línea con
+# su huella (commit:archivo:regla:línea). Solo agregar acá algo que NO sea un secreto real.
+#
+# Vector de prueba público del RFC 6238 (la clave "12345678901234567890" en Base32) en un test de
+# 2FA. No da acceso a nada. El test ya no lo tiene escrito como literal, pero el commit quedó en
+# el historial y gitleaks revisa el historial completo.
+7ea5c3f1cbe5634809011098f72b9b2535a3142f:fkt-turnos-backend/src/test/java/com/fktlomas/turnos/service/AuthServiceSeguridadTest.java:generic-api-key:50
+
+# Valor de ejemplo de MFA_ENCRYPTION_KEY en la plantilla .env.example: es "1234..." en Base64,
+# solo para desarrollo. En producción se genera una clave propia (ver docs/SEGURIDAD.md).
+245986a231993634d186484f4f91150c6916b59e:fkt-turnos-backend/.env.example:generic-api-key:15
