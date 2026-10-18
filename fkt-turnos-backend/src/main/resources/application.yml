@@ -69,7 +69,10 @@ app:
   backend-url: ${BACKEND_URL:}
   jwt:
     secret: ${JWT_SECRET:changeme-dev-secret-change-in-prod-please-0123456789}
+    # Pacientes: 7 días (10080 min). Personal de la clínica: una jornada de 12 h (720 min).
+    # Ver JwtService.generarToken para el porqué de la diferencia.
     expiration-minutes: ${JWT_EXPIRATION_MINUTES:10080}
+    expiration-minutes-staff: ${JWT_EXPIRATION_MINUTES_STAFF:720}
   google:
     # ID de cliente OAuth de Google Cloud Console (Credentials > OAuth client ID > Web
     # application) — el mismo valor va también en VITE_GOOGLE_CLIENT_ID del frontend. Sin
@@ -132,6 +135,15 @@ app:
     # Apagar solo si el host no tiene salida a internet; sin conexión igual falla "abierto" (deja
     # pasar la contraseña) en vez de romper el registro/cambio de contraseña.
     chequeo-password-filtrada: ${CHEQUEO_PASSWORD_FILTRADA:true}
+  retencion:
+    # Plazos de borrado automático de datos que ya no hacen falta (ver RetencionDatosService).
+    # Tienen que coincidir con lo que dice la Política de Privacidad del sitio.
+    postulaciones-dias: ${RETENCION_POSTULACIONES_DIAS:365}
+    mensajes-contacto-dias: ${RETENCION_MENSAJES_CONTACTO_DIAS:730}
+    notificaciones-dias: ${RETENCION_NOTIFICACIONES_DIAS:365}
+    conversaciones-whatsapp-dias: ${RETENCION_CONVERSACIONES_WHATSAPP_DIAS:180}
+    # Pedidos de baja y de arrepentimiento ya resueltos: 5 años como constancia.
+    pedidos-resueltos-dias: ${RETENCION_PEDIDOS_RESUELTOS_DIAS:1825}
   mercadopago:
     # Sin access-token configurado, el pago online al reservar queda deshabilitado (ver
     # MercadoPagoService.habilitado()) y el paciente solo puede pagar en el consultorio, como

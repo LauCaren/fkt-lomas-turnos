@@ -21,6 +21,8 @@ public record AdminResumenDto(
         int postulacionesSinRevisar,
         int solicitudesBajaPendientes,
         int turnosLlegaronHoy,
-        int turnosAusentesHoy
+        int turnosAusentesHoy,
+        /** Pedidos del botón de arrepentimiento sin resolver (ver ArrepentimientoService). */
+        int arrepentimientosPendientes
 ) {
 }

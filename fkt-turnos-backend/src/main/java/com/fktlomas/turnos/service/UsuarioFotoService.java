@@ -6,16 +6,15 @@ import com.fktlomas.turnos.exception.ArchivoInvalidoException;
 import com.fktlomas.turnos.exception.RecursoNoEncontradoException;
 import com.fktlomas.turnos.repository.UsuarioRepository;
 import com.fktlomas.turnos.storage.FileStorageService;
+import com.fktlomas.turnos.storage.ImagenSegura;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -28,9 +27,6 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class UsuarioFotoService {
-
-    private static final Map<String, String> EXTENSIONES_PERMITIDAS = Map.of("image/jpeg", ".jpg", "image/png", ".png");
-    private static final long TAMANO_MAXIMO_BYTES = 5L * 1024 * 1024;
 
     /** Ocho opciones fijas — el frontend las dibuja localmente (constants/avataresGenericos.js),
      *  acá solo se valida que la clave elegida sea una de ellas antes de guardarla. */
@@ -49,9 +45,9 @@ public class UsuarioFotoService {
     @Transactional
     public UsuarioFotoInfoDto subirFoto(Usuario usuario, MultipartFile foto) {
         String rutaAnterior = usuario.getFotoPath();
-        String destino = guardarImagen(foto);
-        usuario.setFotoPath(destino);
-        usuario.setFotoContentType(foto.getContentType());
+        ImagenGuardada guardada = guardarImagen(foto);
+        usuario.setFotoPath(guardada.ruta());
+        usuario.setFotoContentType(guardada.contentType());
         usuario.setAvatarGenerico(null);
         usuarioRepository.save(usuario);
         fileStorageService.borrar(rutaAnterior);
@@ -101,30 +97,19 @@ public class UsuarioFotoService {
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
     }
 
-    private String guardarImagen(MultipartFile archivo) {
-        if (archivo == null || archivo.isEmpty()) {
-            throw new ArchivoInvalidoException("Adjuntá una imagen");
-        }
-        String extension = archivo.getContentType() == null ? null : EXTENSIONES_PERMITIDAS.get(archivo.getContentType());
-        if (extension == null) {
-            throw new ArchivoInvalidoException("La imagen debe ser JPG o PNG");
-        }
-        if (archivo.getSize() > TAMANO_MAXIMO_BYTES) {
-            throw new ArchivoInvalidoException("La imagen no puede superar los 5MB");
-        }
-        // El Content-Type lo declara el navegador/cliente y se puede falsificar — se verifica acá
-        // que el archivo sea realmente una imagen decodificable (mismo chequeo que MedicoService).
+    private ImagenGuardada guardarImagen(MultipartFile archivo) {
+        // Validación + re-codificación (sin EXIF/GPS, con tope de dimensiones): ver ImagenSegura.
+        ImagenSegura.Imagen imagen = ImagenSegura.procesar(archivo);
         try {
-            if (ImageIO.read(archivo.getInputStream()) == null) {
-                throw new ArchivoInvalidoException("El archivo no es una imagen válida");
-            }
-        } catch (IOException e) {
-            throw new ArchivoInvalidoException("El archivo no es una imagen válida");
-        }
-        try {
-            return fileStorageService.guardar("usuarios/foto", UUID.randomUUID() + extension, archivo);
+            String ruta = fileStorageService.guardar("usuarios/foto", UUID.randomUUID() + imagen.extension(),
+                    imagen.contenido(), imagen.contentType());
+            return new ImagenGuardada(ruta, imagen.contentType());
         } catch (IOException e) {
             throw new UncheckedIOException("No se pudo guardar la imagen", e);
         }
+    }
+
+    /** Dónde quedó la imagen y con qué Content-Type se guardó (el que se sirve después). */
+    private record ImagenGuardada(String ruta, String contentType) {
     }
 }

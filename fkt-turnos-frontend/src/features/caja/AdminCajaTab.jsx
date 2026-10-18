@@ -8,7 +8,7 @@ import {
 } from './cajaSlice';
 import { fetchMedicosAdmin } from '../admin/adminSlice';
 import { verArchivo } from '../../api/descargas';
-import { formatMoneda } from '../../utils/formato';
+import { formatMoneda, formatFechaHora } from '../../utils/formato';
 import EstadoVacio from '../../components/EstadoVacio';
 
 function verComprobante(gastoId) {
@@ -224,7 +224,7 @@ function RetirosTab() {
             <div>
               <div style={{ fontWeight: 600 }}>{r.medicoNombre} · {formatMoneda(r.monto)}</div>
               <div style={{ fontSize: 13.5, color: 'var(--muted)' }}>
-                {new Date(r.fechaHora).toLocaleString('es-AR')} · entregado por {r.entregadoPorNombre}
+                {formatFechaHora(r.fechaHora)} · entregado por {r.entregadoPorNombre}
                 {r.anulado && ` · ANULADO (${r.motivoAnulacion})`}
               </div>
             </div>

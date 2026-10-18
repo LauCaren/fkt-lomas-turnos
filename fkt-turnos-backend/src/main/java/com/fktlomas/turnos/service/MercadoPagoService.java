@@ -202,6 +202,16 @@ public class MercadoPagoService {
 
         String estadoMp = payment.getStatus();
         pago.setPaymentId(String.valueOf(payment.getId()));
+        if ("approved".equalsIgnoreCase(estadoMp) && !montoCoincide(payment, pago)) {
+            // Defensa en profundidad: el pago se consulta a la API de Mercado Pago con nuestro
+            // access token (no se confía en lo que trae la notificación), pero igual se compara
+            // monto y moneda contra lo que se cobró al crear la preferencia antes de registrar
+            // un ingreso en caja. Si no coinciden queda PENDIENTE para revisión manual.
+            log.warn("Pago aprobado de Mercado Pago con monto/moneda distintos a lo esperado: paymentId={}, turno={}, esperado={} ARS, recibido={} {}",
+                    payment.getId(), turnoId, pago.getMonto(), payment.getTransactionAmount(), payment.getCurrencyId());
+            pagoOnlineRepository.save(pago);
+            return;
+        }
         if ("approved".equalsIgnoreCase(estadoMp)) {
             pago.setEstado(EstadoPagoOnline.APROBADO);
             pago.setIngreso(registrarIngresoDePago(pago));
@@ -212,6 +222,12 @@ public class MercadoPagoService {
         }
         // "pending"/"in_process"/"authorized": se deja en PENDIENTE, solo se actualiza paymentId.
         pagoOnlineRepository.save(pago);
+    }
+
+    private static boolean montoCoincide(Payment payment, PagoOnline pago) {
+        return payment.getTransactionAmount() != null
+                && payment.getTransactionAmount().compareTo(pago.getMonto()) >= 0
+                && (payment.getCurrencyId() == null || "ARS".equalsIgnoreCase(payment.getCurrencyId()));
     }
 
     private Ingreso registrarIngresoDePago(PagoOnline pago) {

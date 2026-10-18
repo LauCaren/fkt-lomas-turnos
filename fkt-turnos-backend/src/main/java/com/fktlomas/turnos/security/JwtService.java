@@ -1,5 +1,6 @@
 package com.fktlomas.turnos.security;
 
+import com.fktlomas.turnos.domain.Role;
 import com.fktlomas.turnos.domain.Usuario;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -29,9 +30,11 @@ public class JwtService {
 
     private final SecretKey key;
     private final long expirationMinutes;
+    private final long expirationMinutesStaff;
 
     public JwtService(@Value("${app.jwt.secret}") String secret,
-                       @Value("${app.jwt.expiration-minutes}") long expirationMinutes) {
+                       @Value("${app.jwt.expiration-minutes}") long expirationMinutes,
+                       @Value("${app.jwt.expiration-minutes-staff}") long expirationMinutesStaff) {
         if (SECRETO_POR_DEFECTO.equals(secret)) {
             log.warn("JWT_SECRET no está configurado — usando una clave aleatoria generada para esta ejecución. "
                     + "Las sesiones no van a sobrevivir un reinicio del backend. Configurá la variable de entorno "
@@ -41,17 +44,26 @@ public class JwtService {
             this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         }
         this.expirationMinutes = expirationMinutes;
+        this.expirationMinutesStaff = expirationMinutesStaff;
     }
 
+    /**
+     * Pacientes: sesión larga (7 días por defecto) para no pedirle la contraseña a cada rato a
+     * alguien que entra una vez por semana a ver su turno. Personal (médicos, secretaría, admin,
+     * contador): una jornada (12 h por defecto), porque esas cuentas ven historias clínicas y
+     * caja de todo el centro — si alguien se lleva el token de una PC de la oficina, deja de
+     * servir al día siguiente. Ver app.jwt.* en application.yml.
+     */
     public String generarToken(Usuario usuario) {
         Instant now = Instant.now();
+        long minutos = usuario.getRole() == Role.PACIENTE ? expirationMinutes : expirationMinutesStaff;
         return Jwts.builder()
                 .subject(usuario.getEmail())
                 .claim("uid", usuario.getId())
                 .claim("role", usuario.getRole().name())
                 .claim("nombre", usuario.getNombreCompleto())
                 .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plus(expirationMinutes, ChronoUnit.MINUTES)))
+                .expiration(Date.from(now.plus(minutos, ChronoUnit.MINUTES)))
                 .signWith(key)
                 .compact();
     }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { marcarAtendido, crearEvolucion, fetchEvolucionesDePaciente } from './medicoSlice';
+import { formatFechaHora } from '../../utils/formato';
 
 function FormularioEvolucion({ turno, onListo }) {
   const dispatch = useDispatch();
@@ -79,7 +80,7 @@ export default function MedicoTurnoCard({ turno, mostrarBotonAtender, mostrarEvo
               {evoluciones.map((e) => (
                 <div key={e.id} className="evolucion-item">
                   <span className="evolucion-dot" aria-hidden="true" />
-                  <div className="evolucion-fecha">{new Date(e.createdAt).toLocaleString('es-AR')}</div>
+                  <div className="evolucion-fecha">{formatFechaHora(e.createdAt)}</div>
                   <div className="evolucion-texto">{e.texto}</div>
                 </div>
               ))}

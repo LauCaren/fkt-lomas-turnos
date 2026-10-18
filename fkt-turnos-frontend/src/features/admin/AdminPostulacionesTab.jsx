@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchPostulaciones, marcarPostulacionRevisada } from './adminSlice';
 import { descargarArchivo } from '../../api/descargas';
 import EstadoVacio from '../../components/EstadoVacio';
+import { formatFechaHora } from '../../utils/formato';
 
 function descargarCv(id, nombreArchivo) {
   return descargarArchivo(`/api/admin/postulaciones/${id}/cv`, undefined, nombreArchivo);
@@ -28,7 +29,7 @@ export default function AdminPostulacionesTab() {
         <div key={p.id} className="card" style={{ opacity: p.revisado ? 0.65 : 1 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <div style={{ fontWeight: 600 }}>{p.nombreCompleto}</div>
-            <div style={{ fontSize: 13.5, color: 'var(--muted)' }}>{new Date(p.createdAt).toLocaleString('es-AR')}</div>
+            <div style={{ fontSize: 13.5, color: 'var(--muted)' }}>{formatFechaHora(p.createdAt)}</div>
           </div>
           <div style={{ fontSize: 14, color: 'var(--muted)', marginTop: 4 }}>{p.email} · {p.telefono}</div>
           {p.mensaje && <p style={{ marginTop: 10 }}>{p.mensaje}</p>}

@@ -1,6 +1,7 @@
 package com.fktlomas.turnos.service;
 
 import com.fktlomas.turnos.domain.EstadoPlanKinesiologia;
+import com.fktlomas.turnos.domain.EstadoArrepentimiento;
 import com.fktlomas.turnos.domain.EstadoSolicitudBaja;
 import com.fktlomas.turnos.dto.TurnoAdminDto;
 import com.fktlomas.turnos.dto.admin.AdminResumenDto;
@@ -8,6 +9,7 @@ import com.fktlomas.turnos.dto.admin.TendenciaDiaDto;
 import com.fktlomas.turnos.dto.caja.IngresoDto;
 import com.fktlomas.turnos.repository.MensajeContactoRepository;
 import com.fktlomas.turnos.repository.PostulacionRepository;
+import com.fktlomas.turnos.repository.SolicitudArrepentimientoRepository;
 import com.fktlomas.turnos.repository.SolicitudBajaCuentaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,7 @@ public class AdminResumenService {
     private final MensajeContactoRepository mensajeContactoRepository;
     private final PostulacionRepository postulacionRepository;
     private final SolicitudBajaCuentaRepository solicitudBajaCuentaRepository;
+    private final SolicitudArrepentimientoRepository solicitudArrepentimientoRepository;
 
     @Transactional(readOnly = true)
     public AdminResumenDto resumen() {
@@ -52,7 +55,8 @@ public class AdminResumenService {
                 (int) mensajeContactoRepository.countByLeidoFalse(),
                 (int) postulacionRepository.countByRevisadoFalse(),
                 (int) solicitudBajaCuentaRepository.countByEstado(EstadoSolicitudBaja.PENDIENTE),
-                (int) llegaron, (int) ausentes);
+                (int) llegaron, (int) ausentes,
+                (int) solicitudArrepentimientoRepository.countByEstado(EstadoArrepentimiento.PENDIENTE));
     }
 
     private static final int TENDENCIA_DIAS_MAXIMO = 90;

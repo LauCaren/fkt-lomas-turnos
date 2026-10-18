@@ -76,6 +76,18 @@ public class S3FileStorageService implements FileStorageService {
     }
 
     @Override
+    public String guardar(String carpeta, String nombreArchivo, byte[] contenido, String contentType) throws IOException {
+        String clave = carpeta + "/" + nombreArchivo;
+        PutObjectRequest request = PutObjectRequest.builder()
+                .bucket(bucket)
+                .key(clave)
+                .contentType(contentType)
+                .build();
+        s3Client.putObject(request, RequestBody.fromBytes(contenido));
+        return clave;
+    }
+
+    @Override
     public Optional<Resource> cargar(String clave) {
         if (clave == null) {
             return Optional.empty();

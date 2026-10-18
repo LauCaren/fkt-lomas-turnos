@@ -1,7 +1,9 @@
 package com.fktlomas.turnos.service;
 
+import com.fktlomas.turnos.util.DatosPersonales;
 import com.fktlomas.turnos.domain.MensajeContacto;
 import com.fktlomas.turnos.domain.Postulacion;
+import com.fktlomas.turnos.domain.SolicitudArrepentimiento;
 import com.fktlomas.turnos.domain.Usuario;
 
 import jakarta.mail.internet.MimeMessage;
@@ -14,6 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -311,6 +314,53 @@ public class EmailService {
         enviar(adminNotifyEmail, asunto, cuerpo);
     }
 
+    /**
+     * Código del trámite de arrepentimiento para la persona que lo pidió (Res. SCI 424/2020: se
+     * le tiene que informar dentro de las 24 h por el mismo medio). Texto plano a propósito:
+     * que se lea igual en cualquier cliente de correo y se pueda reenviar como constancia.
+     */
+    @Async
+    public void enviarCodigoArrepentimiento(SolicitudArrepentimiento solicitud) {
+        String asunto = "Recibimos tu pedido de arrepentimiento — código " + solicitud.getCodigo();
+        String cuerpo = """
+                Hola %s,
+
+                Recibimos tu pedido para revocar (cancelar) la contratación o el pago que nos indicaste.
+
+                Código de identificación del trámite: %s
+
+                Guardalo: es tu constancia. Te vamos a contactar para confirmarte la cancelación y,
+                si pagaste online, la devolución del dinero por el mismo medio de pago, sin costo.
+
+                Lo que nos contaste:
+                %s
+
+                FKT Lomas — Fisio Kinesio Terapia
+                """.formatted(solicitud.getNombreCompleto(), solicitud.getCodigo(), solicitud.getDetalleOperacion());
+        enviar(solicitud.getEmail(), asunto, cuerpo);
+    }
+
+    @Async
+    public void notificarNuevoArrepentimiento(SolicitudArrepentimiento solicitud) {
+        String asunto = "Botón de arrepentimiento: nuevo pedido " + solicitud.getCodigo();
+        String cuerpo = """
+                Llegó un pedido de arrepentimiento (Ley 24.240, art. 34). Hay que gestionarlo y
+                marcarlo como resuelto desde el panel, sección "Arrepentimiento".
+
+                Código: %s
+                Nombre: %s
+                DNI: %s
+                Email: %s
+                Teléfono: %s
+
+                Qué quiere cancelar:
+                %s
+                """.formatted(solicitud.getCodigo(), solicitud.getNombreCompleto(),
+                Objects.requireNonNullElse(solicitud.getDni(), "-"), solicitud.getEmail(),
+                Objects.requireNonNullElse(solicitud.getTelefono(), "-"), solicitud.getDetalleOperacion());
+        enviar(adminNotifyEmail, asunto, cuerpo);
+    }
+
     @Async
     public void notificarNuevaPostulacion(Postulacion postulacion) {
         String asunto = "Nueva postulación recibida — " + postulacion.getNombreCompleto();
@@ -427,13 +477,16 @@ public class EmailService {
             helper.addAttachment(nombreArchivo, new ByteArrayResource(adjunto), contentType);
             mailSender.send(mensaje);
         } catch (Exception e) {
-            throw new IllegalStateException("Error enviando email con adjunto a " + to + ": " + e.getMessage(), e);
+            // El mensaje llega a la pantalla de quien pidió el envío: sin el email del destinatario
+            // ni el detalle técnico del servidor de correo, que quedan en el log.
+            log.error("No se pudo enviar el email con adjunto a {}: {}", DatosPersonales.enmascararEmail(to), e.getMessage());
+            throw new IllegalStateException("No se pudo enviar el email con el adjunto. Revisá la configuración de correo o probá más tarde.", e);
         }
     }
 
     private void enviar(String to, String asunto, String cuerpo) {
         if (!mailEnabled) {
-            log.info("Envío de email deshabilitado (app.mail.enabled=false). Destinatario: {}, asunto: {}", to, asunto);
+            log.info("Envío de email deshabilitado (app.mail.enabled=false). Destinatario: {}, asunto: {}", DatosPersonales.enmascararEmail(to), asunto);
             return;
         }
         try {
@@ -444,13 +497,13 @@ public class EmailService {
             message.setText(cuerpo);
             mailSender.send(message);
         } catch (Exception e) {
-            log.error("No se pudo enviar el email a {}: {}", to, e.getMessage());
+            log.error("No se pudo enviar el email a {}: {}", DatosPersonales.enmascararEmail(to), e.getMessage());
         }
     }
 
     private void enviarHtml(String to, String asunto, String html) {
         if (!mailEnabled) {
-            log.info("Envío de email deshabilitado (app.mail.enabled=false). Destinatario: {}, asunto: {}", to, asunto);
+            log.info("Envío de email deshabilitado (app.mail.enabled=false). Destinatario: {}, asunto: {}", DatosPersonales.enmascararEmail(to), asunto);
             return;
         }
         try {
@@ -462,7 +515,7 @@ public class EmailService {
             helper.setText(html, true);
             mailSender.send(mensaje);
         } catch (Exception e) {
-            log.error("No se pudo enviar el email HTML a {}: {}", to, e.getMessage());
+            log.error("No se pudo enviar el email HTML a {}: {}", DatosPersonales.enmascararEmail(to), e.getMessage());
         }
     }
 

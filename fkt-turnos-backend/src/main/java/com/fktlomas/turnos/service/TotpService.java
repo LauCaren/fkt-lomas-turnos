@@ -38,12 +38,23 @@ public class TotpService {
     }
 
     public boolean verificar(String secretoBase32, String codigo) {
+        return pasoCoincidente(secretoBase32, codigo) >= 0;
+    }
+
+    /**
+     * Igual que {@link #verificar}, pero devuelve el "paso" de 30 segundos con el que coincidió
+     * el código (o -1 si no coincide con ninguno). El login lo usa para rechazar un código ya
+     * usado (RFC 6238 §5.2): sin eso, alguien que mira por encima del hombro o intercepta un
+     * código podría reusarlo durante los ~90 segundos que sigue siendo válido. Ver
+     * AuthService.verificarSegundoFactor y la columna usuarios.mfa_ultimo_paso (V30).
+     */
+    public long pasoCoincidente(String secretoBase32, String codigo) {
         if (secretoBase32 == null || codigo == null || !codigo.matches("\\d{6}")) {
-            return false;
+            return -1;
         }
         byte[] clave = base32Decode(secretoBase32);
         long pasoActual = Instant.now().getEpochSecond() / PERIODO_SEGUNDOS;
-        boolean coincide = false;
+        long coincide = -1;
         // Comparación de tiempo constante (MessageDigest.isEqual, mismo criterio que
         // MercadoPagoService.validarFirma) — con String.equals(), que corta apenas encuentra
         // el primer dígito distinto, alguien midiendo el tiempo de respuesta con precisión
@@ -53,7 +64,7 @@ public class TotpService {
         for (int i = -VENTANA_TOLERANCIA; i <= VENTANA_TOLERANCIA; i++) {
             String esperado = generarCodigo(clave, pasoActual + i);
             if (MessageDigest.isEqual(esperado.getBytes(StandardCharsets.UTF_8), codigo.getBytes(StandardCharsets.UTF_8))) {
-                coincide = true;
+                coincide = pasoActual + i;
             }
         }
         return coincide;

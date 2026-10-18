@@ -1,5 +1,6 @@
 package com.fktlomas.turnos.service;
 
+import com.fktlomas.turnos.util.DatosPersonales;
 import com.fktlomas.turnos.domain.Usuario;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -101,7 +102,7 @@ public class NotificacionTurnoService {
         try {
             canalFallbackService.enviarConFallback(paciente, envio);
         } catch (Exception e) {
-            log.warn("No se pudo notificar a {} por ningún canal: {}", paciente.getEmail(), e.getMessage());
+            log.warn("No se pudo notificar a {} por ningún canal: {}", DatosPersonales.enmascararEmail(paciente.getEmail()), e.getMessage());
         }
     }
 

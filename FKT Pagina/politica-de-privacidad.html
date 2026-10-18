@@ -5,7 +5,7 @@
 <script>try{var t=localStorage.getItem("fkt-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Política de Privacidad — FKT Lomas</title>
-<meta name="description" content="Cómo FKT Lomas recolecta, usa y protege tus datos personales.">
+<meta name="description" content="Cómo FKT Lomas trata tus datos personales y de salud: qué datos usamos, para qué, con quién los compartimos, cuánto los guardamos y cómo ejercer tus derechos.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="FKT Lomas">
 <meta property="og:locale" content="es_AR">
@@ -25,9 +25,7 @@
 <link rel="icon" type="image/png" href="assets/img/logo/favicon-fkt-2026.png">
 <link rel="shortcut icon" type="image/png" href="assets/img/logo/favicon-fkt-2026.png">
 <link rel="apple-touch-icon" href="assets/img/logo/favicon-fkt-2026.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,300..800;1,400&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<link rel="preload" href="assets/fonts/atkinson-hyperlegible-next-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css">
 <style>
   :root{ --maxw:820px; }
@@ -46,6 +44,7 @@
   footer{background:var(--black); color:rgba(255,255,255,0.75); padding:40px 0; margin-top:60px;}
   footer .wrap{display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; font-size:15.5px;}
   footer a{color:rgba(255,255,255,0.75);}
+  footer .footer-legal-links{padding-bottom:16px; margin-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.12);}
 </style>
 </head>
 <body>
@@ -64,58 +63,190 @@
 <main id="main">
   <div class="wrap">
     <h1 style="margin-top:14px;">Política de Privacidad</h1>
-    <p class="updated">Última actualización: septiembre de 2026</p>
+    <p class="updated">Última actualización: octubre de 2026</p>
 
-    <section class="policy">
-      <h2>1. Quiénes somos</h2>
-      <p>FKT Lomas es un centro médico y de kinesiología ubicado en Juan Larrea 496, Lomas de Zamora, Provincia de Buenos Aires. Somos responsables del tratamiento de los datos personales que recolectamos a través de este sitio y de nuestro sistema de turnos.</p>
+    <nav class="legal-indice" aria-label="Índice">
+      <p><strong>En resumen:</strong> usamos tus datos solo para atenderte y gestionar tus turnos; tus datos de salud los ven únicamente los profesionales que te atienden; no los vendemos ni los usamos para publicidad; y podés ver, corregir, descargar o pedir que borremos tus datos cuando quieras.</p>
+      <ol>
+        <li><a href="#responsable">Quién es responsable de tus datos</a></li>
+        <li><a href="#datos">Qué datos tratamos</a></li>
+        <li><a href="#finalidades">Para qué los usamos y con qué base legal</a></li>
+        <li><a href="#salud">Tus datos de salud</a></li>
+        <li><a href="#obligatorios">Qué datos son obligatorios</a></li>
+        <li><a href="#terceros">Con quién los compartimos</a></li>
+        <li><a href="#transferencias">Transferencias fuera de Argentina</a></li>
+        <li><a href="#plazos">Cuánto tiempo los conservamos</a></li>
+        <li><a href="#derechos">Tus derechos y cómo ejercerlos</a></li>
+        <li><a href="#menores">Menores de edad</a></li>
+        <li><a href="#seguridad">Cómo protegemos tus datos</a></li>
+        <li><a href="#almacenamiento">Cookies y almacenamiento en tu dispositivo</a></li>
+        <li><a href="#automatizado">Decisiones automatizadas</a></li>
+        <li><a href="#equipo">Si sos parte de nuestro equipo</a></li>
+        <li><a href="#cambios">Cambios a esta política</a></li>
+        <li><a href="#contacto-privacidad">Contacto y órgano de control</a></li>
+      </ol>
+    </nav>
+
+    <section class="policy" id="responsable">
+      <h2>1. Quién es responsable de tus datos</h2>
+      <p>El responsable de la base de datos es <strong>[COMPLETAR: razón social]</strong>, CUIT <strong>[COMPLETAR]</strong>, con domicilio en <strong>[COMPLETAR: domicilio legal]</strong>, que opera el centro médico y de kinesiología <strong>FKT Lomas</strong>, Juan Larrea 496, Lomas de Zamora, Provincia de Buenos Aires.</p>
+      <p>La base de datos está inscripta en el Registro Nacional de Bases de Datos de la Agencia de Acceso a la Información Pública con el número <strong>[COMPLETAR: n.º de inscripción]</strong>.</p>
+      <p>Para cualquier tema de privacidad podés escribir a <strong>[COMPLETAR: email de privacidad]</strong>.</p>
     </section>
 
-    <section class="policy">
-      <h2>2. Qué datos recolectamos</h2>
-      <p>Según cómo interactúes con nosotros, podemos recolectar:</p>
+    <section class="policy" id="datos">
+      <h2>2. Qué datos tratamos</h2>
+      <p>Según cómo te relaciones con nosotros:</p>
       <ul>
-        <li><strong>Si te registrás para sacar un turno:</strong> DNI, nombre y apellido, email, teléfono, género y obra social.</li>
-        <li><strong>Si nos escribís por el formulario de alquiler de consultorios:</strong> nombre, email, teléfono y el mensaje que nos dejes.</li>
-        <li><strong>Si te postulás para trabajar con nosotros:</strong> nombre, email, teléfono, un mensaje opcional y tu CV en formato PDF.</li>
+        <li><strong>Si te registrás o te registramos como paciente:</strong> DNI, nombre y apellido, email, teléfono, género, obra social y, si la cargás, una foto de perfil. Si entrás con Google, recibimos de Google tu nombre y tu email verificado (nunca tu contraseña de Google).</li>
+        <li><strong>Cuando sacás o usás un turno:</strong> especialidad, profesional, día y horario, motivo de consulta si lo indicás, si confirmaste o cancelaste, tu llegada al centro (check-in) y tu asistencia.</li>
+        <li><strong>Datos de salud:</strong> las evoluciones que carga el profesional que te atiende (historia clínica), las órdenes médicas que adjuntás para kinesiología y los planes de sesiones. Ver el punto 4.</li>
+        <li><strong>Pagos:</strong> si pagás online, el monto, el estado y el número de operación que nos informa Mercado Pago. <em>Nunca vemos ni guardamos los datos de tu tarjeta</em>: los maneja Mercado Pago.</li>
+        <li><strong>Comunicaciones:</strong> los recordatorios y avisos que te mandamos, tus respuestas a ellos y, si nos escribís al asistente de WhatsApp, los datos que nos des ahí para identificarte y gestionar tu turno.</li>
+        <li><strong>Reseñas:</strong> la calificación y el comentario que dejes sobre tu atención.</li>
+        <li><strong>Formularios del sitio:</strong> nombre, email, teléfono y mensaje (alquiler de consultorios); además tu CV en PDF si te postulás para trabajar con nosotros; y los datos del pedido si usás el botón de arrepentimiento.</li>
+        <li><strong>Datos técnicos:</strong> la dirección IP desde la que te conectás (para frenar intentos de acceso abusivos) y registros de seguridad de qué operaciones se hicieron en el sistema.</li>
       </ul>
     </section>
 
-    <section class="policy">
-      <h2>3. Para qué usamos tus datos</h2>
-      <p>Usamos estos datos exclusivamente para gestionar la atención administrativa del centro: coordinar y confirmar turnos, responder consultas sobre alquiler de consultorios y evaluar postulaciones laborales. No usamos tus datos con fines de marketing ni los cedemos a terceros, salvo que una autoridad competente lo requiera por ley.</p>
+    <section class="policy" id="finalidades">
+      <h2>3. Para qué los usamos y con qué base legal</h2>
+      <ul>
+        <li><strong>Atenderte y gestionar tus turnos</strong> (reservas, recordatorios, confirmaciones, sala de espera, kinesiología): es necesario para prestarte el servicio que nos pedís, y lo hacemos con tu consentimiento, que nos das al registrarte (Ley 25.326, art. 5).</li>
+        <li><strong>Llevar tu historia clínica:</strong> es una obligación legal de los profesionales y establecimientos de salud (Ley 26.529).</li>
+        <li><strong>Cobrar y llevar la caja:</strong> para registrar pagos y cumplir obligaciones contables e impositivas.</li>
+        <li><strong>Responder consultas y postulaciones</strong> que nos mandás por los formularios.</li>
+        <li><strong>Seguridad del sistema:</strong> proteger las cuentas, detectar accesos indebidos y dejar constancia de quién hizo cada operación.</li>
+        <li><strong>Publicar tu reseña</strong>, solo si la dejaste vos y la aprobamos (ver punto 6).</li>
+      </ul>
+      <p><strong>No usamos tus datos para publicidad, no los vendemos y no armamos perfiles comerciales.</strong> Si en algún momento quisiéramos mandarte novedades del centro, te pediríamos un consentimiento aparte, que podrías retirar cuando quieras.</p>
     </section>
 
-    <section class="policy">
-      <h2>4. Cómo protegemos tus datos</h2>
-      <p>Tu contraseña se almacena de forma encriptada (nunca en texto plano) y el acceso a los datos de pacientes está restringido a los sistemas y personas que los necesitan para brindarte atención. Adoptamos medidas de seguridad razonables acordes al tamaño de nuestra organización para proteger tu información. Cuando está activada, usamos además una herramienta de monitoreo técnico de errores del sistema; esta herramienta registra información sobre fallas de la aplicación y no se usa con fines de marketing ni se comparte con terceros.</p>
+    <section class="policy" id="salud">
+      <h2>4. Tus datos de salud</h2>
+      <p>Los datos de salud son <strong>datos sensibles</strong> (Ley 25.326, arts. 2 y 7) y los tratamos con un cuidado especial:</p>
+      <ul>
+        <li>La historia clínica y las evoluciones las ve <strong>solo el profesional que las cargó</strong>. El personal administrativo ve tus turnos y tu asistencia, pero no el contenido clínico.</li>
+        <li>Quienes acceden a estos datos están obligados al <strong>secreto profesional</strong> (Ley 25.326, art. 10; Ley 26.529, art. 2).</li>
+        <li>Cada vez que un profesional abre tu historia clínica, el sistema registra quién fue y cuándo.</li>
+        <li>Las evoluciones no se pueden modificar ni borrar una vez cargadas, para garantizar la integridad de la historia clínica (Ley 26.529, art. 18).</li>
+        <li>Podés pedir una copia de tu historia clínica en cualquier momento; te la entregamos dentro de las 48 horas (Ley 26.529, art. 14).</li>
+      </ul>
     </section>
 
-    <section class="policy">
-      <h2>5. Cuánto tiempo conservamos tus datos</h2>
-      <p>Conservamos tus datos mientras tu cuenta esté activa o mientras sea necesario para cumplir con la finalidad para la que fueron recolectados. Los mensajes de contacto y postulaciones se conservan mientras sean relevantes para su evaluación. La historia clínica generada durante tu atención (turnos, evoluciones y registros vinculados) se conserva por un mínimo de 10 años desde el último acto médico, tal como exige el art. 18 de la Ley 26.529 de Derechos del Paciente — por eso, si solicitás la baja de tu cuenta, esos registros no se eliminan sino que se conservan de forma anónima (ver punto 6).</p>
+    <section class="policy" id="obligatorios">
+      <h2>5. Qué datos son obligatorios</h2>
+      <p>Para sacar turnos online necesitamos DNI, nombre, email, teléfono, género y obra social: sin ellos no podemos identificarte, avisarte de tu turno ni gestionar tu cobertura. Si no querés darlos online, podés pedir tu turno por teléfono o en el centro. El motivo de consulta, la foto de perfil y los datos opcionales de los formularios son voluntarios.</p>
     </section>
 
-    <section class="policy">
-      <h2>6. Tus derechos</h2>
-      <p>De acuerdo con la Ley 25.326 de Protección de Datos Personales de la República Argentina, tenés derecho a acceder, rectificar, actualizar o solicitar la eliminación de tus datos personales (derechos ARCO). Para ejercerlos podés escribirnos por WhatsApp al <a href="https://wa.me/5491123515402">11 2351-5402</a> o llamar al <a href="tel:+541159505888">11 5950-5888</a>, o bien hacerlo vos mismo desde la app: en <strong>Mi cuenta</strong> encontrás los botones "Exportar mis datos" (para descargar toda la información que tenemos sobre vos) y "Solicitar baja de mi cuenta" (para pedir que anonimicemos tus datos personales — DNI, nombre, email y teléfono — de forma permanente e irreversible; tus turnos y evoluciones se conservan de forma anónima, como explica el punto 5).</p>
-      <p>La Agencia de Acceso a la Información Pública, en su carácter de Órgano de Control de la Ley 25.326, tiene la atribución de atender denuncias y reclamos que interpongan quienes resulten afectados en sus derechos por incumplimiento de las normas vigentes en materia de protección de datos personales.</p>
+    <section class="policy" id="terceros">
+      <h2>6. Con quién los compartimos</h2>
+      <p>Solo con proveedores que necesitamos para que el sistema funcione, que actúan por nuestra cuenta, únicamente para esa tarea y con obligación de confidencialidad (Ley 25.326, art. 25):</p>
+      <ul>
+        <li><strong>Alojamiento del sistema y de la base de datos:</strong> [COMPLETAR: proveedor y país].</li>
+        <li><strong>Almacenamiento de archivos</strong> (órdenes médicas, fotos, CVs): [COMPLETAR: proveedor y país].</li>
+        <li><strong>Envío de emails:</strong> [COMPLETAR: proveedor y país].</li>
+        <li><strong>Mercado Pago</strong> (Argentina): procesa los pagos online, si elegís pagar así.</li>
+        <li><strong>Twilio</strong> (Estados Unidos): envía y recibe los mensajes de WhatsApp, si elegís ese canal.</li>
+        <li><strong>Google</strong> (Estados Unidos): solo si elegís "Iniciar sesión con Google", o si tocás "Ver mapa" en nuestra página de contacto.</li>
+        <li><strong>Sentry</strong> (Estados Unidos), si está activado: registra errores técnicos de la app para poder corregirlos. Antes de enviar cada reporte, la app borra emails, teléfonos y DNI que pudiera contener.</li>
+      </ul>
+      <p>Las <strong>reseñas aprobadas</strong> se publican en el sitio con tu nombre y la inicial de tu apellido (por ejemplo, "Martina F.") y la especialidad, nunca con tu apellido completo ni otros datos.</p>
+      <p>Fuera de eso, solo compartimos datos cuando una ley o una autoridad competente nos lo exige, o con tu obra social en la medida necesaria para gestionar tu cobertura.</p>
+      <p>Cuando creás o cambiás tu contraseña, comprobamos que no aparezca en filtraciones conocidas usando el servicio público Have I Been Pwned: solo enviamos los primeros 5 caracteres de una huella cifrada de la contraseña, nunca la contraseña ni ningún dato tuyo.</p>
     </section>
 
-    <section class="policy">
-      <h2>7. Si sos parte de nuestro equipo</h2>
-      <p>Esta política también aplica a los datos personales de quienes trabajan con nosotros (personal administrativo, secretarías, profesionales de la salud): tu cuenta de acceso al sistema, y los registros de auditoría que dejan un rastro de qué operaciones administrativas se realizaron y desde qué cuenta, con fines de seguridad y trazabilidad interna. Los mismos derechos de acceso, rectificación y consulta del punto 6 aplican para vos.</p>
+    <section class="policy" id="transferencias">
+      <h2>7. Transferencias fuera de Argentina</h2>
+      <p>Algunos de los proveedores del punto 6 procesan datos en Estados Unidos, un país que la normativa argentina no considera de protección adecuada. En esos casos la transferencia se hace con las garantías que exige la ley: cláusulas contractuales modelo aprobadas por la Agencia de Acceso a la Información Pública o tu consentimiento, que nos das al aceptar esta política (Ley 25.326, art. 12).</p>
     </section>
 
-    <section class="policy">
-      <h2>8. Contacto</h2>
-      <p>Si tenés dudas sobre esta política, escribinos a través de cualquiera de los medios listados en nuestra <a href="contacto.html">página de contacto</a>.</p>
+    <section class="policy" id="plazos">
+      <h2>8. Cuánto tiempo los conservamos</h2>
+      <ul>
+        <li><strong>Tu cuenta y datos de contacto:</strong> mientras la cuenta esté activa. Si pedís la baja, se anonimizan de forma permanente.</li>
+        <li><strong>Historia clínica</strong> (turnos, evoluciones, órdenes médicas y planes): 10 años desde la última atención, como exige la Ley 26.529 (art. 18). Si pedís la baja de tu cuenta, se conservan sin tus datos identificatorios.</li>
+        <li><strong>Pagos y movimientos de caja:</strong> 10 años, por obligación contable (Código Civil y Comercial, art. 328).</li>
+        <li><strong>Consultas por alquiler de consultorios:</strong> 2 años.</li>
+        <li><strong>Postulaciones y CVs:</strong> 1 año.</li>
+        <li><strong>Avisos dentro de la app:</strong> 1 año.</li>
+        <li><strong>Conversaciones con el asistente de WhatsApp:</strong> se borran después de 180 días sin actividad.</li>
+        <li><strong>Pedidos de arrepentimiento y de baja de cuenta:</strong> 5 años, como constancia de que los gestionamos.</li>
+        <li><strong>Registros de seguridad:</strong> el mismo tiempo que la historia clínica o el registro al que se refieren.</li>
+      </ul>
+      <p>Estos plazos se aplican automáticamente: el sistema borra solo lo que vence.</p>
+    </section>
+
+    <section class="policy" id="derechos">
+      <h2>9. Tus derechos y cómo ejercerlos</h2>
+      <p>Según la Ley 25.326 tenés derecho, en forma gratuita, a:</p>
+      <ul>
+        <li><strong>Acceder</strong> a tus datos: te respondemos dentro de los 10 días corridos (art. 14).</li>
+        <li><strong>Rectificarlos o actualizarlos</strong> si son incorrectos o están incompletos: dentro de los 5 días hábiles (art. 16).</li>
+        <li><strong>Suprimirlos</strong> cuando ya no sean necesarios, salvo los que la ley nos obliga a conservar, como la historia clínica (art. 16).</li>
+        <li><strong>Retirar tu consentimiento</strong> para lo que no sea indispensable para atenderte.</li>
+      </ul>
+      <p><strong>Cómo hacerlo:</strong></p>
+      <ul>
+        <li>Desde la app, en <strong>Mi cuenta</strong>: podés corregir tus datos, <strong>"Exportar mis datos"</strong> (descarga todo lo que tenemos sobre vos) y <strong>"Solicitar baja de mi cuenta"</strong>.</li>
+        <li>Escribiendo a <strong>[COMPLETAR: email de privacidad]</strong>, por WhatsApp al <a href="https://wa.me/5491123515402">11 2351-5402</a>, llamando al <a href="tel:+541159505888">11 5950-5888</a> o en el centro. Para proteger tus datos, te vamos a pedir que acredites tu identidad.</li>
+      </ul>
+      <p class="leyenda-aaip">El titular de los datos personales tiene la facultad de ejercer el derecho de acceso a los mismos en forma gratuita a intervalos no inferiores a seis meses, salvo que se acredite un interés legítimo al efecto conforme lo establecido en el artículo 14, inciso 3 de la Ley N° 25.326. La Agencia de Acceso a la Información Pública, en su carácter de Órgano de Control de la Ley N° 25.326, tiene la atribución de atender las denuncias y reclamos que interpongan quienes resulten afectados en sus derechos por incumplimiento de las normas vigentes en materia de protección de datos personales.</p>
+    </section>
+
+    <section class="policy" id="menores">
+      <h2>10. Menores de edad</h2>
+      <p>Las cuentas de pacientes menores de 18 años las crea y administra su madre, padre o representante legal, con los datos del menor. Si nos enteramos de que un menor creó una cuenta por su cuenta, nos vamos a contactar con su familia.</p>
+    </section>
+
+    <section class="policy" id="seguridad">
+      <h2>11. Cómo protegemos tus datos</h2>
+      <ul>
+        <li>Toda la comunicación con el sistema viaja cifrada (HTTPS).</li>
+        <li>Las contraseñas se guardan con un cifrado de un solo sentido: ni nosotros podemos verlas.</li>
+        <li>El personal del centro entra con verificación en dos pasos, y cada persona ve solo lo que necesita para su tarea.</li>
+        <li>El sistema registra las operaciones administrativas y los accesos a la historia clínica.</li>
+        <li>Se hacen copias de seguridad periódicas de la base de datos.</li>
+        <li>Las fotos que se suben se limpian automáticamente de metadatos (como la ubicación GPS que guardan los celulares).</li>
+      </ul>
+      <p>Si ocurriera un incidente de seguridad que afecte tus datos, te vamos a avisar a la brevedad, junto con lo que estamos haciendo para resolverlo, y lo informaremos a la autoridad de control cuando corresponda.</p>
+    </section>
+
+    <section class="policy" id="almacenamiento">
+      <h2>12. Cookies y almacenamiento en tu dispositivo</h2>
+      <p><strong>No usamos cookies de publicidad ni de seguimiento</strong>, ni herramientas de analítica de terceros. La app y el sitio guardan en tu navegador solo lo necesario para funcionar: tu sesión iniciada, si preferís el tema claro u oscuro, y algunas preferencias de pantalla. Podés borrarlo cuando quieras desde la configuración de tu navegador (vas a tener que volver a iniciar sesión).</p>
+      <p>El mapa de Google de la página de contacto no se carga hasta que tocás "Ver mapa": recién ahí Google puede recibir tu dirección IP y usar sus propias cookies, según su <a href="https://policies.google.com/privacy?hl=es-419" target="_blank" rel="noopener">política de privacidad</a>.</p>
+    </section>
+
+    <section class="policy" id="automatizado">
+      <h2>13. Decisiones automatizadas</h2>
+      <p>No tomamos decisiones sobre vos basadas solo en procesos automáticos. Lo único automático es un control de la foto de perfil que corre <strong>dentro de tu propio dispositivo</strong> (la imagen no se manda a nadie para eso): avisa si no se ve una cara y bloquea imágenes claramente inapropiadas.</p>
+    </section>
+
+    <section class="policy" id="equipo">
+      <h2>14. Si sos parte de nuestro equipo</h2>
+      <p>Esta política también aplica a los datos de quienes trabajan con nosotros (administración, secretaría, profesionales y contaduría): tu cuenta de acceso y los registros de auditoría que dejan constancia de qué operaciones se hicieron y desde qué cuenta, con fines de seguridad y trazabilidad. Tenés los mismos derechos del punto 9.</p>
+    </section>
+
+    <section class="policy" id="cambios">
+      <h2>15. Cambios a esta política</h2>
+      <p>Si cambiamos algo importante de esta política, te lo vamos a avisar por email o con un aviso en la app antes de que se aplique. La fecha de "Última actualización" de arriba indica la versión vigente.</p>
+    </section>
+
+    <section class="policy" id="contacto-privacidad">
+      <h2>16. Contacto y órgano de control</h2>
+      <p>Por cualquier duda sobre tus datos escribinos a <strong>[COMPLETAR: email de privacidad]</strong> o por cualquiera de los medios de nuestra <a href="contacto.html">página de contacto</a>.</p>
+      <p>Si considerás que no respetamos tus derechos, podés presentar un reclamo ante la <a href="https://www.argentina.gob.ar/aaip/datospersonales" target="_blank" rel="noopener">Agencia de Acceso a la Información Pública</a>, órgano de control de la Ley 25.326.</p>
     </section>
   </div>
 </main>
 
 <footer>
   <div class="wrap">
+    <div class="footer-legal-links">
+      <a class="footer-arrepentimiento" href="arrepentimiento.html">Botón de arrepentimiento</a>
+      <a href="https://www.argentina.gob.ar/produccion/defensadelconsumidor/formulario" target="_blank" rel="noopener">Defensa de las y los Consumidores. Para reclamos ingrese aquí</a>
+    </div>
     <span>© 2026 FKT Lomas — Juan Larrea 496, Lomas de Zamora.</span>
     <a href="index.html">Volver al inicio</a>
   </div>

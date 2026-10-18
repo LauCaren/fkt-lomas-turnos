@@ -1,5 +1,6 @@
 package com.fktlomas.turnos.dto.auth;
 
+import com.fktlomas.turnos.util.DatosPersonales;
 import com.fktlomas.turnos.domain.Genero;
 import com.fktlomas.turnos.validation.Patrones;
 import jakarta.validation.constraints.*;
@@ -39,6 +40,11 @@ public record RegistroRequest(
         /** Campo honeypot: invisible para personas, si viene completo es un bot. */
         String sitioWeb
 ) {
+    /** El email se normaliza al entrar (ver DatosPersonales.normalizarEmail): la base lo guarda en minúsculas. */
+    public RegistroRequest {
+        email = DatosPersonales.normalizarEmail(email);
+    }
+
     public boolean pareceSpam() {
         return sitioWeb != null && !sitioWeb.isBlank();
     }

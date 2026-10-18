@@ -9,12 +9,12 @@ import com.fktlomas.turnos.dto.admin.ActualizarMedicoRequest;
 import com.fktlomas.turnos.dto.admin.CrearMedicoRequest;
 import com.fktlomas.turnos.dto.admin.CredencialesMedicoRequest;
 import com.fktlomas.turnos.dto.admin.MedicoAdminDto;
-import com.fktlomas.turnos.exception.ArchivoInvalidoException;
 import com.fktlomas.turnos.exception.ConflictoDeDatosException;
 import com.fktlomas.turnos.exception.RecursoNoEncontradoException;
 import com.fktlomas.turnos.repository.MedicoRepository;
 import com.fktlomas.turnos.repository.UsuarioRepository;
 import com.fktlomas.turnos.storage.FileStorageService;
+import com.fktlomas.turnos.storage.ImagenSegura;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,19 +22,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class MedicoService {
-
-    private static final Map<String, String> EXTENSIONES_PERMITIDAS = Map.of("image/jpeg", ".jpg", "image/png", ".png");
-    private static final long TAMANO_MAXIMO_BYTES = 5L * 1024 * 1024;
 
     private static final String AUDITORIA_TIPO_MEDICO = "MEDICO";
 
@@ -137,9 +132,9 @@ public class MedicoService {
     public MedicoAdminDto subirFoto(Long id, MultipartFile foto) {
         Medico medico = obtenerEntidad(id);
         String rutaAnterior = medico.getFotoPath();
-        String destino = guardarImagen(foto, "foto");
-        medico.setFotoPath(destino);
-        medico.setFotoContentType(foto.getContentType());
+        ImagenGuardada guardada = guardarImagen(foto, "foto");
+        medico.setFotoPath(guardada.ruta());
+        medico.setFotoContentType(guardada.contentType());
         Medico guardado = medicoRepository.save(medico);
         borrarSiExiste(rutaAnterior);
         return MedicoAdminDto.de(guardado);
@@ -149,9 +144,9 @@ public class MedicoService {
     public MedicoAdminDto subirTitulo(Long id, MultipartFile imagen) {
         Medico medico = obtenerEntidad(id);
         String rutaAnterior = medico.getTituloImagenPath();
-        String destino = guardarImagen(imagen, "titulo");
-        medico.setTituloImagenPath(destino);
-        medico.setTituloImagenContentType(imagen.getContentType());
+        ImagenGuardada guardada = guardarImagen(imagen, "titulo");
+        medico.setTituloImagenPath(guardada.ruta());
+        medico.setTituloImagenContentType(guardada.contentType());
         Medico guardado = medicoRepository.save(medico);
         borrarSiExiste(rutaAnterior);
         return MedicoAdminDto.de(guardado);
@@ -178,36 +173,20 @@ public class MedicoService {
                 .orElseThrow(() -> new RecursoNoEncontradoException(mensajeSiFalta));
     }
 
-    private String guardarImagen(MultipartFile archivo, String subcarpeta) {
-        if (archivo == null || archivo.isEmpty()) {
-            throw new ArchivoInvalidoException("Adjuntá una imagen");
-        }
-        // EXTENSIONES_PERMITIDAS es un Map.of(): a diferencia de un HashMap, su get(null) tira
-        // NullPointerException en vez de devolver null — y el Content-Type puede venir null (un
-        // cliente puede no mandarlo). El chequeo de null antes evita un 500 sin sentido en vez
-        // del error de validación esperado.
-        String extension = archivo.getContentType() == null ? null : EXTENSIONES_PERMITIDAS.get(archivo.getContentType());
-        if (extension == null) {
-            throw new ArchivoInvalidoException("La imagen debe ser JPG o PNG");
-        }
-        if (archivo.getSize() > TAMANO_MAXIMO_BYTES) {
-            throw new ArchivoInvalidoException("La imagen no puede superar los 5MB");
-        }
-        // El Content-Type de arriba lo declara el navegador — se puede falsificar. Acá se
-        // verifica que el archivo sea realmente una imagen decodificable, no cualquier cosa
-        // subida con una extensión/mimetype falso.
+    private ImagenGuardada guardarImagen(MultipartFile archivo, String subcarpeta) {
+        // Validación + re-codificación (sin EXIF/GPS, con tope de dimensiones): ver ImagenSegura.
+        ImagenSegura.Imagen imagen = ImagenSegura.procesar(archivo);
         try {
-            if (ImageIO.read(archivo.getInputStream()) == null) {
-                throw new ArchivoInvalidoException("El archivo no es una imagen válida");
-            }
-        } catch (IOException e) {
-            throw new ArchivoInvalidoException("El archivo no es una imagen válida");
-        }
-        try {
-            return fileStorageService.guardar("medicos/" + subcarpeta, UUID.randomUUID() + extension, archivo);
+            String ruta = fileStorageService.guardar("medicos/" + subcarpeta, UUID.randomUUID() + imagen.extension(),
+                    imagen.contenido(), imagen.contentType());
+            return new ImagenGuardada(ruta, imagen.contentType());
         } catch (IOException e) {
             throw new UncheckedIOException("No se pudo guardar la imagen", e);
         }
+    }
+
+    /** Dónde quedó la imagen y con qué Content-Type se guardó (el que se sirve después). */
+    private record ImagenGuardada(String ruta, String contentType) {
     }
 
     private void borrarSiExiste(String ruta) {

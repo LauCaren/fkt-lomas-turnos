@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   CalendarDays, CalendarPlus, ClipboardList, Users, Search, BellRing, Building2, FileText, Star,
-  UserMinus, Settings,
+  UserMinus, Settings, Undo2,
 } from 'lucide-react';
 import SidebarNav from '../../components/ui/SidebarNav';
 import CommandPalette from '../../components/ui/CommandPalette';
@@ -19,6 +19,7 @@ import AdminMensajesTab from '../admin/AdminMensajesTab';
 import AdminPostulacionesTab from '../admin/AdminPostulacionesTab';
 import AdminRecordatoriosTab from '../admin/AdminRecordatoriosTab';
 import AdminSolicitudesBajaTab from '../admin/AdminSolicitudesBajaTab';
+import AdminArrepentimientosTab from '../admin/AdminArrepentimientosTab';
 import AdminResenasTab from '../admin/AdminResenasTab';
 import PanelSaludo from '../../components/ui/PanelSaludo';
 
@@ -46,7 +47,13 @@ const GRUPOS_NAV = [
       { id: 'resenas', label: 'Reseñas', icon: Star },
     ],
   },
-  { label: 'Cuentas', items: [{ id: 'solicitudes-baja', label: 'Pedidos de baja', icon: UserMinus }] },
+  {
+    label: 'Cuentas',
+    items: [
+      { id: 'solicitudes-baja', label: 'Pedidos de baja', icon: UserMinus },
+      { id: 'arrepentimientos', label: 'Arrepentimiento', icon: Undo2 },
+    ],
+  },
   { items: [{ id: 'cuenta', label: 'Mi cuenta', icon: Settings }] },
 ];
 
@@ -59,6 +66,7 @@ const CAMPO_RESUMEN_POR_ITEM = {
   mensajes: 'mensajesSinLeer',
   postulaciones: 'postulacionesSinRevisar',
   'solicitudes-baja': 'solicitudesBajaPendientes',
+  arrepentimientos: 'arrepentimientosPendientes',
 };
 
 function conBadges(groups, resumen) {
@@ -160,6 +168,7 @@ export default function SecretariaDashboardPage() {
               {tab === 'mensajes' && <AdminMensajesTab />}
               {tab === 'postulaciones' && <AdminPostulacionesTab />}
               {tab === 'solicitudes-baja' && <AdminSolicitudesBajaTab />}
+              {tab === 'arrepentimientos' && <AdminArrepentimientosTab />}
               {tab === 'resenas' && <AdminResenasTab />}
               {tab === 'cuenta' && <CuentaSeguridadTab />}
             </TabPanel>

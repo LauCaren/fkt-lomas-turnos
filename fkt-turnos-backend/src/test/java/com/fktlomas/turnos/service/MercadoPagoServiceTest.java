@@ -257,7 +257,7 @@ class MercadoPagoServiceTest {
         when(pagoOnlineRepository.save(any(PagoOnline.class))).thenAnswer(inv -> inv.getArgument(0));
         when(ingresoRepository.save(any(Ingreso.class))).thenAnswer(inv -> inv.getArgument(0));
         Payment pagoAprobado = GSON.fromJson(
-                "{\"id\":777,\"status\":\"approved\",\"externalReference\":\"500\"}", Payment.class);
+                "{\"id\":777,\"status\":\"approved\",\"externalReference\":\"500\",\"transactionAmount\":15000,\"currencyId\":\"ARS\"}", Payment.class);
         when(paymentClient.get(777L)).thenReturn(pagoAprobado);
 
         service.procesarNotificacion("payment", "777", firmaValida("777", "req-2"), "req-2");
@@ -268,6 +268,22 @@ class MercadoPagoServiceTest {
         assertThat(pagoPendiente.getIngreso().getMetodoPago().name()).isEqualTo("MERCADOPAGO");
         assertThat(pagoPendiente.getIngreso().getRegistradoPor()).isNull();
         verify(ingresoRepository).save(any(Ingreso.class));
+    }
+
+    @Test
+    void unPagoAprobadoPorMenosDeLoCobradoQuedaPendienteYNoGeneraIngreso() throws Exception {
+        PagoOnline pagoPendiente = pagoPendienteDe(turno, paciente);
+        when(pagoOnlineRepository.findByTurnoIdOrderByCreatedAtDesc(500L)).thenReturn(List.of(pagoPendiente));
+        when(pagoOnlineRepository.save(any(PagoOnline.class))).thenAnswer(inv -> inv.getArgument(0));
+        Payment pagoParcial = GSON.fromJson(
+                "{\"id\":778,\"status\":\"approved\",\"externalReference\":\"500\",\"transactionAmount\":10,\"currencyId\":\"ARS\"}", Payment.class);
+        when(paymentClient.get(778L)).thenReturn(pagoParcial);
+
+        service.procesarNotificacion("payment", "778", firmaValida("778", "req-3"), "req-3");
+
+        assertThat(pagoPendiente.getEstado()).isEqualTo(EstadoPagoOnline.PENDIENTE);
+        assertThat(pagoPendiente.getIngreso()).isNull();
+        verify(ingresoRepository, never()).save(any(Ingreso.class));
     }
 
     @Test

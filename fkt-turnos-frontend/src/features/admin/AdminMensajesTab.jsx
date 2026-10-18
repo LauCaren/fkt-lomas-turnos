@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMensajesContacto, marcarMensajeLeido } from './adminSlice';
 import EstadoVacio from '../../components/EstadoVacio';
+import { formatFechaHora } from '../../utils/formato';
 
 export default function AdminMensajesTab() {
   const dispatch = useDispatch();
@@ -23,7 +24,7 @@ export default function AdminMensajesTab() {
         <div key={m.id} className="card" style={{ opacity: m.leido ? 0.65 : 1 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <div style={{ fontWeight: 600 }}>{m.nombre}</div>
-            <div style={{ fontSize: 13.5, color: 'var(--muted)' }}>{new Date(m.createdAt).toLocaleString('es-AR')}</div>
+            <div style={{ fontSize: 13.5, color: 'var(--muted)' }}>{formatFechaHora(m.createdAt)}</div>
           </div>
           <div style={{ fontSize: 14, color: 'var(--muted)', marginTop: 4 }}>{m.email} · {m.telefono}</div>
           <p style={{ marginTop: 10 }}>{m.mensaje}</p>

@@ -90,8 +90,10 @@ public class SecurityConfig {
                         // Reseñas aprobadas del centro entero (opiniones.html) — las de un médico puntual
                         // ya están cubiertas arriba, bajo /api/medicos/**.
                         .requestMatchers(HttpMethod.GET, "/api/resenas").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/turnos/confirmacion").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/turnos/confirmacion").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/contacto", "/api/postulaciones").permitAll()
+                        // Botón de arrepentimiento: la Res. SCI 424/2020 prohíbe exigir registro o login.
+                        .requestMatchers(HttpMethod.POST, "/api/arrepentimiento").permitAll()
                         // El estado lo consulta el wizard de reserva sin loguearse necesariamente, y al
                         // webhook le pega Mercado Pago, no un usuario con sesión — la seguridad de este
                         // último es la validación de firma (ver MercadoPagoService.validarFirma), no el JWT.
@@ -164,8 +166,13 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(allowedOrigins.split(",")));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
+        // Sin credenciales: la sesión viaja en el header Authorization, nunca en cookies, así
+        // que el navegador no tiene nada que mandar "automáticamente" a otro origen. Dejarlo en
+        // true no servía para nada y abría la puerta a que un error futuro en la lista de
+        // orígenes permitidos expusiera cookies si algún día se agregan.
+        configuration.setAllowCredentials(false);
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

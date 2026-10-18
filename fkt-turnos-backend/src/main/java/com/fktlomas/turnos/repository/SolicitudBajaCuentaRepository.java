@@ -4,7 +4,9 @@ import com.fktlomas.turnos.domain.EstadoSolicitudBaja;
 import com.fktlomas.turnos.domain.SolicitudBajaCuenta;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 
 public interface SolicitudBajaCuentaRepository extends JpaRepository<SolicitudBajaCuenta, Long> {
@@ -12,6 +14,10 @@ public interface SolicitudBajaCuentaRepository extends JpaRepository<SolicitudBa
     boolean existsByUsuarioIdAndEstado(Long usuarioId, EstadoSolicitudBaja estado);
 
     long countByEstado(EstadoSolicitudBaja estado);
+
+    /** Para la retención automática (ver RetencionDatosService): solo pedidos ya resueltos. */
+    @Transactional
+    long deleteByEstadoNotAndResueltaAtBefore(EstadoSolicitudBaja estado, Instant limite);
 
     @Query("""
             select s from SolicitudBajaCuenta s

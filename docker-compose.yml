@@ -8,7 +8,10 @@ services:
       POSTGRES_USER: fkt
       POSTGRES_PASSWORD: fkt
     ports:
-      - "5433:5432"
+      # Solo en la propia PC (127.0.0.1): sin esto Docker publica el puerto en todas las
+      # interfaces y cualquiera en la misma red (el wifi del consultorio) podía conectarse a la
+      # base con el usuario/clave de desarrollo.
+      - "127.0.0.1:5433:5432"
     volumes:
       - fkt_turnos_pgdata:/var/lib/postgresql/data
 

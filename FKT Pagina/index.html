@@ -25,9 +25,7 @@
 <link rel="icon" type="image/png" href="assets/img/logo/favicon-fkt-2026.png">
 <link rel="shortcut icon" type="image/png" href="assets/img/logo/favicon-fkt-2026.png">
 <link rel="apple-touch-icon" href="assets/img/logo/favicon-fkt-2026.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,300..800;1,400&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<link rel="preload" href="assets/fonts/atkinson-hyperlegible-next-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css">
 <style>
   /* ---------- HERO: editorial, sin foto — un diagrama propio en vez de un stock photo ---------- */
@@ -591,7 +589,12 @@
           </div>
         </div>
         <div class="map-frame">
-          <iframe src="https://maps.google.com/maps?q=Juan%20Larrea%20496%2C%20Lomas%20de%20Zamora&t=m&z=16&output=embed&iwloc=near" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Ubicación de FKT Lomas en el mapa"></iframe>
+          <div class="mapa-diferido" data-mapa-src="https://maps.google.com/maps?q=Juan%20Larrea%20496%2C%20Lomas%20de%20Zamora&t=m&z=16&output=embed&iwloc=near">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+            <p><strong>Juan Larrea 496, Lomas de Zamora</strong></p>
+            <button type="button" class="btn btn-primary">Ver mapa</button>
+            <p class="mapa-aviso">El mapa lo muestra Google: al abrirlo, Google recibe tu dirección IP. <a href="https://www.google.com/maps/place/?q=place_id:ChIJcZceT5rSvJURu57YHxCu_eE" target="_blank" rel="noopener">Abrir en Google Maps</a></p>
+          </div>
         </div>
       </div>
     </div>
@@ -666,6 +669,15 @@
         </div>
       </div>
     </div>
+    <div class="footer-legal">
+      <div class="footer-legal-links">
+        <a class="footer-arrepentimiento" href="arrepentimiento.html">Botón de arrepentimiento</a>
+        <a href="https://www.argentina.gob.ar/produccion/defensadelconsumidor/formulario" target="_blank" rel="noopener">Defensa de las y los Consumidores. Para reclamos ingrese aquí</a>
+      </div>
+      <!-- Datos legales obligatorios (Ley 24.240 y publicidad sanitaria). Completar antes de publicar:
+           ver docs/CUMPLIMIENTO-LEGAL.md. -->
+      <p class="footer-legal-datos">[COMPLETAR: razón social] · CUIT [COMPLETAR] · Dirección médica: [COMPLETAR: nombre], M.P. [COMPLETAR] · Habilitación sanitaria N.º [COMPLETAR]</p>
+    </div>
     <div class="footer-bottom">
       <span>© 2026 FKT Lomas — Kinesiología y especialidades médicas en Lomas de Zamora.</span>
       <a href="https://fktlomas.com" target="_blank" rel="noopener">fktlomas.com</a>
@@ -673,6 +685,7 @@
   </div>
 </footer>
 
+<script src="assets/js/config.js"></script>
 <script src="assets/js/site.js"></script>
 
 <a class="wa-float" href="https://wa.me/5491123515402?text=Hola%20FKT%20Lomas%2C%20quiero%20consultar%20por%20un%20turno." target="_blank" rel="noopener" aria-label="Escribinos por WhatsApp">

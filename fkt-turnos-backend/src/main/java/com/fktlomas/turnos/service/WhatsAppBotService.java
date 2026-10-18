@@ -1,5 +1,6 @@
 package com.fktlomas.turnos.service;
 
+import com.fktlomas.turnos.util.DatosPersonales;
 import tools.jackson.databind.ObjectMapper;
 import com.fktlomas.turnos.domain.ConversacionWhatsApp;
 import com.fktlomas.turnos.domain.EstadoConversacion;
@@ -112,7 +113,7 @@ public class WhatsAppBotService {
         try {
             despachar(conversacion, telefono, cuerpo);
         } catch (RuntimeException e) {
-            log.warn("Error procesando WhatsApp de {} en estado {}: {}", telefono, conversacion.getEstado(), e.getMessage());
+            log.warn("Error procesando WhatsApp de {} en estado {}: {}", DatosPersonales.enmascararTelefono(telefono), conversacion.getEstado(), e.getMessage());
             enviar(telefono, "Uh, no pudimos hacer eso: " + e.getMessage() + "\nEscribí *menu* para volver al inicio.");
         }
         guardar(conversacion);
@@ -527,7 +528,7 @@ public class WhatsAppBotService {
             // No relanzar: si falla el envío (Twilio caído, credenciales faltantes en dev), el
             // estado de la conversación igual se guarda — mejor que Twilio reintente el webhook
             // y termine mandando el mismo mensaje duplicado.
-            log.warn("No se pudo enviar WhatsApp a {}: {}", telefono, e.getMessage());
+            log.warn("No se pudo enviar WhatsApp a {}: {}", DatosPersonales.enmascararTelefono(telefono), e.getMessage());
         }
     }
 

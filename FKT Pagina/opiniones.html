@@ -25,9 +25,7 @@
 <link rel="icon" type="image/png" href="assets/img/logo/favicon-fkt-2026.png">
 <link rel="shortcut icon" type="image/png" href="assets/img/logo/favicon-fkt-2026.png">
 <link rel="apple-touch-icon" href="assets/img/logo/favicon-fkt-2026.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,300..800;1,400&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<link rel="preload" href="assets/fonts/atkinson-hyperlegible-next-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css">
 <style>
   /* ---------- RATING HERO ---------- */
@@ -250,6 +248,15 @@
         </div>
       </div>
     </div>
+    <div class="footer-legal">
+      <div class="footer-legal-links">
+        <a class="footer-arrepentimiento" href="arrepentimiento.html">Botón de arrepentimiento</a>
+        <a href="https://www.argentina.gob.ar/produccion/defensadelconsumidor/formulario" target="_blank" rel="noopener">Defensa de las y los Consumidores. Para reclamos ingrese aquí</a>
+      </div>
+      <!-- Datos legales obligatorios (Ley 24.240 y publicidad sanitaria). Completar antes de publicar:
+           ver docs/CUMPLIMIENTO-LEGAL.md. -->
+      <p class="footer-legal-datos">[COMPLETAR: razón social] · CUIT [COMPLETAR] · Dirección médica: [COMPLETAR: nombre], M.P. [COMPLETAR] · Habilitación sanitaria N.º [COMPLETAR]</p>
+    </div>
     <div class="footer-bottom">
       <span>© 2026 FKT Lomas — Kinesiología y especialidades médicas en Lomas de Zamora.</span>
       <a href="https://fktlomas.com" target="_blank" rel="noopener">fktlomas.com</a>
@@ -257,88 +264,9 @@
   </div>
 </footer>
 
+<script src="assets/js/config.js"></script>
 <script src="assets/js/site.js"></script>
-<script>
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  // Rating count-up + star fill
-  const RATING = 4.4;
-  const numEl = document.getElementById('ratingNum');
-  const starsEl = document.getElementById('ratingStars');
-  const STAR_PATH = 'M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z';
-  for (let i=0;i<5;i++){
-    const pct = Math.max(0, Math.min(1, RATING - i)) * 100;
-    const wrap = document.createElement('span');
-    wrap.style.position='relative'; wrap.style.display='inline-block'; wrap.style.width='26px'; wrap.style.height='26px';
-    wrap.innerHTML = '<svg viewBox="0 0 20 20" style="position:absolute;inset:0;width:100%;height:100%;fill:rgba(255,255,255,0.18)"><path d="'+STAR_PATH+'"/></svg>' +
-      '<svg class="star-fill" data-pct="'+pct+'" viewBox="0 0 20 20" style="position:absolute;inset:0;width:100%;height:100%;fill:currentColor"><path d="'+STAR_PATH+'"/></svg>';
-    starsEl.appendChild(wrap);
-  }
-
-  function animateRating(){
-    const stars = starsEl.querySelectorAll('.star-fill');
-    stars.forEach(s => { s.style.clipPath = 'inset(0 ' + (100 - parseFloat(s.dataset.pct)) + '% 0 0)'; });
-    if (reduceMotion) { numEl.textContent = RATING.toFixed(1); return; }
-    const DURATION = 1200, start = performance.now();
-    function tick(now){
-      const t = Math.min((now-start)/DURATION, 1);
-      numEl.textContent = (RATING * t).toFixed(1);
-      if (t < 1) requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-  }
-  if (reduceMotion) { animateRating(); }
-  else {
-    const ratingIO = new IntersectionObserver((entries)=>{ entries.forEach(e=>{ if(e.isIntersecting){ animateRating(); ratingIO.disconnect(); } }); }, {threshold:0.4});
-    ratingIO.observe(document.getElementById('ratingNum'));
-  }
-</script>
-<script>
-  // Reseñas verificadas: reemplazan las 3 tarjetas fijas de arriba por reseñas reales de
-  // pacientes que de verdad tuvieron un turno atendido (ver ResenaService en el backend),
-  // moderadas por el centro antes de aparecer acá. Si el backend no responde o todavía no hay
-  // ninguna aprobada, se dejan las tarjetas de Google de siempre — mismo criterio que equipo.html.
-  const API_URL = 'http://localhost:8080';
-  const STAR_PATH_MINI = 'M10 1l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.2L4.6 17.3l1.3-6L1.3 7.2l6.1-.6z';
-
-  function estrellasSvg(puntaje) {
-    let html = '';
-    for (let i = 0; i < 5; i++) {
-      const relleno = i < puntaje ? 'currentColor' : 'var(--line)';
-      html += '<svg viewBox="0 0 20 20" fill="' + relleno + '"><path d="' + STAR_PATH_MINI + '"/></svg>';
-    }
-    return html;
-  }
-
-  function escapeHtml(str) {
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
-
-  function tarjetaResena(r) {
-    const texto = r.comentario || 'Calificó su atención en FKT Lomas con ' + r.puntaje + ' de 5 estrellas.';
-    return '<div class="review-card">' +
-      '<div class="stars-mini" aria-hidden="true">' + estrellasSvg(r.puntaje) + '</div>' +
-      '<p class="txt">' + escapeHtml(texto) + '</p>' +
-      '<div class="who"><span>' + escapeHtml(r.pacienteNombreCorto) + ' — ' + escapeHtml(r.especialidadNombre) + '</span><span class="src">Verificada</span></div>' +
-      '</div>';
-  }
-
-  fetch(API_URL + '/api/resenas?limite=6')
-    .then((res) => res.ok ? res.json() : [])
-    .then((resenas) => {
-      if (!Array.isArray(resenas) || resenas.length === 0) return;
-      const grid = document.querySelector('.reviews-grid');
-      const nota = document.querySelector('.reviews-note');
-      grid.innerHTML = resenas.map(tarjetaResena).join('');
-      if (nota) nota.textContent = 'Reseñas verificadas: solo pacientes que tuvieron un turno atendido en FKT Lomas pueden dejarlas, y el centro las revisa antes de publicarlas.';
-    })
-    .catch(() => {});
-</script>
+<script src="assets/js/paginas/opiniones.js"></script>
 
 <a class="wa-float" href="https://wa.me/5491123515402?text=Hola%20FKT%20Lomas%2C%20quiero%20consultar%20por%20un%20turno." target="_blank" rel="noopener" aria-label="Escribinos por WhatsApp">
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12.001 2C6.478 2 2 6.478 2 12c0 1.999.594 3.86 1.615 5.42L2 22l4.674-1.588A9.953 9.953 0 0012 22c5.523 0 10-4.478 10-10S17.523 2 12.001 2zm0 18.163a8.135 8.135 0 01-4.146-1.135l-.297-.176-3.09.99.99-3.021-.194-.313A8.128 8.128 0 013.837 12c0-4.507 3.656-8.163 8.164-8.163 4.507 0 8.163 3.656 8.163 8.163 0 4.508-3.656 8.163-8.163 8.163z"/></svg>

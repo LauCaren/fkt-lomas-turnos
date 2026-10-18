@@ -1,31 +1,61 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axiosClient, { mensajeDeError } from '../../api/axiosClient';
 import Resultado from '../../components/ui/Resultado';
 
+// Página a la que lleva el link del recordatorio ("¿Venís a tu turno? Sí / No"), sin login: el
+// token del link es la credencial.
+//
+// "Sí" se registra apenas abre la página: es inofensivo y le ahorra un paso a quien ya dijo que
+// viene. "No" en cambio pide un clic más antes de cancelar. Los antivirus de correo (Outlook,
+// algunos de empresas) abren solos los links de los mails para revisarlos, a veces en un
+// navegador real: si "No" cancelaba al cargar, uno de esos escaneos podía liberar el turno de
+// alguien sin que la persona hiciera nada. La respuesta se manda por POST por la misma razón
+// (un GET no debería cambiar datos).
 export default function ConfirmarTurnoPage() {
   const [searchParams] = useSearchParams();
-  const [estado, setEstado] = useState('cargando');
-  const [error, setError] = useState(null);
-
   const token = searchParams.get('token');
   const respuesta = searchParams.get('respuesta');
-  const confirmando = respuesta === 'si';
+  const linkValido = Boolean(token) && (respuesta === 'si' || respuesta === 'no');
 
-  useEffect(() => {
-    if (!token || !respuesta) {
-      setEstado('error');
-      setError('El link no es válido.');
-      return;
-    }
-    axiosClient.get('/api/turnos/confirmacion', { params: { token, respuesta } })
+  // preguntar → (clic) → cargando → listo | error
+  const [estado, setEstado] = useState(() => {
+    if (!linkValido) return 'error';
+    return respuesta === 'si' ? 'cargando' : 'preguntar';
+  });
+  const [confirmando, setConfirmando] = useState(respuesta === 'si');
+  const [error, setError] = useState(linkValido ? null : 'El link no es válido.');
+
+  const responder = useCallback((viene) => {
+    setConfirmando(viene);
+    setEstado('cargando');
+    axiosClient.post('/api/turnos/confirmacion', null, { params: { token, respuesta: viene ? 'si' : 'no' } })
       .then(() => setEstado('listo'))
       .catch((err) => {
         setEstado('error');
         setError(mensajeDeError(err, 'El link no es válido o ya venció'));
       });
-  }, [token, respuesta]);
+  }, [token]);
 
+  useEffect(() => {
+    if (linkValido && respuesta === 'si') responder(true);
+  }, [linkValido, respuesta, responder]);
+
+  if (estado === 'preguntar') {
+    return (
+      <Resultado estado="aviso" titulo="¿No vas a poder venir?">
+        <p>Si cancelás, el horario queda libre para otro paciente. Si querés venir otro día, después podés sacar un turno nuevo.</p>
+        <div className="resultado-acciones">
+          <button type="button" className="btn btn-outline btn-peligro" onClick={() => responder(false)}>
+            Sí, cancelar mi turno
+          </button>
+          <button type="button" className="btn btn-primary" onClick={() => responder(true)}>
+            Me equivoqué, voy a ir
+          </button>
+        </div>
+      </Resultado>
+    );
+  }
   if (estado === 'cargando') {
     return <Resultado estado="cargando" titulo="Un segundo…" />;
   }

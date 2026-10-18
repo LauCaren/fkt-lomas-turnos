@@ -3,6 +3,7 @@ package com.fktlomas.turnos.service;
 import com.fktlomas.turnos.domain.EvolucionClinica;
 import com.fktlomas.turnos.domain.Medico;
 import com.fktlomas.turnos.domain.Turno;
+import com.fktlomas.turnos.domain.Usuario;
 import com.fktlomas.turnos.dto.TurnoAdminDto;
 import com.fktlomas.turnos.dto.medico.CrearEvolucionRequest;
 import com.fktlomas.turnos.dto.medico.EvolucionClinicaDto;
@@ -31,6 +32,7 @@ public class MedicoPortalService {
     private final MedicoRepository medicoRepository;
     private final TurnoRepository turnoRepository;
     private final EvolucionClinicaRepository evolucionClinicaRepository;
+    private final AuditoriaService auditoriaService;
 
     @Transactional(readOnly = true)
     public Medico medicoDe(Long usuarioId) {
@@ -86,9 +88,16 @@ public class MedicoPortalService {
         return EvolucionClinicaDto.de(evolucionClinicaRepository.save(evolucion));
     }
 
-    @Transactional(readOnly = true)
-    public List<EvolucionClinicaDto> evolucionesDePaciente(Long usuarioId, Long pacienteId) {
-        Long medicoId = medicoDe(usuarioId).getId();
+    /**
+     * Cada consulta de la historia clínica de un paciente queda en la auditoría (quién la abrió
+     * y cuándo): la Ley 26.529 y su decreto reglamentario piden poder rastrear el acceso a la
+     * historia clínica, y es lo que permite contestar "¿quién vio mis datos?" si un paciente lo
+     * pregunta. No es readOnly justamente porque escribe ese registro.
+     */
+    @Transactional
+    public List<EvolucionClinicaDto> evolucionesDePaciente(Usuario medicoUsuario, Long pacienteId) {
+        Long medicoId = medicoDe(medicoUsuario.getId()).getId();
+        auditoriaService.registrar(medicoUsuario, "PACIENTE", pacienteId, "VER_HISTORIA_CLINICA", null, null);
         return evolucionClinicaRepository.findByMedicoIdAndPacienteIdOrderByCreatedAtDesc(medicoId, pacienteId)
                 .stream().map(EvolucionClinicaDto::de).toList();
     }

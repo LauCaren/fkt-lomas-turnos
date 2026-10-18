@@ -1,10 +1,11 @@
 import { useState } from 'react';
+import ConsentimientoDatos from './ConsentimientoDatos';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { loginConGoogle, limpiarMensajesAuth } from '../features/auth/authSlice';
 import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../constants/obrasSociales';
-import { RUTA_POR_ROL, GOOGLE_CLIENT_ID, SITE_URL } from '../config';
+import { RUTA_POR_ROL, GOOGLE_CLIENT_ID } from '../config';
 
 const GENEROS = [
   { value: '', label: 'Seleccioná una opción' },
@@ -110,19 +111,13 @@ export default function GoogleAuthButton({ destinoPorDefecto = '/turnos' }) {
             {GENEROS.map((g) => <option key={g.value} value={g.value}>{g.label}</option>)}
           </select>
         </div>
-        <div style={{ position: 'absolute', left: -9999, opacity: 0 }} aria-hidden="true">
+        <div className="honeypot" aria-hidden="true">
           <label htmlFor="googleSitioWeb">No completar este campo</label>
           <input id="googleSitioWeb" type="text" tabIndex={-1} autoComplete="off"
             value={perfil.sitioWeb} onChange={(e) => setPerfil({ ...perfil, sitioWeb: e.target.value })} />
         </div>
-        <div className="field" style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
-          <input id="googleAceptaPoliticaPrivacidad" type="checkbox" required style={{ marginTop: 3 }}
-            checked={perfil.aceptaPoliticaPrivacidad}
-            onChange={(e) => setPerfil({ ...perfil, aceptaPoliticaPrivacidad: e.target.checked })} />
-          <label htmlFor="googleAceptaPoliticaPrivacidad" style={{ fontWeight: 400 }}>
-            Acepto la <a href={`${SITE_URL}/politica-de-privacidad.html`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal-dark)', fontWeight: 600 }}>política de privacidad</a> y los <a href={`${SITE_URL}/terminos-y-condiciones.html`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal-dark)', fontWeight: 600 }}>términos y condiciones</a>
-          </label>
-        </div>
+        <ConsentimientoDatos id="googleAceptaPoliticaPrivacidad" checked={perfil.aceptaPoliticaPrivacidad}
+          onChange={(e) => setPerfil({ ...perfil, aceptaPoliticaPrivacidad: e.target.checked })} />
         <button type="submit" className="btn btn-primary btn-block" disabled={enviando}>
           {enviando && <span className="spinner" aria-hidden="true" />}
           {enviando ? 'Creando cuenta…' : 'Terminar de crear mi cuenta'}

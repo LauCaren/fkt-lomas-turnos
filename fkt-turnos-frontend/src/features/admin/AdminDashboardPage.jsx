@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   LayoutDashboard, CalendarDays, CalendarPlus, ClipboardList, Users, Search, Stethoscope, Activity,
-  Wallet, BarChart3, BellRing, Building2, FileText, UserCog, UserMinus, Star, History, Settings,
+  Wallet, BarChart3, BellRing, Building2, FileText, UserCog, UserMinus, Star, History, Settings, Undo2,
 } from 'lucide-react';
 import SidebarNav from '../../components/ui/SidebarNav';
 import CommandPalette from '../../components/ui/CommandPalette';
@@ -26,6 +26,7 @@ import AdminBusquedaPacienteTab from './AdminBusquedaPacienteTab';
 import AdminSecretariasTab from './AdminSecretariasTab';
 import AdminAuditoriaTab from './AdminAuditoriaTab';
 import AdminSolicitudesBajaTab from './AdminSolicitudesBajaTab';
+import AdminArrepentimientosTab from './AdminArrepentimientosTab';
 import AdminResenasTab from './AdminResenasTab';
 import PanelSaludo from '../../components/ui/PanelSaludo';
 
@@ -68,6 +69,7 @@ const GRUPOS_NAV = [
     items: [
       { id: 'secretarias', label: 'Cuentas de secretaria', icon: UserCog },
       { id: 'solicitudes-baja', label: 'Pedidos de baja', icon: UserMinus },
+      { id: 'arrepentimientos', label: 'Arrepentimiento', icon: Undo2 },
       { id: 'auditoria', label: 'Auditoría', icon: History },
     ],
   },
@@ -82,6 +84,7 @@ const CAMPO_RESUMEN_POR_ITEM = {
   mensajes: 'mensajesSinLeer',
   postulaciones: 'postulacionesSinRevisar',
   'solicitudes-baja': 'solicitudesBajaPendientes',
+  arrepentimientos: 'arrepentimientosPendientes',
 };
 
 function conBadges(groups, resumen) {
@@ -203,6 +206,7 @@ export default function AdminDashboardPage() {
               {tab === 'postulaciones' && <AdminPostulacionesTab />}
               {tab === 'secretarias' && <AdminSecretariasTab />}
               {tab === 'solicitudes-baja' && <AdminSolicitudesBajaTab />}
+              {tab === 'arrepentimientos' && <AdminArrepentimientosTab />}
               {tab === 'resenas' && <AdminResenasTab />}
               {tab === 'auditoria' && <AdminAuditoriaTab />}
               {tab === 'cuenta' && <CuentaSeguridadTab />}

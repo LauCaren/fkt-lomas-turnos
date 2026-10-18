@@ -3,3 +3,7 @@ uploads/
 *.log
 .idea/
 .DS_Store
+# Secretos locales: nunca al contexto de build de Docker (aunque el Dockerfile no los copie).
+.env
+.env.*
+!.env.example

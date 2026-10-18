@@ -1,5 +1,6 @@
 package com.fktlomas.turnos.dto;
 
+import com.fktlomas.turnos.util.DatosPersonales;
 import com.fktlomas.turnos.domain.CanalNotificacion;
 import com.fktlomas.turnos.domain.Genero;
 import com.fktlomas.turnos.validation.Patrones;
@@ -28,4 +29,8 @@ public record ActualizarPerfilRequest(
         @NotNull(message = "El canal de notificación preferido es obligatorio")
         CanalNotificacion canalNotificacionPreferido
 ) {
+    /** El email se normaliza al entrar (ver DatosPersonales.normalizarEmail): la base lo guarda en minúsculas. */
+    public ActualizarPerfilRequest {
+        email = DatosPersonales.normalizarEmail(email);
+    }
 }

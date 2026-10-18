@@ -1,5 +1,6 @@
 package com.fktlomas.turnos.service;
 
+import com.fktlomas.turnos.util.DatosPersonales;
 import com.fktlomas.turnos.domain.*;
 import com.fktlomas.turnos.dto.ConfiguracionRecordatoriosDto;
 import com.fktlomas.turnos.dto.PacienteBusquedaDto;
@@ -210,7 +211,7 @@ public class RecordatorioService {
                 enviarPorCanal(paciente.getCanalNotificacionPreferido(), paciente, "Aviso de FKT Lomas", mensaje);
                 enviados++;
             } catch (Exception e) {
-                log.warn("No se pudo enviar el aviso masivo a {} ({}): {}", paciente.getNombreCompleto(), paciente.getEmail(), e.getMessage());
+                log.warn("No se pudo enviar el aviso masivo al paciente {} ({}): {}", paciente.getId(), DatosPersonales.enmascararEmail(paciente.getEmail()), e.getMessage());
             }
         }
         return new MensajeMasivoResponse(enviados);

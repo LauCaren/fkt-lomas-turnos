@@ -174,6 +174,7 @@ const FKT_SEARCH_INDEX = [
   { cat: 'Página', title: 'Trabajá con nosotros', snippet: 'Sumate al equipo enviando tu CV en PDF.', url: 'trabaja-con-nosotros.html' },
   { cat: 'Página', title: 'Política de privacidad', snippet: 'Cómo usamos y protegemos tus datos personales.', url: 'politica-de-privacidad.html' },
   { cat: 'Página', title: 'Términos y condiciones', snippet: 'Condiciones de uso del sistema de turnos y del sitio.', url: 'terminos-y-condiciones.html' },
+  { cat: 'Página', title: 'Botón de arrepentimiento', snippet: 'Cancelá un turno o pago hecho online dentro de los 10 días, sin registrarte.', url: 'arrepentimiento.html' },
 
   { cat: 'Servicio', title: 'Kinesiología', snippet: 'Recuperá movilidad, fuerza y funcionalidad tras una lesión, cirugía o dolor crónico.', url: 'servicios.html#kinesiologia' },
   { cat: 'Servicio', title: 'RPD Postural (Reeducación Postural Dinámica)', snippet: 'Corrección de la postura y alivio de contracturas.', url: 'servicios.html#rpd' },
@@ -237,7 +238,7 @@ const FKT_SEARCH_INDEX = [
   { cat: 'Contacto', title: 'Dirección', snippet: 'Juan Larrea 496, Lomas de Zamora, Buenos Aires.', url: 'contacto.html' },
   { cat: 'Contacto', title: 'Teléfono y WhatsApp', snippet: '11 5950-5888 · WhatsApp 11 2351-5402.', url: 'contacto.html' },
   { cat: 'Contacto', title: 'Horario de atención', snippet: 'Lunes a viernes de 8 a 20 hs.', url: 'contacto.html' },
-  { cat: 'Acción', title: 'Pedir turno online', snippet: 'Elegí el día y el horario que mejor te quede.', url: 'http://localhost:5173' },
+  { cat: 'Acción', title: 'Pedir turno online', snippet: 'Elegí el día y el horario que mejor te quede.', url: window.FKT_CONFIG ? window.FKT_CONFIG.appUrl : 'http://localhost:5173' },
   { cat: 'Acción', title: 'Escribinos por WhatsApp', snippet: 'Consultanos por un turno o por tu cobertura.', url: 'https://wa.me/5491123515402?text=Hola%20FKT%20Lomas%2C%20quiero%20consultar%20por%20un%20turno.' },
 ];
 
@@ -960,6 +961,26 @@ function fktInitStepGauges(reduceMotion) {
   });
 }
 
+/**
+ * Mapa de Google bajo demanda (inicio y contacto). El HTML trae solo un botón "Ver mapa"; el
+ * iframe de Google se crea recién al tocarlo. Así nadie le manda su IP a Google ni recibe sus
+ * cookies por el solo hecho de abrir la página — ver la Política de Privacidad, punto 12.
+ */
+function fktInitMapaDiferido() {
+  document.querySelectorAll('.mapa-diferido').forEach((contenedor) => {
+    const boton = contenedor.querySelector('button');
+    if (!boton) return;
+    boton.addEventListener('click', () => {
+      const iframe = document.createElement('iframe');
+      iframe.src = contenedor.dataset.mapaSrc;
+      iframe.title = 'Ubicación de FKT Lomas en el mapa';
+      iframe.referrerPolicy = 'no-referrer-when-downgrade';
+      contenedor.replaceWith(iframe);
+      iframe.focus();
+    });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const burger = document.getElementById('burgerBtn');
   const header = document.getElementById('site-header');
@@ -1013,6 +1034,7 @@ document.addEventListener('DOMContentLoaded', () => {
   fktInitProcessRail();
   fktInitBodyMap();
   fktInitFluidOrb();
+  fktInitMapaDiferido();
   fktInitIconDraw(reduceMotion);
   fktInitStepGauges(reduceMotion);
   fktInitMarqueePause(reduceMotion);

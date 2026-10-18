@@ -1,6 +1,7 @@
 package com.fktlomas.turnos.security;
 
 import com.fktlomas.turnos.repository.UsuarioRepository;
+import com.fktlomas.turnos.util.DatosPersonales;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,8 +16,11 @@ public class SecurityUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return usuarioRepository.findByEmail(email)
+        // Normalizado igual que al guardar (ver Usuario.normalizarEmail). El mensaje de la
+        // excepción no lleva el email: Spring la convierte en BadCredentials genérico, pero
+        // podría terminar en un log.
+        return usuarioRepository.findByEmail(DatosPersonales.normalizarEmail(email))
                 .map(AppUserDetails::new)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + email));
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
     }
 }

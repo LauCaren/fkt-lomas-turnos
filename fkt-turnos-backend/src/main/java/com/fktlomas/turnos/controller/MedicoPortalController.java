@@ -48,7 +48,7 @@ public class MedicoPortalController {
 
     @GetMapping("/pacientes/{pacienteId}/evoluciones")
     public List<EvolucionClinicaDto> evolucionesDePaciente(@AuthenticationPrincipal AppUserDetails principal, @PathVariable Long pacienteId) {
-        return medicoPortalService.evolucionesDePaciente(principal.getUsuario().getId(), pacienteId);
+        return medicoPortalService.evolucionesDePaciente(principal.getUsuario(), pacienteId);
     }
 
     @GetMapping("/caja/saldo")

@@ -10,6 +10,7 @@ import InstalarAppBanner from './InstalarAppBanner';
 import UsuarioAvatar from './UsuarioAvatar';
 import SelectorFotoPerfil from './SelectorFotoPerfil';
 import NotificacionesBell from './NotificacionesBell';
+import PieLegal from './PieLegal';
 
 function Marca() {
   return (
@@ -126,6 +127,7 @@ export default function Layout({ children }) {
           </div>
         </div>
       </main>
+      {!esPanelInterno && <PieLegal />}
       {selectorFotoAbierto && <SelectorFotoPerfil onCerrar={() => setSelectorFotoAbierto(false)} />}
     </div>
   );

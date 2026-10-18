@@ -110,13 +110,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
-        return ResponseEntity.badRequest().body(cuerpo(HttpStatus.BAD_REQUEST, ex.getMessage(), null));
+        return ResponseEntity.badRequest().body(cuerpo(HttpStatus.BAD_REQUEST, mensajeSeguro(ex, "Datos inválidos"), null));
     }
 
     /** Ej.: un canal de notificación sin credenciales configuradas (ver WhatsAppService), o un envío que falló. */
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalState(IllegalStateException ex) {
-        return ResponseEntity.badRequest().body(cuerpo(HttpStatus.BAD_REQUEST, ex.getMessage(), null));
+        return ResponseEntity.badRequest().body(cuerpo(HttpStatus.BAD_REQUEST, mensajeSeguro(ex, "No se pudo completar la operación"), null));
     }
 
     /**
@@ -130,6 +130,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(cuerpo(HttpStatus.CONFLICT, "Ya existe un registro con esos datos", null));
+    }
+
+    /**
+     * IllegalArgumentException/IllegalStateException se usan en todo el código propio como
+     * "error de negocio con un mensaje para mostrarle a la persona" (en castellano, pensado
+     * para la pantalla). Pero también las tiran librerías de terceros (Spring, Jackson, el SDK
+     * de Mercado Pago, Enum.valueOf...) con mensajes técnicos que nombran clases internas o
+     * datos del request — no tienen que llegar al navegador. Se muestra el mensaje solo si la
+     * excepción nació en código de este proyecto (com.fktlomas.*); si no, uno genérico.
+     */
+    private static String mensajeSeguro(RuntimeException ex, String generico) {
+        StackTraceElement[] traza = ex.getStackTrace();
+        boolean propia = traza.length > 0 && traza[0].getClassName().startsWith("com.fktlomas.");
+        return propia && ex.getMessage() != null ? ex.getMessage() : generico;
     }
 
     private Map<String, Object> cuerpo(HttpStatus status, String mensaje, Object detalle) {

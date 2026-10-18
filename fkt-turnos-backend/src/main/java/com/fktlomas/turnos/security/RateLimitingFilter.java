@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.UrlPathHelper;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -26,6 +27,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 
     private static final List<Regla> REGLAS = List.of(
             new Regla("POST", "/api/auth/login", 15, Duration.ofMinutes(5)),
+            new Regla("POST", "/api/auth/google", 15, Duration.ofMinutes(5)),
             new Regla("POST", "/api/auth/registro", 8, Duration.ofMinutes(10)),
             new Regla("POST", "/api/auth/olvide-password", 8, Duration.ofMinutes(10)),
             // El endpoint que consume el token de recuperación estaba sin límite propio — es
@@ -33,8 +35,11 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             // depender solo de eso). Más laxo que login porque un usuario real puede pifiarle
             // al pegar el link/token alguna vez.
             new Regla("POST", "/api/auth/restablecer-password", 15, Duration.ofMinutes(10)),
+            // Link de confirmación del recordatorio (sin login, el token es la credencial).
+            new Regla("POST", "/api/turnos/confirmacion", 20, Duration.ofMinutes(10)),
             new Regla("POST", "/api/contacto", 5, Duration.ofMinutes(10)),
             new Regla("POST", "/api/postulaciones", 5, Duration.ofMinutes(10)),
+            new Regla("POST", "/api/arrepentimiento", 5, Duration.ofMinutes(10)),
             // Segunda barrera detrás de la verificación de firma de Twilio (ver
             // TwilioSignatureVerifier) — no es la defensa principal, solo evita que un
             // remitente comprometido sature el endpoint antes de llegar a validar la firma.
@@ -48,7 +53,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
                                      @NonNull HttpServletResponse response,
                                      @NonNull FilterChain filterChain) throws ServletException, IOException {
         for (Regla regla : REGLAS) {
-            if (regla.metodo().equals(request.getMethod()) && regla.path().equals(request.getRequestURI())) {
+            if (regla.metodo().equals(request.getMethod()) && regla.path().equals(rutaNormalizada(request))) {
                 String clave = regla.path() + "|" + ipDelCliente(request);
                 if (!rateLimiterService.permitir(clave, regla.maxIntentos(), regla.ventana())) {
                     response.setStatus(429);
@@ -60,6 +65,17 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             }
         }
         filterChain.doFilter(request, response);
+    }
+
+    /**
+     * La ruta tal como la va a resolver Spring MVC: decodificada (%XX), sin ";jsessionid" ni
+     * otros parámetros de matriz y sin el context-path. Antes se comparaba contra
+     * getRequestURI(), que es la ruta CRUDA — "/api/auth/%6Cogin" no era igual a
+     * "/api/auth/login" para este filtro, pero Spring igual la despachaba al login: alcanzaba con
+     * codificar una letra para saltearse el límite de intentos.
+     */
+    private static String rutaNormalizada(HttpServletRequest request) {
+        return UrlPathHelper.defaultInstance.getPathWithinApplication(request);
     }
 
     private String ipDelCliente(HttpServletRequest request) {

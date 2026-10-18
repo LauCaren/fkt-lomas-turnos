@@ -26,4 +26,7 @@ RUN groupadd --system app && useradd --system --gid app --no-create-home app \
 USER app
 
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# MaxRAMPercentage: la JVM dimensiona el heap según la memoria del contenedor (no la de la
+# máquina host). Sin esto, en un plan chico (512 MB) la JVM puede pedir más de lo que el
+# host le da y el contenedor muere por OOM sin un error claro.
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-jar", "app.jar"]

@@ -33,6 +33,15 @@ public class LocalFileStorageService implements FileStorageService {
     }
 
     @Override
+    public String guardar(String carpeta, String nombreArchivo, byte[] contenido, String contentType) throws IOException {
+        Path directorio = Path.of(uploadsDir, carpeta);
+        Files.createDirectories(directorio);
+        Path destino = directorio.resolve(nombreArchivo);
+        Files.write(destino, contenido);
+        return destino.toString();
+    }
+
+    @Override
     public Optional<Resource> cargar(String clave) {
         if (clave == null) {
             return Optional.empty();

@@ -2,10 +2,16 @@
    letra que no se confunden entre sí (Il1, 0O, 5S). Elegida porque muchos pacientes son
    adultos mayores; la misma familia cubre texto, títulos y cifras. Caveat queda solo para la
    bajada manuscrita de la marca ("Fisio Kinesio Terapia"), igual que en el sitio. */
-@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,300..800;1,400&family=Caveat:wght@600&display=swap');
+/* Las fuentes se sirven desde la propia app (paquetes @fontsource, empaquetados por Vite), no
+   desde Google Fonts: (1) no se le pasa a Google la IP de cada paciente que abre la app — un
+   tercero más con datos personales, que la Ley 25.326 y el RGPD piden evitar si no hace falta;
+   (2) funciona sin conexión (PWA) y dentro de la app de escritorio, cuya CSP no deja cargar
+   estilos de otros dominios; (3) una conexión menos al abrir la app. */
+@import '@fontsource-variable/atkinson-hyperlegible-next/wght.css';
+@import '@fontsource/caveat/latin-600.css';
 
 :root {
-  --font: 'Atkinson Hyperlegible Next', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font: 'Atkinson Hyperlegible Next Variable', 'Atkinson Hyperlegible Next', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --bg: #FFFFFF;
   --bg-soft: #F2F7F7;
   --ink: #1C3240;
@@ -1293,6 +1299,7 @@ button.reserva-paso-btn:hover { background: var(--teal-tint); color: var(--ink);
 .resultado-medidor { width: 190px; margin: 0 auto 10px; }
 .resultado h1 { font-size: clamp(28px, 6vw, 34px); }
 .resultado-detalle { margin-top: 14px; display: grid; gap: 8px; font-size: 17px; color: var(--ink-soft); }
+.resultado-acciones { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 8px; }
 .resultado-turno { font-size: 18px; color: var(--ink); }
 .resultado-turno strong { font-variant-numeric: tabular-nums; }
 .resultado-marca { margin-top: 36px; font-size: 14px; color: var(--muted); }
@@ -1542,3 +1549,34 @@ kbd {
 .agenda-ocupacion strong { color: var(--ink); font-variant-numeric: tabular-nums; }
 .agenda-ocupacion-medidor { width: 46px; flex-shrink: 0; }
 .agenda-ocupacion-libres { color: var(--green); font-weight: 700; }
+
+/* ---------- Legal: pie de pantallas públicas y de pacientes, botón de arrepentimiento ----------
+   Ver components/PieLegal.jsx y features/legal/ArrepentimientoPage.jsx. */
+.pie-legal { border-top: 1px solid var(--line); background: var(--bg-soft); padding: 18px 0 calc(18px + env(safe-area-inset-bottom)); }
+.pie-legal-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; }
+.pie-legal-arrepentimiento { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 18px; border: 1.5px solid var(--primary); border-radius: 999px; color: var(--primary); font-weight: 700; text-decoration: none; transition: background-color .2s var(--ease-out), color .2s var(--ease-out); }
+.pie-legal-arrepentimiento:hover { background: var(--primary); color: var(--on-primary); }
+.pie-legal-links { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 15px; }
+.pie-legal-links a { color: var(--muted); }
+.pie-legal-links a:hover { color: var(--ink); }
+.codigo-tramite { font-size: 28px; font-weight: 800; letter-spacing: .06em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.campo-opcional { font-weight: 400; color: var(--muted); }
+.campo-ayuda { margin-top: 14px; font-size: 15px; color: var(--muted); text-align: center; }
+/* Campo trampa para bots: fuera de pantalla pero accesible al DOM (no display:none, que algunos
+   bots detectan y saltean). aria-hidden + tabIndex=-1 lo esconden de lectores y del teclado. */
+.honeypot { position: absolute; left: -9999px; opacity: 0; }
+
+/* ---------- Bandejas de pedidos legales (arrepentimiento) ---------- */
+.tab-intro { max-width: 680px; margin-bottom: 16px; font-size: 15.5px; color: var(--muted); }
+.filtro-estrecho { max-width: 220px; }
+.pedido-legal { margin-bottom: 12px; display: grid; gap: 12px; }
+.pedido-legal > .btn { justify-self: start; }
+.pedido-legal-cabecera { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+.pedido-legal-codigo { font-size: 18px; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+.pedido-legal-meta { font-size: 14.5px; color: var(--muted); }
+.pedido-legal-datos { display: flex; flex-wrap: wrap; gap: 6px 24px; margin: 0; font-size: 15px; }
+.pedido-legal-datos dt { font-size: 13px; color: var(--muted); }
+.pedido-legal-datos dd { margin: 0; color: var(--ink); }
+.pedido-legal-detalle { padding: 12px 14px; border-radius: var(--radius-s, 10px); background: var(--bg-soft); color: var(--ink-soft); white-space: pre-wrap; }
+.pedido-legal-resolver .field { margin-bottom: 8px; }
+.pedido-legal-acciones { display: flex; gap: 8px; }

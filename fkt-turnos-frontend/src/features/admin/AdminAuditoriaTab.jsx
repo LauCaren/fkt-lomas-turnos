@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAuditoria } from './adminSlice';
 import EstadoVacio from '../../components/EstadoVacio';
+import { formatFechaHora } from '../../utils/formato';
 
 const TIPOS = [
   { value: '', label: 'Todos' },
@@ -13,10 +14,6 @@ const TIPOS = [
   { value: 'GASTO', label: 'Gastos' },
   { value: 'CUENTA_STAFF', label: 'Cuentas de staff' },
 ];
-
-function formatoFecha(iso) {
-  return new Date(iso).toLocaleString('es-AR');
-}
 
 export default function AdminAuditoriaTab() {
   const dispatch = useDispatch();
@@ -73,7 +70,7 @@ export default function AdminAuditoriaTab() {
                 <strong>{r.operacion}</strong> · {r.tipoEntidad} #{r.entidadId}
                 {r.deshecho && <span className="badge badge-cancelado" style={{ marginLeft: 8 }}>Deshecho</span>}
               </div>
-              <div style={{ fontSize: 14, color: 'var(--muted)' }}>{formatoFecha(r.createdAt)}</div>
+              <div style={{ fontSize: 14, color: 'var(--muted)' }}>{formatFechaHora(r.createdAt)}</div>
             </div>
             <div style={{ fontSize: 14, color: 'var(--muted)', marginTop: 4 }}>Por: {r.usuarioNombre}</div>
           </div>

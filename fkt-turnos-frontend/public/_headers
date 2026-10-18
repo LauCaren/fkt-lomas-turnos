@@ -1,0 +1,21 @@
+# Cabeceras de seguridad de la app de turnos — formato de Netlify y Cloudflare Pages (Vercel
+# usa vercel.json, con las mismas reglas).
+#
+# La Content-Security-Policy NO está acá: va como <meta> dentro de index.html, generada en cada
+# build a partir de VITE_API_URL (ver vite/politicaSeguridad.js), para que sea la misma en la
+# web, en las apps de celular y en la de escritorio. Acá va lo que un <meta> no puede hacer:
+# frame-ancestors (que nadie meta la app dentro de un iframe para engañar clics) y el resto.
+/*
+  Content-Security-Policy: frame-ancestors 'none'; object-src 'none'; base-uri 'none'
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
+  Cross-Origin-Opener-Policy: same-origin-allow-popups
+
+# index.html y el service worker nunca se cachean: si no, una versión nueva de la app podría
+# tardar días en llegarle a quien ya la tenía abierta.
+/index.html
+  Cache-Control: no-cache
+/sw.js
+  Cache-Control: no-cache

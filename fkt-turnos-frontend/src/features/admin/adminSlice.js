@@ -414,6 +414,27 @@ export const revocarSesionesCuentaStaff = createAsyncThunk('admin/revocarSesione
   }
 });
 
+// Botón de arrepentimiento (Ley 24.240 art. 34): pedidos que llegan desde el sitio o la app sin
+// login. Se gestionan a mano (cancelar el turno, devolver el pago) y se marcan como resueltos con
+// una nota que queda como constancia — ver ArrepentimientoService en el backend.
+export const fetchArrepentimientos = createAsyncThunk('admin/fetchArrepentimientos', async (estado, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/admin/arrepentimientos', { params: { estado: estado || undefined } });
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
+export const resolverArrepentimiento = createAsyncThunk('admin/resolverArrepentimiento', async ({ id, notaResolucion }, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.put(`/api/admin/arrepentimientos/${id}/resolver`, { notaResolucion });
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error, 'No se pudo marcar el pedido como resuelto'));
+  }
+});
+
 export const fetchSolicitudesBaja = createAsyncThunk('admin/fetchSolicitudesBaja', async (estado, { rejectWithValue }) => {
   try {
     const { data } = await axiosClient.get('/api/admin/solicitudes-baja', { params: { estado: estado || undefined } });
@@ -506,6 +527,7 @@ const adminSlice = createSlice({
     tendencia: [],
     secretarias: [],
     solicitudesBaja: [],
+    arrepentimientos: [],
     resenas: [],
     auditoria: { content: [], totalPages: 0, number: 0 },
     error: null,
@@ -705,6 +727,13 @@ const adminSlice = createSlice({
       .addCase(revocarSesionesCuentaStaff.rejected, (state, action) => { state.error = action.payload; })
       .addCase(fetchAuditoria.fulfilled, (state, action) => { state.auditoria = action.payload; })
       .addCase(fetchAuditoria.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(fetchArrepentimientos.fulfilled, (state, action) => { state.arrepentimientos = action.payload; })
+      .addCase(fetchArrepentimientos.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(resolverArrepentimiento.fulfilled, (state, action) => {
+        state.arrepentimientos = state.arrepentimientos.map((s) => s.id === action.payload.id ? action.payload : s);
+        state.mensajeExito = `Pedido ${action.payload.codigo} marcado como resuelto`;
+      })
+      .addCase(resolverArrepentimiento.rejected, (state, action) => { state.error = action.payload; })
       .addCase(fetchSolicitudesBaja.fulfilled, (state, action) => { state.solicitudesBaja = action.payload; })
       .addCase(fetchSolicitudesBaja.rejected, (state, action) => { state.error = action.payload; })
       .addCase(aprobarSolicitudBaja.fulfilled, (state, action) => {

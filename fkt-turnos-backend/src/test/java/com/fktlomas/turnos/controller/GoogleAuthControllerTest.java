@@ -133,6 +133,28 @@ class GoogleAuthControllerTest {
     }
 
     @Test
+    void unaCuentaDelPersonalNoPuedeEntrarNiVincularseConGoogle() throws Exception {
+        String email = "secretaria.google@test.com";
+        Usuario staff = new Usuario();
+        staff.setEmail(email);
+        staff.setNombreCompleto("Secretaria Con Gmail");
+        staff.setPasswordHash(passwordEncoder.encode("Segura123!"));
+        staff.setRole(Role.SECRETARIA);
+        usuarioRepository.save(staff);
+
+        when(googleTokenVerifierService.verificar(eq("credential-staff")))
+                .thenReturn(new GoogleTokenVerifierService.DatosGoogle("google-sub-staff", email, "Secretaria Con Gmail"));
+
+        mockMvc.perform(googleRequest("""
+                        {"credential":"credential-staff"}
+                        """))
+                .andExpect(status().isUnauthorized());
+
+        org.junit.jupiter.api.Assertions.assertNull(usuarioRepository.findByEmail(email).orElseThrow().getGoogleId(),
+                "La cuenta del personal no tiene que quedar vinculada a Google");
+    }
+
+    @Test
     void tokenDeGoogleInvalidoDevuelve401() throws Exception {
         when(googleTokenVerifierService.verificar(any())).thenReturn(null);
 

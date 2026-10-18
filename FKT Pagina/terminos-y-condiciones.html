@@ -5,7 +5,7 @@
 <script>try{var t=localStorage.getItem("fkt-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Términos y Condiciones — FKT Lomas</title>
-<meta name="description" content="Condiciones de uso del sistema de turnos y del sitio de FKT Lomas.">
+<meta name="description" content="Condiciones de uso del sitio y del sistema de turnos online de FKT Lomas: reservas, cancelaciones, pagos, derecho de arrepentimiento y reclamos.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="FKT Lomas">
 <meta property="og:locale" content="es_AR">
@@ -25,9 +25,7 @@
 <link rel="icon" type="image/png" href="assets/img/logo/favicon-fkt-2026.png">
 <link rel="shortcut icon" type="image/png" href="assets/img/logo/favicon-fkt-2026.png">
 <link rel="apple-touch-icon" href="assets/img/logo/favicon-fkt-2026.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,300..800;1,400&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<link rel="preload" href="assets/fonts/atkinson-hyperlegible-next-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css">
 <style>
   :root{ --maxw:820px; }
@@ -46,6 +44,7 @@
   footer{background:var(--black); color:rgba(255,255,255,0.75); padding:40px 0; margin-top:60px;}
   footer .wrap{display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; font-size:15.5px;}
   footer a{color:rgba(255,255,255,0.75);}
+  footer .footer-legal-links{padding-bottom:16px; margin-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.12);}
 </style>
 </head>
 <body>
@@ -64,69 +63,91 @@
 <main id="main">
   <div class="wrap">
     <h1 style="margin-top:14px;">Términos y Condiciones</h1>
-    <p class="updated">Última actualización: septiembre de 2026</p>
+    <p class="updated">Última actualización: octubre de 2026</p>
 
     <section class="policy">
       <h2>1. Quiénes somos y a qué aplica esto</h2>
-      <p>FKT Lomas es un centro médico y de kinesiología ubicado en Juan Larrea 496, Lomas de Zamora, Provincia de Buenos Aires. Estos Términos y Condiciones regulan el uso de este sitio web y del sistema de turnos online (la "Plataforma"), tanto si accedés como paciente, como si lo hacés para consultar por alquiler de consultorios o por una postulación laboral. Al crear una cuenta, reservar un turno o enviar un formulario a través de la Plataforma, aceptás estos términos. Si no estás de acuerdo, te pedimos que no uses la Plataforma y nos contactes por los medios de la sección 10.</p>
+      <p>Este sitio y el sistema de turnos online (la "Plataforma") son de <strong>[COMPLETAR: razón social]</strong>, CUIT <strong>[COMPLETAR]</strong>, con domicilio en <strong>[COMPLETAR: domicilio legal]</strong>, que opera el centro médico y de kinesiología <strong>FKT Lomas</strong>, Juan Larrea 496, Lomas de Zamora, Provincia de Buenos Aires. Dirección médica: <strong>[COMPLETAR: nombre]</strong>, M.P. <strong>[COMPLETAR]</strong>. Habilitación sanitaria n.º <strong>[COMPLETAR]</strong>.</p>
+      <p>Estos Términos regulan el uso de la Plataforma, ya sea como paciente, para consultar por alquiler de consultorios o para postularte a trabajar con nosotros. Al crear una cuenta, reservar un turno o enviar un formulario, los aceptás. Si no estás de acuerdo, no uses la Plataforma y contactanos por los medios del punto 12: siempre podés pedir tu turno por teléfono o en el centro.</p>
       <p>El tratamiento de tus datos personales se rige por nuestra <a href="politica-de-privacidad.html">Política de Privacidad</a>, que forma parte de estos Términos.</p>
     </section>
 
     <section class="policy">
       <h2>2. Tu cuenta</h2>
-      <p>Para reservar turnos por tu cuenta necesitás registrarte con datos reales: DNI, nombre y apellido, email, teléfono, género y obra social. Sos responsable de que esos datos estén actualizados y de mantener tu contraseña en secreto — cualquier acción realizada desde tu cuenta se considera hecha por vos. Si sospechás que alguien accedió a tu cuenta sin autorización, cambiá tu contraseña de inmediato desde <strong>Mi cuenta</strong> y avisanos.</p>
-      <p>Para el personal del centro (secretarías, profesionales, administración y contaduría), el acceso requiere además verificación en dos pasos, y las cuentas quedan sujetas a auditoría interna de uso, como se explica en nuestra Política de Privacidad.</p>
+      <p>Para reservar turnos online necesitás registrarte con datos reales y propios: DNI, nombre y apellido, email, teléfono, género y obra social. Sos responsable de mantenerlos actualizados y de no compartir tu contraseña. Si sospechás que alguien entró a tu cuenta, cambiá la contraseña desde Mi cuenta, usá "Cerrar todas mis sesiones" y avisanos.</p>
+      <p>Las cuentas de pacientes menores de 18 años las crea y administra su madre, padre o representante legal.</p>
+      <p>El personal del centro (secretaría, profesionales, administración y contaduría) accede con verificación en dos pasos, y sus cuentas quedan sujetas a auditoría interna de uso.</p>
     </section>
 
     <section class="policy">
       <h2>3. Reserva de turnos</h2>
-      <p>La Plataforma te permite reservar un turno eligiendo especialidad, profesional y horario disponible. Cada horario solo puede reservarlo una persona a la vez: si dos personas intentan tomar el mismo horario, gana quien confirma primero y el otro ve el horario como ya no disponible. Para kinesiología, es obligatorio adjuntar una orden médica vigente antes de poder reservar un plan de sesiones.</p>
-      <p>El día anterior a tu turno te enviamos un recordatorio (por el canal que hayas elegido) con un link para confirmar o avisar que no podés asistir, sin necesidad de iniciar sesión. Si avisás que no venís, el horario queda libre para otro paciente.</p>
+      <p>Podés reservar un turno eligiendo especialidad, profesional, día y horario disponible. Cada horario lo puede tomar una sola persona: si dos personas intentan reservarlo a la vez, queda para quien confirma primero. Para los planes de kinesiología hay que adjuntar una orden médica vigente, que el centro revisa antes de confirmar las sesiones.</p>
+      <p>Antes de tu turno te mandamos un recordatorio por el canal que elegiste (email o WhatsApp), con un link para confirmar o avisar que no podés venir, sin necesidad de iniciar sesión. Si avisás que no venís, el horario queda libre para otro paciente.</p>
+      <p>Si nos escribís al asistente de WhatsApp, te va a pedir tu DNI para identificarte antes de mostrarte o gestionar tus turnos.</p>
     </section>
 
     <section class="policy">
       <h2>4. Cancelación, reprogramación e inasistencias</h2>
-      <p>Podés cancelar o reprogramar un turno reservado desde <strong>Mis turnos</strong> en cualquier momento antes de la fecha y hora del turno, sin cargo. Al cancelar, el horario queda disponible para otro paciente.</p>
-      <p>Si no asistís a un turno reservado sin haberlo cancelado antes, queda registrado como inasistencia en tu historial administrativo. Actualmente esto no genera una penalización automática, pero un historial reiterado de inasistencias puede ser tenido en cuenta por el centro para futuras reservas.</p>
+      <p>Podés cancelar o reprogramar un turno reservado desde Mis turnos en cualquier momento antes de su fecha y hora, sin cargo.</p>
+      <p>Si no venís a un turno sin haberlo cancelado, queda registrado como inasistencia en tu historial administrativo. Hoy esto no genera ninguna penalización automática, pero inasistencias repetidas pueden ser tenidas en cuenta por el centro para futuras reservas.</p>
     </section>
 
     <section class="policy">
-      <h2>5. Pagos</h2>
-      <p>Según la especialidad y el profesional, la Plataforma puede mostrarte una tarifa de referencia antes de confirmar tu turno. El pago es opcional al momento de reservar: podés pagar online a través de Mercado Pago o abonar directamente en el consultorio. El precio mostrado es informativo y puede no reflejar coberturas o copagos específicos de tu obra social — ante cualquier duda, consultá con administración antes de tu turno.</p>
-      <p>Si pagaste online y necesitás un reembolso (por ejemplo, por cancelación de un turno ya abonado), escribinos por los medios de la sección 10: hoy los reembolsos se gestionan de forma manual caso por caso, no automáticamente desde la Plataforma.</p>
+      <h2>5. Precios y pagos</h2>
+      <p>Según la especialidad y el profesional, la Plataforma puede mostrarte la tarifa de la consulta antes de confirmar el turno. Pagar online es opcional: podés hacerlo con Mercado Pago o pagar en el consultorio. La tarifa mostrada no incluye coberturas ni copagos específicos de tu obra social; ante cualquier duda, consultá con administración antes de tu turno.</p>
+      <p>Los pagos online los procesa Mercado Pago, con sus propios términos. Nosotros nunca vemos ni guardamos los datos de tu tarjeta.</p>
+    </section>
+
+    <section class="policy" id="arrepentimiento">
+      <h2>6. Derecho de arrepentimiento y devoluciones</h2>
+      <p>Si contrataste o pagaste un servicio a través de la Plataforma, tenés derecho a <strong>revocar esa aceptación dentro de los 10 días corridos</strong>, sin costo ni responsabilidad alguna (Ley 24.240, art. 34). Podés hacerlo con el <a href="arrepentimiento.html"><strong>Botón de arrepentimiento</strong></a>, sin registrarte ni iniciar sesión, o por cualquiera de los medios del punto 12. Te damos un código de identificación del trámite en el momento, y también te lo mandamos por email.</p>
+      <p>Si pagaste online, te devolvemos el dinero por el mismo medio de pago. Lo mismo aplica si cancelás un turno ya pagado o si el centro tiene que cancelarlo: escribinos y gestionamos la devolución.</p>
+      <p>Si el turno ya se realizó, la consulta ya se prestó y no corresponde el arrepentimiento sobre ese servicio.</p>
     </section>
 
     <section class="policy">
-      <h2>6. Alcance del servicio</h2>
-      <p>La Plataforma es un sistema de gestión administrativa de turnos: te ayuda a coordinar horarios con nuestros profesionales, pero no reemplaza la consulta médica presencial ni constituye un servicio de telemedicina, diagnóstico a distancia o atención de urgencias. Ante una emergencia médica, comunicate con los servicios de emergencia correspondientes, no a través de este sitio.</p>
-      <p>La historia clínica y las evoluciones que carga cada profesional sobre tus consultas son de su responsabilidad y confidenciales — ni el personal administrativo ni otros profesionales acceden a ese contenido, solo a que existe un registro cargado (ver nuestra Política de Privacidad, sección 7).</p>
+      <h2>7. Alcance del servicio</h2>
+      <p>La Plataforma es un sistema de gestión administrativa de turnos: te ayuda a coordinar horarios con nuestros profesionales, pero <strong>no reemplaza la consulta médica, no es telemedicina y no atiende urgencias</strong>. Ante una emergencia, llamá al 107 (SAME) o al servicio de emergencias de tu cobertura.</p>
+      <p>La historia clínica y las evoluciones que carga cada profesional son de su responsabilidad y confidenciales: el personal administrativo no accede a su contenido. Ver nuestra <a href="politica-de-privacidad.html#salud">Política de Privacidad</a>.</p>
+      <p>Hacemos lo posible para que la Plataforma funcione siempre, pero puede haber interrupciones por mantenimiento o fallas técnicas. Si no podés reservar online, llamanos o escribinos por WhatsApp.</p>
     </section>
 
     <section class="policy">
-      <h2>7. Reseñas y contenido que publicás</h2>
-      <p>Si dejás una reseña sobre tu atención, antes de publicarse la revisamos para verificar que corresponda a una consulta real y que no contenga datos personales de terceros ni contenido inapropiado. Nos reservamos el derecho de no publicar o de retirar una reseña que incumpla esto. Al enviar una reseña, nos autorizás a mostrarla públicamente en el sitio con tu nombre tal como lo cargaste.</p>
+      <h2>8. Reseñas y contenido que publicás</h2>
+      <p>Solo pueden dejar reseñas pacientes con un turno ya atendido. Antes de publicarla la revisamos, para verificar que no contenga datos de terceros, información de salud de otras personas ni contenido ofensivo; podemos no publicar o retirar una reseña que no cumpla esto. Al enviarla, nos autorizás a mostrarla en el sitio con tu nombre y la inicial de tu apellido, y la especialidad en la que te atendiste.</p>
+      <p>La foto de perfil que subas tiene que ser tuya o de alguien que te autorizó, y no puede tener contenido inapropiado: la ven el personal del centro y tus profesionales.</p>
     </section>
 
     <section class="policy">
-      <h2>8. Propiedad intelectual</h2>
-      <p>Los textos, el diseño, el logo y el resto del contenido de este sitio y de la Plataforma pertenecen a FKT Lomas o se usan con la autorización correspondiente. No está permitido copiarlos, redistribuirlos o usarlos comercialmente sin nuestro consentimiento previo por escrito.</p>
+      <h2>9. Uso correcto de la Plataforma</h2>
+      <p>No está permitido usar la Plataforma para reservar turnos a nombre de otra persona sin su autorización, sacar turnos que no vas a usar para bloquear la agenda, intentar acceder a cuentas o datos ajenos, ni interferir con su funcionamiento. Podemos suspender cuentas que lo hagan.</p>
     </section>
 
     <section class="policy">
-      <h2>9. Cambios a estos Términos</h2>
-      <p>Podemos actualizar estos Términos para reflejar cambios en la Plataforma o en la normativa aplicable. Si el cambio es significativo, te avisaremos por los medios disponibles (email o un aviso en la Plataforma) antes de que entre en vigencia. Seguir usando la Plataforma después de un cambio implica que lo aceptás.</p>
+      <h2>10. Propiedad intelectual</h2>
+      <p>Los textos, el diseño, el logo y el resto del contenido del sitio y de la Plataforma pertenecen a FKT Lomas o se usan con autorización. No se pueden copiar, redistribuir ni usar comercialmente sin nuestro consentimiento previo por escrito.</p>
     </section>
 
     <section class="policy">
-      <h2>10. Legislación aplicable, jurisdicción y contacto</h2>
-      <p>Estos Términos se rigen por las leyes de la República Argentina, incluyendo la Ley 24.240 de Defensa del Consumidor cuando corresponda a tu relación con nosotros como paciente. Ante cualquier conflicto que no podamos resolver directamente, y sin perjuicio de tu derecho como consumidor a optar por el tribunal de tu domicilio, las partes podrán someterse a los tribunales ordinarios con competencia en Lomas de Zamora, Provincia de Buenos Aires.</p>
-      <p>Si tenés dudas sobre estos Términos, escribinos por los medios listados en nuestra <a href="contacto.html">página de contacto</a>, por WhatsApp al <a href="https://wa.me/5491123515402">11 2351-5402</a> o llamando al <a href="tel:+541159505888">11 5950-5888</a>.</p>
+      <h2>11. Cambios a estos Términos</h2>
+      <p>Podemos actualizar estos Términos para reflejar cambios en la Plataforma o en la normativa. Si el cambio es importante, te avisamos por email o con un aviso en la Plataforma antes de que entre en vigencia.</p>
+    </section>
+
+    <section class="policy">
+      <h2>12. Ley aplicable, reclamos y contacto</h2>
+      <p>Estos Términos se rigen por las leyes de la República Argentina, incluida la Ley 24.240 de Defensa del Consumidor. Ante un conflicto que no podamos resolver directamente, podés recurrir a los tribunales de tu domicilio o a los de Lomas de Zamora, Provincia de Buenos Aires, a tu elección.</p>
+      <p>También podés hacer un reclamo ante la autoridad de defensa del consumidor: <a href="https://www.argentina.gob.ar/produccion/defensadelconsumidor/formulario" target="_blank" rel="noopener">Defensa de las y los Consumidores. Para reclamos ingrese aquí</a>.</p>
+      <p>Para cualquier consulta sobre estos Términos, escribinos por los medios de nuestra <a href="contacto.html">página de contacto</a>, por WhatsApp al <a href="https://wa.me/5491123515402">11 2351-5402</a> o llamando al <a href="tel:+541159505888">11 5950-5888</a>.</p>
     </section>
   </div>
 </main>
 
 <footer>
   <div class="wrap">
+    <div class="footer-legal-links">
+      <a class="footer-arrepentimiento" href="arrepentimiento.html">Botón de arrepentimiento</a>
+      <a href="https://www.argentina.gob.ar/produccion/defensadelconsumidor/formulario" target="_blank" rel="noopener">Defensa de las y los Consumidores. Para reclamos ingrese aquí</a>
+    </div>
     <span>© 2026 FKT Lomas — Juan Larrea 496, Lomas de Zamora.</span>
     <a href="index.html">Volver al inicio</a>
   </div>

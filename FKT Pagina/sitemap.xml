@@ -40,4 +40,12 @@
     <loc>https://fktlomas.com/politica-de-privacidad.html</loc>
     <priority>0.2</priority>
   </url>
+  <url>
+    <loc>https://fktlomas.com/terminos-y-condiciones.html</loc>
+    <priority>0.2</priority>
+  </url>
+  <url>
+    <loc>https://fktlomas.com/arrepentimiento.html</loc>
+    <priority>0.3</priority>
+  </url>
 </urlset>

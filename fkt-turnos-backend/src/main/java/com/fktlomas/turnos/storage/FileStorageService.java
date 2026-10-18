@@ -19,6 +19,12 @@ public interface FileStorageService {
      */
     String guardar(String carpeta, String nombreArchivo, MultipartFile archivo) throws IOException;
 
+    /**
+     * Igual que el anterior, pero con el contenido ya en memoria — para archivos que el backend
+     * transforma antes de guardar (las imágenes re-codificadas por {@link ImagenSegura}).
+     */
+    String guardar(String carpeta, String nombreArchivo, byte[] contenido, String contentType) throws IOException;
+
     Optional<Resource> cargar(String clave);
 
     /** Best-effort: si falla o el archivo no existe, no rompe el flujo que la llama. */

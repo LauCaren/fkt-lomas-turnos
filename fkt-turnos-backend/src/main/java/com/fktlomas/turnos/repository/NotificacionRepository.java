@@ -7,6 +7,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
 
 public interface NotificacionRepository extends JpaRepository<Notificacion, Long> {
 
@@ -22,4 +25,8 @@ public interface NotificacionRepository extends JpaRepository<Notificacion, Long
     @Modifying
     @Query("update Notificacion n set n.leida = true where n.usuario.id = :usuarioId and n.leida = false")
     void marcarTodasLeidas(@Param("usuarioId") Long usuarioId);
+
+    /** Para la retención automática (ver RetencionDatosService). */
+    @Transactional
+    long deleteByCreatedAtBefore(Instant limite);
 }

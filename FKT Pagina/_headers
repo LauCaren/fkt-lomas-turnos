@@ -1,0 +1,20 @@
+# Cabeceras de seguridad del sitio — formato de Netlify y Cloudflare Pages (Vercel usa
+# vercel.json, con las mismas reglas). No se usan en desarrollo (npx serve no lee este archivo).
+#
+# Content-Security-Policy, regla por regla:
+#   script-src  solo archivos del propio sitio + el hash del script inline del tema (el único
+#               que queda en el HTML, porque tiene que correr antes de pintar la página para
+#               no mostrar un flash de tema claro). Si se cambia ese script, hay que
+#               recalcular el hash (ver README, sección "Seguridad").
+#   connect-src el backend (formularios, equipo, reseñas). La URL la reemplaza
+#   img-src     scripts/configurar-urls.mjs junto con assets/js/config.js.
+#   frame-src   solo el mapa embebido de Google Maps (contacto e inicio).
+#   style-src   'unsafe-inline' por los atributos style="" del HTML; el riesgo de inyectar CSS
+#               es mucho menor que el de inyectar scripts, que sí queda bloqueado.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-Hjf+KQ7YHc/OYScQGw0Vj22CTM3B7TvuF9fRh7pTGtg='; style-src 'self' 'unsafe-inline'; img-src 'self' data: http://localhost:8080; font-src 'self'; media-src 'self'; connect-src 'self' http://localhost:8080; frame-src https://maps.google.com https://www.google.com; form-action 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
+  Cross-Origin-Opener-Policy: same-origin

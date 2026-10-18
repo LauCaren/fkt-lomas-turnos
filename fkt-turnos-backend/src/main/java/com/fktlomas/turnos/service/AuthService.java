@@ -49,6 +49,12 @@ public class AuthService {
     private static final int MINUTOS_VALIDEZ_TOKEN_RESET = 60;
     private static final int MAX_REGISTROS_POR_HORA = 5;
     private static final int MAX_OLVIDE_PASSWORD_POR_HORA = 5;
+    // Un solo mensaje para "email ya usado" y "DNI ya usado": con mensajes distintos, el
+    // formulario de registro servía para averiguar si un DNI cualquiera es paciente del centro
+    // (un dato de salud, sensible según la Ley 25.326). La persona real sabe qué hacer con este
+    // mensaje igual: entrar o recuperar la contraseña.
+    static final String MENSAJE_CUENTA_EXISTENTE =
+            "Ya hay una cuenta con ese email o DNI. Si es tuya, ingresá o recuperá tu contraseña.";
     // Una sola instancia reusada: SecureRandom es thread-safe y crear una nueva por llamada
     // tiene un costo de inicialización/sembrado innecesario.
     private static final SecureRandom RANDOM = new SecureRandom();
@@ -92,11 +98,8 @@ public class AuthService {
         if (request.pareceSpam()) {
             throw new IllegalArgumentException("No pudimos procesar el registro");
         }
-        if (usuarioRepository.existsByEmail(request.email())) {
-            throw new ConflictoDeDatosException("Ya existe una cuenta registrada con ese email");
-        }
-        if (usuarioRepository.existsByDni(request.dni())) {
-            throw new ConflictoDeDatosException("Ya existe una cuenta registrada con ese DNI");
+        if (usuarioRepository.existsByEmail(request.email()) || usuarioRepository.existsByDni(request.dni())) {
+            throw new ConflictoDeDatosException(MENSAJE_CUENTA_EXISTENTE);
         }
         passwordFiltradaService.verificar(request.password());
 
@@ -130,15 +133,7 @@ public class AuthService {
         Usuario usuario = usuarioRepository.findByEmail(request.email())
                 .orElseThrow(() -> new IllegalStateException("Usuario no encontrado tras autenticar"));
 
-        if (usuario.isMfaHabilitado()) {
-            if (request.codigoMfa() == null || request.codigoMfa().isBlank()) {
-                throw new MfaRequeridaException();
-            }
-            if (!totpService.verificar(usuario.getMfaSecret(), request.codigoMfa())) {
-                loginRateLimiterService.registrarFallo(request.email());
-                throw new BadCredentialsException("Código de verificación incorrecto");
-            }
-        }
+        verificarSegundoFactor(usuario, request.codigoMfa());
 
         loginRateLimiterService.registrarExito(request.email());
         alertarLoginFueraDeHorarioSiCorresponde(usuario);
@@ -170,12 +165,21 @@ public class AuthService {
         Usuario usuario = usuarioRepository.findByGoogleId(datos.googleId()).orElse(null);
         if (usuario == null) {
             usuario = usuarioRepository.findByEmail(email).orElse(null);
+            // El personal no entra con Google (ver el javadoc de arriba). Antes esto solo estaba
+            // documentado: una cuenta de staff cuyo email fuera también una cuenta de Google
+            // podía vincularse y entrar sin su contraseña. Se corta acá, antes de vincular nada.
+            if (usuario != null && usuario.getRole() != Role.PACIENTE) {
+                throw new BadCredentialsException("El personal del centro ingresa con su email y contraseña");
+            }
             if (usuario != null) {
                 usuario.setGoogleId(datos.googleId());
                 usuarioRepository.save(usuario);
             }
         }
 
+        if (usuario != null && usuario.getRole() != Role.PACIENTE) {
+            throw new BadCredentialsException("El personal del centro ingresa con su email y contraseña");
+        }
         return usuario != null
                 ? iniciarSesionGoogle(usuario, request)
                 : registrarPacienteConGoogle(datos, email, request);
@@ -183,15 +187,7 @@ public class AuthService {
 
     private GoogleAuthResponse iniciarSesionGoogle(Usuario usuario, GoogleAuthRequest request) {
         loginRateLimiterService.verificarNoBloqueado(usuario.getEmail());
-        if (usuario.isMfaHabilitado()) {
-            if (request.codigoMfa() == null || request.codigoMfa().isBlank()) {
-                throw new MfaRequeridaException();
-            }
-            if (!totpService.verificar(usuario.getMfaSecret(), request.codigoMfa())) {
-                loginRateLimiterService.registrarFallo(usuario.getEmail());
-                throw new BadCredentialsException("Código de verificación incorrecto");
-            }
-        }
+        verificarSegundoFactor(usuario, request.codigoMfa());
         loginRateLimiterService.registrarExito(usuario.getEmail());
         alertarLoginFueraDeHorarioSiCorresponde(usuario);
         boolean mfaSetupRequerido = ROLES_MFA_OBLIGATORIO.contains(usuario.getRole()) && !usuario.isMfaHabilitado();
@@ -213,11 +209,8 @@ public class AuthService {
         if (request.pareceSpam()) {
             throw new IllegalArgumentException("No pudimos procesar el registro");
         }
-        if (usuarioRepository.existsByEmail(email)) {
-            throw new ConflictoDeDatosException("Ya existe una cuenta registrada con ese email");
-        }
-        if (usuarioRepository.existsByDni(request.dni())) {
-            throw new ConflictoDeDatosException("Ya existe una cuenta registrada con ese DNI");
+        if (usuarioRepository.existsByEmail(email) || usuarioRepository.existsByDni(request.dni())) {
+            throw new ConflictoDeDatosException(MENSAJE_CUENTA_EXISTENTE);
         }
 
         // Nunca se usa para loguear (esta cuenta entra por Google) — solo para que passwordHash,
@@ -279,7 +272,7 @@ public class AuthService {
             RANDOM.nextBytes(bytes);
             String token = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
 
-            usuario.setResetToken(token);
+            usuario.setResetToken(hashDeToken(token));
             usuario.setResetTokenExpira(OffsetDateTime.now().plusMinutes(MINUTOS_VALIDEZ_TOKEN_RESET));
             usuarioRepository.save(usuario);
 
@@ -291,7 +284,7 @@ public class AuthService {
 
     @Transactional
     public void restablecerPassword(RestablecerPasswordRequest request) {
-        Usuario usuario = usuarioRepository.findByResetToken(request.token())
+        Usuario usuario = usuarioRepository.findByResetToken(hashDeToken(request.token()))
                 .orElseThrow(() -> new RecursoNoEncontradoException("El link de recuperación no es válido o ya se usó"));
 
         if (usuario.getResetTokenExpira() == null || usuario.getResetTokenExpira().isBefore(OffsetDateTime.now())) {
@@ -349,6 +342,45 @@ public class AuthService {
         usuario.setMfaHabilitado(false);
         usuario.setMfaSecret(null);
         usuarioRepository.save(usuario);
+    }
+
+    /**
+     * Segundo factor del login (con contraseña o con Google). Si la cuenta no tiene 2FA, no hace
+     * nada. Si lo tiene: sin código pide el código (401 con requiereMfa), con un código
+     * incorrecto cuenta como intento fallido, y con un código correcto pero ya usado antes
+     * (mismo paso de 30 s o anterior) también lo rechaza — un código TOTP sirve una sola vez.
+     */
+    private void verificarSegundoFactor(Usuario usuario, String codigoMfa) {
+        if (!usuario.isMfaHabilitado()) {
+            return;
+        }
+        if (codigoMfa == null || codigoMfa.isBlank()) {
+            throw new MfaRequeridaException();
+        }
+        long paso = totpService.pasoCoincidente(usuario.getMfaSecret(), codigoMfa.trim());
+        boolean yaUsado = usuario.getMfaUltimoPaso() != null && paso <= usuario.getMfaUltimoPaso();
+        if (paso < 0 || yaUsado) {
+            loginRateLimiterService.registrarFallo(usuario.getEmail());
+            throw new BadCredentialsException(yaUsado
+                    ? "Ese código ya se usó. Esperá a que la app muestre uno nuevo."
+                    : "Código de verificación incorrecto");
+        }
+        usuario.setMfaUltimoPaso(paso);
+        usuarioRepository.save(usuario);
+    }
+
+    /**
+     * SHA-256 en Base64 URL (43 caracteres, entra en la columna de 64). El token tiene 256 bits
+     * aleatorios, así que no hace falta sal ni un hash lento: no hay diccionario posible.
+     */
+    static String hashDeToken(String token) {
+        try {
+            byte[] hash = java.security.MessageDigest.getInstance("SHA-256")
+                    .digest(token.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            return Base64.getUrlEncoder().withoutPadding().encodeToString(hash);
+        } catch (java.security.NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 no disponible", e);
+        }
     }
 
     public static Usuario usuarioActual(Object principal) {

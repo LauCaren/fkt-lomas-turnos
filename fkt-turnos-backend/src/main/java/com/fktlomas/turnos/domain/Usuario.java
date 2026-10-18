@@ -73,6 +73,12 @@ public class Usuario {
     @Column(name = "password_changed_at", nullable = false)
     private Instant passwordChangedAt;
 
+    /**
+     * Hash SHA-256 (Base64 URL) del token de "olvidé mi contraseña" — nunca el token en sí, que
+     * solo viaja en el link del mail. Así, alguien con una copia de la base (un backup filtrado,
+     * por ejemplo) no puede usar los tokens vigentes para tomar cuentas. Ver
+     * AuthService.hashDeToken.
+     */
     @Column(name = "reset_token", length = 64)
     private String resetToken;
 
@@ -85,6 +91,14 @@ public class Usuario {
 
     @Column(name = "mfa_habilitado", nullable = false)
     private boolean mfaHabilitado;
+
+    /**
+     * Último "paso" TOTP (ventana de 30 s) aceptado en un login — un código de ese paso o de uno
+     * anterior ya no sirve para entrar, aunque todavía esté dentro de su ventana de validez
+     * (ver TotpService.pasoCoincidente y AuthService.verificarSegundoFactor).
+     */
+    @Column(name = "mfa_ultimo_paso")
+    private Long mfaUltimoPaso;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "canal_notificacion_preferido", nullable = false, length = 20)

@@ -25,9 +25,7 @@
 <link rel="icon" type="image/png" href="assets/img/logo/favicon-fkt-2026.png">
 <link rel="shortcut icon" type="image/png" href="assets/img/logo/favicon-fkt-2026.png">
 <link rel="apple-touch-icon" href="assets/img/logo/favicon-fkt-2026.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,300..800;1,400&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<link rel="preload" href="assets/fonts/atkinson-hyperlegible-next-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css">
 <style>
   .spec-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:18px;}
@@ -224,6 +222,15 @@
         </div>
       </div>
     </div>
+    <div class="footer-legal">
+      <div class="footer-legal-links">
+        <a class="footer-arrepentimiento" href="arrepentimiento.html">Botón de arrepentimiento</a>
+        <a href="https://www.argentina.gob.ar/produccion/defensadelconsumidor/formulario" target="_blank" rel="noopener">Defensa de las y los Consumidores. Para reclamos ingrese aquí</a>
+      </div>
+      <!-- Datos legales obligatorios (Ley 24.240 y publicidad sanitaria). Completar antes de publicar:
+           ver docs/CUMPLIMIENTO-LEGAL.md. -->
+      <p class="footer-legal-datos">[COMPLETAR: razón social] · CUIT [COMPLETAR] · Dirección médica: [COMPLETAR: nombre], M.P. [COMPLETAR] · Habilitación sanitaria N.º [COMPLETAR]</p>
+    </div>
     <div class="footer-bottom">
       <span>© 2026 FKT Lomas — Kinesiología y especialidades médicas en Lomas de Zamora.</span>
       <a href="https://fktlomas.com" target="_blank" rel="noopener">fktlomas.com</a>
@@ -231,6 +238,7 @@
   </div>
 </footer>
 
+<script src="assets/js/config.js"></script>
 <script src="assets/js/site.js"></script>
 
 <a class="wa-float" href="https://wa.me/5491123515402?text=Hola%20FKT%20Lomas%2C%20quiero%20consultar%20por%20un%20turno." target="_blank" rel="noopener" aria-label="Escribinos por WhatsApp">

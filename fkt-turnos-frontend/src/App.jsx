@@ -14,6 +14,7 @@ import BookingWizard from './features/turnos/BookingWizard';
 import MisTurnosPage from './features/turnos/MisTurnosPage';
 import MiCuentaPage from './features/cuenta/MiCuentaPage';
 import ConfirmarTurnoPage from './features/turnos/ConfirmarTurnoPage';
+import ArrepentimientoPage from './features/legal/ArrepentimientoPage';
 import CheckInPage from './features/turnos/CheckInPage';
 import { RUTA_POR_ROL, GOOGLE_CLIENT_ID } from './config';
 
@@ -53,6 +54,8 @@ function AppRoutes() {
               <Route path="/olvide-password" element={<OlvidePasswordPage />} />
               <Route path="/restablecer-password" element={<RestablecerPasswordPage />} />
               <Route path="/confirmar-turno" element={<ConfirmarTurnoPage />} />
+              {/* Pública aunque haya sesión: la Res. SCI 424/2020 prohíbe exigir login para arrepentirse. */}
+              <Route path="/arrepentimiento" element={<ArrepentimientoPage />} />
               <Route path="/turnos" element={<RutaPaciente><BookingWizard /></RutaPaciente>} />
               <Route path="/turnos/kinesiologia" element={<RutaPaciente><KinesiologiaPage /></RutaPaciente>} />
               <Route path="/turnos/mis-turnos" element={<RutaPaciente><MisTurnosPage /></RutaPaciente>} />

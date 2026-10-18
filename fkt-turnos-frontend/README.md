@@ -16,7 +16,8 @@ Por defecto apunta al backend en `http://localhost:8080` (ver `.env.development`
 Públicas:
 - `/login`, `/registro` — login y alta de pacientes
 - `/olvide-password`, `/restablecer-password` — recuperación de contraseña por email
-- `/confirmar-turno` — confirmación/rechazo de asistencia sin login, desde el link del recordatorio (token por turno)
+- `/confirmar-turno` — confirmación/rechazo de asistencia sin login, desde el link del recordatorio (token por turno). "Sí" se registra al abrir; "No" pide un clic más (un antivirus de correo que abre el link no puede cancelar el turno solo)
+- `/arrepentimiento` — "Botón de arrepentimiento" (Ley 24.240 art. 34): pública aunque haya sesión, devuelve un código de trámite. Linkeado desde el pie legal (`PieLegal.jsx`) de las pantallas de pacientes y públicas
 
 Paciente (`RutaPaciente`, requiere sesión con `role=PACIENTE`):
 - `/turnos` — asistente de reserva (especialidad → médico → fecha/horario → confirmación), con sugerencia de próximas fechas con lugar si la elegida no tiene horarios
@@ -40,6 +41,16 @@ La app y el sitio de marketing comparten un mismo sistema visual, documentado en
 - **Goniómetro** (`src/components/ui/Goniometro.jsx`): el arco graduado con aguja es la pieza de identidad. Se usa en la reserva (los 4 pasos), en el login, en el avance de los planes de kinesiología, en el resumen del día de la agenda y en las pantallas de resultado (`Resultado.jsx`). Es decorativo (`aria-hidden`): quien lo usa tiene que mostrar el mismo dato en texto.
 - **Estados**: cada `.badge-*` combina color con forma (punto lleno o anillo hueco), nunca solo color. "Reservado" es neutro para el equipo y teal para el paciente, nunca rojo (el rojo es para errores y ausencias).
 - **Movimiento**: resorte suave (`--spring`) solo para la aguja y las selecciones; el resto, `--ease-out` corto. Todo se apaga con `prefers-reduced-motion`.
+
+## Seguridad, fuentes y rendimiento
+
+Detalle completo en `docs/SEGURIDAD.md` (raíz del repo). Lo que hay que saber para tocar la app:
+
+- **Content-Security-Policy**: la genera `vite/politicaSeguridad.js` en cada `npm run build`, a partir de `VITE_API_URL`, `VITE_SENTRY_DSN` y `VITE_GOOGLE_CLIENT_ID`, y la inyecta como `<meta>` en `index.html`. Es la misma para web, PWA, Capacitor y Electron. Solo se permiten scripts propios: **no agregar `<script>` inline ni cargar librerías desde un CDN** (no van a correr). Si hace falta un dominio nuevo (otra API, otro servicio), agregarlo ahí. En `npm run dev` no se aplica (Vite necesita scripts inline para el hot reload): probar con `npm run build && npm run preview`.
+- **Cabeceras del hosting** (HSTS, anti-clickjacking, etc.): `public/_headers` (Netlify/Cloudflare) y `vercel.json`.
+- **Fuentes**: Atkinson Hyperlegible Next y Caveat se sirven desde la propia app (paquetes `@fontsource`), no desde Google Fonts — privacidad (no se le pasa la IP de cada paciente a Google), funcionan sin conexión y dentro de la CSP.
+- **Moderación de fotos** (TensorFlow.js + face-api + nsfwjs, ~1,8 MB): va en un chunk aparte (`moderacion-ml`) que solo se baja cuando alguien sube una foto, y queda fuera del precache del service worker. Ver `build.rolldownOptions` y `workbox` en `vite.config.js`.
+- **Electron**: `sandbox`, sin permisos salvo la cámara para la foto de perfil y los links externos se abren en el navegador de la PC (`electron/main.cjs`).
 
 ## Variables de entorno
 

@@ -17,7 +17,8 @@ API REST en Spring Boot 4 (Java 17) para el sistema de turnos, contacto y postul
 | `FORWARDED_HEADERS_STRATEGY` | `none` | Poner en `native` si en producción hay un proxy/CDN delante terminando TLS (load balancer, nginx, Cloudflare). Sin esto, el rate limiting por IP (`RateLimitingFilter`) ve la IP del proxy en vez de la del cliente real, y termina limitando a todo el tráfico como si fuera una sola persona |
 | `DB_USERNAME` / `DB_PASSWORD` | `fkt` / `fkt` | Credenciales de la base |
 | `JWT_SECRET` | valor de desarrollo | **Cambiar en producción.** Secreto para firmar los JWT |
-| `JWT_EXPIRATION_MINUTES` | `10080` (7 días) | Duración del token |
+| `JWT_EXPIRATION_MINUTES` | `10080` (7 días) | Duración de la sesión de los **pacientes** |
+| `JWT_EXPIRATION_MINUTES_STAFF` | `720` (12 h) | Duración de la sesión del **personal** (médicos, secretaría, admin, contador): una jornada, porque esas cuentas ven historia clínica y caja de todo el centro — ver `JwtService.generarToken` |
 | `ADMIN_BOOTSTRAP_EMAIL` / `ADMIN_BOOTSTRAP_PASSWORD` | ver `application.yml` | Credenciales del usuario admin (Fernando) que se crea automáticamente al arrancar si no existe. Cambiar la contraseña desde el panel una vez logueado. |
 | `ADMIN_NOTIFY_EMAIL` | `fernando@fktlomas.com` | A dónde llegan los avisos de contacto/postulaciones |
 | `CORS_ALLOWED_ORIGINS` | `http://localhost:5173` | Orígenes permitidos (separados por coma) |
@@ -39,6 +40,7 @@ API REST en Spring Boot 4 (Java 17) para el sistema de turnos, contacto y postul
 | `MERCADOPAGO_ACCESS_TOKEN` / `MERCADOPAGO_PUBLIC_KEY` | vacío | Credenciales de [Mercado Pago](https://www.mercadopago.com.ar/developers/panel) ("Tus integraciones" > Credenciales). Sin `MERCADOPAGO_ACCESS_TOKEN`, el pago online al reservar queda deshabilitado y solo se puede pagar en el consultorio, como antes |
 | `MERCADOPAGO_WEBHOOK_SECRET` | vacío | Firma secreta del webhook ("Tus integraciones" > Webhooks > Configurar notificaciones). A diferencia de otras integraciones de este proyecto, sin esto **el webhook rechaza toda notificación** — ver `MercadoPagoService.validarFirma` |
 | `CHEQUEO_PASSWORD_FILTRADA` | `true` | Chequea cada contraseña nueva contra la API pública de HaveIBeenPwned (sin API key, k-anonymity) además de la regla de fuerza — ver `PasswordFiltradaService`. Poner en `false` solo si el host no tiene salida a internet; de todos modos, sin conexión el chequeo falla "abierto" (no bloquea) |
+| `RETENCION_POSTULACIONES_DIAS` / `RETENCION_MENSAJES_CONTACTO_DIAS` / `RETENCION_NOTIFICACIONES_DIAS` / `RETENCION_CONVERSACIONES_WHATSAPP_DIAS` / `RETENCION_PEDIDOS_RESUELTOS_DIAS` | `365` / `730` / `365` / `180` / `1825` | Plazos del borrado automático diario de datos que ya no hacen falta (`RetencionDatosService`, Ley 25.326 art. 4). **Si se cambian, hay que cambiar también la Política de Privacidad del sitio (punto 8)**. La historia clínica y la caja no tienen plazo acá: no se borran nunca automáticamente |
 | `GOOGLE_CLIENT_ID` | vacío | ID de cliente OAuth de [Google Cloud Console](https://console.cloud.google.com/apis/credentials) (Credentials > OAuth client ID > Web application) para "Iniciar sesión con Google" — solo pacientes, ver `AuthService.loginConGoogle`. Mismo valor va en `VITE_GOOGLE_CLIENT_ID` del frontend. Sin esto, el botón de Google simplemente no se muestra en el login/registro — se sigue pudiendo usar email y contraseña, como antes |
 
 Con `MAIL_ENABLED=false` (default) los emails no se envían, solo se loguean — así se puede probar todo el flujo sin tener un SMTP configurado. Mismo criterio para WhatsApp: sin credenciales de Twilio, ese canal simplemente no se registra (los recordatorios de pacientes con ese canal preferido quedan en FALLIDO con un mensaje de error claro, no rompen el resto). El canal SMS no existe en el sistema — solo email y WhatsApp.
@@ -84,6 +86,9 @@ Cubren, entre otras cosas: que ante dos intentos de reserva sobre el mismo turno
 - **ReglaDisponibilidad**: plantilla semanal (día + hora inicio/fin) por médico, usada para generar turnos concretos.
 - **Turno**: la unidad real de reserva (`DISPONIBLE` / `RESERVADO` / `CANCELADO`), con `@Version` para optimistic locking además del `UPDATE` condicional.
 - **MensajeContacto** / **Postulacion**: formularios públicos del sitio estático.
+- **SolicitudArrepentimiento**: pedidos del "Botón de arrepentimiento" (Ley 24.240 art. 34), públicos y sin login — `POST /api/arrepentimiento` genera un código de trámite que se devuelve y se manda por email; el panel los lista en `/api/admin/arrepentimientos`. Ver `ArrepentimientoService`.
+
+Seguridad y normativa: ver `docs/SEGURIDAD.md` y `docs/CUMPLIMIENTO-LEGAL.md` en la raíz del repo.
 
 El schema se versiona con Flyway (`src/main/resources/db/migration`), no con `ddl-auto`. Desde Spring Boot 4 Flyway solo se autoconfigura con `spring-boot-starter-flyway` (ya está en el `pom.xml`): con `flyway-core` suelto las migraciones dejan de correr al arrancar sin dar ningún error, así que no reemplazarlo.
 

@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog } = require('electron');
+const { app, BrowserWindow, dialog, shell } = require('electron');
 const path = require('node:path');
 const express = require('express');
 const { autoUpdater } = require('electron-updater');
@@ -32,19 +32,16 @@ function carpetaDist() {
 function iniciarServidorEstatico() {
   return new Promise((resolve) => {
     const servidor = express();
-    // Defensa en profundidad: si alguna vez hay un XSS en el bundle de React, esto
-    // impide que ejecute scripts/estilos inline o cargue nada de un origen ajeno —
-    // el backend ya manda su propio CSP en sus respuestas, pero este es un servidor
-    // Express aparte (el bundle estático de dist/), que no la hereda.
+    // La Content-Security-Policy principal (qué scripts, a qué backend se puede conectar,
+    // etc.) viene adentro del propio index.html como <meta>, generada en el build a partir
+    // de VITE_API_URL (ver vite/politicaSeguridad.js) — la misma para web, celular y
+    // escritorio. Antes estaba escrita a mano acá con connect-src fijo a localhost:8080: con
+    // el backend ya desplegado en otro dominio, la app de escritorio no hubiera podido
+    // conectarse. Acá quedan solo las directivas que un <meta> no admite.
     servidor.use((_req, res, next) => {
-      // connect-src apunta al mismo backend que VITE_API_URL (.env.production) — hoy
-      // todavía localhost:8080 porque no se desplegó (ver README, sección Despliegue).
-      // Actualizar acá junto con VITE_API_URL cuando haya un dominio real, y volver a
-      // correr "npm run desktop:build".
-      res.setHeader('Content-Security-Policy',
-        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
-        + "img-src 'self' data:; connect-src 'self' http://localhost:8080; "
-        + "frame-ancestors 'none'; object-src 'none'; base-uri 'none'");
+      res.setHeader('Content-Security-Policy', "frame-ancestors 'none'; object-src 'none'; base-uri 'none'");
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
       next();
     });
     servidor.use(express.static(carpetaDist(), {
@@ -72,6 +69,17 @@ function iniciarServidorEstatico() {
   });
 }
 
+function abrirAfuera(url) {
+  try {
+    const { protocol } = new URL(url);
+    if (['https:', 'mailto:', 'tel:'].includes(protocol)) {
+      shell.openExternal(url);
+    }
+  } catch {
+    // URL inválida: no se abre nada.
+  }
+}
+
 async function crearVentana() {
   await iniciarServidorEstatico();
 
@@ -82,6 +90,9 @@ async function crearVentana() {
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
+      // Explícito aunque ya sea el default desde Electron 20: el renderer corre sin acceso a
+      // Node ni al sistema operativo, como una pestaña de navegador.
+      sandbox: true,
     },
   });
 
@@ -107,7 +118,27 @@ async function crearVentana() {
   ventana.webContents.on('will-navigate', (evento, url) => {
     if (!url.startsWith(origenPermitido)) {
       evento.preventDefault();
+      abrirAfuera(url);
     }
+  });
+
+  // Links con target="_blank" (el logo que va al sitio, WhatsApp, Google Calendar...): en vez
+  // de abrir otra ventana de Electron, se abren en el navegador normal de la PC. Solo https,
+  // mailto y tel — nunca file:// ni protocolos raros que podrían lanzar otros programas.
+  ventana.webContents.setWindowOpenHandler(({ url }) => {
+    abrirAfuera(url);
+    return { action: 'deny' };
+  });
+
+  // El único permiso que la app necesita es la cámara (sin micrófono), para "Sacarme una foto
+  // ahora" en la foto de perfil (SelectorFotoPerfil.jsx), y solo pedida por la propia app.
+  // Todo lo demás (micrófono, ubicación, notificaciones, USB...) se rechaza sin preguntar.
+  ventana.webContents.session.setPermissionRequestHandler((_contenido, permiso, responder, detalles) => {
+    const esSoloCamara = permiso === 'media'
+      && Array.isArray(detalles.mediaTypes)
+      && detalles.mediaTypes.length > 0
+      && detalles.mediaTypes.every((tipo) => tipo === 'video');
+    responder(esSoloCamara && (detalles.requestingUrl || '').startsWith(origenPermitido));
   });
 
   ventana.loadURL(origenPermitido);

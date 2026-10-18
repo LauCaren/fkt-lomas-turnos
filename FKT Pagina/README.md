@@ -1,7 +1,7 @@
 # FKT Lomas — sitio informativo
 
 Sitio estático (HTML + CSS + JS vanilla, sin build step) para FKT Lomas, centro de
-kinesiología y especialidades médicas en Lomas de Zamora. 11 páginas de contenido + una
+kinesiología y especialidades médicas en Lomas de Zamora. 12 páginas de contenido + una
 página 404, todas compartiendo `assets/css/site.css` y `assets/js/site.js`.
 
 > **Este archivo se mantiene actualizado en cada sesión de trabajo** — es la referencia de
@@ -15,22 +15,30 @@ FKT Pagina/
 ├── index.html, servicios.html, especialidades.html, equipo.html,
 │   el-centro.html, opiniones.html, contacto.html,
 │   alquiler-consultorios.html, trabaja-con-nosotros.html,
-│   politica-de-privacidad.html, terminos-y-condiciones.html, 404.html
+│   politica-de-privacidad.html, terminos-y-condiciones.html,
+│   arrepentimiento.html, 404.html
 ├── assets/
-│   ├── css/site.css      ← estilos compartidos por las 12 páginas
+│   ├── css/site.css      ← estilos compartidos por las 13 páginas
+│   ├── js/config.js      ← URLs del backend y de la app de turnos (UN solo lugar)
 │   ├── js/site.js        ← todo el JS compartido (ver más abajo)
+│   ├── js/paginas/       ← el JS propio de cada página (equipo, opiniones, formularios…)
+│   ├── fonts/            ← Atkinson Hyperlegible Next y Caveat (alojadas acá, licencia OFL)
 │   ├── img/               ← fotos reales del centro, logos de obras sociales, etc.
 │   └── video/
+├── scripts/configurar-urls.mjs  ← cambia las URLs de dev a producción de una vez
+├── _headers, vercel.json        ← cabeceras de seguridad (CSP, HSTS…) para el hosting
 ├── sitemap.xml, robots.txt
 ```
 
 Cada página conserva, en su propio `<style>`, solo las reglas que le son exclusivas (grilla
 de especialidades, hero del home, etc.) — todo lo reutilizable vive en `site.css`.
 
-`equipo.html`, `el-centro.html`, `alquiler-consultorios.html` y `trabaja-con-nosotros.html`
-tienen además un `<script>` propio al final del body que habla con el backend
-(`fkt-turnos-backend`, Spring Boot en `http://localhost:8080`) para la ficha de
-profesionales y el envío de formularios. **`politica-de-privacidad.html` y
+Las páginas con comportamiento propio (`equipo`, `opiniones`, `el-centro`, `404` y los
+formularios de `alquiler-consultorios`, `trabaja-con-nosotros` y `arrepentimiento`) cargan su
+script de `assets/js/paginas/<página>.js`, después de `config.js` y `site.js`. **Ninguna
+página tiene JavaScript embebido en el HTML** (salvo el script mínimo del tema en el `<head>`):
+es lo que permite que la política de seguridad (CSP) prohíba scripts inline. La URL del backend
+(`fkt-turnos-backend`, Spring Boot) sale de `window.FKT_CONFIG.apiUrl` (`assets/js/config.js`). **`politica-de-privacidad.html` y
 `terminos-y-condiciones.html` no cargan `site.js`** — son páginas legales con header mínimo
 a propósito (sin buscador, sin menú hamburguesa), decisión ya tomada, no es un olvido.
 
@@ -58,7 +66,8 @@ Desde octubre de 2026 el sitio usa el mismo sistema visual que `fkt-turnos-front
 identidad es el goniómetro (el instrumento con el que el kinesiólogo mide un ángulo
 articular), en línea con el eslogan "Cada grado de movimiento". Ver `DESIGN.md` en la raíz
 del repo para tokens, tipografía y componentes.
-- Tipografía: **Atkinson Hyperlegible Next** (Google Fonts), diseñada para baja visión —
+- Tipografía: **Atkinson Hyperlegible Next** (alojada en `assets/fonts/`, no en Google Fonts:
+  así abrir el sitio no le manda la IP de cada visitante a Google), diseñada para baja visión —
   elegida porque muchos pacientes son adultos mayores. Caveat queda solo para la bajada
   manuscrita del logo. Ya no se usan Playfair Display, Inter ni JetBrains Mono.
 - Tokens en `:root` de `site.css` idénticos a los de la app (incluido el modo oscuro). El
@@ -122,7 +131,7 @@ Toggle real (sol/luna) en el header, persistido en `localStorage`, respeta
 ### SEO
 - `MedicalClinic` (JSON-LD) en el home, `FAQPage` en contacto.html, `Service` en
   servicios.html y especialidades.html.
-- Open Graph + Twitter Card completos en las 12 páginas, `theme-color`, favicon.
+- Open Graph + Twitter Card completos en las 13 páginas, `theme-color`, favicon.
 - `sitemap.xml` / `robots.txt` ya existían antes de esta sesión — **no incluyen 404.html a
   propósito** (una página de error no debe indexarse).
 
@@ -159,6 +168,38 @@ grillas); las imágenes hero/banner quedan eager a propósito (son el LCP de cad
   — hoy dice "septiembre de 2026"; **hay que actualizarla a mano** la próxima vez que se
   toque esa lista (no es un dato dinámico, es honesto: se actualiza cuando alguien la edita).
 
+### Legal y privacidad (octubre de 2026)
+Detalle completo en `docs/CUMPLIMIENTO-LEGAL.md` (raíz del repo).
+- **Footer legal en todas las páginas**: "Botón de arrepentimiento" destacado (Ley 24.240 art.
+  34, Res. SCI 424/2020), link a la Ventanilla Única de Defensa del Consumidor (Res. SCI
+  274/2021) y datos del titular / dirección médica / habilitación (`[COMPLETAR]`).
+- **`arrepentimiento.html`**: formulario sin registro contra `POST /api/arrepentimiento`; el
+  código de trámite aparece en pantalla al instante y llega por email.
+- **Política de Privacidad reescrita** (Ley 25.326 art. 6, datos de salud, encargados,
+  transferencias, plazos, derechos con plazos legales, leyenda obligatoria de la AAIP, menores,
+  cookies) y **Términos actualizados** (arrepentimiento, uso correcto, urgencias al 107).
+- **Mapa de Google bajo demanda**: inicio y contacto muestran "Ver mapa" y recién ahí se crea
+  el iframe (`fktInitMapaDiferido`). Sin cookies de terceros ni analítica: no hace falta cartel
+  de cookies (si se agrega analítica, sí — ver el doc legal).
+
+### Seguridad (octubre de 2026)
+Detalle completo en `docs/SEGURIDAD.md`.
+- `_headers` (Netlify/Cloudflare) y `vercel.json` (Vercel) con CSP estricta (solo scripts
+  propios + el hash del script del tema), HSTS, nosniff, Referrer-Policy, Permissions-Policy y
+  anti-clickjacking. **Si se cambia el script del tema del `<head>`, hay que actualizar su
+  hash** en esos dos archivos.
+- Los datos que vienen del backend se insertan con `textContent` o `escapeHtml`, nunca como
+  HTML crudo.
+
+## Publicar en producción
+
+1. Desde esta carpeta:
+   `node scripts/configurar-urls.mjs --app https://<app de turnos> --api https://<backend>`.
+   Actualiza `assets/js/config.js`, todos los links "Pedir turno" y la CSP de `_headers` y
+   `vercel.json`.
+2. Completar los `[COMPLETAR]` legales (`grep -rn COMPLETAR --include=*.html .`).
+3. Agregar el dominio del sitio a `CORS_ALLOWED_ORIGINS` del backend.
+
 ## Qué falta — necesita información real del cliente
 
 Nada de esto se inventó porque hacerlo sería publicar información falsa sobre una clínica
@@ -171,9 +212,12 @@ real. Implementar apenas haya el dato:
 - [ ] **Feed de Instagram embebido** (@fktlomas) — necesita posts reales concretos.
 - [ ] **Cómo llegar en detalle**: líneas de colectivo, estacionamiento cercano verificados.
 - [ ] **Sello de matrícula / colegio profesional**, si tienen uno para mostrar.
+- [ ] **Datos legales del footer, la Política y los Términos** (`[COMPLETAR]`): razón social,
+      CUIT, dirección médica y matrícula, habilitación, n.º de registro de la base en la AAIP,
+      email de privacidad, proveedores de hosting/email. Ver `docs/CUMPLIMIENTO-LEGAL.md`.
 - [ ] **"Próximo turno disponible" en vivo**: el botón "Pedir turno" hoy apunta a
-      `http://localhost:5173` — el turnero (`fkt-turnos-frontend`) todavía no está en
-      producción. Conectar un endpoint público en vivo es trabajo de infraestructura aparte
+      `http://localhost:5173` (se cambia con `scripts/configurar-urls.mjs`) — el turnero
+      (`fkt-turnos-frontend`) todavía no está en producción. Conectar un endpoint público en vivo es trabajo de infraestructura aparte
       (backend público + CORS), no de esta página.
 - [ ] Contenido tipo blog ("consejos para tu recuperación") — requiere que alguien lo
       escriba, no es un build de una vez.
@@ -186,7 +230,10 @@ real. Implementar apenas haya el dato:
   muestra una cita destacada y linkea a opiniones.html, no las repite todas.
 - Las páginas legales (política de privacidad, términos) no cargan `site.js` ni tienen
   buscador/dark-mode-toggle propio, aunque sí heredan el tema si el usuario lo cambió en
-  otra página (vía `localStorage` + `data-theme`).
+  otra página (vía `localStorage` + `data-theme`). Sí tienen en su footer el botón de
+  arrepentimiento y el link de Defensa del Consumidor.
+- Los datos legales pendientes se muestran como `[COMPLETAR]` visible, a propósito: es más
+  difícil publicar sin completarlos que si estuvieran escondidos en un comentario.
 
 ## Desarrollo local
 

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import ConsentimientoDatos from '../../components/ConsentimientoDatos';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { registrarPaciente } from './authSlice';
@@ -6,7 +7,7 @@ import PasswordInput from '../../components/PasswordInput';
 import GoogleAuthButton from '../../components/GoogleAuthButton';
 import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../../constants/obrasSociales';
 import { PATRON_PASSWORD, TITULO_PASSWORD, AYUDA_PASSWORD } from '../../constants/validacion';
-import { SITE_URL, GOOGLE_CLIENT_ID } from '../../config';
+import { GOOGLE_CLIENT_ID } from '../../config';
 
 const GENEROS = [
   { value: '', label: 'Seleccioná una opción' },
@@ -102,17 +103,12 @@ export default function RegisterPage() {
           <p className="field-hint">{AYUDA_PASSWORD}</p>
         </div>
 
-        <div style={{ position: 'absolute', left: -9999, opacity: 0 }} aria-hidden="true">
+        <div className="honeypot" aria-hidden="true">
           <label htmlFor="sitioWeb">No completar este campo</label>
           <input id="sitioWeb" name="sitioWeb" type="text" tabIndex={-1} autoComplete="off" value={form.sitioWeb} onChange={handleChange} />
         </div>
 
-        <label className="check" htmlFor="aceptaPoliticaPrivacidad">
-          <input id="aceptaPoliticaPrivacidad" name="aceptaPoliticaPrivacidad" type="checkbox" required checked={form.aceptaPoliticaPrivacidad} onChange={handleChange} />
-          <span>
-            Acepto la <a href={`${SITE_URL}/politica-de-privacidad.html`} target="_blank" rel="noopener noreferrer" className="link-fuerte">política de privacidad</a> y los <a href={`${SITE_URL}/terminos-y-condiciones.html`} target="_blank" rel="noopener noreferrer" className="link-fuerte">términos y condiciones</a>
-          </span>
-        </label>
+        <ConsentimientoDatos id="aceptaPoliticaPrivacidad" name="aceptaPoliticaPrivacidad" checked={form.aceptaPoliticaPrivacidad} onChange={handleChange} />
 
         <button type="submit" className="btn btn-primary btn-block btn-lg" disabled={status === 'loading'}>
           {status === 'loading' && <span className="spinner" aria-hidden="true" />}
