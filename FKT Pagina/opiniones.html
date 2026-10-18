@@ -36,9 +36,10 @@
   .rating-hero .bg-photo img{width:100%; height:100%; object-fit:cover; display:block;}
   .rating-hero .bg-photo .overlay{position:absolute; inset:0; background:linear-gradient(180deg, rgba(11,11,10,0.88) 0%, rgba(11,11,10,0.94) 100%);}
   .rating-hero .wrap{position:relative; z-index:1;}
-  .rating-num{font-family:var(--font); font-weight:700; font-size:clamp(56px,9vw,100px); line-height:1; color:#fff; font-variant-numeric:tabular-nums;}
+  .rating-num{font-family:var(--font); font-weight:800; letter-spacing:-0.04em; font-size:clamp(64px,10vw,112px); line-height:1; color:#fff; font-variant-numeric:tabular-nums;}
   .rating-stars{display:flex; justify-content:center; gap:6px; margin:16px 0 12px; color:var(--teal);}
   .rating-stars svg{width:26px; height:26px;}
+  .rating-titulo{color:#fff; font-size:clamp(28px,3.6vw,40px); margin-bottom:18px;}
   .rating-hero .cap{color:rgba(255,255,255,0.6); font-size:15px;}
   .rating-ctas{display:flex; justify-content:center; gap:14px; margin-top:32px; flex-wrap:wrap;}
   .star-fill{clip-path:inset(0 100% 0 0); transition:clip-path 1.1s var(--ease);}
@@ -106,6 +107,7 @@
       <div class="overlay"></div>
     </div>
     <div class="wrap">
+      <h1 class="rating-titulo reveal">Opiniones de pacientes</h1>
       <div class="rating-num reveal" id="ratingNum">0.0</div>
       <div class="rating-stars reveal" id="ratingStars" aria-hidden="true"></div>
       <p class="cap reveal">Calificación en Google, basada en más de 60 reseñas de pacientes</p>

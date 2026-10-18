@@ -960,18 +960,6 @@ function fktInitStepGauges(reduceMotion) {
   });
 }
 
-// ---------- SPOTLIGHT EN BANDAS OSCURAS ----------
-function fktInitSpotlight(reduceMotion) {
-  if (reduceMotion || !FKT_FINE_POINTER()) return;
-  document.querySelectorAll('.dark-band').forEach((band) => {
-    band.addEventListener('mousemove', (e) => {
-      const r = band.getBoundingClientRect();
-      band.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
-      band.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
-    });
-  });
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   const burger = document.getElementById('burgerBtn');
   const header = document.getElementById('site-header');
@@ -1026,7 +1014,6 @@ document.addEventListener('DOMContentLoaded', () => {
   fktInitBodyMap();
   fktInitFluidOrb();
   fktInitIconDraw(reduceMotion);
-  fktInitSpotlight(reduceMotion);
   fktInitStepGauges(reduceMotion);
   fktInitMarqueePause(reduceMotion);
 });

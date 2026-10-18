@@ -31,17 +31,17 @@
 <link rel="stylesheet" href="assets/css/site.css">
 <style>
   .spec-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:18px;}
-  .spec-item{border:1px solid var(--line); border-radius:var(--radius-m); overflow:hidden; background:var(--white); transition:border-color .25s var(--ease), transform .25s var(--ease); position:relative;}
-  .spec-item:hover{border-color:var(--teal); transform:translateY(-4px);}
+  .spec-item{border:1px solid var(--line); border-radius:var(--radius-l); overflow:hidden; background:var(--white); box-shadow:var(--shadow-sm); cursor:pointer; transition:border-color .25s var(--ease), box-shadow .25s var(--ease), transform .18s var(--ease-out); position:relative;}
+  .spec-item:hover{border-color:var(--line-strong); box-shadow:var(--shadow-md);}
   .spec-item:active{transform:scale(.98); transition-duration:.15s; transition-timing-function:var(--ease-out);}
   .spec-img{position:relative; width:100%; aspect-ratio:4/3; background:var(--bg-soft); overflow:hidden;}
   .spec-img img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s var(--ease);}
   .spec-item:hover .spec-img img{transform:scale(1.07);}
   .spec-icn{position:absolute; left:14px; bottom:-16px; width:36px; height:36px; background:var(--white); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 3px 10px rgba(0,0,0,0.14); color:var(--teal-dark);}
   .spec-icn svg{width:18px; height:18px;}
-  .spec-body{padding:28px 18px 18px;}
-  .spec-body h3{font-size:17px; font-weight:800;}
-  .spec-body p{font-size:15px; color:var(--muted); margin-top:5px;}
+  .spec-body{padding:30px 20px 22px;}
+  .spec-body h3{font-size:19px; font-weight:800;}
+  .spec-body p{font-size:16px; color:var(--muted); margin-top:6px;}
   @media (max-width:960px){ .spec-grid{grid-template-columns:1fr 1fr;} }
   @media (max-width:560px){ .spec-grid{grid-template-columns:1fr;} }
 </style>

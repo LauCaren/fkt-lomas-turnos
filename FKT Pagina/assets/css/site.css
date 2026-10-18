@@ -396,17 +396,25 @@ section.soft .step-deg { background: var(--bg-soft); }
 @media (max-width: 560px) { .intent-grid-mini { grid-template-columns: 1fr; } }
 
 /* ---------- FORMULARIOS (alquiler / trabaja-con-nosotros) ---------- */
-.form-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-m); padding: 40px; max-width: 560px; }
-.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
-.field label { font-size: 15.5px; font-weight: 600; color: var(--ink-soft); }
-.field input, .field textarea { padding: 12px 14px; border: 1.5px solid var(--line); border-radius: var(--radius-s); font: inherit; font-size: 15px; color: var(--ink); background: var(--white); transition: border-color .2s var(--ease); }
-.field input[type="file"] { padding: 10px 0; border: none; }
-.field input:focus, .field textarea:focus { outline: none; border-color: var(--teal); }
-.field .hint { font-size: 14.5px; color: var(--muted); }
+.form-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-l); box-shadow: var(--shadow-sm); padding: 40px; max-width: 580px; }
+.field { display: flex; flex-direction: column; gap: 7px; margin-bottom: 18px; }
+.field label { font-size: 16px; font-weight: 700; color: var(--ink-soft); }
+.field input, .field textarea, .field select { min-height: 48px; padding: 12px 14px; border: 1.5px solid var(--line-strong); border-radius: var(--radius-s); font: inherit; font-size: 17px; color: var(--ink); background: var(--white); transition: border-color .15s var(--ease), box-shadow .2s var(--ease); }
+.field textarea { min-height: 120px; }
+.field input[type="file"] { min-height: 0; padding: 10px 0; border: none; }
+.field input:hover, .field textarea:hover { border-color: var(--ink-soft); }
+/* Antes el foco solo cambiaba el color del borde (sin contorno): ahora anillo + contorno con teclado. */
+.field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--teal-dark); box-shadow: 0 0 0 4px rgba(35, 154, 150, .18); }
+.field input:focus-visible, .field textarea:focus-visible, .field select:focus-visible { outline: 2px solid var(--teal-dark); outline-offset: 2px; }
+.field .hint { font-size: 15px; color: var(--muted); }
 @keyframes alertIn { from { opacity: 0; transform: translateY(-6px); } }
-.alert { padding: 12px 16px; border-radius: var(--radius-s); font-size: 14px; margin-bottom: 18px; animation: alertIn .3s var(--ease-out); }
-.alert-error { background: var(--teal-tint); color: var(--teal-dark); border: 1px solid var(--teal); }
-.alert-success { background: #E8F5E9; color: #2E7D32; border: 1px solid #2E7D32; }
+.alert { padding: 13px 16px; border-radius: var(--radius-s); font-size: 16px; margin-bottom: 18px; animation: alertIn .3s var(--ease-out); }
+/* Errores en rojo (antes iban en teal y se confundían con un aviso normal). */
+.alert-error { background: #FBEAE4; color: #BE3E12; border: 1px solid rgba(190, 62, 18, .4); }
+.alert-success { background: #E8F5E9; color: #2E7D32; border: 1px solid rgba(46, 125, 50, .4); }
+:root[data-theme="dark"] .alert-error { background: #3A1F16; color: #FF8A6B; }
+:root[data-theme="dark"] .alert-success { background: #1C3320; color: #6FCF73; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .alert-error { background: #3A1F16; color: #FF8A6B; } :root:not([data-theme="light"]) .alert-success { background: #1C3320; color: #6FCF73; } }
 
 /* ---------- FOOTER ---------- */
 footer { background: var(--black); color: rgba(255, 255, 255, 0.75); padding: 56px 0 28px; }
@@ -540,7 +548,7 @@ footer { background: var(--black); color: rgba(255, 255, 255, 0.75); padding: 56
    estándar (1280-1366px, lo más común) el header ya viene ajustado con logo + 7 links +
    teléfono + CTA, así que ahí el buscador se reduce a ícono para no forzar el wrap. */
 @media (max-width: 1300px) { .search-trigger kbd { display: none; } }
-@media (max-width: 1150px) { .search-trigger span { display: none; } .search-trigger { padding: 9px; } }
+@media (max-width: 1480px) { .search-trigger span { display: none; } .search-trigger { padding: 9px; } }
 
 .search-overlay {
   position: fixed; inset: 0; background: rgba(19, 35, 44, 0.5); backdrop-filter: blur(2px);
@@ -629,14 +637,6 @@ h1.reveal.in-view, .section-head.in-view h2 { clip-path: inset(0 0 0% 0); }
 /* ---------- CONTADOR: leve desenfoque mientras cuenta rápido ---------- */
 [data-count-to].counting { filter: blur(1.5px); }
 
-/* ---------- SPOTLIGHT EN BANDAS OSCURAS ---------- */
-.dark-band::after {
-  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0;
-  background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), rgba(35, 154, 150, .22), transparent 70%);
-  transition: opacity .3s var(--ease);
-}
-.dark-band:hover::after { opacity: 1; }
-@media (hover: none), (pointer: coarse) { .dark-band::after { display: none; } }
 
 /* ---------- GLOSARIO EN LÍNEA ---------- */
 .glossary { border-bottom: 1.5px dotted var(--teal); cursor: help; position: relative; }
@@ -739,10 +739,150 @@ html { scrollbar-width: thin; scrollbar-color: var(--teal) var(--bg-soft); }
 @media (max-width: 760px) { .body-map-wrap { grid-template-columns: 1fr; justify-items: center; gap: 28px; } }
 
 /* El teléfono sale del header antes que la navegación (sigue en el hero y el footer). */
-@media (max-width: 1340px) and (min-width: 1181px) { .nav-cta .btn-outline { display: none; } }
+@media (max-width: 1480px) and (min-width: 1181px) { .nav-cta .btn-outline { display: none; } }
 /* Sin el recuadro de foco por defecto al tocar una articulación; con teclado, el anillo crece. */
 .body-spot:focus { outline: none; }
 .body-spot:focus-visible .body-spot-ring { stroke-width: 3; opacity: 1; animation: none; }
 
 /* Tarjeta de equipo: la especialidad es el título; la descripción, la bajada. */
 .team-card-sub { margin-top: 4px; color: var(--muted); font-size: 16px; font-weight: 600; }
+
+/* ==========================================================================
+   RECOMPOSICIÓN (rediseño Goniómetro, segunda etapa)
+   ========================================================================== */
+
+/* Flechas dibujadas dentro de botones (reemplazan el carácter "→"). */
+.btn svg, .camino-accion svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: transform .3s var(--spring); }
+.btn:hover svg, .camino:hover .camino-accion svg { transform: translateX(3px); }
+
+/* ---------- Dos caminos: dos paneles grandes ---------- */
+.caminos { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.camino {
+  display: flex; flex-direction: column; gap: 10px; min-height: 220px; padding: 32px 34px;
+  background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-l); box-shadow: var(--shadow-sm);
+  transition: box-shadow .25s var(--ease), border-color .25s var(--ease), transform .18s var(--ease-out);
+}
+.camino:hover { box-shadow: var(--shadow-md); border-color: var(--line-strong); }
+.camino:active { transform: scale(.99); }
+.camino h3 { font-size: clamp(24px, 2.4vw, 30px); }
+.camino p { color: var(--muted); font-size: 17px; max-width: 34ch; flex-grow: 1; }
+.camino-accion { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; font-size: 17px; color: var(--teal-dark); }
+.camino-fuerte { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+.camino-fuerte h3, .camino-fuerte .camino-accion { color: var(--on-primary); }
+.camino-fuerte p { color: color-mix(in srgb, var(--on-primary) 78%, transparent); }
+.camino-fuerte:hover { border-color: var(--primary-hover); background: var(--primary-hover); }
+@media (max-width: 760px) { .caminos { grid-template-columns: 1fr; } .camino { min-height: 0; padding: 26px; } }
+
+/* ---------- Lo que encontrás: lista con filetes y marca de graduación ---------- */
+.valores { display: grid; grid-template-columns: 5fr 7fr; gap: 56px; align-items: start; }
+.valores-cabecera { position: sticky; top: 120px; }
+.valores-cabecera h2 { font-size: clamp(30px, 3.6vw, 46px); }
+.valores-lista { display: grid; border-top: 1px solid var(--line); }
+.valores-lista li {
+  position: relative; padding: 26px 0 26px 34px; border-bottom: 1px solid var(--line);
+}
+/* Cada punto lleva una marca corta de regla, como una graduación del goniómetro. */
+.valores-lista li::before { content: ""; position: absolute; left: 0; top: 34px; width: 18px; height: 3px; border-radius: 2px; background: var(--teal); }
+.valores-lista li::after { content: ""; position: absolute; left: 0; top: 24px; width: 2px; height: 23px; border-radius: 2px; background: var(--line-strong); }
+.valores-lista h3 { font-size: 22px; }
+.valores-lista p { margin-top: 8px; color: var(--muted); font-size: 17px; max-width: 56ch; }
+@media (max-width: 860px) { .valores { grid-template-columns: 1fr; gap: 24px; } .valores-cabecera { position: static; } }
+
+/* ---------- Tarjetas de servicios: hojas separadas, la foto real manda ---------- */
+.cards-grid { gap: 18px; background: none; border: none; border-radius: 0; overflow: visible; }
+.service-card {
+  border: 1px solid var(--line); border-radius: var(--radius-l); overflow: hidden; background: var(--white);
+  box-shadow: var(--shadow-sm); cursor: pointer;
+}
+.service-card:hover { background: var(--white); box-shadow: var(--shadow-md); border-color: var(--line-strong); }
+.scard-img { aspect-ratio: 5/4; }
+.scard-body { padding: 20px 22px 24px; gap: 8px; }
+.service-card p { font-size: 16px; }
+
+/* ---------- Encabezado de páginas internas: regla graduada bajo el título ---------- */
+.page-hero { padding: 64px 0 28px; }
+.page-hero .wrap::after {
+  content: ""; display: block; max-width: 460px; height: 14px; margin-top: 30px;
+  background:
+    linear-gradient(var(--teal), var(--teal)) left bottom / 32% 3px no-repeat,
+    repeating-linear-gradient(90deg, var(--line-strong) 0 1.5px, transparent 1.5px 12px) left bottom / 100% 8px no-repeat,
+    repeating-linear-gradient(90deg, var(--line-strong) 0 2px, transparent 2px 60px) left bottom / 100% 14px no-repeat;
+  opacity: .9;
+}
+
+/* ---------- Banda oscura de llamado a la acción: un goniómetro grande de fondo ---------- */
+.cta-band { padding: 84px 0; overflow: hidden; }
+.cta-band::before {
+  content: ""; position: absolute; z-index: 0; inset: auto; mix-blend-mode: normal; right: -60px; top: 50%; width: 520px; height: 280px; transform: translateY(-30%);
+  pointer-events: none; opacity: .5;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 180'%3E%3Cpath d='M24 164 A136 136 0 0 1 296 164' fill='none' stroke='%23ffffff' stroke-opacity='.14' stroke-width='10' stroke-linecap='round'/%3E%3Cpath d='M24 164 A136 136 0 0 1 252 68' fill='none' stroke='%233CC4BE' stroke-opacity='.7' stroke-width='10' stroke-linecap='round'/%3E%3Cg stroke='%23ffffff' stroke-opacity='.3' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M38 164h12M41 130l11 4M51 98l10 7M68 70l8 9M90 47l6 10M116 30l3 11M146 21l1 12M175 21l-1 12M205 30l-3 11M231 47l-6 10M253 70l-8 9M270 98l-10 7M280 130l-11 4M284 164h-12'/%3E%3C/g%3E%3Cline x1='160' y1='164' x2='238' y2='86' stroke='%23ffffff' stroke-opacity='.8' stroke-width='4' stroke-linecap='round'/%3E%3Ccircle cx='160' cy='164' r='9' fill='%23ffffff' fill-opacity='.85'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.cta-inner h2 { font-size: clamp(28px, 3.4vw, 40px); max-width: 520px; }
+.cta-inner p { color: rgba(255, 255, 255, 0.72); font-size: 18px; }
+.btn-outline-light { border-color: rgba(255, 255, 255, 0.45); color: #fff; background: transparent; }
+@media (max-width: 760px) { .cta-band::before { width: 340px; height: 190px; right: -90px; top: auto; bottom: -40px; transform: none; opacity: .35; } }
+
+/* ---------- Teasers con foto: fotos más grandes, texto con aire ---------- */
+.detail-photo { border-radius: var(--radius-l); box-shadow: var(--shadow-md); }
+.centro-teaser-text h2, .filosofia-text h2 { font-size: clamp(30px, 3.6vw, 44px); }
+.centro-teaser-text p, .filosofia-text p { font-size: 18px; }
+.centro-teaser-text .btn { margin-top: 22px; }
+
+/* ---------- Especialidades en pastillas ---------- */
+.tag-pill { min-height: 44px; display: inline-flex; align-items: center; padding: 9px 18px; font-size: 16px; font-weight: 700; background: var(--white); border: 1.5px solid var(--line); }
+
+/* ---------- Opiniones: la cifra como lectura de instrumento ---------- */
+.trust-strip { border-radius: var(--radius-l); padding: 28px 34px; }
+.trust-score { font-size: 34px; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.featured-quote p { font-size: 22px; font-style: normal; font-weight: 600; line-height: 1.45; }
+
+/* ---------- Preguntas frecuentes ---------- */
+.faq-item summary { font-size: 18px; font-weight: 700; min-height: 64px; }
+.faq-item p { font-size: 17px; }
+.faq-item summary .faq-icon { width: 32px; height: 32px; }
+
+/* ---------- Banner con foto (equipo, el centro): más alto, tinta de marca, regla graduada ---------- */
+.team-banner { height: clamp(360px, 46vw, 460px); }
+.team-banner .overlay { background: linear-gradient(100deg, rgba(13, 26, 33, 0.88) 18%, rgba(13, 26, 33, 0.5) 62%, rgba(13, 26, 33, 0.2) 100%); }
+.team-banner h1 { font-size: clamp(34px, 4.8vw, 56px); max-width: 680px; margin-top: 0 !important; }
+.team-banner p { color: rgba(255, 255, 255, 0.82); font-size: 19px; max-width: 520px; }
+.team-banner .cap .wrap::after {
+  content: ""; display: block; max-width: 420px; height: 14px; margin-top: 28px;
+  background:
+    linear-gradient(#3CC4BE, #3CC4BE) left bottom / 32% 3px no-repeat,
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, .55) 0 1.5px, transparent 1.5px 12px) left bottom / 100% 8px no-repeat,
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, .55) 0 2px, transparent 2px 60px) left bottom / 100% 14px no-repeat;
+}
+
+/* ---------- Galería de fotos reales ---------- */
+.gallery-grid { gap: 12px; }
+.gallery-item { border-radius: var(--radius-m); }
+.gallery-item:hover img { transform: scale(1.05); }
+
+/* ---------- Grilla del equipo / del centro: celdas con más aire ---------- */
+.team-grid { border-radius: var(--radius-l); }
+.team-card { padding: 32px 34px; }
+.team-card:hover { background: var(--bg-soft); box-shadow: none; }
+.team-card li { font-size: 16.5px; }
+.team-card li::before { top: 11px; }
+.team-card p { font-size: 16.5px; }
+
+/* ---------- Reseñas ---------- */
+.review-card { border-radius: var(--radius-l); box-shadow: var(--shadow-sm); padding: 30px; }
+.review-card:hover, .review-card:active { transform: none; border-color: var(--line-strong); box-shadow: var(--shadow-md); }
+.review-card p.txt { font-size: 17.5px; line-height: 1.55; color: var(--ink); }
+.review-card .stars-mini svg { width: 17px; height: 17px; }
+
+/* ---------- Formularios del sitio (alquiler, trabajá con nosotros, contacto) ---------- */
+.form-card, form.card { border-radius: var(--radius-l); }
+
+/* Celular: el buscador y el cambio de tema viven dentro del menú (ya están duplicados ahí), así
+   el header deja lugar al logo, "Pedir turno" y el botón de menú sin desbordar. */
+@media (max-width: 560px) {
+  .wrap { padding: 0 18px; }
+  .nav { gap: 12px; }
+  .nav > .nav-cta .search-trigger, .nav > .nav-cta .theme-toggle { display: none; }
+}
+.mobile-panel .search-trigger { padding: 10px 14px; justify-content: flex-start; }
+.mobile-panel .search-trigger span { display: inline; }
+.mobile-panel .search-trigger kbd { display: none; }
