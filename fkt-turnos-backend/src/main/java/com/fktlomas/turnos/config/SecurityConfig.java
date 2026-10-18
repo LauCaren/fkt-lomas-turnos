@@ -85,6 +85,11 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // Página de error interna de Spring: cuando un pedido a un endpoint público falla
+                        // (ej. le falta un parámetro), Spring lo reenvía a /error. Sin esto, esa respuesta
+                        // terminaba en un 401 "no autenticado" engañoso en vez del error real. No expone
+                        // nada: server.error.include-message/stacktrace quedan en "never" por defecto.
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/especialidades/**", "/api/medicos/**").permitAll()
                         // Reseñas aprobadas del centro entero (opiniones.html) — las de un médico puntual

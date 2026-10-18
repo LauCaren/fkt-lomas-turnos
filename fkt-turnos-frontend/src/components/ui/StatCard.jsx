@@ -3,17 +3,16 @@ import { useEffect, useRef, useState } from 'react';
 // Anima desde el último valor mostrado hacia el nuevo (no siempre desde 0 — si el resumen se
 // refresca en caliente, un stat que pasa de 3 a 4 sube un paso, no arranca de cero de nuevo).
 // Respeta prefers-reduced-motion saltando directo al valor final, sin pasos intermedios.
+// Se lee una vez al cargar: alcanza para respetar la preferencia del sistema sin consultar
+// matchMedia en cada render.
+const SIN_MOVIMIENTO = typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
+
 function useCountUp(valorNumerico) {
   const [mostrado, setMostrado] = useState(valorNumerico ?? 0);
   const desdeRef = useRef(valorNumerico ?? 0);
 
   useEffect(() => {
-    if (valorNumerico == null || Number.isNaN(valorNumerico)) return undefined;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setMostrado(valorNumerico);
-      desdeRef.current = valorNumerico;
-      return undefined;
-    }
+    if (SIN_MOVIMIENTO || valorNumerico == null || Number.isNaN(valorNumerico)) return undefined;
     const desde = desdeRef.current;
     const hasta = valorNumerico;
     if (desde === hasta) return undefined;
@@ -35,7 +34,8 @@ function useCountUp(valorNumerico) {
     return () => cancelAnimationFrame(frame);
   }, [valorNumerico]);
 
-  return mostrado;
+  // Con movimiento reducido no hay animación: se muestra el valor final directamente.
+  return SIN_MOVIMIENTO ? (valorNumerico ?? 0) : mostrado;
 }
 
 /**

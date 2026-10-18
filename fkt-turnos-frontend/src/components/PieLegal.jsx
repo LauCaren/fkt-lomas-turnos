@@ -8,7 +8,7 @@ import { SITE_URL } from '../config';
 //   - Política de privacidad y términos (Ley 25.326, art. 6: informar antes de recolectar datos).
 // Los paneles internos (secretaría, médicos, admin, contador) no lo muestran: no son
 // pantallas para consumidores y ahí cada píxel es para trabajar.
-export const URL_DEFENSA_CONSUMIDOR = 'https://www.argentina.gob.ar/produccion/defensadelconsumidor/formulario';
+const URL_DEFENSA_CONSUMIDOR = 'https://www.argentina.gob.ar/produccion/defensadelconsumidor/formulario';
 
 export default function PieLegal() {
   return (

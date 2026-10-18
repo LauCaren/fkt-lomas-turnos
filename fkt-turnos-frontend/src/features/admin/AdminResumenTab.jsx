@@ -21,7 +21,10 @@ export default function AdminResumenTab({
     }
     cargar();
     dispatch(fetchTendenciaAdmin(14));
-    const intervaloFetch = setInterval(cargar, 30000);
+    const intervaloFetch = setInterval(() => {
+      // Con la pestaña oculta no se consulta: el resumen se refresca al volver a mirarlo.
+      if (!document.hidden) cargar();
+    }, 30000);
     return () => clearInterval(intervaloFetch);
   }, [dispatch]);
 

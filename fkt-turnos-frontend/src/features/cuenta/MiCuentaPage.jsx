@@ -9,7 +9,7 @@ import PasswordInput from '../../components/PasswordInput';
 import SeccionMfa from '../../components/SeccionMfa';
 import SeccionRevocarSesiones from '../../components/SeccionRevocarSesiones';
 import SeccionPrivacidad from '../../components/SeccionPrivacidad';
-import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../../constants/obrasSociales';
+import SelectorObraSocial from '../../components/SelectorObraSocial';
 import { PATRON_PASSWORD, TITULO_PASSWORD, AYUDA_PASSWORD } from '../../constants/validacion';
 import { descargarArchivo } from '../../api/descargas';
 import { formatMoneda } from '../../utils/formato';
@@ -68,12 +68,7 @@ function DatosPersonales({ perfil }) {
       </div>
       <div className="field">
         <label htmlFor="obraSocial">Obra social</label>
-        <select id="obraSocial" name="obraSocial" required value={form.obraSocial} onChange={handleChange}>
-          <option value="">Seleccioná tu obra social</option>
-          <option value={OBRA_SOCIAL_PARTICULAR}>{OBRA_SOCIAL_PARTICULAR}</option>
-          {OBRAS_SOCIALES.map((os) => <option key={os} value={os}>{os}</option>)}
-          <option value={OBRA_SOCIAL_OTRA}>{OBRA_SOCIAL_OTRA}</option>
-        </select>
+        <SelectorObraSocial id="obraSocial" name="obraSocial" value={form.obraSocial} onChange={handleChange} placeholder="Seleccioná tu obra social" />
       </div>
       <div className="field">
         <label htmlFor="email">Email</label>

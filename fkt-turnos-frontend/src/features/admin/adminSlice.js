@@ -68,6 +68,17 @@ export const crearOActualizarCredencialesMedico = createAsyncThunk('admin/crearO
   }
 });
 
+// Solo los contadores del menú lateral (sin datos de caja): lo usa la secretaría, que no puede
+// ver /api/admin/resumen (incluye ingresos y caja física, solo para el admin).
+export const fetchPendientes = createAsyncThunk('admin/fetchPendientes', async (_, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/admin/resumen/pendientes');
+    return data;
+  } catch (error) {
+    return rejectWithValue(mensajeDeError(error));
+  }
+});
+
 export const fetchResumenAdmin = createAsyncThunk('admin/fetchResumen', async (_, { rejectWithValue }) => {
   try {
     const { data } = await axiosClient.get('/api/admin/resumen');
@@ -504,6 +515,7 @@ const adminSlice = createSlice({
   name: 'admin',
   initialState: {
     resumen: null,
+    pendientes: null,
     medicos: [],
     reglasPorMedico: {},
     agenda: [],
@@ -562,6 +574,7 @@ const adminSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(fetchPendientes.fulfilled, (state, action) => { state.pendientes = action.payload; })
       .addCase(fetchResumenAdmin.fulfilled, (state, action) => { state.resumen = action.payload; })
       .addCase(fetchResumenAdmin.rejected, (state, action) => { state.error = action.payload; })
       .addCase(fetchMedicosAdmin.fulfilled, (state, action) => { state.medicos = action.payload; })

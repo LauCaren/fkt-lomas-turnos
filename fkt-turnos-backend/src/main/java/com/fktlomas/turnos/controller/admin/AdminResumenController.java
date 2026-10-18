@@ -1,6 +1,7 @@
 package com.fktlomas.turnos.controller.admin;
 
 import com.fktlomas.turnos.dto.admin.AdminResumenDto;
+import com.fktlomas.turnos.dto.admin.PendientesDto;
 import com.fktlomas.turnos.dto.admin.TendenciaDiaDto;
 import com.fktlomas.turnos.service.AdminResumenService;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,16 @@ public class AdminResumenController {
     @GetMapping
     public AdminResumenDto resumen() {
         return adminResumenService.resumen();
+    }
+
+    /**
+     * Los numeritos del menú lateral para la secretaría (y el admin): solo conteos, sin datos de
+     * caja. La anotación del método reemplaza a la de la clase, que es ADMIN-only.
+     */
+    @GetMapping("/pendientes")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SECRETARIA')")
+    public PendientesDto pendientes() {
+        return adminResumenService.pendientes();
     }
 
     @GetMapping("/tendencia")

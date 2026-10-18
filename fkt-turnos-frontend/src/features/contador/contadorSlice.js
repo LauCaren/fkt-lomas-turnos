@@ -60,11 +60,7 @@ const contadorSlice = createSlice({
     tendencia: [],
     error: null,
   },
-  reducers: {
-    limpiarMensajesContador(state) {
-      state.error = null;
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchResumenCajaContador.pending, (state) => { state.resumenCargando = true; })
@@ -80,9 +76,11 @@ const contadorSlice = createSlice({
       .addCase(fetchGastosContador.fulfilled, (state, action) => { state.gastos = action.payload; state.gastosCargando = false; })
       .addCase(fetchGastosContador.rejected, (state, action) => { state.error = action.payload; state.gastosCargando = false; })
       .addCase(fetchTendenciaContador.fulfilled, (state, action) => { state.tendencia = action.payload; })
-      .addCase(fetchTendenciaContador.rejected, (state, action) => { state.error = action.payload; });
+      .addCase(fetchTendenciaContador.rejected, (state, action) => { state.error = action.payload; })
+      // Cada pedido nuevo limpia el error del anterior: sin esto, una falla momentánea dejaba el
+      // cartel de error pegado en todas las pestañas aunque los datos ya hubieran cargado bien.
+      .addMatcher((action) => action.type.startsWith('contador/') && action.type.endsWith('/pending'), (state) => { state.error = null; });
   },
 });
 
-export const { limpiarMensajesContador } = contadorSlice.actions;
 export default contadorSlice.reducer;

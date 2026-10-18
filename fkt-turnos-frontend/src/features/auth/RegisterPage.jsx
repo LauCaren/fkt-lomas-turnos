@@ -5,7 +5,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { registrarPaciente } from './authSlice';
 import PasswordInput from '../../components/PasswordInput';
 import GoogleAuthButton from '../../components/GoogleAuthButton';
-import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../../constants/obrasSociales';
+import { OBRA_SOCIAL_PARTICULAR } from '../../constants/obrasSociales';
+import SelectorObraSocial from '../../components/SelectorObraSocial';
 import { PATRON_PASSWORD, TITULO_PASSWORD, AYUDA_PASSWORD } from '../../constants/validacion';
 import { GOOGLE_CLIENT_ID } from '../../config';
 
@@ -78,12 +79,7 @@ export default function RegisterPage() {
         <div className="campos-2">
           <div className="field">
             <label htmlFor="obraSocial">Obra social</label>
-            <select id="obraSocial" name="obraSocial" required value={form.obraSocial} onChange={handleChange}>
-              <option value="">Elegí una opción</option>
-              <option value={OBRA_SOCIAL_PARTICULAR}>{OBRA_SOCIAL_PARTICULAR}</option>
-              {OBRAS_SOCIALES.map((os) => <option key={os} value={os}>{os}</option>)}
-              <option value={OBRA_SOCIAL_OTRA}>{OBRA_SOCIAL_OTRA}</option>
-            </select>
+            <SelectorObraSocial id="obraSocial" name="obraSocial" value={form.obraSocial} onChange={handleChange} placeholder="Elegí una opción" />
           </div>
           <div className="field">
             <label htmlFor="genero">Género</label>

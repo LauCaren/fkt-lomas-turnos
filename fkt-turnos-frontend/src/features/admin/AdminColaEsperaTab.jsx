@@ -17,7 +17,10 @@ export default function AdminColaEsperaTab() {
 
   useEffect(() => {
     dispatch(fetchColaEsperaAdmin({ fecha, medicoId }));
-    const intervalo = setInterval(() => dispatch(fetchColaEsperaAdmin({ fecha, medicoId })), 10000);
+    const intervalo = setInterval(() => {
+      // Con la pestaña oculta no se consulta (no hay nadie mirando la cola).
+      if (!document.hidden) dispatch(fetchColaEsperaAdmin({ fecha, medicoId }));
+    }, 10000);
     return () => clearInterval(intervalo);
   }, [dispatch, fecha, medicoId]);
 

@@ -1,6 +1,5 @@
 package com.fktlomas.turnos.controller;
 
-import com.fktlomas.turnos.dto.PostulacionDto;
 import com.fktlomas.turnos.service.PostulacionService;
 import com.fktlomas.turnos.validation.Patrones;
 import jakarta.validation.constraints.Email;

@@ -5,7 +5,7 @@ import {
   rechazarPlanKinesiologia, cancelarPlanKinesiologiaAdmin, limpiarMensajesKinesiologia,
 } from './kinesiologiaSlice';
 import { fetchMedicosAdmin } from '../admin/adminSlice';
-import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../../constants/obrasSociales';
+import SelectorObraSocial from '../../components/SelectorObraSocial';
 import { verArchivo } from '../../api/descargas';
 import { hoyISO } from '../../utils/formato';
 import EstadoVacio from '../../components/EstadoVacio';
@@ -85,12 +85,7 @@ function NuevoPlanTelefonico({ medicosKinesiologia }) {
           </div>
           <div className="field" style={{ marginBottom: 0, flex: '1 1 160px' }}>
             <label htmlFor="kineTelefonicoObraSocial">Obra social</label>
-            <select id="kineTelefonicoObraSocial" required value={form.obraSocial} onChange={(e) => setForm({ ...form, obraSocial: e.target.value })}>
-              <option value="">Seleccioná</option>
-              <option value={OBRA_SOCIAL_PARTICULAR}>{OBRA_SOCIAL_PARTICULAR}</option>
-              {OBRAS_SOCIALES.map((os) => <option key={os} value={os}>{os}</option>)}
-              <option value={OBRA_SOCIAL_OTRA}>{OBRA_SOCIAL_OTRA}</option>
-            </select>
+            <SelectorObraSocial id="kineTelefonicoObraSocial" value={form.obraSocial} onChange={(e) => setForm({ ...form, obraSocial: e.target.value })} placeholder="Seleccioná" />
           </div>
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>

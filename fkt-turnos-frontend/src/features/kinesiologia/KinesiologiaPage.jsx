@@ -73,8 +73,15 @@ function NuevoPlanForm({ medicos }) {
     } else {
       dispatch(limpiarHorariosDisponibles());
     }
-    setSeleccionados([]);
+    // La selección de horarios se vacía en los mismos clics que cambian el profesional o el
+    // modo (ver cambiarProfesional), no acá: los horarios elegidos dejan de existir con el cambio.
   }, [tieneOrden, modoIndiferente, medicoId, dispatch]);
+
+  function cambiarProfesional(indiferente, id) {
+    setModoIndiferente(indiferente);
+    setMedicoId(id);
+    setSeleccionados([]);
+  }
 
   // Agrupados por día: cada día es un renglón y sus horarios, celdas que se marcan.
   const horariosPorDia = useMemo(() => {
@@ -163,19 +170,19 @@ function NuevoPlanForm({ medicos }) {
         <div className="kine-modos">
           <label className={`kine-modo${!modoIndiferente ? ' activo' : ''}`}>
             <input type="radio" name="modoMedico" checked={!modoIndiferente}
-              onChange={() => { setModoIndiferente(false); setMedicoId(''); }} />
+              onChange={() => cambiarProfesional(false, '')} />
             <span><strong>Con un kinesiólogo en particular</strong>Elegís a quién y ves sus horarios.</span>
           </label>
           <label className={`kine-modo${modoIndiferente ? ' activo' : ''}`}>
             <input type="radio" name="modoMedico" checked={modoIndiferente}
-              onChange={() => { setModoIndiferente(true); setMedicoId(''); }} />
+              onChange={() => cambiarProfesional(true, '')} />
             <span><strong>Me da igual quién</strong>Ves todos los horarios libres del centro.</span>
           </label>
         </div>
         {!modoIndiferente && (
           <div className="field" style={{ marginTop: 14, marginBottom: 0 }}>
             <label htmlFor="kineMedico">Kinesiólogo</label>
-            <select id="kineMedico" required value={medicoId} onChange={(e) => setMedicoId(e.target.value)}>
+            <select id="kineMedico" required value={medicoId} onChange={(e) => cambiarProfesional(false, e.target.value)}>
               <option value="">Elegí un kinesiólogo</option>
               {medicos.map((m) => <option key={m.id} value={m.id}>{m.nombreCompleto}</option>)}
             </select>

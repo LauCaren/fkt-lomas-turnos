@@ -23,11 +23,62 @@ function aplanarItems(groups) {
  */
 export default function CommandPalette({ groups, onNavigate, comandos = [], onBuscarPacientes, onSeleccionarPaciente }) {
   const [abierto, setAbierto] = useState(false);
+
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setAbierto((v) => !v);
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  return (
+    <>
+      <button
+        type="button"
+        className="command-palette-trigger"
+        onClick={() => setAbierto(true)}
+        title="Buscar (Ctrl+K)"
+      >
+        <Search aria-hidden="true" />
+        <span>Buscar{onBuscarPacientes ? ' paciente o sección' : ' sección'}…</span>
+        <kbd>Ctrl K</kbd>
+      </button>
+
+      {/* El contenido solo existe mientras la paleta está abierta: cada vez que se abre arranca
+          con la búsqueda vacía, sin tener que resetear estado a mano. */}
+      {abierto && (
+        <PaletaAbierta
+          groups={groups}
+          comandos={comandos}
+          onNavigate={onNavigate}
+          onBuscarPacientes={onBuscarPacientes}
+          onSeleccionarPaciente={onSeleccionarPaciente}
+          onCerrar={() => setAbierto(false)}
+        />
+      )}
+    </>
+  );
+}
+
+// Lista vacía estable (la misma referencia en cada render) para no recalcular los memos de abajo.
+const SIN_PACIENTES = [];
+
+function PaletaAbierta({ groups, comandos, onNavigate, onBuscarPacientes, onSeleccionarPaciente, onCerrar }) {
   const [query, setQuery] = useState('');
   const [indiceActivo, setIndiceActivo] = useState(0);
-  const [pacientes, setPacientes] = useState([]);
-  const [buscandoPacientes, setBuscandoPacientes] = useState(false);
+  // Resultado de la última búsqueda de pacientes, con el texto que la originó: solo se muestra
+  // si todavía coincide con lo escrito (así no hace falta limpiarlo a mano al borrar).
+  const [busqueda, setBusqueda] = useState({ q: '', pacientes: [], buscando: false });
   const inputRef = useRef(null);
+
+  const qPacientes = query.trim();
+  const buscaPacientes = Boolean(onBuscarPacientes) && qPacientes.length >= 2;
+  const pacientes = buscaPacientes && busqueda.q === qPacientes ? busqueda.pacientes : SIN_PACIENTES;
+  const buscandoPacientes = buscaPacientes && busqueda.buscando;
 
   const itemsNav = useMemo(() => aplanarItems(groups), [groups]);
   const itemsComando = useMemo(() => comandos.map((c) => ({ ...c, tipo: 'comando' })), [comandos]);
@@ -49,44 +100,23 @@ export default function CommandPalette({ groups, onNavigate, comandos = [], onBu
 
   const resultados = useMemo(() => [...resultadosLocales, ...resultadosPacientes], [resultadosLocales, resultadosPacientes]);
 
-  useEffect(() => {
-    function handleKeyDown(e) {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        setAbierto((v) => !v);
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  useEffect(() => {
-    if (abierto) {
-      setQuery('');
-      setIndiceActivo(0);
-      setPacientes([]);
-    }
-  }, [abierto]);
-
-  useEffect(() => { setIndiceActivo(0); }, [query]);
-
   // Búsqueda en vivo de pacientes: debounced, y solo con texto suficiente para no pegarle
   // a la API en cada tecla ni con una query vacía.
   useEffect(() => {
-    const q = query.trim();
-    if (!onBuscarPacientes || q.length < 2) {
-      setPacientes([]);
-      return undefined;
-    }
-    setBuscandoPacientes(true);
+    if (!buscaPacientes) return undefined;
     const timer = setTimeout(() => {
-      onBuscarPacientes(q)
-        .then((data) => setPacientes(data || []))
-        .catch(() => setPacientes([]))
-        .finally(() => setBuscandoPacientes(false));
+      setBusqueda((b) => ({ ...b, buscando: true }));
+      onBuscarPacientes(qPacientes)
+        .then((data) => setBusqueda({ q: qPacientes, pacientes: data || [], buscando: false }))
+        .catch(() => setBusqueda({ q: qPacientes, pacientes: [], buscando: false }));
     }, 300);
     return () => clearTimeout(timer);
-  }, [query, onBuscarPacientes]);
+  }, [qPacientes, buscaPacientes, onBuscarPacientes]);
+
+  function cambiarQuery(valor) {
+    setQuery(valor);
+    setIndiceActivo(0);
+  }
 
   function seleccionar(item) {
     if (item.tipo === 'comando') {
@@ -96,7 +126,7 @@ export default function CommandPalette({ groups, onNavigate, comandos = [], onBu
     } else {
       onNavigate(item.id);
     }
-    setAbierto(false);
+    onCerrar();
   }
 
   function handleInputKeyDown(e) {
@@ -113,54 +143,39 @@ export default function CommandPalette({ groups, onNavigate, comandos = [], onBu
   }
 
   return (
-    <>
-      <button
-        type="button"
-        className="command-palette-trigger"
-        onClick={() => setAbierto(true)}
-        title="Buscar (Ctrl+K)"
-      >
+    <Modal onCerrar={onCerrar} labelledBy="paletaComandosTitulo" className="command-palette" initialFocusRef={inputRef}>
+      <h2 id="paletaComandosTitulo" className="sr-only">Buscar una sección, un paciente o una acción</h2>
+      <div className="command-palette-input">
         <Search aria-hidden="true" />
-        <span>Buscar{onBuscarPacientes ? ' paciente o sección' : ' sección'}…</span>
-        <kbd>Ctrl K</kbd>
-      </button>
-
-      {abierto && (
-        <Modal onCerrar={() => setAbierto(false)} labelledBy="paletaComandosTitulo" className="command-palette" initialFocusRef={inputRef}>
-          <h2 id="paletaComandosTitulo" className="sr-only">Buscar una sección, un paciente o una acción</h2>
-          <div className="command-palette-input">
-            <Search aria-hidden="true" />
-            <input
-              ref={inputRef}
-              type="text"
-              placeholder={onBuscarPacientes ? 'Paciente por nombre o DNI, o una sección…' : 'Agenda, Caja, Reseñas…'}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={handleInputKeyDown}
-            />
-          </div>
-          <div className="command-palette-results">
-            {resultados.length === 0 && !buscandoPacientes && <p className="command-palette-empty">Sin resultados</p>}
-            {buscandoPacientes && resultadosPacientes.length === 0 && <p className="command-palette-empty">Buscando pacientes…</p>}
-            {resultados.map((item, i) => {
-              const Icon = item.tipo === 'paciente' ? User : item.icon;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={`command-palette-item${i === indiceActivo ? ' active' : ''}`}
-                  onClick={() => seleccionar(item)}
-                  onMouseEnter={() => setIndiceActivo(i)}
-                >
-                  {Icon && <Icon aria-hidden="true" />}
-                  <span className="command-palette-item-label">{item.label}</span>
-                  {item.grupo && <span className="command-palette-item-group">{item.grupo}</span>}
-                </button>
-              );
-            })}
-          </div>
-        </Modal>
-      )}
-    </>
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder={onBuscarPacientes ? 'Paciente por nombre o DNI, o una sección…' : 'Agenda, Caja, Reseñas…'}
+          value={query}
+          onChange={(e) => cambiarQuery(e.target.value)}
+          onKeyDown={handleInputKeyDown}
+        />
+      </div>
+      <div className="command-palette-results">
+        {resultados.length === 0 && !buscandoPacientes && <p className="command-palette-empty">Sin resultados</p>}
+        {buscandoPacientes && resultadosPacientes.length === 0 && <p className="command-palette-empty">Buscando pacientes…</p>}
+        {resultados.map((item, i) => {
+          const Icon = item.tipo === 'paciente' ? User : item.icon;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              className={`command-palette-item${i === indiceActivo ? ' active' : ''}`}
+              onClick={() => seleccionar(item)}
+              onMouseEnter={() => setIndiceActivo(i)}
+            >
+              {Icon && <Icon aria-hidden="true" />}
+              <span className="command-palette-item-label">{item.label}</span>
+              {item.grupo && <span className="command-palette-item-group">{item.grupo}</span>}
+            </button>
+          );
+        })}
+      </div>
+    </Modal>
   );
 }

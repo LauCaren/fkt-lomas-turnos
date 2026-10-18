@@ -7,7 +7,7 @@ import {
   fetchListaEsperaCompatibles, asignarTurnoAPaciente, enviarRecordatorioAhora,
 } from './adminSlice';
 import { fetchEspecialidades } from '../turnos/turnosSlice';
-import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../../constants/obrasSociales';
+import SelectorObraSocial from '../../components/SelectorObraSocial';
 import { hoyISO } from '../../utils/formato';
 import EstadoVacio from '../../components/EstadoVacio';
 import { useConfirm } from '../../components/ui/useConfirm';
@@ -15,6 +15,7 @@ import { useToast } from '../../components/ui/useToast';
 import axiosClient from '../../api/axiosClient';
 import { leerPref, guardarPref } from '../../utils/uiPrefs';
 import Goniometro from '../../components/ui/Goniometro';
+import { useAhora } from '../../hooks/useAhora';
 
 function parseISO(fechaISO) {
   const [y, m, d] = fechaISO.split('-').map(Number);
@@ -80,8 +81,13 @@ function FormularioReserva({ turno, onCancelar, dniInicial }) {
   const dispatch = useDispatch();
   const [datos, setDatos] = useState(() => (dniInicial ? { ...PACIENTE_VACIO, dni: dniInicial } : PACIENTE_VACIO));
   const [enviando, setEnviando] = useState(false);
-  const [pacienteEncontrado, setPacienteEncontrado] = useState(null);
-  const [buscandoDni, setBuscandoDni] = useState(false);
+  // Resultado de la última búsqueda por DNI, con el DNI que la originó: si la secretaria cambia
+  // el DNI, el resultado viejo deja de mostrarse solo (sin limpiarlo a mano).
+  const [busquedaDni, setBusquedaDni] = useState({ dni: null, paciente: null, buscando: false });
+  const dniEscrito = datos.dni.trim();
+  const dniCompleto = /^\d{7,8}$/.test(dniEscrito);
+  const pacienteEncontrado = dniCompleto && busquedaDni.dni === dniEscrito ? busquedaDni.paciente : null;
+  const buscandoDni = dniCompleto && busquedaDni.buscando;
 
   // Se consume una sola vez: si el DNI llegó prellenado desde "Nuevo turno" en la ficha del
   // paciente, no debe quedar pegado para la próxima reserva por teléfono que abra cualquier
@@ -95,26 +101,22 @@ function FormularioReserva({ turno, onCancelar, dniInicial }) {
   // completo (7 u 8 dígitos, mismo patrón que valida el backend) y con un debounce para no
   // pegarle a la API en cada tecla.
   useEffect(() => {
-    const dni = datos.dni.trim();
-    if (!/^\d{7,8}$/.test(dni)) {
-      setPacienteEncontrado(null);
-      return undefined;
-    }
-    setBuscandoDni(true);
+    if (!dniCompleto) return undefined;
+    const dni = dniEscrito;
     const timer = setTimeout(() => {
+      setBusquedaDni((b) => ({ ...b, buscando: true }));
       axiosClient.get('/api/admin/pacientes/buscar', { params: { q: dni } })
         .then(({ data }) => {
-          const match = data.find((p) => p.dni === dni);
-          setPacienteEncontrado(match || null);
+          const match = data.find((p) => p.dni === dni) || null;
+          setBusquedaDni({ dni, paciente: match, buscando: false });
           if (match) {
             setDatos((prev) => ({ ...prev, nombreCompleto: match.nombreCompleto, telefono: match.telefono }));
           }
         })
-        .catch(() => setPacienteEncontrado(null))
-        .finally(() => setBuscandoDni(false));
+        .catch(() => setBusquedaDni({ dni, paciente: null, buscando: false }));
     }, 400);
     return () => clearTimeout(timer);
-  }, [datos.dni]);
+  }, [dniCompleto, dniEscrito]);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -150,12 +152,7 @@ function FormularioReserva({ turno, onCancelar, dniInicial }) {
         </div>
         <div className="field" style={{ marginBottom: 0, flex: '1 1 160px' }}>
           <label htmlFor="agendaReservaObraSocial">Obra social</label>
-          <select id="agendaReservaObraSocial" required value={datos.obraSocial} onChange={(e) => setDatos({ ...datos, obraSocial: e.target.value })}>
-            <option value="">Seleccioná una obra social</option>
-            <option value={OBRA_SOCIAL_PARTICULAR}>{OBRA_SOCIAL_PARTICULAR}</option>
-            {OBRAS_SOCIALES.map((os) => <option key={os} value={os}>{os}</option>)}
-            <option value={OBRA_SOCIAL_OTRA}>{OBRA_SOCIAL_OTRA}</option>
-          </select>
+          <SelectorObraSocial id="agendaReservaObraSocial" value={datos.obraSocial} onChange={(e) => setDatos({ ...datos, obraSocial: e.target.value })} placeholder="Seleccioná una obra social" />
         </div>
         <div className="field" style={{ marginBottom: 0, flex: '1 1 200px' }}>
           <label htmlFor="agendaReservaEmail">Email (opcional)</label>
@@ -499,7 +496,7 @@ function VistaLista({ agenda, agendaCompleta, agendaCargando, medicoId, reservan
   // Selección múltiple para cancelar varios turnos de una (ej. un médico avisa que no viene un
   // día entero) — solo tiene sentido sobre turnos RESERVADO, así que un cambio de filtro/día
   // que ya no los muestre limpia la selección para no dejar ids "fantasma" seleccionados.
-  const [seleccionados, setSeleccionados] = useState(() => new Set());
+  const [seleccionCruda, setSeleccionados] = useState(() => new Set());
   const dispatch = useDispatch();
   const confirmar = useConfirm();
   const toast = useToast();
@@ -507,13 +504,10 @@ function VistaLista({ agenda, agendaCompleta, agendaCargando, medicoId, reservan
 
   const idsReservadosVisibles = useMemo(() => agenda.filter((t) => t.estado === 'RESERVADO').map((t) => t.id), [agenda]);
 
-  useEffect(() => {
-    setSeleccionados((actual) => {
-      const visibles = new Set(idsReservadosVisibles);
-      const filtrado = new Set([...actual].filter((id) => visibles.has(id)));
-      return filtrado.size === actual.size ? actual : filtrado;
-    });
-  }, [idsReservadosVisibles]);
+  const seleccionados = useMemo(() => {
+    const visibles = new Set(idsReservadosVisibles);
+    return new Set([...seleccionCruda].filter((id) => visibles.has(id)));
+  }, [seleccionCruda, idsReservadosVisibles]);
 
   function alternarSeleccion(id) {
     setSeleccionados((actual) => {
@@ -931,18 +925,19 @@ export default function AdminAgendaTab() {
     return Array.from({ length: 7 }, (_, i) => sumarDias(fecha, i - 3));
   }, [fecha, vista]);
 
+  // Se recalcula sola cada minuto: un turno que ya pasó deja de figurar como "próximo".
+  const ahora = useAhora();
   const resumenDia = useMemo(() => {
     if (vista === 'semana') return null;
     const reservados = agenda.filter((t) => t.estado === 'RESERVADO');
     const disponibles = agenda.filter((t) => t.estado === 'DISPONIBLE').length;
     const esHoy = fecha === hoyISO();
-    const ahora = new Date();
     const proximos = reservados
       .filter((t) => !esHoy || new Date(`${t.fecha}T${t.horaInicio}`) >= ahora)
       .sort((a, b) => a.horaInicio.localeCompare(b.horaInicio))
       .slice(0, 5);
     return { esHoy, reservadosTotal: reservados.length, disponibles, proximos };
-  }, [agenda, vista, fecha]);
+  }, [agenda, vista, fecha, ahora]);
 
   return (
     <div>

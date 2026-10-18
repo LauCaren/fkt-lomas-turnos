@@ -10,7 +10,10 @@ export default function MedicoColaEsperaTab() {
 
   useEffect(() => {
     dispatch(fetchColaEsperaMedico());
-    const intervalo = setInterval(() => dispatch(fetchColaEsperaMedico()), 10000);
+    const intervalo = setInterval(() => {
+      // Con la pestaña oculta no se consulta (no hay nadie mirando la cola).
+      if (!document.hidden) dispatch(fetchColaEsperaMedico());
+    }, 10000);
     return () => clearInterval(intervalo);
   }, [dispatch]);
 

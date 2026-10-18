@@ -35,10 +35,21 @@ export default function NotificacionesBell() {
   const [abierto, setAbierto] = useState(false);
   const contenedorRef = useRef(null);
 
+  // Con la pestaña en segundo plano no se consulta (nadie está mirando la campana): la PC de la
+  // secretaría puede tener la app abierta todo el día. Al volver a la pestaña se actualiza enseguida.
   useEffect(() => {
     dispatch(fetchCantidadNoLeidas());
-    const intervalo = setInterval(() => dispatch(fetchCantidadNoLeidas()), INTERVALO_POLLING_MS);
-    return () => clearInterval(intervalo);
+    const intervalo = setInterval(() => {
+      if (!document.hidden) dispatch(fetchCantidadNoLeidas());
+    }, INTERVALO_POLLING_MS);
+    function alVolver() {
+      if (!document.hidden) dispatch(fetchCantidadNoLeidas());
+    }
+    document.addEventListener('visibilitychange', alVolver);
+    return () => {
+      clearInterval(intervalo);
+      document.removeEventListener('visibilitychange', alVolver);
+    };
   }, [dispatch]);
 
   useEffect(() => {

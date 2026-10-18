@@ -110,7 +110,8 @@ export default function BookingWizard() {
   const turnoAReprogramar = location.state?.reprogramar || null;
 
   const [especialidadId, setEspecialidadId] = useState(turnoAReprogramar?.especialidadId ? String(turnoAReprogramar.especialidadId) : '');
-  const [medicoId, setMedicoId] = useState('');
+  // Al reprogramar se arranca con la misma especialidad y el mismo profesional del turno original.
+  const [medicoId, setMedicoId] = useState(turnoAReprogramar?.medicoId ? String(turnoAReprogramar.medicoId) : '');
   const [fecha, setFecha] = useState(hoyISO());
   const [turnoSeleccionado, setTurnoSeleccionado] = useState(null);
   const [motivoConsulta, setMotivoConsulta] = useState('');
@@ -159,12 +160,6 @@ export default function BookingWizard() {
     // No reseteamos medicoId acá: si venimos de "Reprogramar" necesitamos que el
     // médico preseleccionado sobreviva a este efecto disparado por el mismo cambio inicial de especialidad.
   }, [especialidadId, dispatch]);
-
-  useEffect(() => {
-    if (reprogramando && medicos.some((m) => m.id === reprogramando.medicoId) && !medicoId) {
-      setMedicoId(String(reprogramando.medicoId));
-    }
-  }, [medicos, reprogramando, medicoId]);
 
   useEffect(() => {
     if (medicoId && fecha) {

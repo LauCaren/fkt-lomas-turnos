@@ -3,6 +3,29 @@ import axiosClient from '../api/axiosClient';
 import { colorDeAvatar } from '../constants/avataresGenericos';
 import AvatarGenericoIcono from './AvatarGenericoIcono';
 
+// Caché de fotos compartida por todos los avatares de la pantalla. Antes cada avatar pedía su
+// propia copia: con la foto propia visible en el header, en "Mi cuenta" y en el selector, se
+// bajaba la misma imagen tres veces. Ahora el primer pedido se reutiliza (incluso mientras está
+// en vuelo). La clave incluye el token de la sesión: "/api/usuarios/me/foto" es la foto de quien
+// esté logueado, así que si cambia la cuenta no se puede reusar la imagen de la anterior.
+const fotosEnCache = new Map(); // clave sin versión -> { version, promesa de object URL }
+
+function cargarFoto(fotoUrl, version) {
+  let sesion = '';
+  try { sesion = localStorage.getItem('fkt_token') || ''; } catch { /* sin storage: no pasa nada */ }
+  const clave = `${sesion}|${fotoUrl}`;
+  const previa = fotosEnCache.get(clave);
+  if (previa && previa.version === version) return previa.promesa;
+  // Foto reemplazada (cambió la versión): se libera la URL anterior para no acumular memoria.
+  previa?.promesa.then((url) => URL.revokeObjectURL(url)).catch(() => {});
+  const promesa = axiosClient.get(fotoUrl, { responseType: 'blob' }).then((res) => URL.createObjectURL(res.data));
+  const entrada = { version, promesa };
+  fotosEnCache.set(clave, entrada);
+  // Si falla, se saca de la caché para que el próximo avatar lo vuelva a intentar.
+  promesa.catch(() => { if (fotosEnCache.get(clave) === entrada) fotosEnCache.delete(clave); });
+  return promesa;
+}
+
 /**
  * Dibuja el avatar de un usuario cualquiera (uno mismo o alguien que se está mirando, p. ej.
  * un paciente desde la ficha de secretaría): foto real si tiene, si no el avatar genérico
@@ -20,27 +43,23 @@ import AvatarGenericoIcono from './AvatarGenericoIcono';
  * se re-ejecuta y el header sigue mostrando el blob viejo hasta recargar la página entera.
  */
 export default function UsuarioAvatar({ fotoUrl, tieneFoto, avatarGenerico, nombreCompleto, size = 40, version }) {
-  const [blobUrl, setBlobUrl] = useState(null);
-  const [errorCarga, setErrorCarga] = useState(false);
+  // Qué foto corresponde mostrar ahora; el resultado guardado solo vale si es de esta misma
+  // clave (si cambió la foto o la versión, se ignora el viejo sin tener que resetear estado).
+  const clave = tieneFoto && fotoUrl ? `${fotoUrl}|${version ?? ''}` : null;
+  const [resultado, setResultado] = useState({ clave: null, url: null, error: false });
 
   useEffect(() => {
-    setBlobUrl(null);
-    setErrorCarga(false);
-    if (!tieneFoto || !fotoUrl) return undefined;
+    if (!clave) return undefined;
     let cancelado = false;
-    let url = null;
-    axiosClient.get(fotoUrl, { responseType: 'blob' })
-      .then((res) => {
-        if (cancelado) return;
-        url = URL.createObjectURL(res.data);
-        setBlobUrl(url);
-      })
-      .catch(() => { if (!cancelado) setErrorCarga(true); });
-    return () => {
-      cancelado = true;
-      if (url) URL.revokeObjectURL(url);
-    };
-  }, [fotoUrl, tieneFoto, version]);
+    cargarFoto(fotoUrl, version)
+      .then((url) => { if (!cancelado) setResultado({ clave, url, error: false }); })
+      .catch(() => { if (!cancelado) setResultado({ clave, url: null, error: true }); });
+    return () => { cancelado = true; };
+  }, [clave, fotoUrl, version]);
+
+  const vigente = resultado.clave === clave ? resultado : { url: null, error: false };
+  const blobUrl = vigente.url;
+  const errorCarga = vigente.error;
 
   const base = {
     width: size, height: size, borderRadius: '50%', flexShrink: 0,

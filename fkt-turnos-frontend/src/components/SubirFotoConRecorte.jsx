@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Modal from './ui/Modal';
 import CropeadorFoto from './CropeadorFoto';
 import { cargarImagen, recortarYComprimir } from '../utils/imagenPerfil';
@@ -16,17 +16,14 @@ const TAMANO_MAXIMO_BYTES = 8 * 1024 * 1024;
  */
 export default function SubirFotoConRecorte({ titulo, aspect = 1, cropShape = 'round', ancho, alto, onSubir, onCerrar }) {
   const [archivoOriginal, setArchivoOriginal] = useState(null);
-  const [imagenUrl, setImagenUrl] = useState(null);
   const [procesando, setProcesando] = useState(false);
   const [error, setError] = useState(null);
   const [fotoSinCaraConfirmar, setFotoSinCaraConfirmar] = useState(null);
 
-  useEffect(() => {
-    if (!archivoOriginal) return undefined;
-    const url = URL.createObjectURL(archivoOriginal);
-    setImagenUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [archivoOriginal]);
+  // URL temporal para mostrar el archivo elegido en el recortador; se libera cuando cambia el
+  // archivo o se cierra el diálogo, para no dejar la imagen colgada en memoria.
+  const imagenUrl = useMemo(() => (archivoOriginal ? URL.createObjectURL(archivoOriginal) : null), [archivoOriginal]);
+  useEffect(() => () => { if (imagenUrl) URL.revokeObjectURL(imagenUrl); }, [imagenUrl]);
 
   function handleElegirArchivo(e) {
     const archivo = e.target.files?.[0];

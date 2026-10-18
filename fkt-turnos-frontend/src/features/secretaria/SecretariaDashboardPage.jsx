@@ -7,7 +7,7 @@ import {
 import SidebarNav from '../../components/ui/SidebarNav';
 import CommandPalette from '../../components/ui/CommandPalette';
 import { TabPanel } from '../../components/ui/TabNav';
-import { limpiarMensajes, setPacienteAAbrir, fetchResumenAdmin } from '../admin/adminSlice';
+import { limpiarMensajes, setPacienteAAbrir, fetchPendientes } from '../admin/adminSlice';
 import axiosClient from '../../api/axiosClient';
 import { fetchMiPerfil } from '../cuenta/cuentaSlice';
 import CuentaSeguridadTab from '../../components/CuentaSeguridadTab';
@@ -84,12 +84,12 @@ export default function SecretariaDashboardPage() {
   const dispatch = useDispatch();
   const usuario = useSelector((state) => state.auth.usuario);
   const perfil = useSelector((state) => state.cuenta.perfil);
-  const resumen = useSelector((state) => state.admin.resumen);
+  const resumen = useSelector((state) => state.admin.pendientes);
   const [tab, setTab] = useState('agenda');
   const gruposNav = useMemo(() => conBadges(GRUPOS_NAV, resumen), [resumen]);
 
   useEffect(() => { dispatch(fetchMiPerfil()); }, [dispatch]);
-  useEffect(() => { dispatch(fetchResumenAdmin()); }, [dispatch]);
+  useEffect(() => { dispatch(fetchPendientes()); }, [dispatch]);
 
   // Mismo gate que en AdminDashboardPage (esta cuenta pega a los mismos endpoints /api/admin/**):
   // el backend ya bloquea el acceso hasta activar el 2FA, esto es solo para que la experiencia

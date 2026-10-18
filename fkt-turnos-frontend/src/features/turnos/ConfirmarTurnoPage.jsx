@@ -26,20 +26,26 @@ export default function ConfirmarTurnoPage() {
   const [confirmando, setConfirmando] = useState(respuesta === 'si');
   const [error, setError] = useState(linkValido ? null : 'El link no es válido.');
 
-  const responder = useCallback((viene) => {
+  // Solo actualiza el estado cuando responde el backend (no de forma sincrónica): así se puede
+  // llamar desde el efecto de abajo sin provocar un render extra.
+  const enviar = useCallback((viene) => axiosClient
+    .post('/api/turnos/confirmacion', null, { params: { token, respuesta: viene ? 'si' : 'no' } })
+    .then(() => setEstado('listo'))
+    .catch((err) => {
+      setEstado('error');
+      setError(mensajeDeError(err, 'El link no es válido o ya venció'));
+    }), [token]);
+
+  function responder(viene) {
     setConfirmando(viene);
     setEstado('cargando');
-    axiosClient.post('/api/turnos/confirmacion', null, { params: { token, respuesta: viene ? 'si' : 'no' } })
-      .then(() => setEstado('listo'))
-      .catch((err) => {
-        setEstado('error');
-        setError(mensajeDeError(err, 'El link no es válido o ya venció'));
-      });
-  }, [token]);
+    enviar(viene);
+  }
 
+  // "Sí" arranca ya en estado "cargando" (ver useState de arriba): acá solo se manda.
   useEffect(() => {
-    if (linkValido && respuesta === 'si') responder(true);
-  }, [linkValido, respuesta, responder]);
+    if (linkValido && respuesta === 'si') enviar(true);
+  }, [linkValido, respuesta, enviar]);
 
   if (estado === 'preguntar') {
     return (

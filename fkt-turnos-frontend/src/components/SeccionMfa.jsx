@@ -4,21 +4,24 @@ import { ROLES_MFA_OBLIGATORIO } from '../config';
 
 export default function SeccionMfa({ perfil, mfaSetup, onIniciar, onActivar, onDesactivar }) {
   const [codigo, setCodigo] = useState('');
-  const [qrDataUrl, setQrDataUrl] = useState(null);
+  const [qr, setQr] = useState({ uri: null, dataUrl: null });
   const [activando, setActivando] = useState(false);
   const [desactivando, setDesactivando] = useState(false);
 
   // El QR se genera en el navegador a partir del otpAuthUri que ya manda el backend —
   // nunca sale de acá (ni el secreto ni el QR pegan a ningún servicio de terceros para
   // "convertir texto en imagen", como suele hacerse con las APIs públicas de QR).
+  const otpAuthUri = mfaSetup?.otpAuthUri;
   useEffect(() => {
-    if (!mfaSetup?.otpAuthUri) { setQrDataUrl(null); return; }
+    if (!otpAuthUri) return undefined;
     let cancelado = false;
-    QRCode.toDataURL(mfaSetup.otpAuthUri, { width: 220, margin: 1 })
-      .then((url) => { if (!cancelado) setQrDataUrl(url); })
-      .catch(() => { if (!cancelado) setQrDataUrl(null); });
+    QRCode.toDataURL(otpAuthUri, { width: 220, margin: 1 })
+      .then((dataUrl) => { if (!cancelado) setQr({ uri: otpAuthUri, dataUrl }); })
+      .catch(() => { if (!cancelado) setQr({ uri: otpAuthUri, dataUrl: null }); });
     return () => { cancelado = true; };
-  }, [mfaSetup?.otpAuthUri]);
+  }, [otpAuthUri]);
+  // Si cambió el otpAuthUri (o ya no hay), el QR viejo no se muestra.
+  const qrDataUrl = otpAuthUri && qr.uri === otpAuthUri ? qr.dataUrl : null;
 
   function handleActivar(e) {
     e.preventDefault();

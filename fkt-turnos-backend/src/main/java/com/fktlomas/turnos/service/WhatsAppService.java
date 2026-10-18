@@ -34,10 +34,6 @@ public class WhatsAppService {
         }
     }
 
-    public boolean estaConfigurado() {
-        return configurado;
-    }
-
     public void enviar(String telefonoDestino, String texto) {
         if (!configurado) {
             throw new IllegalStateException("El canal WhatsApp no está configurado (faltan credenciales de Twilio)");

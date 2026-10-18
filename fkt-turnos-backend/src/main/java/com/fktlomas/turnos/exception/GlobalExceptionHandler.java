@@ -7,7 +7,10 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.validation.FieldError;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -39,6 +42,17 @@ public class GlobalExceptionHandler {
             errores.put(campo, v.getMessage());
         });
         return ResponseEntity.badRequest().body(cuerpo(HttpStatus.BAD_REQUEST, "Datos inválidos", errores));
+    }
+
+    /**
+     * Pedidos mal armados (falta un parámetro obligatorio, un parámetro con el tipo equivocado como
+     * "abc" en un id numérico, o un cuerpo JSON ilegible): son errores del cliente, 400 con un
+     * mensaje genérico — sin repetir el detalle técnico de Spring, que nombra clases internas.
+     */
+    @ExceptionHandler({MissingServletRequestParameterException.class, MethodArgumentTypeMismatchException.class,
+            HttpMessageNotReadableException.class})
+    public ResponseEntity<Map<String, Object>> handlePedidoMalFormado(Exception ex) {
+        return ResponseEntity.badRequest().body(cuerpo(HttpStatus.BAD_REQUEST, "El pedido está incompleto o tiene datos con un formato inválido", null));
     }
 
     @ExceptionHandler(RecursoNoEncontradoException.class)

@@ -246,17 +246,16 @@ function VistaCamara({ onVolver, onCapturada, guardando, error }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
-  const [errorCamara, setErrorCamara] = useState(null);
+  // getUserMedia necesita un contexto seguro (https, o localhost en desarrollo) — si el
+  // navegador ni siquiera expone la API, mejor avisar de una que dejar el botón "Capturar"
+  // colgado sin explicación.
+  const [errorCamara, setErrorCamara] = useState(() => (navigator.mediaDevices?.getUserMedia
+    ? null
+    : 'Este navegador no permite acceder a la cámara. Probá subir la foto desde la galería.'));
   const [capturaUrl, setCapturaUrl] = useState(null);
 
   useEffect(() => {
-    // getUserMedia necesita un contexto seguro (https, o localhost en desarrollo) — si el
-    // navegador ni siquiera expone la API, mejor avisar de una que dejar el botón "Capturar"
-    // colgado sin explicación.
-    if (!navigator.mediaDevices?.getUserMedia) {
-      setErrorCamara('Este navegador no permite acceder a la cámara. Probá subir la foto desde la galería.');
-      return undefined;
-    }
+    if (!navigator.mediaDevices?.getUserMedia) return undefined;
     let cancelado = false;
     navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false })
       .then((stream) => {

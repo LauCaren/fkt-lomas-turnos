@@ -17,7 +17,6 @@ import com.fktlomas.turnos.exception.DemasiadosIntentosException;
 import com.fktlomas.turnos.exception.MfaRequeridaException;
 import com.fktlomas.turnos.exception.RecursoNoEncontradoException;
 import com.fktlomas.turnos.repository.UsuarioRepository;
-import com.fktlomas.turnos.security.AppUserDetails;
 import com.fktlomas.turnos.security.GoogleTokenVerifierService;
 import com.fktlomas.turnos.security.JwtService;
 import com.fktlomas.turnos.security.RateLimiterService;
@@ -381,13 +380,6 @@ public class AuthService {
         } catch (java.security.NoSuchAlgorithmException e) {
             throw new IllegalStateException("SHA-256 no disponible", e);
         }
-    }
-
-    public static Usuario usuarioActual(Object principal) {
-        if (principal instanceof AppUserDetails appUserDetails) {
-            return appUserDetails.getUsuario();
-        }
-        throw new IllegalStateException("No hay un usuario autenticado válido");
     }
 
     /**

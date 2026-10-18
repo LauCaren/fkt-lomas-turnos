@@ -201,6 +201,18 @@ class AutorizacionRolesTest {
         mockMvc.perform(autenticado(get("/api/admin/secretarias"), token)).andExpect(status().isForbidden());
         // No: el resumen de arranque del admin trae ingresosHoy/cajaFisica (AdminResumenDto).
         mockMvc.perform(autenticado(get("/api/admin/resumen"), token)).andExpect(status().isForbidden());
+        // Sí: los contadores del menú lateral (sin datos de caja), que su panel pide al entrar.
+        mockMvc.perform(autenticado(get("/api/admin/resumen/pendientes"), token)).andExpect(status().isOk());
+        // Sí: la bandeja del botón de arrepentimiento.
+        mockMvc.perform(autenticado(get("/api/admin/arrepentimientos"), token)).andExpect(status().isOk());
+    }
+
+    @Test
+    void unPedidoPublicoMalArmadoDevuelve400YNo401() throws Exception {
+        // Antes, al faltar un parámetro Spring reenviaba a /error, que exigía login: la respuesta
+        // era un 401 "sesión vencida" que no tenía nada que ver con el problema real.
+        mockMvc.perform(get("/api/medicos/1/proxima-disponibilidad")).andExpect(status().isBadRequest());
+        mockMvc.perform(get("/api/medicos/abc/horarios")).andExpect(status().isBadRequest());
     }
 
     @Test

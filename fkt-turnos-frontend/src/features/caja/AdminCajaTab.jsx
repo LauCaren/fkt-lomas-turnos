@@ -10,6 +10,7 @@ import { fetchMedicosAdmin } from '../admin/adminSlice';
 import { verArchivo } from '../../api/descargas';
 import { formatMoneda, formatFechaHora } from '../../utils/formato';
 import EstadoVacio from '../../components/EstadoVacio';
+import { useAhora } from '../../hooks/useAhora';
 
 function verComprobante(gastoId) {
   return verArchivo(`/api/admin/caja/gastos/${gastoId}/comprobante`);
@@ -103,6 +104,7 @@ function IngresosTab() {
   const { ingresos } = useSelector((state) => state.caja);
   const medicos = useSelector((state) => state.admin.medicos);
   const [form, setForm] = useState({ medicoId: '', turnoId: '', monto: '', metodoPago: 'EFECTIVO', fecha: '' });
+  const ahora = useAhora();
 
   useEffect(() => {
     dispatch(fetchMedicosAdmin());
@@ -160,7 +162,7 @@ function IngresosTab() {
       )}
       <div id="ingresos-imprimir">
         <div className="ficha-print-header">
-          <strong>FKT Lomas</strong> · Listado de cobros · Impreso el {new Date().toLocaleDateString('es-AR')}
+          <strong>FKT Lomas</strong> · Listado de cobros · Impreso el {ahora.toLocaleDateString('es-AR')}
         </div>
         <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {ingresos.map((i) => (

@@ -8,6 +8,7 @@ import UsuarioAvatar from '../../components/UsuarioAvatar';
 import { setDniPrellenado, setObjetivoReprogramar, setPacienteAAbrir, cancelarTurnoStaff, enviarMensajeManual } from './adminSlice';
 import { useConfirm } from '../../components/ui/useConfirm';
 import { useToast } from '../../components/ui/useToast';
+import { useAhora } from '../../hooks/useAhora';
 
 const CANALES = [
   { value: 'EMAIL', label: 'Email' },
@@ -144,10 +145,11 @@ function AccionesRapidasFicha({ ficha, irAAgenda, onRecargar }) {
 }
 
 function Ficha({ ficha, irAAgenda, onRecargar }) {
+  const ahora = useAhora();
   return (
     <div style={{ marginTop: 24 }}>
       <div className="ficha-print-header">
-        <strong>FKT Lomas</strong> · Ficha de paciente · Impreso el {new Date().toLocaleDateString('es-AR')}
+        <strong>FKT Lomas</strong> · Ficha de paciente · Impreso el {ahora.toLocaleDateString('es-AR')}
       </div>
       <div className="card" style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>

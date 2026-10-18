@@ -35,7 +35,7 @@ function hashesDeScriptsInline(html) {
   return hashes;
 }
 
-export function construirCsp({ apiUrl, sentryDsn, googleClientId, hashesScripts = [] }) {
+function construirCsp({ apiUrl, sentryDsn, googleClientId, hashesScripts = [] }) {
   const api = origenDe(apiUrl);
   const sentry = origenDe(sentryDsn);
   const google = Boolean(googleClientId);

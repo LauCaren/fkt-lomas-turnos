@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { loginConGoogle, limpiarMensajesAuth } from '../features/auth/authSlice';
-import { OBRAS_SOCIALES, OBRA_SOCIAL_PARTICULAR, OBRA_SOCIAL_OTRA } from '../constants/obrasSociales';
+import SelectorObraSocial from './SelectorObraSocial';
 import { RUTA_POR_ROL, GOOGLE_CLIENT_ID } from '../config';
 
 const GENEROS = [
@@ -93,12 +93,7 @@ export default function GoogleAuthButton({ destinoPorDefecto = '/turnos' }) {
         </div>
         <div className="field">
           <label htmlFor="googleObraSocial">Obra social</label>
-          <select id="googleObraSocial" required value={perfil.obraSocial} onChange={(e) => setPerfil({ ...perfil, obraSocial: e.target.value })}>
-            <option value="">Seleccioná tu obra social</option>
-            <option value={OBRA_SOCIAL_PARTICULAR}>{OBRA_SOCIAL_PARTICULAR}</option>
-            {OBRAS_SOCIALES.map((os) => <option key={os} value={os}>{os}</option>)}
-            <option value={OBRA_SOCIAL_OTRA}>{OBRA_SOCIAL_OTRA}</option>
-          </select>
+          <SelectorObraSocial id="googleObraSocial" value={perfil.obraSocial} onChange={(e) => setPerfil({ ...perfil, obraSocial: e.target.value })} placeholder="Seleccioná tu obra social" />
         </div>
         <div className="field">
           <label htmlFor="googleTelefono">Teléfono</label>

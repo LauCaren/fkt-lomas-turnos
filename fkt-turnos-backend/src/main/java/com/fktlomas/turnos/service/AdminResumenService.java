@@ -5,6 +5,7 @@ import com.fktlomas.turnos.domain.EstadoArrepentimiento;
 import com.fktlomas.turnos.domain.EstadoSolicitudBaja;
 import com.fktlomas.turnos.dto.TurnoAdminDto;
 import com.fktlomas.turnos.dto.admin.AdminResumenDto;
+import com.fktlomas.turnos.dto.admin.PendientesDto;
 import com.fktlomas.turnos.dto.admin.TendenciaDiaDto;
 import com.fktlomas.turnos.dto.caja.IngresoDto;
 import com.fktlomas.turnos.repository.MensajeContactoRepository;
@@ -33,6 +34,19 @@ public class AdminResumenService {
     private final PostulacionRepository postulacionRepository;
     private final SolicitudBajaCuentaRepository solicitudBajaCuentaRepository;
     private final SolicitudArrepentimientoRepository solicitudArrepentimientoRepository;
+
+    /** Solo conteos, sin datos de caja: ver PendientesDto. */
+    @Transactional(readOnly = true)
+    public PendientesDto pendientes() {
+        LocalDate hoy = LocalDate.now();
+        return new PendientesDto(
+                turnoService.turnosSinConfirmarHoy(hoy),
+                turnoService.colaEspera(hoy, null).size(),
+                (int) mensajeContactoRepository.countByLeidoFalse(),
+                (int) postulacionRepository.countByRevisadoFalse(),
+                (int) solicitudBajaCuentaRepository.countByEstado(EstadoSolicitudBaja.PENDIENTE),
+                (int) solicitudArrepentimientoRepository.countByEstado(EstadoArrepentimiento.PENDIENTE));
+    }
 
     @Transactional(readOnly = true)
     public AdminResumenDto resumen() {

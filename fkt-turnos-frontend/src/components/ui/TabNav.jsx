@@ -1,22 +1,6 @@
-export default function TabNav({ tabs, active, onChange }) {
-  return (
-    <div className="tabnav" role="tablist">
-      {tabs.map((t) => (
-        <button
-          key={t.id}
-          type="button"
-          role="tab"
-          aria-selected={active === t.id}
-          className={`tabnav-btn${active === t.id ? ' active' : ''}`}
-          onClick={() => onChange(t.id)}
-        >
-          {t.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
+// Envoltorio de la sección activa de un panel (admin, secretaría, médico, contador): el key fuerza
+// a React a remontar el contenido al cambiar de sección, así corre la animación de entrada
+// (.page-fade). La navegación en sí la hace SidebarNav.
 export function TabPanel({ tabKey, children }) {
   return <div key={tabKey} className="page-fade">{children}</div>;
 }

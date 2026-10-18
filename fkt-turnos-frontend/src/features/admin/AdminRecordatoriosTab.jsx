@@ -22,15 +22,19 @@ const ESTADO_LABEL = { PENDIENTE: 'Pendiente', ENVIADO: 'Enviado', FALLIDO: 'Fal
 function ConfiguracionRecordatorios() {
   const dispatch = useDispatch();
   const configuracion = useSelector((state) => state.admin.configuracionRecordatorios);
-  const [form, setForm] = useState({ plantillaMensaje: '', horasAnticipacion: 24 });
 
   useEffect(() => {
     dispatch(fetchConfiguracionRecordatorios());
   }, [dispatch]);
 
-  useEffect(() => {
-    if (configuracion) setForm(configuracion);
-  }, [configuracion]);
+  // El key remonta el formulario cuando llega una configuración distinta del servidor (la
+  // carga inicial o después de guardar), así arranca siempre con los valores vigentes.
+  return <FormConfiguracionRecordatorios key={JSON.stringify(configuracion)} inicial={configuracion} />;
+}
+
+function FormConfiguracionRecordatorios({ inicial }) {
+  const dispatch = useDispatch();
+  const [form, setForm] = useState(inicial || { plantillaMensaje: '', horasAnticipacion: 24 });
 
   function handleGuardar(e) {
     e.preventDefault();
