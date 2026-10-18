@@ -20,6 +20,18 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Horarios de atención de cada médico (ReglaDisponibilidad: "los martes de 10 a 14") y la
+ * generación de los turnos concretos a partir de ellos.
+ *
+ * <p>Los turnos NO se crean solos: el admin elige un rango de fechas (hasta 90 días) y el sistema
+ * corta cada franja horaria en turnos de la duración del médico, salteando feriados y los turnos
+ * que ya existan (se puede volver a generar el mismo rango sin duplicar). Es a propósito: así el
+ * centro controla hasta cuándo abre la agenda (vacaciones, licencias, cambios de horario). Si no
+ * se generan turnos, los pacientes no ven horarios para reservar.
+ *
+ * <p>Al crear turnos nuevos se avisa a quienes estaban en lista de espera de esos días.
+ */
 @Service
 @RequiredArgsConstructor
 public class DisponibilidadService {

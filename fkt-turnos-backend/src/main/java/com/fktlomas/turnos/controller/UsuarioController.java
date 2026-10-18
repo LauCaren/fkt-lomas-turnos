@@ -24,6 +24,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * "Mi cuenta" de cualquier usuario logueado (paciente o personal), siempre sobre la propia cuenta:
+ * todo sale del usuario autenticado, nunca de un id que mande el cliente. Acá viven también los
+ * derechos de la Ley 25.326 por autoservicio: ver y corregir los datos, exportarlos (acceso,
+ * art. 14) y pedir la baja (supresión, art. 16 — ver SolicitudBajaService).
+ */
 @RestController
 @RequestMapping("/api/mi-cuenta")
 @RequiredArgsConstructor

@@ -29,6 +29,8 @@ PRODUCT.md               Contexto de producto (usuarios, principios, qué no se 
 DESIGN.md                Sistema visual "Goniómetro" compartido por la app y el sitio:
                           tokens, tipografía, componentes y movimiento.
 
+docs/ARQUITECTURA.md     Cómo está armado todo, convenciones, cómo agregar una funcionalidad
+                          y cómo escalar. Empezar por acá si vas a mantener el sistema.
 docs/SEGURIDAD.md        Cómo está protegido cada componente + checklist de despliegue.
 docs/CUMPLIMIENTO-LEGAL.md  Normativa que cubre el sistema (Ley 25.326, 26.529, 24.240)
                           y qué datos/trámites faltan antes de publicar.

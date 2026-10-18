@@ -1,6 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosClient, { mensajeDeError } from '../../api/axiosClient';
 
+// Estado de Redux de la caja del admin (ver AdminCajaTab): resumen, ingresos, retiros, gastos y
+// categorías de gasto. El contador tiene su propio slice de solo lectura (contadorSlice).
+
 export const fetchResumenCaja = createAsyncThunk('caja/fetchResumen', async (_, { rejectWithValue }) => {
   try {
     const { data } = await axiosClient.get('/api/admin/caja/resumen');

@@ -13,6 +13,7 @@ import com.fktlomas.turnos.storage.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,6 +69,7 @@ public class RetencionDatosService {
     private int diasPedidosResueltos;
 
     @Scheduled(cron = "0 30 3 * * *", zone = "America/Argentina/Buenos_Aires")
+    @SchedulerLock(name = "retencionDatos")
     @Transactional
     public void aplicarPlazos() {
         Instant ahora = Instant.now();

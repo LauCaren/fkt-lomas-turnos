@@ -1,6 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosClient, { mensajeDeError } from '../../api/axiosClient';
 
+// Estado de Redux de los planes de kinesiología: del lado del paciente (pedir un plan, pausarlo,
+// reanudarlo, cancelarlo) y del lado del centro (listar, cargar por teléfono, validar, rechazar).
+// Ver KinesiologiaService en el backend para las reglas de cada transición de estado.
+
 export const fetchMisPlanesKinesiologia = createAsyncThunk('kinesiologia/fetchMisPlanes', async (_, { rejectWithValue }) => {
   try {
     const { data } = await axiosClient.get('/api/kinesiologia/planes');

@@ -11,6 +11,11 @@ import { hoyISO } from '../../utils/formato';
 import EstadoVacio from '../../components/EstadoVacio';
 import { useConfirm } from '../../components/ui/useConfirm';
 
+// Planes de kinesiología del lado del centro: un plan es un paquete de N sesiones en días y
+// horarios fijos, que arranca con la orden médica del paciente. El admin revisa la orden y
+// valida (o rechaza) el plan; recién validado se reservan los turnos. La secretaría puede cargar
+// un plan por teléfono (NuevoPlanTelefonico) y ver la orden, pero validar es solo del admin.
+
 function verOrdenMedica(planId) {
   return verArchivo(`/api/admin/kinesiologia/planes/${planId}/orden-medica`);
 }

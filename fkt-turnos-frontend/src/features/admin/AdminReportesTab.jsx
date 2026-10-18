@@ -3,6 +3,11 @@ import axiosClient, { mensajeDeError } from '../../api/axiosClient';
 import { descargarArchivo } from '../../api/descargas';
 import { hoyISO } from '../../utils/formato';
 
+// Pestaña "Reportes": exportación a Excel de la agenda y de la caja por rango de fechas, y el
+// email al que se manda el reporte mensual automático de caja (último día de cada mes, ver
+// ReporteCajaProgramadoService). La caja es solo para ADMIN; la agenda la puede exportar también
+// la secretaría.
+
 function primerDiaMesISO() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;

@@ -11,6 +11,14 @@ import SubirFotoConRecorte from '../../components/SubirFotoConRecorte';
 import { hoyISO } from '../../utils/formato';
 import EstadoVacio from '../../components/EstadoVacio';
 
+// Pestaña "Médicos" del panel del admin: alta y edición de profesionales (datos, tarifa,
+// duración del turno, copago IOMA), su foto y título para el sitio (equipo.html), sus horarios
+// semanales y la generación de turnos a partir de esos horarios. También crea la cuenta con la
+// que el médico entra a su portal (CredencialesMedico). Solo ADMIN: la secretaría ve la lista
+// pero el backend le rechaza las modificaciones (ver AdminMedicoController).
+// Los turnos no se crean solos: si no se generan para un rango, los pacientes no ven horarios
+// (ver DisponibilidadService en el backend).
+
 const DIAS = [
   { value: 'MONDAY', label: 'Lunes' },
   { value: 'TUESDAY', label: 'Martes' },

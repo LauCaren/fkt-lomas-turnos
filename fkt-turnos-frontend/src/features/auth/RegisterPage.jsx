@@ -10,6 +10,10 @@ import SelectorObraSocial from '../../components/SelectorObraSocial';
 import { PATRON_PASSWORD, TITULO_PASSWORD, AYUDA_PASSWORD } from '../../constants/validacion';
 import { GOOGLE_CLIENT_ID } from '../../config';
 
+// Alta de pacientes por la web. Pide lo mínimo para atender y avisar (Ley 25.326: datos
+// adecuados y no excesivos) y el consentimiento expreso para datos de salud (ConsentimientoDatos).
+// El DNI no se puede cambiar después: identifica a la persona en la historia clínica.
+
 const GENEROS = [
   { value: '', label: 'Seleccioná una opción' },
   { value: 'FEMENINO', label: 'Femenino' },

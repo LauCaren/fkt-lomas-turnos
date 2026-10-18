@@ -4,6 +4,10 @@ import { fetchSolicitudesBaja, aprobarSolicitudBaja, rechazarSolicitudBaja } fro
 import EstadoVacio from '../../components/EstadoVacio';
 import { useConfirm } from '../../components/ui/useConfirm';
 
+// Cola de pedidos de baja de cuenta (derecho de supresión, Ley 25.326 art. 16). Aprobar no
+// borra la fila: anonimiza los datos personales y conserva turnos/evoluciones/cobros de forma
+// anónima, porque la historia clínica se guarda 10 años (Ley 26.529). Ver SolicitudBajaService.
+
 const ESTADOS = [
   { value: 'PENDIENTE', label: 'Pendientes' },
   { value: '', label: 'Todos' },

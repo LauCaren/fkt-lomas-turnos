@@ -43,14 +43,19 @@ export default function SalaEsperaQr() {
 
       {error && <div className="alert alert-error" role="alert" style={{ marginTop: 12 }}>{error}</div>}
 
-      <div id="cartel-qr-imprimir" style={{ textAlign: 'center', marginTop: 20, padding: 24, border: '1px solid var(--line)', borderRadius: 'var(--radius-m)' }}>
-        <div className="eyebrow">FKT Lomas</div>
-        <h2 style={{ marginTop: 8, fontSize: 22 }}>Escaneá al llegar</h2>
-        <p style={{ color: 'var(--muted)', marginTop: 6, maxWidth: 320, marginInline: 'auto' }}>
+      {/* Cartel para imprimir y pegar en la sala de espera: la marca (logo + nombre) firma el
+          cartel en lugar de un rótulo arriba del título, como en el resto del sistema. */}
+      <div id="cartel-qr-imprimir" className="cartel-qr">
+        <p className="cartel-qr-marca">
+          <img src="/img/fkt-logo-mark-transparent.png" alt="" aria-hidden="true" />
+          FKT Lomas
+        </p>
+        <h2>Escaneá al llegar</h2>
+        <p className="cartel-qr-texto">
           Apuntá la cámara de tu celular a este código para avisarnos que llegaste a tu turno.
         </p>
-        <canvas ref={canvasRef} style={{ marginTop: 16 }} />
-        <p style={{ color: 'var(--muted)', fontSize: 13.5, marginTop: 12 }}>
+        <canvas ref={canvasRef} className="cartel-qr-codigo" />
+        <p className="cartel-qr-nota">
           ¿Tenés copago de IOMA o no podés escanear? Avisale directamente a la secretaria en el mostrador.
         </p>
       </div>

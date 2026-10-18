@@ -157,18 +157,6 @@ html { scrollbar-color: var(--line-strong) transparent; scrollbar-width: thin; }
 
 .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
 
-/* Rótulo chico sobre un título: queda solo por compatibilidad en las pantallas que todavía
-   no pasaron por el rediseño — las nuevas no lo usan (el título se sostiene solo). */
-.eyebrow {
-  font-size: 13px;
-  letter-spacing: 0.02em;
-  color: var(--teal-dark);
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .btn {
   display: inline-flex;
   align-items: center;
@@ -1580,3 +1568,12 @@ kbd {
 .pedido-legal-detalle { padding: 12px 14px; border-radius: var(--radius-s, 10px); background: var(--bg-soft); color: var(--ink-soft); white-space: pre-wrap; }
 .pedido-legal-resolver .field { margin-bottom: 8px; }
 .pedido-legal-acciones { display: flex; gap: 8px; }
+
+/* ---------- Cartel QR de la sala de espera (SalaEsperaQr) ---------- */
+.cartel-qr { margin-top: 20px; padding: 28px 24px; text-align: center; border: 1px solid var(--line); border-radius: var(--radius-m); background: var(--white); }
+.cartel-qr-marca { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; color: var(--ink); }
+.cartel-qr-marca img { width: 28px; height: 28px; object-fit: contain; }
+.cartel-qr h2 { margin-top: 10px; font-size: 26px; }
+.cartel-qr-texto { max-width: 340px; margin: 8px auto 0; color: var(--ink-soft); font-size: 17px; }
+.cartel-qr-codigo { margin-top: 16px; }
+.cartel-qr-nota { margin-top: 12px; color: var(--muted); font-size: 15px; }

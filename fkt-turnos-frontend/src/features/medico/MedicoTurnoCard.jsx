@@ -3,6 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { marcarAtendido, crearEvolucion, fetchEvolucionesDePaciente } from './medicoSlice';
 import { formatFechaHora } from '../../utils/formato';
 
+// Tarjeta de un turno en el portal del médico (agenda del día y cola de espera): datos del
+// paciente, botón "Atender" y el formulario de evolución clínica. Las evoluciones se agregan,
+// nunca se editan ni se borran (integridad de la historia clínica, Ley 26.529 art. 18).
+
 function FormularioEvolucion({ turno, onListo }) {
   const dispatch = useDispatch();
   const [texto, setTexto] = useState('');

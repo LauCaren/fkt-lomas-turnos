@@ -15,6 +15,7 @@ import com.fktlomas.turnos.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,6 +69,8 @@ public class RecordatorioService {
     private String frontendUrl;
 
     @Scheduled(fixedDelayString = "#{${app.recordatorios.intervalo-minutos} * 60000}")
+    // lockAtLeastFor: si dos instancias arrancan casi juntas, la segunda no repite la corrida.
+    @SchedulerLock(name = "recordatorios", lockAtLeastFor = "PT1M")
     public void procesarPendientes() {
         // Los fallos de un recordatorio puntual (Twilio/SMTP caído, etc.) ya los maneja
         // intentarEnvio() por turno, marcando el Recordatorio como FALLIDO con reintento

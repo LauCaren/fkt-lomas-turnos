@@ -12,6 +12,11 @@ import { formatMoneda, formatFechaHora } from '../../utils/formato';
 import EstadoVacio from '../../components/EstadoVacio';
 import { useAhora } from '../../hooks/useAhora';
 
+// Caja del centro (solo ADMIN): resumen (ingresos, retiros, gastos y caja física), cobros por
+// turno, retiros que hacen los médicos de lo que les corresponde, y gastos con comprobante.
+// Nada se borra: un movimiento equivocado se ANULA con un motivo, y queda en la auditoría, para
+// que la caja siempre cierre y se pueda reconstruir qué pasó.
+
 function verComprobante(gastoId) {
   return verArchivo(`/api/admin/caja/gastos/${gastoId}/comprobante`);
 }

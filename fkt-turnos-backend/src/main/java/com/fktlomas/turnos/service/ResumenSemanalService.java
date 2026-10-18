@@ -5,6 +5,7 @@ import com.fktlomas.turnos.dto.caja.IngresoDto;
 import com.fktlomas.turnos.dto.caja.RetiroDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +30,8 @@ public class ResumenSemanalService {
     private final EmailService emailService;
 
     /** Todos los lunes a las 8am — resume la semana anterior (lunes a domingo). */
-    @Scheduled(cron = "0 0 8 * * MON")
+    @Scheduled(cron = "0 0 8 * * MON", zone = "America/Argentina/Buenos_Aires")
+    @SchedulerLock(name = "resumenSemanal")
     public void enviarResumenSemanal() {
         LocalDate hasta = LocalDate.now().minusDays(1);
         LocalDate desde = hasta.minusDays(6);

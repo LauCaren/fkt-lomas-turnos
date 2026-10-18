@@ -40,6 +40,7 @@ API REST en Spring Boot 4 (Java 17) para el sistema de turnos, contacto y postul
 | `MERCADOPAGO_ACCESS_TOKEN` / `MERCADOPAGO_PUBLIC_KEY` | vacío | Credenciales de [Mercado Pago](https://www.mercadopago.com.ar/developers/panel) ("Tus integraciones" > Credenciales). Sin `MERCADOPAGO_ACCESS_TOKEN`, el pago online al reservar queda deshabilitado y solo se puede pagar en el consultorio, como antes |
 | `MERCADOPAGO_WEBHOOK_SECRET` | vacío | Firma secreta del webhook ("Tus integraciones" > Webhooks > Configurar notificaciones). A diferencia de otras integraciones de este proyecto, sin esto **el webhook rechaza toda notificación** — ver `MercadoPagoService.validarFirma` |
 | `CHEQUEO_PASSWORD_FILTRADA` | `true` | Chequea cada contraseña nueva contra la API pública de HaveIBeenPwned (sin API key, k-anonymity) además de la regla de fuerza — ver `PasswordFiltradaService`. Poner en `false` solo si el host no tiene salida a internet; de todos modos, sin conexión el chequeo falla "abierto" (no bloquea) |
+| `APP_TIMEZONE` | `America/Argentina/Buenos_Aires` | Zona horaria de la aplicación ("hoy" de la agenda, horario de los resúmenes). Se fija al arrancar (`TurnosApplication`) para que un servidor en UTC no crea que ya es mañana a partir de las 21 h. No hace falta tocarla |
 | `RETENCION_POSTULACIONES_DIAS` / `RETENCION_MENSAJES_CONTACTO_DIAS` / `RETENCION_NOTIFICACIONES_DIAS` / `RETENCION_CONVERSACIONES_WHATSAPP_DIAS` / `RETENCION_PEDIDOS_RESUELTOS_DIAS` | `365` / `730` / `365` / `180` / `1825` | Plazos del borrado automático diario de datos que ya no hacen falta (`RetencionDatosService`, Ley 25.326 art. 4). **Si se cambian, hay que cambiar también la Política de Privacidad del sitio (punto 8)**. La historia clínica y la caja no tienen plazo acá: no se borran nunca automáticamente |
 | `GOOGLE_CLIENT_ID` | vacío | ID de cliente OAuth de [Google Cloud Console](https://console.cloud.google.com/apis/credentials) (Credentials > OAuth client ID > Web application) para "Iniciar sesión con Google" — solo pacientes, ver `AuthService.loginConGoogle`. Mismo valor va en `VITE_GOOGLE_CLIENT_ID` del frontend. Sin esto, el botón de Google simplemente no se muestra en el login/registro — se sigue pudiendo usar email y contraseña, como antes |
 
@@ -88,7 +89,9 @@ Cubren, entre otras cosas: que ante dos intentos de reserva sobre el mismo turno
 - **MensajeContacto** / **Postulacion**: formularios públicos del sitio estático.
 - **SolicitudArrepentimiento**: pedidos del "Botón de arrepentimiento" (Ley 24.240 art. 34), públicos y sin login — `POST /api/arrepentimiento` genera un código de trámite que se devuelve y se manda por email; el panel los lista en `/api/admin/arrepentimientos`. Ver `ArrepentimientoService`.
 
-Seguridad y normativa: ver `docs/SEGURIDAD.md` y `docs/CUMPLIMIENTO-LEGAL.md` en la raíz del repo.
+Las tareas programadas (recordatorios, resumen semanal, reporte mensual de caja, retención de datos) llevan `@SchedulerLock` (ShedLock, tabla `shedlock` de la migración V32): con más de una instancia del backend, cada una corre en una sola. Cualquier tarea programada nueva tiene que llevarlo también.
+
+Arquitectura, seguridad y normativa: ver `docs/ARQUITECTURA.md`, `docs/SEGURIDAD.md` y `docs/CUMPLIMIENTO-LEGAL.md` en la raíz del repo.
 
 El schema se versiona con Flyway (`src/main/resources/db/migration`), no con `ddl-auto`. Desde Spring Boot 4 Flyway solo se autoconfigura con `spring-boot-starter-flyway` (ya está en el `pom.xml`): con `flyway-core` suelto las migraciones dejan de correr al arrancar sin dar ningún error, así que no reemplazarlo.
 

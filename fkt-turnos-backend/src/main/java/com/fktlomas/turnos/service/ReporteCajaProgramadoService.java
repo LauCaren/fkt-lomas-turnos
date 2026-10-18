@@ -6,6 +6,7 @@ import com.fktlomas.turnos.dto.caja.IngresoDto;
 import com.fktlomas.turnos.dto.caja.RetiroDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +32,8 @@ public class ReporteCajaProgramadoService {
     private final EmailService emailService;
 
     /** Segundo minuto hora día-de-mes mes día-de-semana — "L" es el último día del mes. */
-    @Scheduled(cron = "0 0 20 L * *")
+    @Scheduled(cron = "0 0 20 L * *", zone = "America/Argentina/Buenos_Aires")
+    @SchedulerLock(name = "reporteCajaMensual")
     public void enviarReporteMensualSiCorresponde() {
         ConfiguracionCajaDto configuracion = cajaService.obtenerConfiguracion();
         String destinatario = configuracion.emailReporteMensual();

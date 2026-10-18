@@ -8,6 +8,10 @@ import { PATRON_PASSWORD, TITULO_PASSWORD, AYUDA_PASSWORD } from '../../constant
 import EstadoVacio from '../../components/EstadoVacio';
 import { useConfirm } from '../../components/ui/useConfirm';
 
+// Cuentas de secretaría (solo ADMIN): alta, activar/desactivar sin borrar (bajas temporales o
+// desvinculaciones) y "cerrar todas sus sesiones" al instante. Las secretarias tienen 2FA
+// obligatoria: hasta que la activan no pueden usar el panel (ver AppUserDetails en el backend).
+
 const VACIO = { nombreCompleto: '', email: '', password: '' };
 
 function NuevaSecretaria() {

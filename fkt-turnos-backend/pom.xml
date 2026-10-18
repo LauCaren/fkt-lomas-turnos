@@ -101,6 +101,19 @@
       <version>13.1.0</version>
     </dependency>
 
+    <!-- Lock de tareas programadas en la base (ShedLock): con varias instancias del backend,
+         cada recordatorio/resumen se manda una sola vez — ver SchedulerLockConfig -->
+    <dependency>
+      <groupId>net.javacrumbs.shedlock</groupId>
+      <artifactId>shedlock-spring</artifactId>
+      <version>7.10.1</version>
+    </dependency>
+    <dependency>
+      <groupId>net.javacrumbs.shedlock</groupId>
+      <artifactId>shedlock-provider-jdbc-template</artifactId>
+      <version>7.10.1</version>
+    </dependency>
+
     <!-- Pago online al reservar una consulta (Checkout Pro) — ver MercadoPagoService -->
     <dependency>
       <groupId>com.mercadopago</groupId>

@@ -5,6 +5,9 @@ import { fetchEspecialidades } from '../turnos/turnosSlice';
 import { hoyISO } from '../../utils/formato';
 import EstadoVacio from '../../components/EstadoVacio';
 
+// "Buscar turnos por rango": lista de turnos reservados entre dos fechas (con filtro por
+// especialidad y médico), para ver de un vistazo la agenda de los próximos días o semanas.
+
 function etiquetaFecha(fechaISO) {
   const [y, m, d] = fechaISO.split('-').map(Number);
   const fecha = new Date(Date.UTC(y, m - 1, d));

@@ -4,6 +4,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchResenas, aprobarResena, rechazarResena } from './adminSlice';
 import EstadoVacio from '../../components/EstadoVacio';
 
+// Moderación de reseñas: solo pueden dejarlas pacientes con un turno ya atendido, y no se
+// publican en el sitio (opiniones.html) hasta que alguien del centro las aprueba. Se rechazan las
+// que tengan datos de terceros o información de salud de otras personas (ver Términos, punto 8).
+
 const ESTADOS = [
   { value: 'PENDIENTE', label: 'Pendientes' },
   { value: '', label: 'Todas' },
