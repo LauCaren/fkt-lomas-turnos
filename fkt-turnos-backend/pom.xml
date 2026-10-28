@@ -22,7 +22,7 @@
     <jjwt.version>0.13.0</jjwt.version>
     <springdoc.version>3.1.1</springdoc.version>
     <aws-sdk.version>2.56.0</aws-sdk.version>
-    <poi.version>5.5.1</poi.version>
+    <poi.version>6.0.0</poi.version>
     <pdfbox.version>3.0.8</pdfbox.version>
     <!-- Parches de seguridad por encima de lo que trae Spring Boot 4.1.1 (CVEs de Tomcat,
          Jackson y HttpComponents que marca Trivy en CI). Misma línea menor que la del BOM de
