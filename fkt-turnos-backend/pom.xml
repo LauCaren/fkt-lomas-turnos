@@ -98,7 +98,7 @@
     <dependency>
       <groupId>com.twilio.sdk</groupId>
       <artifactId>twilio</artifactId>
-      <version>13.1.0</version>
+      <version>13.2.0</version>
     </dependency>
 
     <!-- Lock de tareas programadas en la base (ShedLock): con varias instancias del backend,
